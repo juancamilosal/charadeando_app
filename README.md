@@ -12,6 +12,10 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Pantalla de categorías: "Libre" (los grupos escriben las palabras) está
   disponible; Animales, Países, Películas, Celebridades, Marcas, Deportes y
   Equipos de fútbol aparecen como "Pronto" hasta tener el backend.
+- Libre explica con una animación cómo se juega y deja elegir entre palabras
+  manuales (con la sugerencia de cuántas escribir) y automáticas ("Pronto").
+  El botón "Ingresar valores de prueba" llena una partida de ejemplo y va
+  directo al turno; se oculta con `TestData.enabled = false` antes de publicar.
 - Un solo celular, aciertos con movimiento: inclinar hacia abajo es acierto y
   hacia arriba es pasar.
 - La configuración y los resultados se ven en vertical. Al tocar "¡Listo!" la

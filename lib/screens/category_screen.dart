@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../models/models.dart';
-import '../providers/providers.dart';
 import '../router.dart';
 import '../theme.dart';
 import '../widgets/play_background.dart';
 
 /// Elección de la categoría. "Libre" lleva a la configuración de siempre;
 /// las demás se habilitan cuando esté el backend de palabras.
-class CategoryScreen extends ConsumerWidget {
+class CategoryScreen extends StatelessWidget {
   const CategoryScreen({super.key});
 
-  void _choose(BuildContext context, WidgetRef ref, GameCategory category) {
+  void _choose(BuildContext context, GameCategory category) {
     if (!category.available) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
@@ -24,18 +22,11 @@ class CategoryScreen extends ConsumerWidget {
         );
       return;
     }
-    final controller = ref.read(gameControllerProvider.notifier);
-    controller.configure(
-      ref
-          .read(gameControllerProvider)
-          .config
-          .copyWith(wordSource: WordSource.groups),
-    );
-    context.go(Routes.config);
+    context.go(Routes.freeMode);
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return PlayBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -60,7 +51,7 @@ class CategoryScreen extends ConsumerWidget {
               _CategoryCard(
                 category: GameCategory.free,
                 large: true,
-                onTap: () => _choose(context, ref, GameCategory.free),
+                onTap: () => _choose(context, GameCategory.free),
               ),
               const SizedBox(height: 24),
               const Text(
@@ -84,7 +75,7 @@ class CategoryScreen extends ConsumerWidget {
                   for (final category in GameCategory.themed)
                     _CategoryCard(
                       category: category,
-                      onTap: () => _choose(context, ref, category),
+                      onTap: () => _choose(context, category),
                     ),
                 ],
               ),

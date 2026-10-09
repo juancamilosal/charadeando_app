@@ -73,7 +73,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text('Configuración'),
-          leading: BackButton(onPressed: () => context.go(Routes.categories)),
+          leading: BackButton(onPressed: () => context.go(Routes.freeMode)),
         ),
         body: SafeArea(
           top: false,
