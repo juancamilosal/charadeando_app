@@ -22,6 +22,9 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
   final _input = TextEditingController();
   final _focus = FocusNode();
   final List<Word> _words = [];
+
+  /// Palabras que el grupo decidió mostrar tocando el ojo.
+  final Set<Word> _revealed = {};
   int _author = 0;
 
   /// Pantalla intermedia para entregar el celular al siguiente grupo.
@@ -56,6 +59,7 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
       setState(() {
         _author++;
         _words.clear();
+        _revealed.clear();
         _handoff = true;
       });
     } else {
@@ -139,20 +143,42 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
                   Expanded(
                     child: ListView.builder(
                       itemCount: _words.length,
-                      itemBuilder: (context, i) => ListTile(
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                        leading: const Icon(
-                          Icons.visibility_off,
-                          color: AppColors.purple,
-                        ),
-                        title: Text('Palabra ${i + 1}  ••••••'),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete_outline),
-                          tooltip: 'Borrar',
-                          onPressed: () => setState(() => _words.removeAt(i)),
-                        ),
-                      ),
+                      itemBuilder: (context, i) {
+                        final word = _words[i];
+                        final visible = _revealed.contains(word);
+                        return ListTile(
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          leading: IconButton(
+                            icon: Icon(
+                              visible ? Icons.visibility : Icons.visibility_off,
+                            ),
+                            color: AppColors.purple,
+                            tooltip: visible ? 'Ocultar' : 'Mostrar',
+                            onPressed: () => setState(
+                              () => visible
+                                  ? _revealed.remove(word)
+                                  : _revealed.add(word),
+                            ),
+                          ),
+                          title: Text(
+                            visible
+                                ? '${i + 1}. ${word.text}'
+                                : 'Palabra ${i + 1}  ••••••',
+                            style: visible
+                                ? const TextStyle(fontWeight: FontWeight.w800)
+                                : null,
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete_outline),
+                            tooltip: 'Borrar',
+                            onPressed: () => setState(() {
+                              _revealed.remove(word);
+                              _words.removeAt(i);
+                            }),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ],
