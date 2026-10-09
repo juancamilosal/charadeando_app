@@ -194,10 +194,15 @@ class _HowToPlayDemoState extends State<HowToPlayDemo>
               transitionBuilder: (child, animation) =>
                   ScaleTransition(scale: animation, child: child),
               child: speaking
-                  ? _Bubble(
+                  // El globo puede ser más ancho que la columna de la
+                  // persona, para que el texto quepa completo.
+                  ? OverflowBox(
                       key: ValueKey('$_step-$_guesser'),
-                      text: _bubble,
-                      color: _correct ? AppColors.green : Colors.white,
+                      maxWidth: _Bubble.maxWidth,
+                      child: _Bubble(
+                        text: _bubble,
+                        color: _correct ? AppColors.green : Colors.white,
+                      ),
                     )
                   : const SizedBox.shrink(),
             ),
@@ -236,7 +241,9 @@ class _HowToPlayDemoState extends State<HowToPlayDemo>
 }
 
 class _Bubble extends StatelessWidget {
-  const _Bubble({super.key, required this.text, required this.color});
+  const _Bubble({required this.text, required this.color});
+
+  static const maxWidth = 120.0;
 
   final String text;
   final Color color;
@@ -245,7 +252,8 @@ class _Bubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final light = color == Colors.white;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      constraints: const BoxConstraints(maxWidth: maxWidth),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(12),
@@ -254,15 +262,17 @@ class _Bubble extends StatelessWidget {
           BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
         ],
       ),
-      child: Text(
-        text,
-        maxLines: 1,
-        softWrap: false,
-        overflow: TextOverflow.visible,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w800,
-          color: light ? AppColors.ink : Colors.white,
+      // Si el texto no cabe en el ancho máximo, se achica dentro del globo.
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          text,
+          maxLines: 1,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            color: light ? AppColors.ink : Colors.white,
+          ),
         ),
       ),
     );
