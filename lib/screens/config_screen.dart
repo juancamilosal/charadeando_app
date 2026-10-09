@@ -144,12 +144,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                         () => _config = _config.copyWith(wordsPerGroup: v),
                       ),
                     ),
-                    WordSuggestion(
-                      config: _config,
-                      onUse: (v) => setState(
-                        () => _config = _config.copyWith(wordsPerGroup: v),
-                      ),
-                    ),
+                    WordSuggestion(config: _config),
                   ],
                 ),
               ),

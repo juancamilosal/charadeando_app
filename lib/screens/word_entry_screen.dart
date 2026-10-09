@@ -81,8 +81,8 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
   Widget build(BuildContext context) {
     final game = ref.watch(gameControllerProvider);
     final author = game.groups[_author];
-    final target =
-        game.groups[WordService.targetOf(_author, game.groups.length)];
+    final rivals = WordService.rivalsLabel(_author, game.groups);
+    final single = game.groups.length == 2;
     return PlayBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -95,16 +95,22 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
           child: _handoff
               ? _HandoffView(
                   author: author.name,
-                  target: target.name,
+                  rivals: rivals,
+                  single: single,
                   onReady: () => setState(() => _handoff = false),
                 )
-              : _entryView(context, game.config.wordsPerGroup, target.name),
+              : _entryView(context, game.config.wordsPerGroup, rivals, single),
         ),
       ),
     );
   }
 
-  Widget _entryView(BuildContext context, int required, String target) {
+  Widget _entryView(
+    BuildContext context,
+    int required,
+    String rivals,
+    bool single,
+  ) {
     final enough = _words.length >= required;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
@@ -112,7 +118,10 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Escriban palabras o frases para que $target las adivine.',
+            single
+                ? 'Escriban palabras o frases para que $rivals las adivine.'
+                : 'Escriban palabras o frases para $rivals. Ustedes no las '
+                      'verán en su turno.',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 17,
@@ -217,12 +226,16 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
 class _HandoffView extends StatelessWidget {
   const _HandoffView({
     required this.author,
-    required this.target,
+    required this.rivals,
+    required this.single,
     required this.onReady,
   });
 
   final String author;
-  final String target;
+  final String rivals;
+
+  /// Verdadero si hay un solo grupo rival.
+  final bool single;
   final VoidCallback onReady;
 
   @override
@@ -247,7 +260,9 @@ class _HandoffView extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '¡Que $target no mire la pantalla!',
+            single
+                ? '¡Que $rivals no mire la pantalla!'
+                : '¡Que $rivals no miren la pantalla!',
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: Colors.white,

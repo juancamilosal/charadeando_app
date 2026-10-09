@@ -115,9 +115,6 @@ class GameConfig {
   /// rondas.
   int get suggestedWordsPerGroup => wordsPerTurn * rounds;
 
-  /// Rondas completas que alcanzan con las palabras elegidas.
-  int get roundsCovered => wordsPerGroup ~/ wordsPerTurn;
-
   GameConfig copyWith({
     Duration? turnDuration,
     int? rounds,

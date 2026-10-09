@@ -21,8 +21,9 @@ la cámara frontal graba a los participantes para revivir las risas.
 - La configuración y los resultados se ven en vertical. Al tocar "¡Listo!" la
   pantalla gira a horizontal para la cuenta regresiva y el juego, y al terminar
   el turno vuelve a vertical.
-- Palabras escritas por los grupos: cada grupo escribe las de su rival y el
-  texto se oculta al guardarlo. Funciona sin internet.
+- Palabras escritas por los grupos: las de cada grupo se reparten entre todos
+  los demás, así que a nadie le salen las suyas y cada palabra se juega una
+  sola vez. El texto se oculta al guardarlo. Funciona sin internet.
 - Puntuación por palabra (cuentan artículos y conectores) o por frase. Pasar
   no suma ni resta, y las palabras pasadas no vuelven al mazo. Igualdad de
   puntos es empate.
