@@ -3,7 +3,9 @@ import 'dart:io';
 
 import 'package:ffmpeg_kit_flutter_new_video/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_new_video/ffmpeg_kit_config.dart';
+import 'package:ffmpeg_kit_flutter_new_video/ffprobe_kit.dart';
 import 'package:ffmpeg_kit_flutter_new_video/return_code.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../models/models.dart';
@@ -34,21 +36,45 @@ class VideoRenderer {
       if (Platform.isIOS) hardwareEncoder('h264_videotoolbox', bitrateMbps),
       softwareEncoder,
     ];
-    for (final encoder in encoders) {
-      final ok = await _run(
-        buildArguments(
-          segments: recording.segments,
-          subtitlesPath: subtitles.path,
-          fontsDir: fontsDir,
-          encoder: encoder,
-          outputPath: outputPath,
-        ),
-        recording.duration,
-        onProgress,
-      );
-      if (ok) return outputPath;
+    // Algunas grabaciones no traen audio (por ejemplo, en el emulador o si
+    // se negó el micrófono). Si falta en alguna parte, se arma sin audio; y
+    // si con audio falla, se intenta una última vez sin él.
+    final hasAudio = await _allHaveAudio(recording.segments);
+    String? lastLogs;
+    for (final withAudio in [hasAudio, if (hasAudio) false]) {
+      for (final encoder in encoders) {
+        final failure = await _run(
+          buildArguments(
+            segments: recording.segments,
+            subtitlesPath: subtitles.path,
+            fontsDir: fontsDir,
+            encoder: encoder,
+            outputPath: outputPath,
+            withAudio: withAudio,
+          ),
+          recording.duration,
+          onProgress,
+        );
+        if (failure == null) return outputPath;
+        lastLogs = failure;
+      }
     }
-    throw const VideoRenderException();
+    debugPrint('[Charadeando] No se pudo armar el video del turno:\n$lastLogs');
+    throw VideoRenderException(lastLogs);
+  }
+
+  Future<bool> _allHaveAudio(List<String> segments) async {
+    for (final segment in segments) {
+      try {
+        final session = await FFprobeKit.getMediaInformation(segment);
+        final streams = session.getMediaInformation()?.getStreams();
+        if (streams == null) continue;
+        if (!streams.any((s) => s.getType() == 'audio')) return false;
+      } on Exception {
+        // Si no se puede revisar, se intenta con audio.
+      }
+    }
+    return true;
   }
 
   /// Detiene el proceso en curso, si lo hay.
@@ -57,17 +83,26 @@ class VideoRenderer {
     if (id != null) await FFmpegKit.cancel(id);
   }
 
-  Future<bool> _run(
+  /// Ejecuta FFmpeg. Devuelve null si salió bien, o los últimos mensajes
+  /// de FFmpeg si falló.
+  Future<String?> _run(
     List<String> arguments,
     Duration total,
     void Function(double progress)? onProgress,
   ) async {
-    final done = Completer<bool>();
+    final done = Completer<String?>();
     final session = await FFmpegKit.executeWithArgumentsAsync(
       arguments,
       (session) async {
         final code = await session.getReturnCode();
-        done.complete(ReturnCode.isSuccess(code));
+        if (ReturnCode.isSuccess(code)) {
+          done.complete(null);
+          return;
+        }
+        final logs = (await session.getAllLogsAsString() ?? '').trim();
+        final lines = logs.split('\n');
+        final tail = lines.skip(lines.length > 25 ? lines.length - 25 : 0);
+        done.complete('Código ${code?.getValue()}:\n${tail.join('\n')}');
       },
       null,
       (statistics) {
@@ -77,9 +112,9 @@ class VideoRenderer {
       },
     );
     _sessionId = session.getSessionId();
-    final ok = await done.future;
+    final result = await done.future;
     _sessionId = null;
-    return ok;
+    return result;
   }
 
   /// Copia la fuente del juego a una carpeta que FFmpeg pueda leer.
@@ -112,14 +147,20 @@ class VideoRenderer {
     required String fontsDir,
     required List<String> encoder,
     required String outputPath,
+    bool withAudio = true,
   }) {
     final inputs = [
       for (final s in segments) ...['-i', s],
     ];
-    final streams = [for (var i = 0; i < segments.length; i++) '[$i:v][$i:a]']
-        .join();
+    final streams = [
+      for (var i = 0; i < segments.length; i++)
+        withAudio ? '[$i:v][$i:a]' : '[$i:v]',
+    ].join();
+    final concat = withAudio
+        ? 'concat=n=${segments.length}:v=1:a=1[cv][a]'
+        : 'concat=n=${segments.length}:v=1:a=0[cv]';
     final filter =
-        '${streams}concat=n=${segments.length}:v=1:a=1[cv][a];'
+        '$streams$concat;'
         "[cv]ass=filename=${_quote(subtitlesPath)}:fontsdir=${_quote(fontsDir)}[v]";
     return [
       '-y',
@@ -128,15 +169,11 @@ class VideoRenderer {
       filter,
       '-map',
       '[v]',
-      '-map',
-      '[a]',
+      if (withAudio) ...['-map', '[a]'],
       ...encoder,
       '-pix_fmt',
       'yuv420p',
-      '-c:a',
-      'aac',
-      '-b:a',
-      '128k',
+      if (withAudio) ...['-c:a', 'aac', '-b:a', '128k'] else '-an',
       '-movflags',
       '+faststart',
       outputPath,
@@ -220,8 +257,11 @@ class VideoRenderer {
 }
 
 class VideoRenderException implements Exception {
-  const VideoRenderException();
+  const VideoRenderException([this.details]);
+
+  /// Últimos mensajes de FFmpeg, para diagnosticar.
+  final String? details;
 
   @override
-  String toString() => 'No se pudo armar el video del turno.';
+  String toString() => 'No se pudo armar el video del turno.\n${details ?? ''}';
 }

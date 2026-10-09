@@ -36,7 +36,7 @@ class FakeRenderer extends VideoRenderer {
     void Function(double progress)? onProgress,
   }) async {
     onProgress?.call(0.5);
-    if (fail) throw const VideoRenderException();
+    if (fail) throw const VideoRenderException('prueba');
     return outputPath;
   }
 

@@ -52,4 +52,19 @@ void main() {
     );
     expect(args.last, '/v/final.mp4');
   });
+
+  test('buildArguments sin audio no pide pistas de audio', () {
+    final args = VideoRenderer.buildArguments(
+      segments: ['/v/a.mp4', '/v/b.mp4'],
+      subtitlesPath: '/v/turno.ass',
+      fontsDir: '/v/fonts',
+      encoder: VideoRenderer.softwareEncoder,
+      outputPath: '/v/final.mp4',
+      withAudio: false,
+    );
+    final filter = args[args.indexOf('-filter_complex') + 1];
+    expect(filter, startsWith('[0:v][1:v]concat=n=2:v=1:a=0[cv];'));
+    expect(args, contains('-an'));
+    expect(args, isNot(contains('[a]')));
+  });
 }
