@@ -76,7 +76,7 @@ class GameConfig {
     this.rounds = 3,
     this.groups = const [Group('Grupo 1'), Group('Grupo 2')],
     this.wordSource = WordSource.groups,
-    this.wordsPerGroup = 15,
+    this.wordsPerGroup = 30,
     this.scoringMode = ScoringMode.perWord,
     this.hitMode = HitMode.tilt,
     this.resolution = VideoResolution.hd,
@@ -103,6 +103,20 @@ class GameConfig {
   final VideoResolution resolution;
 
   int get groupCount => groups.length;
+
+  /// Segundos que tarda en promedio un grupo en acertar o pasar una palabra.
+  /// Es un ritmo algo rápido, para que las palabras no se acaben antes.
+  static const secondsPerWord = 6;
+
+  /// Palabras que un grupo suele resolver en un turno.
+  int get wordsPerTurn => (turnDuration.inSeconds / secondsPerWord).ceil();
+
+  /// Palabras que conviene escribir por grupo para que alcancen todas las
+  /// rondas.
+  int get suggestedWordsPerGroup => wordsPerTurn * rounds;
+
+  /// Rondas completas que alcanzan con las palabras elegidas.
+  int get roundsCovered => wordsPerGroup ~/ wordsPerTurn;
 
   GameConfig copyWith({
     Duration? turnDuration,

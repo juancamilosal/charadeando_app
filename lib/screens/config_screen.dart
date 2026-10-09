@@ -8,6 +8,7 @@ import '../router.dart';
 import '../widgets/number_stepper.dart';
 import '../widgets/option_selector.dart';
 import '../widgets/play_background.dart';
+import '../widgets/word_suggestion.dart';
 
 class ConfigScreen extends ConsumerStatefulWidget {
   const ConfigScreen({super.key});
@@ -118,6 +119,12 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                       min: GameConfig.minWordsPerGroup,
                       max: GameConfig.maxWordsPerGroup,
                       onChanged: (v) => setState(
+                        () => _config = _config.copyWith(wordsPerGroup: v),
+                      ),
+                    ),
+                    WordSuggestion(
+                      config: _config,
+                      onUse: (v) => setState(
                         () => _config = _config.copyWith(wordsPerGroup: v),
                       ),
                     ),
