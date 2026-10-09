@@ -17,7 +17,6 @@ class Turn {
     required this.round,
     required this.groupIndex,
     required this.entries,
-    this.videoPath,
   });
 
   final int round;
@@ -25,9 +24,6 @@ class Turn {
 
   /// Palabras en el orden en que salieron.
   final List<TurnEntry> entries;
-
-  /// Video temporal del turno. Se borra al pasar al siguiente turno.
-  final String? videoPath;
 
   List<Word> get hits => [
     for (final e in entries)
@@ -41,7 +37,4 @@ class Turn {
 
   int points(ScoringMode mode) =>
       hits.fold(0, (sum, word) => sum + mode.pointsFor(word.wordCount));
-
-  Turn withoutVideo() =>
-      Turn(round: round, groupIndex: groupIndex, entries: entries);
 }

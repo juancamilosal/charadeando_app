@@ -10,7 +10,8 @@ import 'package:share_plus/share_plus.dart';
 class VideoService {
   static const _folder = 'charadeando_videos';
 
-  Future<Directory> _directory() async {
+  /// Carpeta temporal donde viven los videos de la partida.
+  Future<Directory> directory() async {
     final temp = await getTemporaryDirectory();
     final dir = Directory('${temp.path}/$_folder');
     if (!await dir.exists()) await dir.create(recursive: true);
@@ -20,7 +21,7 @@ class VideoService {
   /// Mueve el video recién grabado a la carpeta temporal de la app y
   /// devuelve su nueva ruta.
   Future<String> keep(XFile recorded) async {
-    final dir = await _directory();
+    final dir = await directory();
     final target =
         '${dir.path}/turno_${DateTime.now().millisecondsSinceEpoch}.mp4';
     final source = File(recorded.path);
@@ -41,7 +42,7 @@ class VideoService {
   /// Borra todos los videos temporales, por ejemplo los que quedaron de una
   /// partida que se cerró a la mitad.
   Future<void> deleteAll() async {
-    final dir = await _directory();
+    final dir = await directory();
     await for (final entity in dir.list()) {
       await entity.delete(recursive: true);
     }

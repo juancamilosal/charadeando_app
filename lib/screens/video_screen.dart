@@ -22,7 +22,7 @@ class _VideoScreenState extends ConsumerState<VideoScreen> {
   bool _saving = false;
   bool _saved = false;
 
-  String? get _path => ref.read(gameControllerProvider).lastTurn?.videoPath;
+  String? get _path => ref.read(turnVideoProvider).path;
 
   @override
   void initState() {

@@ -25,13 +25,8 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
   Future<void> _continue() async {
     if (_leaving) return;
     setState(() => _leaving = true);
-    final controller = ref.read(gameControllerProvider.notifier);
-    final path = ref.read(gameControllerProvider).lastTurn?.videoPath;
-    if (path != null) {
-      await ref.read(videoServiceProvider).delete(path);
-      controller.clearLastVideo();
-    }
-    controller.advance();
+    await ref.read(turnVideoProvider.notifier).discard();
+    ref.read(gameControllerProvider.notifier).advance();
     if (!mounted) return;
     context.go(
       ref.read(gameControllerProvider).finished
@@ -43,6 +38,7 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
   @override
   Widget build(BuildContext context) {
     final game = ref.watch(gameControllerProvider);
+    final video = ref.watch(turnVideoProvider);
     final turn = game.lastTurn;
     if (turn == null) return const Scaffold();
     final mode = game.config.scoringMode;
@@ -118,16 +114,15 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  if (turn.videoPath != null) ...[
-                    OutlinedButton.icon(
-                      icon: const Icon(Icons.play_circle_outline),
-                      label: const Text('Ver video'),
-                      onPressed: () => context.push(Routes.video),
-                    ),
+                  if (video.status != TurnVideoStatus.none) ...[
+                    _VideoButton(video: video),
                     const SizedBox(height: 6),
-                    const Text(
-                      'El video se borra al continuar. Si lo quieres, guárdalo antes.',
-                      style: TextStyle(color: Colors.white, fontSize: 13),
+                    Text(
+                      video.withWords
+                          ? 'El video se borra al continuar. Si lo quieres, guárdalo antes.'
+                          : 'No se pudieron escribir las palabras en este video. '
+                                'Se borra al continuar.',
+                      style: const TextStyle(color: Colors.white, fontSize: 13),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 10),
@@ -169,6 +164,41 @@ class _EntryTile extends StatelessWidget {
             : const TextStyle(decoration: TextDecoration.lineThrough),
       ),
       trailing: Text(hit ? '+${mode.pointsFor(entry.word.wordCount)}' : '0'),
+    );
+  }
+}
+
+/// "Ver video", o el avance mientras se escriben las palabras en el video.
+class _VideoButton extends StatelessWidget {
+  const _VideoButton({required this.video});
+
+  final TurnVideoState video;
+
+  @override
+  Widget build(BuildContext context) {
+    if (video.status == TurnVideoStatus.ready) {
+      return OutlinedButton.icon(
+        icon: const Icon(Icons.play_circle_outline),
+        label: const Text('Ver video'),
+        onPressed: () => context.push(Routes.video),
+      );
+    }
+    final percent = (video.progress * 100).round();
+    return OutlinedButton.icon(
+      icon: SizedBox.square(
+        dimension: 20,
+        child: CircularProgressIndicator(
+          strokeWidth: 3,
+          color: Colors.white,
+          value: video.progress > 0 ? video.progress : null,
+        ),
+      ),
+      label: Text('Preparando video… $percent%'),
+      style: OutlinedButton.styleFrom(
+        disabledForegroundColor: Colors.white70,
+        side: const BorderSide(color: Colors.white54, width: 2),
+      ),
+      onPressed: null,
     );
   }
 }

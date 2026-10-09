@@ -117,15 +117,6 @@ class GameController extends Notifier<GameState> {
     state = state.copyWith(decks: decks, turns: [...state.turns, turn]);
   }
 
-  /// Olvida el video del último turno, que ya se borró del celular.
-  void clearLastVideo() {
-    final last = state.lastTurn;
-    if (last == null || last.videoPath == null) return;
-    state = state.copyWith(
-      turns: [...state.turns.take(state.turns.length - 1), last.withoutVideo()],
-    );
-  }
-
   /// Pasa al siguiente grupo, o a la siguiente ronda cuando ya jugaron todos.
   void advance() {
     final next = state.groupIndex + 1;

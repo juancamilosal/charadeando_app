@@ -27,6 +27,11 @@ la cámara frontal graba a los participantes para revivir las risas.
 - El video se puede ver, guardar en la galería o compartir. Al continuar al
   siguiente turno se borra del celular; la app no guarda videos en ningún
   otro lugar.
+- El video final muestra las palabras que se están adivinando, los aciertos y
+  los pases. Se arma con FFmpeg (`ffmpeg_kit_flutter_new_video`, licencia
+  LGPL) mientras se ven los resultados del turno.
+- Si la app sale a segundo plano durante el turno, el juego se pausa y al
+  volver sigue donde quedó. El video se graba por partes y se unen al final.
 
 Pendiente para siguientes versiones: palabras aleatorias desde el backend de
 palabras, modo celular juez con Realtime Database, compras, anuncios y marca de
