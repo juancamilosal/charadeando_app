@@ -75,18 +75,21 @@ void main() {
     expect(find.text('Escriban el nombre de cada grupo.'), findsOneWidget);
   });
 
-  testWidgets('advierte cuando las palabras no alcanzan', (tester) async {
-    // Por defecto: 3 rondas de 60 s piden unas 30 palabras y son 10.
+  testWidgets('recuerda escribir más palabras, sin cálculos', (tester) async {
     await pumpConfig(tester);
-    expect(find.textContaining('pierde sus turnos'), findsOneWidget);
+    expect(
+      find.textContaining('Recuerda: mientras más rondas'),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('no advierte si las palabras alcanzan', (tester) async {
-    // 1 ronda de 60 s pide unas 10 palabras.
-    await pumpConfig(
-      tester,
-      config: const GameConfig(rounds: 1, wordsPerGroup: 10),
-    );
-    expect(find.textContaining('pierde sus turnos'), findsNothing);
+  testWidgets('no deja pasar de 6 grupos', (tester) async {
+    await pumpConfig(tester);
+    final add = find.byIcon(Icons.add).first;
+    for (var i = 0; i < 6; i++) {
+      await tester.tap(add);
+      await tester.pump();
+    }
+    expect(find.textContaining('Nombre del grupo'), findsNWidgets(6));
   });
 }

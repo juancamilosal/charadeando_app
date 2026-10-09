@@ -10,7 +10,7 @@ import '../widgets/config_section.dart';
 import '../widgets/number_stepper.dart';
 import '../widgets/option_selector.dart';
 import '../widgets/play_background.dart';
-import '../widgets/words_warning.dart';
+import '../widgets/words_reminder.dart';
 
 class ConfigScreen extends ConsumerStatefulWidget {
   const ConfigScreen({super.key});
@@ -120,6 +120,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                 children: [
                   ConfigRow(
                     label: 'Número de grupos',
+                    hint: 'Hasta ${GameConfig.maxGroups} grupos.',
                     child: NumberStepper(
                       value: _names.length,
                       min: GameConfig.minGroups,
@@ -158,7 +159,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                       color: Color(0xFF6B5A86),
                     ),
                   ),
-                  WordsWarning(config: _config),
+                  const WordsReminder(),
                 ],
               ),
               gap,
@@ -254,21 +255,16 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
     );
   }
 
-  /// Campos de nombre de dos en dos, como en una tabla.
+  /// Un campo de nombre por grupo, uno debajo del otro.
   Widget _nameFields() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const spacing = 12.0;
-        final width = (constraints.maxWidth - spacing) / 2;
-        return Wrap(
-          spacing: spacing,
-          runSpacing: 12,
-          children: [
-            for (var i = 0; i < _names.length; i++)
-              SizedBox(width: width, child: _nameField(i)),
-          ],
-        );
-      },
+    return Column(
+      children: [
+        for (var i = 0; i < _names.length; i++)
+          Padding(
+            padding: EdgeInsets.only(top: i == 0 ? 0 : 12),
+            child: _nameField(i),
+          ),
+      ],
     );
   }
 
@@ -296,7 +292,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
           textCapitalization: TextCapitalization.words,
           onChanged: (_) => setState(() {}),
           decoration: InputDecoration(
-            hintText: 'Ej: Los Tigres',
+            hintText: 'Ej: Los Invencibles',
             counterText: '',
             isDense: true,
             errorText: _showNameErrors && empty ? 'Escribe un nombre' : null,
