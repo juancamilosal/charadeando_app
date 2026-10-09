@@ -10,8 +10,11 @@ final tiltServiceProvider = Provider((ref) => TiltService());
 final videoServiceProvider = Provider((ref) => VideoService());
 
 /// Si el usuario compró las funciones premium. Las compras llegan en una
-/// versión posterior; por ahora siempre es falso.
-final premiumUnlockedProvider = Provider((ref) => false);
+/// versión posterior.
+///
+/// TEMPORAL: en true para probar las funciones premium. Volver a false
+/// antes de publicar.
+final premiumUnlockedProvider = Provider((ref) => true);
 
 final gameControllerProvider = NotifierProvider<GameController, GameState>(
   GameController.new,
