@@ -8,6 +8,9 @@ la cámara frontal graba a los participantes para revivir las risas.
 
 - Un solo celular, aciertos con movimiento: inclinar hacia abajo es acierto y
   hacia arriba es pasar.
+- La configuración y los resultados se ven en vertical. Al tocar "¡Listo!" la
+  pantalla gira a horizontal para la cuenta regresiva y el juego, y al terminar
+  el turno vuelve a vertical.
 - Palabras escritas por los grupos: cada grupo escribe las de su rival y el
   texto se oculta al guardarlo. Funciona sin internet.
 - Puntuación por palabra (cuentan artículos y conectores) o por frase. Pasar

@@ -43,44 +43,43 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: ListView(
                     children: [
+                      const SizedBox(height: 24),
                       Icon(
                         Icons.emoji_events,
-                        size: 64,
+                        size: 72,
                         color: theme.colorScheme.primary,
                       ),
                       const SizedBox(height: 8),
                       Text(
                         title,
+                        textAlign: TextAlign.center,
                         style: theme.textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 24),
-                      FilledButton.icon(
-                        icon: const Icon(Icons.replay),
-                        label: const Text('Jugar otra vez'),
-                        onPressed: _playAgain,
-                      ),
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: () => context.go(Routes.welcome),
-                        child: const Text('Volver al inicio'),
-                      ),
+                      Scoreboard(groups: game.groups, scores: game.scores),
                     ],
                   ),
                 ),
-                const SizedBox(width: 24),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Scoreboard(groups: game.groups, scores: game.scores),
+                FilledButton.icon(
+                  icon: const Icon(Icons.replay),
+                  label: const Text('Jugar otra vez'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(52),
                   ),
+                  onPressed: _playAgain,
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () => context.go(Routes.welcome),
+                  child: const Text('Volver al inicio'),
                 ),
               ],
             ),

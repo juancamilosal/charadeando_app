@@ -76,7 +76,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
           children: [
             Wrap(
-              spacing: 32,
+              spacing: 16,
               runSpacing: 16,
               children: [
                 NumberStepper(
@@ -124,13 +124,11 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
               style: Theme.of(context).textTheme.labelLarge,
             ),
             const SizedBox(height: 6),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
+            Column(
               children: [
                 for (var i = 0; i < _names.length; i++)
-                  SizedBox(
-                    width: 200,
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
                     child: TextField(
                       controller: _names[i],
                       maxLength: 20,
@@ -185,14 +183,13 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                   setState(() => _config = _config.copyWith(resolution: o)),
             ),
             const SizedBox(height: 32),
-            Align(
-              alignment: Alignment.centerRight,
-              child: FilledButton.icon(
-                icon: const Icon(Icons.arrow_forward),
-                label: const Text('Continuar'),
-                style: FilledButton.styleFrom(minimumSize: const Size(200, 52)),
-                onPressed: _continue,
+            FilledButton.icon(
+              icon: const Icon(Icons.arrow_forward),
+              label: const Text('Continuar'),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(52),
               ),
+              onPressed: _continue,
             ),
           ],
         ),

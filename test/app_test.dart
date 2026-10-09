@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('de la bienvenida se pasa a la configuración', (tester) async {
-    tester.view.physicalSize = const Size(2400, 1080);
+    tester.view.physicalSize = const Size(1080, 2400);
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(const ProviderScope(child: CharadeandoApp()));

@@ -90,52 +90,35 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
     final enough = _words.length >= required;
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Escriban palabras o frases para que $target las adivine.',
-                  style: theme.textTheme.titleMedium,
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _input,
-                  focusNode: _focus,
-                  autofocus: true,
-                  maxLength: 40,
-                  textCapitalization: TextCapitalization.sentences,
-                  onSubmitted: (_) => _add(),
-                  decoration: InputDecoration(
-                    labelText: 'Palabra o frase',
-                    border: const OutlineInputBorder(),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.add_circle),
-                      onPressed: _add,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${_words.length} de $required palabras',
-                  style: theme.textTheme.titleSmall,
-                ),
-                const Spacer(),
-                FilledButton.icon(
-                  icon: const Icon(Icons.check),
-                  label: const Text('Listo'),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size(200, 52),
-                  ),
-                  onPressed: enough ? _done : null,
-                ),
-              ],
+          Text(
+            'Escriban palabras o frases para que $target las adivine.',
+            style: theme.textTheme.titleMedium,
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _input,
+            focusNode: _focus,
+            autofocus: true,
+            maxLength: 40,
+            textCapitalization: TextCapitalization.sentences,
+            onSubmitted: (_) => _add(),
+            decoration: InputDecoration(
+              labelText: 'Palabra o frase',
+              border: const OutlineInputBorder(),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.add_circle),
+                onPressed: _add,
+              ),
             ),
           ),
-          const SizedBox(width: 24),
+          Text(
+            '${_words.length} de $required palabras',
+            style: theme.textTheme.titleSmall,
+          ),
+          const SizedBox(height: 8),
           Expanded(
             child: ListView.builder(
               itemCount: _words.length,
@@ -150,6 +133,15 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
                 ),
               ),
             ),
+          ),
+          const SizedBox(height: 8),
+          FilledButton.icon(
+            icon: const Icon(Icons.check),
+            label: const Text('Listo'),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(52),
+            ),
+            onPressed: enough ? _done : null,
           ),
         ],
       ),

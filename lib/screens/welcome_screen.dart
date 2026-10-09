@@ -24,47 +24,41 @@ class WelcomeScreen extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Charadeando',
-                      style: theme.textTheme.displayMedium?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'El juego de charadas que graba tus risas.',
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 24),
-                    FilledButton.icon(
-                      icon: const Icon(Icons.play_arrow),
-                      label: const Text('Jugar'),
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size(200, 56),
-                        textStyle: theme.textTheme.titleLarge,
-                      ),
-                      onPressed: () => context.go(Routes.config),
-                    ),
-                  ],
+              const SizedBox(height: 32),
+              Text(
+                'Charadeando',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.displayMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: theme.colorScheme.primary,
                 ),
               ),
-              const SizedBox(width: 24),
+              const SizedBox(height: 8),
+              Text(
+                'El juego de charadas que graba tus risas.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleMedium,
+              ),
+              const SizedBox(height: 24),
               Expanded(
                 child: ListView(
-                  shrinkWrap: true,
                   children: [
                     for (final (icon, text) in _steps)
                       ListTile(leading: Icon(icon), title: Text(text)),
                   ],
                 ),
+              ),
+              FilledButton.icon(
+                icon: const Icon(Icons.play_arrow),
+                label: const Text('Jugar'),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(56),
+                  textStyle: theme.textTheme.titleLarge,
+                ),
+                onPressed: () => context.go(Routes.config),
               ),
             ],
           ),

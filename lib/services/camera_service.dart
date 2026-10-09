@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart';
+import 'package:flutter/services.dart';
 
 import '../models/models.dart';
 
@@ -25,15 +26,15 @@ class CameraService {
     final controller = CameraController(front, resolution.preset);
     _controller = controller;
     await controller.initialize();
-    // Fija la orientación actual para que el video no gire cuando el
-    // jugador incline el celular.
-    await controller.lockCaptureOrientation();
     await controller.prepareForVideoRecording();
   }
 
-  Future<void> startRecording() async {
+  /// Graba con la orientación fija en [orientation], para que el video no
+  /// gire cuando el jugador incline el celular.
+  Future<void> startRecording(DeviceOrientation orientation) async {
     final controller = _controller;
     if (controller == null || !controller.value.isInitialized) return;
+    await controller.lockCaptureOrientation(orientation);
     await controller.startVideoRecording();
   }
 

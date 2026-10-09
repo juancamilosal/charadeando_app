@@ -74,15 +74,18 @@ class _TurnScreenState extends ConsumerState<TurnScreen> {
     _tilt?.cancel();
     _camera.dispose();
     WakelockPlus.disable();
+    ScreenOrientation.portrait();
     super.dispose();
   }
 
   Future<void> _startCountdown() async {
     setState(() => _phase = _Phase.countdown);
-    // Se empieza a grabar durante la cuenta regresiva para absorber la
-    // demora de la cámara al arrancar.
+    // La cuenta regresiva da tiempo de girar el celular y ponerlo en la
+    // frente. También se empieza a grabar aquí, para absorber la demora de
+    // la cámara al arrancar.
+    await ScreenOrientation.landscape();
     try {
-      await _camera.startRecording();
+      await _camera.startRecording(ScreenOrientation.game);
     } on CameraException {
       _cameraError = 'No se pudo grabar este turno.';
     }
@@ -152,6 +155,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen> {
       videoPath = null;
     }
     await _camera.dispose();
+    await ScreenOrientation.portrait();
 
     final game = ref.read(gameControllerProvider);
     ref
@@ -198,6 +202,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen> {
     } on Exception {
       // El archivo queda en la carpeta temporal del sistema.
     }
+    await ScreenOrientation.portrait();
     if (mounted) context.go(Routes.welcome);
   }
 
@@ -226,48 +231,20 @@ class _TurnScreenState extends ConsumerState<TurnScreen> {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Ronda ${game.round} de ${game.config.rounds}',
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  Text(
-                    'Turno de ${game.currentGroup.name}',
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Pon el celular en tu frente con la pantalla hacia tu grupo.\n'
-                    'Inclínalo hacia abajo si aciertas y hacia arriba para pasar.',
-                  ),
-                  if (_cameraError != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      _cameraError!,
-                      style: TextStyle(color: theme.colorScheme.error),
-                    ),
-                  ],
-                  const SizedBox(height: 20),
-                  FilledButton.icon(
-                    icon: const Icon(Icons.play_arrow),
-                    label: const Text('¡Listo!'),
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size(200, 56),
-                    ),
-                    onPressed: _cameraLoading ? null : _startCountdown,
-                  ),
-                ],
+            Text(
+              'Ronda ${game.round} de ${game.config.rounds}',
+              style: theme.textTheme.titleMedium,
+            ),
+            Text(
+              'Turno de ${game.currentGroup.name}',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(width: 24),
+            const SizedBox(height: 16),
             Expanded(
               child: Center(
                 child: _cameraLoading
@@ -279,6 +256,28 @@ class _TurnScreenState extends ConsumerState<TurnScreen> {
                       )
                     : const Icon(Icons.videocam_off, size: 64),
               ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Al tocar "¡Listo!", la pantalla gira. Pon el celular en tu '
+              'frente con la pantalla hacia tu grupo.\n'
+              'Inclínalo hacia abajo si aciertas y hacia arriba para pasar.',
+            ),
+            if (_cameraError != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                _cameraError!,
+                style: TextStyle(color: theme.colorScheme.error),
+              ),
+            ],
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              icon: const Icon(Icons.play_arrow),
+              label: const Text('¡Listo!'),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(56),
+              ),
+              onPressed: _cameraLoading ? null : _startCountdown,
             ),
           ],
         ),

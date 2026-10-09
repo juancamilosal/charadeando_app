@@ -52,13 +52,16 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: ListView(
                     children: [
+                      Text(
+                        'Ronda ${turn.round} de ${game.config.rounds}',
+                        style: theme.textTheme.titleMedium,
+                      ),
                       Text(
                         '${game.groups[turn.groupIndex].name}: '
                         '+${turn.points(mode)} puntos',
@@ -67,63 +70,49 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Expanded(
-                        child: turn.entries.isEmpty
-                            ? const Text('No se marcó ninguna palabra.')
-                            : ListView(
-                                children: [
-                                  for (final entry in turn.entries)
-                                    _EntryTile(entry: entry, mode: mode),
-                                ],
-                              ),
+                      if (turn.entries.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: Text('No se marcó ninguna palabra.'),
+                        ),
+                      for (final entry in turn.entries)
+                        _EntryTile(entry: entry, mode: mode),
+                      const SizedBox(height: 16),
+                      Text('Puntajes', style: theme.textTheme.titleMedium),
+                      const SizedBox(height: 8),
+                      Scoreboard(
+                        groups: game.groups,
+                        scores: game.scores,
+                        highlight: turn.groupIndex,
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 24),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        'Ronda ${turn.round} de ${game.config.rounds}',
-                        style: theme.textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 8),
-                      Flexible(
-                        child: SingleChildScrollView(
-                          child: Scoreboard(
-                            groups: game.groups,
-                            scores: game.scores,
-                            highlight: turn.groupIndex,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      if (turn.videoPath != null) ...[
-                        OutlinedButton.icon(
-                          icon: const Icon(Icons.play_circle_outline),
-                          label: const Text('Ver video'),
-                          onPressed: () => context.push(Routes.video),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'El video se borra al continuar. Si lo quieres, guárdalo antes.',
-                          style: theme.textTheme.bodySmall,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                      ],
-                      FilledButton.icon(
-                        icon: const Icon(Icons.arrow_forward),
-                        label: const Text('Continuar'),
-                        style: FilledButton.styleFrom(
-                          minimumSize: const Size.fromHeight(52),
-                        ),
-                        onPressed: _leaving ? null : _continue,
-                      ),
-                    ],
+                const SizedBox(height: 12),
+                if (turn.videoPath != null) ...[
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.play_circle_outline),
+                    label: const Text('Ver video'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(48),
+                    ),
+                    onPressed: () => context.push(Routes.video),
                   ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'El video se borra al continuar. Si lo quieres, guárdalo antes.',
+                    style: theme.textTheme.bodySmall,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                FilledButton.icon(
+                  icon: const Icon(Icons.arrow_forward),
+                  label: const Text('Continuar'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(52),
+                  ),
+                  onPressed: _leaving ? null : _continue,
                 ),
               ],
             ),

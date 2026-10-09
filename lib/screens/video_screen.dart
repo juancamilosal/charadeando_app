@@ -84,7 +84,7 @@ class _VideoScreenState extends ConsumerState<VideoScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: Row(
+        child: Column(
           children: [
             Expanded(
               child: GestureDetector(
@@ -102,21 +102,28 @@ class _VideoScreenState extends ConsumerState<VideoScreen> {
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  FilledButton.icon(
-                    icon: Icon(_saved ? Icons.check : Icons.download),
-                    label: Text(_saved ? 'Guardado' : 'Guardar'),
-                    onPressed: _saving || _saved ? null : _save,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: FilledButton.icon(
+                          icon: Icon(_saved ? Icons.check : Icons.download),
+                          label: Text(_saved ? 'Guardado' : 'Guardar'),
+                          onPressed: _saving || _saved ? null : _save,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: FilledButton.tonalIcon(
+                          icon: const Icon(Icons.share),
+                          label: const Text('Compartir'),
+                          onPressed: _share,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                  FilledButton.tonalIcon(
-                    icon: const Icon(Icons.share),
-                    label: const Text('Compartir'),
-                    onPressed: _share,
-                  ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   OutlinedButton.icon(
                     icon: const Icon(Icons.arrow_back),
                     label: const Text('Volver'),
