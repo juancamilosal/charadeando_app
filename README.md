@@ -1,17 +1,50 @@
-# charadeando_app
+# Charadeando
 
-A new Flutter project.
+Juego de charadas para Android e iOS hecho en Flutter. Un jugador se pone el
+celular en la frente y adivina la palabra con las pistas de su grupo, mientras
+la cámara frontal graba a los participantes para revivir las risas.
 
-## Getting Started
+## Versión 0.1
 
-This project is a starting point for a Flutter application.
+- Un solo celular, aciertos con movimiento: inclinar hacia abajo es acierto y
+  hacia arriba es pasar.
+- Palabras escritas por los grupos: cada grupo escribe las de su rival y el
+  texto se oculta al guardarlo. Funciona sin internet.
+- Puntuación por palabra (cuentan artículos y conectores) o por frase. Pasar
+  no suma ni resta, y las palabras pasadas no vuelven al mazo. Igualdad de
+  puntos es empate.
+- Video de cada turno con la cámara frontal, en 720p por defecto. 1080p y la
+  máxima resolución quedan bloqueadas como premium.
+- El video se puede ver, guardar en la galería o compartir. Al continuar al
+  siguiente turno se borra del celular; la app no guarda videos en ningún
+  otro lugar.
 
-A few resources to get you started if this is your first Flutter project:
+Pendiente para siguientes versiones: palabras aleatorias con Gemini y base de
+datos, modo celular juez con Realtime Database, compras, anuncios y marca de
+agua.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Estructura
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```
+lib/
+├── models/      clases del juego (GameConfig, Word, Group, Turn)
+├── services/    cámara, sensores, videos y palabras
+├── providers/   estado de la partida (Riverpod) y servicios
+├── screens/     una pantalla por paso del flujo
+├── widgets/     piezas reutilizables
+├── router.dart  rutas (go_router)
+└── main.dart
+```
+
+## Desarrollo
+
+```sh
+flutter pub get
+flutter analyze
+flutter test
+flutter run
+```
+
+La app se prueba en un celular real: necesita cámara frontal y acelerómetro.
+En modo debug, durante el turno tocar la mitad izquierda de la pantalla pasa
+y la mitad derecha acierta, para probar en un emulador.
