@@ -13,4 +13,11 @@ void main() {
     final all = words.expand((w) => w).toList();
     expect(all.toSet(), hasLength(all.length));
   });
+
+  test('completa con palabras numeradas si se piden muchas', () {
+    final words = TestData.sample(40, random: Random(1));
+    expect(words, hasLength(40));
+    expect(words.map((w) => w.text).toSet(), hasLength(40));
+    expect(words.last.text, 'Palabra de prueba 40');
+  });
 }

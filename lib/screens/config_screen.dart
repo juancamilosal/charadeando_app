@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../models/models.dart';
 import '../providers/providers.dart';
 import '../router.dart';
+import '../services/services.dart';
 import '../widgets/number_stepper.dart';
 import '../widgets/option_selector.dart';
 import '../widgets/play_background.dart';
@@ -49,6 +50,19 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
     });
   }
 
+  /// Llena la configuración con los valores de prueba, para no escribirlos
+  /// en cada prueba.
+  void _fillTestData() {
+    final names = [for (final g in TestData.config.groups) g.name];
+    _setGroupCount(names.length);
+    setState(() {
+      _config = TestData.config.copyWith(resolution: _config.resolution);
+      for (var i = 0; i < names.length; i++) {
+        _names[i].text = names[i];
+      }
+    });
+  }
+
   void _continue() {
     final groups = [
       for (var i = 0; i < _names.length; i++)
@@ -80,6 +94,14 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
             children: [
+              if (TestData.enabled) ...[
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.science),
+                  label: const Text('Rellenar datos de prueba'),
+                  onPressed: _fillTestData,
+                ),
+                const SizedBox(height: 16),
+              ],
               PlayPanel(
                 child: Wrap(
                   spacing: 16,

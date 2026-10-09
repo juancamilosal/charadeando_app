@@ -44,6 +44,16 @@ abstract final class TestData {
     'Mariposa',
   ];
 
+  /// [count] palabras de prueba distintas, elegidas al azar. Si se piden
+  /// más de las que hay en la lista, se completan con palabras numeradas.
+  static List<Word> sample(int count, {Random? random}) {
+    final pool = [..._words]..shuffle(random ?? Random());
+    return [
+      for (var i = 0; i < count; i++)
+        Word(i < pool.length ? pool[i] : 'Palabra de prueba ${i + 1}'),
+    ];
+  }
+
   /// Palabras distintas para cada grupo, elegidas al azar.
   static List<List<Word>> words({Random? random}) {
     final pool = [..._words]..shuffle(random ?? Random());

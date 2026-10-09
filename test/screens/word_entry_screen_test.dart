@@ -37,4 +37,30 @@ void main() {
     await tester.pump();
     expect(find.textContaining('El Rey León'), findsNothing);
   });
+
+  testWidgets('rellena las palabras de prueba que faltan', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    addTearDown(tester.view.reset);
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    container
+        .read(gameControllerProvider.notifier)
+        .configure(
+          const GameConfig(groups: [Group('A'), Group('B')], wordsPerGroup: 12),
+        );
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(home: WordEntryScreen()),
+      ),
+    );
+    await tester.tap(find.text('Empezar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Rellenar palabras de prueba'));
+    await tester.pump();
+
+    expect(find.text('12 de 12 palabras'), findsOneWidget);
+    expect(find.text('Rellenar palabras de prueba'), findsNothing);
+  });
 }
