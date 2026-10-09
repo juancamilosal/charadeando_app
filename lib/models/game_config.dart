@@ -39,7 +39,7 @@ enum HitMode {
 
 /// De dónde salen las palabras de la partida.
 enum WordSource {
-  /// Generadas con Gemini y guardadas en la base de datos. Requiere internet.
+  /// Entregadas por el backend de palabras. Requiere internet.
   random('Aleatorias', available: false),
 
   /// Cada grupo escribe las palabras de sus rivales. Funciona sin internet.

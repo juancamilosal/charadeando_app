@@ -19,8 +19,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   siguiente turno se borra del celular; la app no guarda videos en ningún
   otro lugar.
 
-Pendiente para siguientes versiones: palabras aleatorias con Gemini y base de
-datos, modo celular juez con Realtime Database, compras, anuncios y marca de
+Pendiente para siguientes versiones: palabras aleatorias desde el backend de
+palabras, modo celular juez con Realtime Database, compras, anuncios y marca de
 agua.
 
 ## Estructura
