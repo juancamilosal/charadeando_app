@@ -12,7 +12,9 @@ import '../models/models.dart';
 import '../providers/providers.dart';
 import '../router.dart';
 import '../services/services.dart';
+import '../theme.dart';
 import '../widgets/countdown_view.dart';
+import '../widgets/play_background.dart';
 import '../widgets/word_card.dart';
 
 enum _Phase { ready, countdown, playing, saving }
@@ -214,47 +216,60 @@ class _TurnScreenState extends ConsumerState<TurnScreen> {
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop && _phase != _Phase.saving) _confirmExit();
       },
-      child: Scaffold(
-        body: switch (_phase) {
-          _Phase.ready => _readyView(context, game),
-          _Phase.countdown => CountdownView(value: _countdown),
-          _Phase.playing => _playingView(context),
-          _Phase.saving => const Center(child: CircularProgressIndicator()),
-        },
+      child: PlayBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: switch (_phase) {
+            _Phase.ready => _readyView(context, game),
+            _Phase.countdown => CountdownView(value: _countdown),
+            _Phase.playing => _playingView(context),
+            _Phase.saving => const Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
+          },
+        ),
       ),
     );
   }
 
   Widget _readyView(BuildContext context, GameState game) {
-    final theme = Theme.of(context);
     final controller = _camera.controller;
+    const white = TextStyle(
+      color: Colors.white,
+      fontSize: 16,
+      fontWeight: FontWeight.w700,
+    );
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Ronda ${game.round} de ${game.config.rounds}',
-              style: theme.textTheme.titleMedium,
-            ),
+            Text('Ronda ${game.round} de ${game.config.rounds}', style: white),
             Text(
               'Turno de ${game.currentGroup.name}',
-              style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+              style: const TextStyle(
+                fontFamily: AppFonts.display,
+                fontSize: 34,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
               ),
             ),
             const SizedBox(height: 16),
             Expanded(
               child: Center(
                 child: _cameraLoading
-                    ? const CircularProgressIndicator()
+                    ? const CircularProgressIndicator(color: Colors.white)
                     : controller != null && controller.value.isInitialized
                     ? ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(24),
                         child: CameraPreview(controller),
                       )
-                    : const Icon(Icons.videocam_off, size: 64),
+                    : const Icon(
+                        Icons.videocam_off,
+                        size: 72,
+                        color: Colors.white70,
+                      ),
               ),
             ),
             const SizedBox(height: 16),
@@ -262,21 +277,19 @@ class _TurnScreenState extends ConsumerState<TurnScreen> {
               'Al tocar "¡Listo!", la pantalla gira. Pon el celular en tu '
               'frente con la pantalla hacia tu grupo.\n'
               'Inclínalo hacia abajo si aciertas y hacia arriba para pasar.',
+              style: white,
             ),
             if (_cameraError != null) ...[
               const SizedBox(height: 8),
               Text(
                 _cameraError!,
-                style: TextStyle(color: theme.colorScheme.error),
+                style: white.copyWith(color: AppColors.yellow),
               ),
             ],
             const SizedBox(height: 16),
             FilledButton.icon(
               icon: const Icon(Icons.play_arrow),
               label: const Text('¡Listo!'),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(56),
-              ),
               onPressed: _cameraLoading ? null : _startCountdown,
             ),
           ],

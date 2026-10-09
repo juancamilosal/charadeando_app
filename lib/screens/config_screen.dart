@@ -7,6 +7,7 @@ import '../providers/providers.dart';
 import '../router.dart';
 import '../widgets/number_stepper.dart';
 import '../widgets/option_selector.dart';
+import '../widgets/play_background.dart';
 
 class ConfigScreen extends ConsumerStatefulWidget {
   const ConfigScreen({super.key});
@@ -65,133 +66,139 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   @override
   Widget build(BuildContext context) {
     final premium = ref.watch(premiumUnlockedProvider);
-    const gap = SizedBox(height: 20);
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Configuración'),
-        leading: BackButton(onPressed: () => context.go(Routes.welcome)),
-      ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-          children: [
-            Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              children: [
-                NumberStepper(
-                  label: 'Grupos',
-                  value: _names.length,
-                  min: GameConfig.minGroups,
-                  max: GameConfig.maxGroups,
-                  onChanged: _setGroupCount,
-                ),
-                NumberStepper(
-                  label: 'Rondas',
-                  value: _config.rounds,
-                  min: GameConfig.minRounds,
-                  max: GameConfig.maxRounds,
-                  onChanged: (v) =>
-                      setState(() => _config = _config.copyWith(rounds: v)),
-                ),
-                NumberStepper(
-                  label: 'Tiempo por turno',
-                  value: _config.turnDuration.inSeconds,
-                  min: GameConfig.minTurnSeconds,
-                  max: GameConfig.maxTurnSeconds,
-                  step: 15,
-                  format: (v) => '$v s',
-                  onChanged: (v) => setState(
-                    () => _config = _config.copyWith(
-                      turnDuration: Duration(seconds: v),
+    const gap = SizedBox(height: 16);
+    return PlayBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: const Text('Configuración'),
+          leading: BackButton(onPressed: () => context.go(Routes.categories)),
+        ),
+        body: SafeArea(
+          top: false,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+            children: [
+              PlayPanel(
+                child: Wrap(
+                  spacing: 16,
+                  runSpacing: 16,
+                  children: [
+                    NumberStepper(
+                      label: 'Grupos',
+                      value: _names.length,
+                      min: GameConfig.minGroups,
+                      max: GameConfig.maxGroups,
+                      onChanged: _setGroupCount,
                     ),
-                  ),
-                ),
-                NumberStepper(
-                  label: 'Palabras por grupo',
-                  value: _config.wordsPerGroup,
-                  min: GameConfig.minWordsPerGroup,
-                  max: GameConfig.maxWordsPerGroup,
-                  onChanged: (v) => setState(
-                    () => _config = _config.copyWith(wordsPerGroup: v),
-                  ),
-                ),
-              ],
-            ),
-            gap,
-            Text(
-              'Nombres de los grupos',
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
-            const SizedBox(height: 6),
-            Column(
-              children: [
-                for (var i = 0; i < _names.length; i++)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: TextField(
-                      controller: _names[i],
-                      maxLength: 20,
-                      decoration: InputDecoration(
-                        labelText: 'Grupo ${i + 1}',
-                        border: const OutlineInputBorder(),
-                        counterText: '',
+                    NumberStepper(
+                      label: 'Rondas',
+                      value: _config.rounds,
+                      min: GameConfig.minRounds,
+                      max: GameConfig.maxRounds,
+                      onChanged: (v) =>
+                          setState(() => _config = _config.copyWith(rounds: v)),
+                    ),
+                    NumberStepper(
+                      label: 'Tiempo por turno',
+                      value: _config.turnDuration.inSeconds,
+                      min: GameConfig.minTurnSeconds,
+                      max: GameConfig.maxTurnSeconds,
+                      step: 15,
+                      format: (v) => '$v s',
+                      onChanged: (v) => setState(
+                        () => _config = _config.copyWith(
+                          turnDuration: Duration(seconds: v),
+                        ),
                       ),
                     ),
-                  ),
-              ],
-            ),
-            gap,
-            OptionSelector<WordSource>(
-              label: 'Origen de las palabras',
-              options: WordSource.values,
-              selected: _config.wordSource,
-              labelOf: (o) => o.label,
-              lockReasonOf: (o) => o.available ? null : 'Próximamente',
-              onSelected: (o) =>
-                  setState(() => _config = _config.copyWith(wordSource: o)),
-            ),
-            gap,
-            OptionSelector<ScoringMode>(
-              label: 'Puntuación',
-              options: ScoringMode.values,
-              selected: _config.scoringMode,
-              labelOf: (o) => o.label,
-              description: _config.scoringMode.description,
-              onSelected: (o) =>
-                  setState(() => _config = _config.copyWith(scoringMode: o)),
-            ),
-            gap,
-            OptionSelector<HitMode>(
-              label: 'Cómo marcar los aciertos',
-              options: HitMode.values,
-              selected: _config.hitMode,
-              labelOf: (o) => o.label,
-              lockReasonOf: (o) => o.available ? null : 'Próximamente',
-              onSelected: (o) =>
-                  setState(() => _config = _config.copyWith(hitMode: o)),
-            ),
-            gap,
-            OptionSelector<VideoResolution>(
-              label: 'Resolución del video',
-              options: VideoResolution.values,
-              selected: _config.resolution,
-              labelOf: (o) => o.label,
-              lockReasonOf: (o) => o.premium && !premium ? 'Premium' : null,
-              description: 'Si tu celular no soporta la resolución elegida, se usa la más cercana.',
-              onSelected: (o) =>
-                  setState(() => _config = _config.copyWith(resolution: o)),
-            ),
-            const SizedBox(height: 32),
-            FilledButton.icon(
-              icon: const Icon(Icons.arrow_forward),
-              label: const Text('Continuar'),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(52),
+                    NumberStepper(
+                      label: 'Palabras por grupo',
+                      value: _config.wordsPerGroup,
+                      min: GameConfig.minWordsPerGroup,
+                      max: GameConfig.maxWordsPerGroup,
+                      onChanged: (v) => setState(
+                        () => _config = _config.copyWith(wordsPerGroup: v),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              onPressed: _continue,
-            ),
-          ],
+              gap,
+              PlayPanel(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Nombres de los grupos',
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    const SizedBox(height: 10),
+                    for (var i = 0; i < _names.length; i++)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: TextField(
+                          controller: _names[i],
+                          maxLength: 20,
+                          decoration: InputDecoration(
+                            labelText: 'Grupo ${i + 1}',
+                            counterText: '',
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              gap,
+              PlayPanel(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    OptionSelector<ScoringMode>(
+                      label: 'Puntuación',
+                      options: ScoringMode.values,
+                      selected: _config.scoringMode,
+                      labelOf: (o) => o.label,
+                      description: _config.scoringMode.description,
+                      onSelected: (o) => setState(
+                        () => _config = _config.copyWith(scoringMode: o),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    OptionSelector<HitMode>(
+                      label: 'Cómo marcar los aciertos',
+                      options: HitMode.values,
+                      selected: _config.hitMode,
+                      labelOf: (o) => o.label,
+                      lockReasonOf: (o) => o.available ? null : 'Próximamente',
+                      onSelected: (o) => setState(
+                        () => _config = _config.copyWith(hitMode: o),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    OptionSelector<VideoResolution>(
+                      label: 'Resolución del video',
+                      options: VideoResolution.values,
+                      selected: _config.resolution,
+                      labelOf: (o) => o.label,
+                      lockReasonOf: (o) =>
+                          o.premium && !premium ? 'Premium' : null,
+                      description: 'Si tu celular no soporta la resolución elegida, se usa la más cercana.',
+                      onSelected: (o) => setState(
+                        () => _config = _config.copyWith(resolution: o),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                icon: const Icon(Icons.arrow_forward),
+                label: const Text('Continuar'),
+                onPressed: _continue,
+              ),
+            ],
+          ),
         ),
       ),
     );

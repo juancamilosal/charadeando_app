@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/models.dart';
+import '../theme.dart';
 
 /// Lo que ven los demás mientras el jugador tiene el celular en la frente:
 /// la palabra en grande, el tiempo restante y el resultado de cada palabra.
@@ -13,8 +14,8 @@ class WordCard extends StatelessWidget {
     required this.recording,
   });
 
-  static const _hitColor = Color(0xFF2E7D32);
-  static const _passColor = Color(0xFFEF6C00);
+  static const _hitColors = [AppColors.green, Color(0xFF0E9F55)];
+  static const _passColors = [AppColors.orange, AppColors.coral];
 
   final Word word;
   final Duration remaining;
@@ -23,19 +24,20 @@ class WordCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final (background, foreground, text) = switch (feedback) {
-      WordOutcome.hit => (_hitColor, Colors.white, '¡Correcto!'),
-      WordOutcome.pass => (_passColor, Colors.white, 'Paso'),
-      null => (
-        theme.colorScheme.primaryContainer,
-        theme.colorScheme.onPrimaryContainer,
-        word.text,
-      ),
+    final (colors, text) = switch (feedback) {
+      WordOutcome.hit => (_hitColors, '¡Correcto!'),
+      WordOutcome.pass => (_passColors, 'Paso'),
+      null => (AppColors.word, word.text),
     };
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
-      color: background,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: colors,
+        ),
+      ),
       child: SafeArea(
         child: Stack(
           children: [
@@ -47,10 +49,18 @@ class WordCard extends StatelessWidget {
                   child: Text(
                     text,
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.displayLarge?.copyWith(
-                      fontSize: 96,
-                      fontWeight: FontWeight.w900,
-                      color: foreground,
+                    style: const TextStyle(
+                      fontFamily: AppFonts.display,
+                      fontSize: 100,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black26,
+                          blurRadius: 12,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -59,11 +69,23 @@ class WordCard extends StatelessWidget {
             Positioned(
               top: 12,
               right: 16,
-              child: Text(
-                '${remaining.inSeconds}',
-                style: theme.textTheme.headlineLarge?.copyWith(
-                  color: foreground,
-                  fontWeight: FontWeight.bold,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '${remaining.inSeconds}',
+                  style: const TextStyle(
+                    fontFamily: AppFonts.display,
+                    fontSize: 30,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
                 ),
               ),
             ),

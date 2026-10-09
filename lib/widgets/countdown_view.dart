@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../theme.dart';
+import 'play_background.dart';
+
 /// Número grande de la cuenta regresiva antes de cada turno.
 class CountdownView extends StatelessWidget {
   const CountdownView({super.key, required this.value});
@@ -8,9 +11,8 @@ class CountdownView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return ColoredBox(
-      color: theme.colorScheme.primary,
+    return PlayBackground(
+      colors: AppColors.countdown,
       child: Center(
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 250),
@@ -19,10 +21,18 @@ class CountdownView extends StatelessWidget {
           child: Text(
             '$value',
             key: ValueKey(value),
-            style: theme.textTheme.displayLarge?.copyWith(
-              fontSize: 160,
-              fontWeight: FontWeight.w900,
-              color: theme.colorScheme.onPrimary,
+            style: const TextStyle(
+              fontFamily: AppFonts.display,
+              fontSize: 180,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              shadows: [
+                Shadow(
+                  color: Colors.black26,
+                  blurRadius: 16,
+                  offset: Offset(0, 6),
+                ),
+              ],
             ),
           ),
         ),

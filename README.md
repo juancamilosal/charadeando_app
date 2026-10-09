@@ -6,6 +6,12 @@ la cámara frontal graba a los participantes para revivir las risas.
 
 ## Versión 0.1
 
+- Diseño colorido con fondo de gradiente y las fuentes Fredoka y Nunito
+  (licencia OFL, en `assets/fonts`). Los colores no cambian con el modo oscuro
+  del celular.
+- Pantalla de categorías: "Libre" (los grupos escriben las palabras) está
+  disponible; Animales, Países, Películas, Celebridades, Marcas, Deportes y
+  Equipos de fútbol aparecen como "Pronto" hasta tener el backend.
 - Un solo celular, aciertos con movimiento: inclinar hacia abajo es acierto y
   hacia arriba es pasar.
 - La configuración y los resultados se ven en vertical. Al tocar "¡Listo!" la

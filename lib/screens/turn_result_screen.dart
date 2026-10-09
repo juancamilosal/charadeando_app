@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../models/models.dart';
 import '../providers/providers.dart';
 import '../router.dart';
+import '../theme.dart';
+import '../widgets/play_background.dart';
 import '../widgets/scoreboard.dart';
 
 /// Palabras acertadas y pasadas del turno, más los puntajes de todos.
@@ -43,78 +45,100 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
     final game = ref.watch(gameControllerProvider);
     final turn = game.lastTurn;
     if (turn == null) return const Scaffold();
-    final theme = Theme.of(context);
     final mode = game.config.scoringMode;
 
+    const white = TextStyle(
+      color: Colors.white,
+      fontSize: 16,
+      fontWeight: FontWeight.w700,
+    );
     return PopScope(
       canPop: false,
-      child: Scaffold(
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: ListView(
-                    children: [
-                      Text(
-                        'Ronda ${turn.round} de ${game.config.rounds}',
-                        style: theme.textTheme.titleMedium,
-                      ),
-                      Text(
-                        '${game.groups[turn.groupIndex].name}: '
-                        '+${turn.points(mode)} puntos',
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
+      child: PlayBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: ListView(
+                      children: [
+                        Text(
+                          'Ronda ${turn.round} de ${game.config.rounds}',
+                          style: white,
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      if (turn.entries.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8),
-                          child: Text('No se marcó ninguna palabra.'),
+                        Text(
+                          '${game.groups[turn.groupIndex].name}: '
+                          '+${turn.points(mode)} puntos',
+                          style: const TextStyle(
+                            fontFamily: AppFonts.display,
+                            fontSize: 30,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
                         ),
-                      for (final entry in turn.entries)
-                        _EntryTile(entry: entry, mode: mode),
-                      const SizedBox(height: 16),
-                      Text('Puntajes', style: theme.textTheme.titleMedium),
-                      const SizedBox(height: 8),
-                      Scoreboard(
-                        groups: game.groups,
-                        scores: game.scores,
-                        highlight: turn.groupIndex,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                if (turn.videoPath != null) ...[
-                  OutlinedButton.icon(
-                    icon: const Icon(Icons.play_circle_outline),
-                    label: const Text('Ver video'),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(48),
+                        const SizedBox(height: 12),
+                        PlayPanel(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          child: turn.entries.isEmpty
+                              ? const Padding(
+                                  padding: EdgeInsets.all(12),
+                                  child: Text('No se marcó ninguna palabra.'),
+                                )
+                              : Column(
+                                  children: [
+                                    for (final entry in turn.entries)
+                                      _EntryTile(entry: entry, mode: mode),
+                                  ],
+                                ),
+                        ),
+                        const SizedBox(height: 20),
+                        const Text(
+                          'Puntajes',
+                          style: TextStyle(
+                            fontFamily: AppFonts.display,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Scoreboard(
+                          groups: game.groups,
+                          scores: game.scores,
+                          highlight: turn.groupIndex,
+                        ),
+                      ],
                     ),
-                    onPressed: () => context.push(Routes.video),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'El video se borra al continuar. Si lo quieres, guárdalo antes.',
-                    style: theme.textTheme.bodySmall,
-                    textAlign: TextAlign.center,
+                  const SizedBox(height: 12),
+                  if (turn.videoPath != null) ...[
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.play_circle_outline),
+                      label: const Text('Ver video'),
+                      onPressed: () => context.push(Routes.video),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'El video se borra al continuar. Si lo quieres, guárdalo antes.',
+                      style: TextStyle(color: Colors.white, fontSize: 13),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                  FilledButton.icon(
+                    icon: const Icon(Icons.arrow_forward),
+                    label: const Text('Continuar'),
+                    onPressed: _leaving ? null : _continue,
                   ),
-                  const SizedBox(height: 8),
                 ],
-                FilledButton.icon(
-                  icon: const Icon(Icons.arrow_forward),
-                  label: const Text('Continuar'),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(52),
-                  ),
-                  onPressed: _leaving ? null : _continue,
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -136,7 +160,7 @@ class _EntryTile extends StatelessWidget {
       dense: true,
       leading: Icon(
         hit ? Icons.check_circle : Icons.skip_next,
-        color: hit ? Colors.green : Colors.orange,
+        color: hit ? AppColors.green : AppColors.orange,
       ),
       title: Text(
         entry.word.text,

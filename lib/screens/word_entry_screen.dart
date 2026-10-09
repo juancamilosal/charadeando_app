@@ -6,6 +6,8 @@ import '../models/models.dart';
 import '../providers/providers.dart';
 import '../router.dart';
 import '../services/services.dart';
+import '../theme.dart';
+import '../widgets/play_background.dart';
 
 /// Cada grupo, por turnos, escribe las palabras que adivinará su rival.
 /// El texto se oculta al guardarlo para que nadie vea las suyas.
@@ -68,79 +70,99 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
     final author = game.groups[_author];
     final target =
         game.groups[WordService.targetOf(_author, game.groups.length)];
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Palabras de ${author.name}'),
-        leading: BackButton(onPressed: () => context.go(Routes.config)),
-      ),
-      body: SafeArea(
-        child: _handoff
-            ? _HandoffView(
-                author: author.name,
-                target: target.name,
-                onReady: () => setState(() => _handoff = false),
-              )
-            : _entryView(context, game.config.wordsPerGroup, target.name),
+    return PlayBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: Text('Palabras de ${author.name}'),
+          leading: BackButton(onPressed: () => context.go(Routes.config)),
+        ),
+        body: SafeArea(
+          top: false,
+          child: _handoff
+              ? _HandoffView(
+                  author: author.name,
+                  target: target.name,
+                  onReady: () => setState(() => _handoff = false),
+                )
+              : _entryView(context, game.config.wordsPerGroup, target.name),
+        ),
       ),
     );
   }
 
   Widget _entryView(BuildContext context, int required, String target) {
-    final theme = Theme.of(context);
     final enough = _words.length >= required;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             'Escriban palabras o frases para que $target las adivine.',
-            style: theme.textTheme.titleMedium,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 12),
-          TextField(
-            controller: _input,
-            focusNode: _focus,
-            autofocus: true,
-            maxLength: 40,
-            textCapitalization: TextCapitalization.sentences,
-            onSubmitted: (_) => _add(),
-            decoration: InputDecoration(
-              labelText: 'Palabra o frase',
-              border: const OutlineInputBorder(),
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.add_circle),
-                onPressed: _add,
-              ),
-            ),
-          ),
-          Text(
-            '${_words.length} de $required palabras',
-            style: theme.textTheme.titleSmall,
-          ),
-          const SizedBox(height: 8),
           Expanded(
-            child: ListView.builder(
-              itemCount: _words.length,
-              itemBuilder: (context, i) => ListTile(
-                dense: true,
-                leading: const Icon(Icons.visibility_off),
-                title: Text('Palabra ${i + 1}  ••••••'),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  tooltip: 'Borrar',
-                  onPressed: () => setState(() => _words.removeAt(i)),
-                ),
+            child: PlayPanel(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextField(
+                    controller: _input,
+                    focusNode: _focus,
+                    autofocus: true,
+                    maxLength: 40,
+                    textCapitalization: TextCapitalization.sentences,
+                    onSubmitted: (_) => _add(),
+                    decoration: InputDecoration(
+                      labelText: 'Palabra o frase',
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.add_circle),
+                        color: AppColors.purple,
+                        onPressed: _add,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '${_words.length} de $required palabras',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      color: enough ? AppColors.green : AppColors.ink,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: _words.length,
+                      itemBuilder: (context, i) => ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(
+                          Icons.visibility_off,
+                          color: AppColors.purple,
+                        ),
+                        title: Text('Palabra ${i + 1}  ••••••'),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete_outline),
+                          tooltip: 'Borrar',
+                          onPressed: () => setState(() => _words.removeAt(i)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           FilledButton.icon(
             icon: const Icon(Icons.check),
             label: const Text('Listo'),
-            style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(52),
-            ),
             onPressed: enough ? _done : null,
           ),
         ],
@@ -162,20 +184,35 @@ class _HandoffView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Center(
+    return Padding(
+      padding: const EdgeInsets.all(24),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Icon(Icons.edit_note, size: 64, color: theme.colorScheme.primary),
+          const Spacer(),
+          const Icon(Icons.edit_note, size: 96, color: AppColors.yellow),
           const SizedBox(height: 12),
           Text(
             'Le toca escribir a $author',
-            style: theme.textTheme.headlineSmall,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontFamily: AppFonts.display,
+              fontSize: 32,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
           ),
           const SizedBox(height: 8),
-          Text('Que $target no mire la pantalla.'),
-          const SizedBox(height: 24),
+          Text(
+            '¡Que $target no mire la pantalla!',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const Spacer(),
           FilledButton(onPressed: onReady, child: const Text('Empezar')),
         ],
       ),
