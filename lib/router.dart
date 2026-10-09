@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 
 import 'screens/category_screen.dart';
 import 'screens/config_screen.dart';
+import 'screens/directus_test_screen.dart';
 import 'screens/final_result_screen.dart';
 import 'screens/free_mode_screen.dart';
 import 'screens/turn_result_screen.dart';
@@ -20,6 +21,7 @@ abstract final class Routes {
   static const turnResult = '/turn-result';
   static const video = '/video';
   static const finalResult = '/final';
+  static const directusTest = '/directus';
 }
 
 final router = GoRouter(
@@ -35,6 +37,10 @@ final router = GoRouter(
       builder: (_, _) => const TurnResultScreen(),
     ),
     GoRoute(path: Routes.video, builder: (_, _) => const VideoScreen()),
+    GoRoute(
+      path: Routes.directusTest,
+      builder: (_, _) => const DirectusTestScreen(),
+    ),
     GoRoute(
       path: Routes.finalResult,
       builder: (_, _) => const FinalResultScreen(),

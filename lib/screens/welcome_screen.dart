@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../router.dart';
+import '../services/services.dart';
 import '../theme.dart';
 import '../widgets/category_ticker.dart';
 import '../widgets/play_background.dart';
@@ -115,6 +116,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   onPressed: () => context.go(Routes.categories),
                   child: const Text('Listo'),
                 ),
+                if (TestData.enabled) ...[
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.cloud_sync),
+                    label: const Text('Probar Directus'),
+                    onPressed: () => context.go(Routes.directusTest),
+                  ),
+                ],
               ],
             ),
           ),

@@ -8,6 +8,7 @@ export 'game_controller.dart';
 export 'turn_video_controller.dart';
 
 final wordServiceProvider = Provider((ref) => WordService());
+final directusServiceProvider = Provider((ref) => DirectusService());
 final tiltServiceProvider = Provider((ref) => TiltService());
 final videoServiceProvider = Provider((ref) => VideoService());
 final videoRendererProvider = Provider((ref) => VideoRenderer());
