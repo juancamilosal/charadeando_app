@@ -16,14 +16,22 @@ class FreeModeScreen extends ConsumerWidget {
   const FreeModeScreen({super.key});
 
   static const _steps = [
-    (Icons.visibility, AppColors.purple, 'El grupo ve la palabra secreta.'),
+    (
+      Icons.smartphone,
+      AppColors.purple,
+      'Una persona se pone el celular en la frente.',
+    ),
     (
       Icons.record_voice_over,
       AppColors.turquoise,
-      'Todos la describen sin decirla.',
+      'Su grupo ve la palabra y la describe sin decirla.',
     ),
-    (Icons.psychology_alt, AppColors.orange, 'Una persona intenta adivinarla.'),
-    (Icons.sync, AppColors.green, '¡Acierta y el turno rota!'),
+    (
+      Icons.psychology_alt,
+      AppColors.orange,
+      'Intenta adivinar todas las que pueda.',
+    ),
+    (Icons.swap_vert, AppColors.green, 'Abajo si acierta, arriba para pasar.'),
   ];
 
   void _manual(BuildContext context, WidgetRef ref) {
@@ -91,8 +99,9 @@ class FreeModeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 6),
               const Text(
-                'El grupo ve la palabra secreta y la describe. Una persona '
-                'adivina… ¡y con cada acierto el turno rota a alguien más!',
+                'Una persona se pone el celular en la frente y su grupo le '
+                'describe la palabra sin decirla. ¡Adivinen todas las que '
+                'puedan antes de que se acabe el tiempo!',
                 textAlign: TextAlign.center,
                 style: white,
               ),
