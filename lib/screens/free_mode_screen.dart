@@ -62,7 +62,6 @@ class FreeModeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final config = ref.watch(gameControllerProvider).config;
     const white = TextStyle(
       color: Colors.white,
       fontSize: 16,
@@ -145,10 +144,9 @@ class FreeModeScreen extends ConsumerWidget {
                     'Ustedes escriben sus propias palabras antes de empezar. '
                     '¡Perfecto para bromas internas y palabras de la familia!',
                 suggestion:
-                    'Sugerencia: unas ${config.suggestedWordsPerGroup} '
-                    'palabras por grupo para ${config.rounds} rondas de '
-                    '${config.turnDuration.inSeconds} s. '
-                    'Lo ajustan en la configuración.',
+                    'Entre más rondas y más tiempo por turno, más palabras '
+                    'se juegan. Ustedes eligen cuántas escribir en la '
+                    'configuración.',
                 onTap: () => _manual(context, ref),
               ),
               const SizedBox(height: 12),

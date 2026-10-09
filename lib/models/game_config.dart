@@ -74,9 +74,9 @@ class GameConfig {
   const GameConfig({
     this.turnDuration = const Duration(seconds: 60),
     this.rounds = 3,
-    this.groups = const [Group('Grupo 1'), Group('Grupo 2')],
+    this.groups = const [Group(''), Group('')],
     this.wordSource = WordSource.groups,
-    this.wordsPerGroup = 30,
+    this.wordsPerGroup = 10,
     this.scoringMode = ScoringMode.perWord,
     this.hitMode = HitMode.tilt,
     this.resolution = VideoResolution.hd,
@@ -111,9 +111,14 @@ class GameConfig {
   /// Palabras que un grupo suele resolver en un turno.
   int get wordsPerTurn => (turnDuration.inSeconds / secondsPerWord).ceil();
 
-  /// Palabras que conviene escribir por grupo para que alcancen todas las
-  /// rondas.
-  int get suggestedWordsPerGroup => wordsPerTurn * rounds;
+  /// Palabras que un grupo alcanza a resolver en todas sus rondas.
+  int get wordsNeededPerGroup => wordsPerTurn * rounds;
+
+  /// Rondas completas que alcanzan con las palabras elegidas.
+  int get roundsCovered => wordsPerGroup ~/ wordsPerTurn;
+
+  /// Palabras de toda la partida, sumando las de todos los grupos.
+  int get totalWords => wordsPerGroup * groupCount;
 
   GameConfig copyWith({
     Duration? turnDuration,
