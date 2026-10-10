@@ -22,22 +22,43 @@ class _VideoScreenState extends ConsumerState<VideoScreen> {
   bool _saving = false;
   bool _saved = false;
 
+  /// Por qué no se pudo reproducir el video, si falló.
+  String? _error;
+
   String? get _path => ref.read(turnVideoProvider).path;
 
   @override
   void initState() {
     super.initState();
     final path = _path;
-    if (path == null) return;
-    final player = VideoPlayerController.file(File(path));
+    if (path == null) {
+      _error = 'No hay video de este turno.';
+      return;
+    }
+    _open(path);
+  }
+
+  Future<void> _open(String path) async {
+    final file = File(path);
+    final size = await file.exists() ? await file.length() : -1;
+    debugPrint('[Charadeando] Video: $path ($size bytes)');
+    if (size <= 0) {
+      if (mounted) setState(() => _error = 'El archivo del video no existe.');
+      return;
+    }
+    final player = VideoPlayerController.file(file);
     _player = player;
-    player.initialize().then((_) {
-      if (!mounted) return;
-      player
-        ..setLooping(true)
-        ..play();
-      setState(() {});
-    });
+    try {
+      await player.initialize();
+    } catch (e) {
+      debugPrint('[Charadeando] No se pudo reproducir el video: $e');
+      if (mounted) setState(() => _error = 'No se pudo reproducir el video.');
+      return;
+    }
+    if (!mounted) return;
+    await player.setLooping(true);
+    await player.play();
+    setState(() {});
   }
 
   @override
@@ -90,7 +111,20 @@ class _VideoScreenState extends ConsumerState<VideoScreen> {
               child: GestureDetector(
                 onTap: _togglePlay,
                 child: Center(
-                  child: ready
+                  child: _error != null
+                      ? Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Text(
+                            _error!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        )
+                      : ready
                       ? AspectRatio(
                           aspectRatio: player.value.aspectRatio,
                           child: VideoPlayer(player),
