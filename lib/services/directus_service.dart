@@ -5,12 +5,14 @@ import 'package:http/http.dart' as http;
 
 import '../models/models.dart';
 
-/// Consulta las palabras guardadas en Directus.
+/// Pide palabras al azar a la ruta del juego en Directus
+/// (`POST /juego/palabras`, extensión en `server/directus-extensions`).
+/// La colección no es pública: la ruta solo lee, entrega un subconjunto con
+/// tope y limita las peticiones por IP.
 class DirectusService {
-  DirectusService({http.Client? client, String? baseUrl, String? collection})
+  DirectusService({http.Client? client, String? baseUrl})
     : _client = client ?? http.Client(),
-      baseUrl = baseUrl ?? defaultBaseUrl,
-      collection = collection ?? defaultCollection;
+      baseUrl = baseUrl ?? defaultBaseUrl;
 
   /// Se puede cambiar al compilar con
   /// `--dart-define=DIRECTUS_URL=https://...`.
@@ -19,29 +21,47 @@ class DirectusService {
     defaultValue: 'https://charadeando.vps.webdock.cloud',
   );
 
-  /// Se puede cambiar al compilar con
-  /// `--dart-define=DIRECTUS_COLLECTION=...`.
-  static const defaultCollection = String.fromEnvironment(
-    'DIRECTUS_COLLECTION',
-    defaultValue: 'palabras',
-  );
+  /// Máximo de palabras por petición. Debe coincidir con `MAX_COUNT` de la
+  /// extensión.
+  static const maxCount = 450;
+
+  /// Máximo de ids ya jugados que se pueden excluir. Debe coincidir con
+  /// `MAX_EXCLUDE` de la extensión.
+  static const maxExclude = 500;
 
   static const _timeout = Duration(seconds: 15);
 
   final http.Client _client;
   final String baseUrl;
-  final String collection;
 
-  Uri get wordsUri => Uri.parse(
-    '$baseUrl/items/$collection',
-  ).replace(queryParameters: {'fields': 'id,frase,categoria', 'limit': '-1'});
+  Uri get wordsUri => Uri.parse('$baseUrl/juego/palabras');
 
-  Future<List<RemoteWord>> fetchWords() async {
+  /// Trae [count] palabras al azar, de [category] si se indica. Las de
+  /// [exclude] (ids ya jugados) solo se repiten si no alcanzan las demás.
+  Future<List<RemoteWord>> fetchWords({
+    required int count,
+    String? category,
+    Iterable<String> exclude = const [],
+  }) async {
     final uri = wordsUri;
-    debugPrint('[Directus] GET $uri');
+    final excluded = exclude.toList();
+    final payload = jsonEncode({
+      'n': count.clamp(1, maxCount),
+      'categoria': ?category,
+      'excluir': excluded.sublist(
+        excluded.length > maxExclude ? excluded.length - maxExclude : 0,
+      ),
+    });
+    debugPrint('[Directus] POST $uri $payload');
     final http.Response response;
     try {
-      response = await _client.get(uri).timeout(_timeout);
+      response = await _client
+          .post(
+            uri,
+            headers: {'Content-Type': 'application/json'},
+            body: payload,
+          )
+          .timeout(_timeout);
     } on Exception catch (e) {
       debugPrint('[Directus] Sin respuesta: $e');
       throw DirectusException(null, 'No se pudo conectar con el servidor: $e');
@@ -76,10 +96,10 @@ class DirectusException implements Exception {
   /// Explicación en palabras simples de los errores más comunes.
   String get hint => switch (statusCode) {
     null => 'Revisa la conexión a internet y que Directus esté encendido.',
-    401 || 403 =>
-      'Directus negó el acceso. Dale permiso de lectura al rol Public '
-          'sobre la colección.',
-    404 => 'No existe la colección. Revisa que el nombre sea correcto.',
+    404 =>
+      'No existe la ruta /juego/palabras. Revisa que la extensión '
+          'charadeando-juego esté instalada en Directus.',
+    429 => 'Demasiadas consultas seguidas. Espera un minuto.',
     _ => 'Directus respondió con un error.',
   };
 

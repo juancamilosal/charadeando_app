@@ -1,0 +1,13 @@
+{
+  "name": "directus-extension-charadeando-juego",
+  "description": "Ruta pública que entrega palabras al azar para las partidas de Charadeando.",
+  "version": "1.0.0",
+  "type": "module",
+  "keywords": ["directus", "directus-extension", "directus-endpoint"],
+  "directus:extension": {
+    "type": "endpoint",
+    "path": "index.js",
+    "source": "index.js",
+    "host": "^11.0.0"
+  }
+}

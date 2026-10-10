@@ -63,7 +63,10 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
     final names = [for (final g in TestData.config.groups) g.name];
     _setGroupCount(names.length);
     setState(() {
-      _config = TestData.config.copyWith(resolution: _config.resolution);
+      _config = TestData.config.copyWith(
+        resolution: _config.resolution,
+        wordSource: _config.wordSource,
+      );
       for (var i = 0; i < names.length; i++) {
         _names[i].text = names[i];
       }
@@ -85,7 +88,9 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
     ref
         .read(gameControllerProvider.notifier)
         .configure(_config.copyWith(groups: groups));
-    context.go(Routes.words);
+    context.go(
+      _config.wordSource == WordSource.random ? Routes.autoWords : Routes.words,
+    );
   }
 
   void _update(GameConfig config) => setState(() => _config = config);
@@ -93,6 +98,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   @override
   Widget build(BuildContext context) {
     final premium = ref.watch(premiumUnlockedProvider);
+    final automatic = _config.wordSource == WordSource.random;
     const gap = SizedBox(height: 14);
     return PlayBackground(
       child: Scaffold(
@@ -136,13 +142,18 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                 icon: Icons.edit_note,
                 title: 'Palabras por grupo',
                 children: [
-                  const Text(
-                    'Antes de empezar, cada grupo escribirá sus propias '
-                    'palabras o frases secretas para los demás grupos. '
-                    '¿Cuántas pondrá cada grupo?',
+                  Text(
+                    automatic
+                        ? 'Nosotros ponemos las palabras al empezar la '
+                              'partida. ¿Cuántas jugará cada grupo?'
+                        : 'Antes de empezar, cada grupo escribirá sus propias '
+                              'palabras o frases secretas para los demás '
+                              'grupos. ¿Cuántas pondrá cada grupo?',
                   ),
                   ConfigRow(
-                    label: 'Palabras o frases por grupo',
+                    label: automatic
+                        ? 'Palabras por grupo'
+                        : 'Palabras o frases por grupo',
                     child: NumberStepper(
                       value: _config.wordsPerGroup,
                       min: GameConfig.minWordsPerGroup,
@@ -159,7 +170,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                       color: Color(0xFF6B5A86),
                     ),
                   ),
-                  const WordsReminder(),
+                  if (!automatic) const WordsReminder(),
                 ],
               ),
               gap,

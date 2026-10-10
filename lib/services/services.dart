@@ -5,4 +5,5 @@ export 'test_data.dart';
 export 'tilt_service.dart';
 export 'video_renderer.dart';
 export 'video_service.dart';
+export 'word_bank.dart';
 export 'word_service.dart';

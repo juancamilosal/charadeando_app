@@ -34,26 +34,13 @@ class FreeModeScreen extends ConsumerWidget {
     (Icons.swap_vert, AppColors.green, 'Abajo si acierta, arriba para pasar.'),
   ];
 
-  void _manual(BuildContext context, WidgetRef ref) {
+  void _choose(BuildContext context, WidgetRef ref, WordSource source) {
     ref
         .read(gameControllerProvider.notifier)
         .configure(
-          ref
-              .read(gameControllerProvider)
-              .config
-              .copyWith(wordSource: WordSource.groups),
+          ref.read(gameControllerProvider).config.copyWith(wordSource: source),
         );
     context.go(Routes.config);
-  }
-
-  void _automatic(BuildContext context) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(
-          content: Text('Muy pronto pondremos las palabras por ustedes.'),
-        ),
-      );
   }
 
   /// Llena la partida con valores de prueba y va directo al primer turno.
@@ -156,7 +143,7 @@ class FreeModeScreen extends ConsumerWidget {
                     'Entre más rondas y más tiempo por turno, más palabras '
                     'se juegan. Ustedes eligen cuántas escribir en la '
                     'configuración.',
-                onTap: () => _manual(context, ref),
+                onTap: () => _choose(context, ref, WordSource.groups),
               ),
               const SizedBox(height: 12),
               _ModeCard(
@@ -166,8 +153,10 @@ class FreeModeScreen extends ConsumerWidget {
                 description:
                     'Nosotros ponemos las palabras por ustedes. Solo denle '
                     'comenzar y a jugar sin pensar en nada más.',
-                comingSoon: true,
-                onTap: () => _automatic(context),
+                suggestion:
+                    'Necesitan internet al empezar. Si no hay, se juega con '
+                    'las últimas palabras descargadas.',
+                onTap: () => _choose(context, ref, WordSource.random),
               ),
               if (TestData.enabled) ...[
                 const SizedBox(height: 24),
@@ -242,7 +231,6 @@ class _ModeCard extends StatelessWidget {
     required this.description,
     required this.onTap,
     this.suggestion,
-    this.comingSoon = false,
   });
 
   final IconData icon;
@@ -250,7 +238,6 @@ class _ModeCard extends StatelessWidget {
   final String title;
   final String description;
   final String? suggestion;
-  final bool comingSoon;
   final VoidCallback onTap;
 
   @override
@@ -320,27 +307,21 @@ class _ModeCard extends StatelessWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: comingSoon
-                      ? const Color(0xFFEDE7F6)
-                      : color.withValues(alpha: 0.15),
+                  color: color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      comingSoon ? Icons.lock_clock : Icons.circle,
-                      size: comingSoon ? 14 : 8,
-                      color: comingSoon ? AppColors.ink : color,
-                    ),
+                    Icon(Icons.circle, size: 8, color: color),
                     const SizedBox(width: 6),
                     Text(
-                      comingSoon ? 'PRONTO' : 'ELEGIR',
+                      'ELEGIR',
                       style: TextStyle(
                         fontSize: 12,
                         letterSpacing: 1,
                         fontWeight: FontWeight.w800,
-                        color: comingSoon ? AppColors.ink : color,
+                        color: color,
                       ),
                     ),
                   ],

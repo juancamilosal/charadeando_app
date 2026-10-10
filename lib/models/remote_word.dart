@@ -1,3 +1,5 @@
+import 'word.dart';
+
 /// Palabra guardada en Directus.
 class RemoteWord {
   const RemoteWord({
@@ -11,6 +13,14 @@ class RemoteWord {
     frase: '${json['frase'] ?? ''}',
     categoria: '${json['categoria'] ?? ''}',
   );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'frase': frase,
+    'categoria': categoria,
+  };
+
+  Word toWord() => Word(frase, category: categoria, id: id);
 
   final String id;
   final String frase;

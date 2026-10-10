@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import 'screens/auto_words_screen.dart';
 import 'screens/category_screen.dart';
 import 'screens/config_screen.dart';
 import 'screens/directus_test_screen.dart';
@@ -17,6 +18,7 @@ abstract final class Routes {
   static const freeMode = '/libre';
   static const config = '/config';
   static const words = '/words';
+  static const autoWords = '/auto-words';
   static const turn = '/turn';
   static const turnResult = '/turn-result';
   static const video = '/video';
@@ -31,6 +33,7 @@ final router = GoRouter(
     GoRoute(path: Routes.freeMode, builder: (_, _) => const FreeModeScreen()),
     GoRoute(path: Routes.config, builder: (_, _) => const ConfigScreen()),
     GoRoute(path: Routes.words, builder: (_, _) => const WordEntryScreen()),
+    GoRoute(path: Routes.autoWords, builder: (_, _) => const AutoWordsScreen()),
     GoRoute(path: Routes.turn, builder: (_, _) => const TurnScreen()),
     GoRoute(
       path: Routes.turnResult,

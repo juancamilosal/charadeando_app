@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import '../theme.dart';
 
 /// Categorías de palabras. "Libre" es la que ya existe: los grupos escriben
-/// las palabras. Las demás llegan cuando esté el backend de palabras.
+/// las palabras o se descargan de todas las categorías. Las demás llegan
+/// cuando haya palabras suficientes de cada una.
 enum GameCategory {
   free(
     'Libre',
-    'Ustedes escriben las palabras. Funciona sin internet.',
+    'Escriban sus palabras o nosotros las ponemos.',
     Icons.edit_note,
     AppColors.yellow,
     available: true,

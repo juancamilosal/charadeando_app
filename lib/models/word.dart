@@ -1,9 +1,13 @@
 /// Una palabra o frase que el jugador debe adivinar.
 class Word {
-  Word(String text, {this.category}) : text = _normalize(text);
+  Word(String text, {this.category, this.id}) : text = _normalize(text);
 
   final String text;
   final String? category;
+
+  /// Id en Directus de las palabras automáticas. No cuenta para comparar
+  /// palabras.
+  final String? id;
 
   /// Cantidad de palabras de la frase. Cuentan también artículos y
   /// conectores: "El Rey León" tiene 3.

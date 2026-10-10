@@ -39,8 +39,9 @@ enum HitMode {
 
 /// De dónde salen las palabras de la partida.
 enum WordSource {
-  /// Entregadas por el backend de palabras. Requiere internet.
-  random('Aleatorias', available: false),
+  /// Entregadas por Directus al empezar la partida. Sin internet se usan
+  /// las últimas que se descargaron.
+  random('Automáticas', available: true),
 
   /// Cada grupo escribe las palabras de sus rivales. Funciona sin internet.
   groups('Escritas por los grupos', available: true);
@@ -96,7 +97,8 @@ class GameConfig {
   final List<Group> groups;
   final WordSource wordSource;
 
-  /// Palabras que cada grupo escribe para su rival.
+  /// Palabras que juega cada grupo: las que escriben sus rivales, o las
+  /// que se descargan en el modo automático.
   final int wordsPerGroup;
   final ScoringMode scoringMode;
   final HitMode hitMode;

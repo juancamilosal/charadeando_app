@@ -9,6 +9,9 @@ export 'turn_video_controller.dart';
 
 final wordServiceProvider = Provider((ref) => WordService());
 final directusServiceProvider = Provider((ref) => DirectusService());
+final wordBankProvider = Provider(
+  (ref) => WordBank(ref.watch(directusServiceProvider)),
+);
 final tiltServiceProvider = Provider((ref) => TiltService());
 final videoServiceProvider = Provider((ref) => VideoService());
 final videoRendererProvider = Provider((ref) => VideoRenderer());

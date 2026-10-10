@@ -44,4 +44,11 @@ void main() {
     expect(WordService.rivalsLabel(1, two), 'A');
     expect(WordService.rivalsLabel(2, three), 'los demás grupos');
   });
+
+  test('reparte las palabras automáticas sin repetir', () {
+    final decks = service.decksFromWords(words('w', 10), 3);
+    expect(decks.map((d) => d.length), [4, 3, 3]);
+    final all = decks.expand((d) => d).toList();
+    expect(all.toSet(), hasLength(10));
+  });
 }

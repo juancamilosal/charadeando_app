@@ -9,8 +9,8 @@ import '../services/services.dart';
 import '../theme.dart';
 import '../widgets/play_background.dart';
 
-/// Pantalla de prueba: trae las palabras de Directus y muestra la frase y
-/// la categoría de cada una, o el error si algo falla.
+/// Pantalla de prueba: pide 20 palabras al azar a la ruta del juego y
+/// muestra la frase y la categoría de cada una, o el error si algo falla.
 class DirectusTestScreen extends ConsumerStatefulWidget {
   const DirectusTestScreen({super.key});
 
@@ -28,7 +28,7 @@ class _DirectusTestScreenState extends ConsumerState<DirectusTestScreen> {
   }
 
   void _load() {
-    _words = ref.read(directusServiceProvider).fetchWords();
+    _words = ref.read(directusServiceProvider).fetchWords(count: 20);
   }
 
   @override
@@ -53,7 +53,7 @@ class _DirectusTestScreenState extends ConsumerState<DirectusTestScreen> {
           child: FutureBuilder<List<RemoteWord>>(
             future: _words,
             builder: (context, snapshot) {
-              final header = _UrlCard(url: '${service.wordsUri}');
+              final header = _UrlCard(url: 'POST ${service.wordsUri}');
               if (snapshot.connectionState != ConnectionState.done) {
                 return ListView(
                   padding: const EdgeInsets.all(20),

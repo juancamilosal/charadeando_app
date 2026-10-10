@@ -13,7 +13,14 @@ la cámara frontal graba a los participantes para revivir las risas.
   disponible; Animales, Países, Películas, Celebridades, Marcas, Deportes y
   Equipos de fútbol aparecen como "Pronto" hasta tener el backend.
 - Libre explica con una animación cómo se juega y deja elegir entre palabras
-  manuales (con la sugerencia de cuántas escribir) y automáticas ("Pronto").
+  manuales (con la sugerencia de cuántas escribir) y automáticas.
+- Palabras automáticas: al empezar la partida se descargan de una vez todas
+  las que hacen falta (palabras por grupo × grupos, con 50 % de margen por
+  las que se pasan) desde la ruta `POST /juego/palabras` de Directus. Durante
+  el turno no se usa internet; si a un grupo no le van a alcanzar, se piden
+  más en los resultados del turno. El celular recuerda las últimas 500
+  palabras jugadas para no repetirlas, y guarda el último lote para jugar sin
+  internet. Ver `server/README.md`.
   El botón "Ingresar valores de prueba" llena una partida de ejemplo y va
   directo al turno; se oculta con `TestData.enabled = false` antes de publicar.
 - Un solo celular, aciertos con movimiento: inclinar hacia abajo es acierto y
@@ -38,8 +45,8 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Si la app sale a segundo plano durante el turno, el juego se pausa y al
   volver sigue donde quedó. El video se graba por partes y se unen al final.
 
-Pendiente para siguientes versiones: palabras aleatorias desde el backend de
-palabras, modo celular juez con Realtime Database, compras, anuncios y marca de
+Pendiente para siguientes versiones: categorías con palabras de Directus,
+Firebase App Check, modo celular juez con Realtime Database, compras, anuncios y marca de
 agua.
 
 ## Estructura
@@ -53,6 +60,7 @@ lib/
 ├── widgets/     piezas reutilizables
 ├── router.dart  rutas (go_router)
 └── main.dart
+server/          extensión de Directus con la ruta del juego
 ```
 
 ## Desarrollo

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../models/models.dart';
 import '../providers/providers.dart';
 import '../router.dart';
+import '../services/services.dart';
 import '../theme.dart';
 import '../widgets/play_background.dart';
 import '../widgets/scoreboard.dart';
@@ -26,6 +27,7 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
     if (_leaving) return;
     setState(() => _leaving = true);
     await ref.read(turnVideoProvider.notifier).discard();
+    await _refillWords();
     ref.read(gameControllerProvider.notifier).advance();
     if (!mounted) return;
     context.go(
@@ -33,6 +35,30 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
           ? Routes.finalResult
           : Routes.turn,
     );
+  }
+
+  /// En el modo automático, si a algún grupo no le alcanzan las palabras
+  /// para sus turnos restantes, pide más. Se hace entre turnos para no
+  /// depender de internet mientras se juega; sin conexión se sigue con las
+  /// que haya.
+  Future<void> _refillWords() async {
+    final game = ref.read(gameControllerProvider);
+    if (game.config.wordSource != WordSource.random) return;
+    final controller = ref.read(gameControllerProvider.notifier);
+    final needed = controller.wordsNeeded();
+    final total = needed.fold(0, (a, b) => a + b);
+    if (total == 0) return;
+    final words = await ref
+        .read(wordBankProvider)
+        .more(
+          total.clamp(1, DirectusService.maxCount),
+          game.decks
+              .expand((d) => d)
+              .followedBy(
+                game.turns.expand((t) => t.entries.map((e) => e.word)),
+              ),
+        );
+    if (words.isNotEmpty) controller.addWords(words, needed);
   }
 
   @override
@@ -129,7 +155,7 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
                   ],
                   FilledButton.icon(
                     icon: const Icon(Icons.arrow_forward),
-                    label: const Text('Continuar'),
+                    label: Text(_leaving ? 'Un momento…' : 'Continuar'),
                     onPressed: _leaving ? null : _continue,
                   ),
                 ],

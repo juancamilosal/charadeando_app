@@ -90,4 +90,29 @@ void main() {
     play(hits: 1);
     expect((state().round, state().groupIndex), (2, 1));
   });
+
+  test('las palabras automáticas se reparten parejo entre los grupos', () {
+    controller().startWithWords(words('w', 7));
+    expect(state().decks.map((d) => d.length), [4, 3]);
+    expect((state().round, state().groupIndex), (1, 0));
+  });
+
+  test('calcula cuántas palabras faltan y las agrega entre turnos', () {
+    controller().startWithWords(words('w', 6));
+    final deck = state().currentDeck;
+    controller().finishTurn(
+      Turn(
+        round: 1,
+        groupIndex: 0,
+        entries: [for (final w in deck.take(2)) TurnEntry(w, WordOutcome.hit)],
+      ),
+    );
+    // A: le queda 1 turno y 1 palabra; B: 2 turnos y 3 palabras, a 2 por turno.
+    final needed = controller().wordsNeeded();
+    expect(needed, [1, 1]);
+
+    controller().addWords(words('x', 2), needed);
+    expect(state().decks.map((d) => d.length), [2, 4]);
+    expect(controller().wordsNeeded(), [0, 0]);
+  });
 }

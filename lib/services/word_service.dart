@@ -28,6 +28,17 @@ class WordService {
     return decks;
   }
 
+  /// Reparte las palabras automáticas entre los grupos, por turnos, para
+  /// que los mazos queden del mismo tamaño.
+  List<List<Word>> decksFromWords(List<Word> words, int groupCount) {
+    final decks = List.generate(groupCount, (_) => <Word>[]);
+    final shuffled = [...words]..shuffle(_random);
+    for (var i = 0; i < shuffled.length; i++) {
+      decks[i % groupCount].add(shuffled[i]);
+    }
+    return decks;
+  }
+
   /// Cómo nombrar a los rivales de [author]: el nombre del grupo si solo hay
   /// uno, o "los demás grupos" si hay varios.
   static String rivalsLabel(int author, List<Group> groups) =>

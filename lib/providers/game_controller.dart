@@ -97,10 +97,17 @@ class GameController extends Notifier<GameState> {
     state = state.copyWith(writtenWords: written);
   }
 
-  void start() {
-    final decks = ref
-        .read(wordServiceProvider)
-        .decksFromGroupWords(state.writtenWords);
+  /// Empieza con las palabras que escribieron los grupos.
+  void start() => startWithDecks(
+    ref.read(wordServiceProvider).decksFromGroupWords(state.writtenWords),
+  );
+
+  /// Empieza con las palabras automáticas, repartidas entre los grupos.
+  void startWithWords(List<Word> words) => startWithDecks(
+    ref.read(wordServiceProvider).decksFromWords(words, state.groups.length),
+  );
+
+  void startWithDecks(List<List<Word>> decks) {
     state = _firstPlayableFrom(
       state.copyWith(decks: decks, turns: const [], round: 1, groupIndex: 0),
     );
@@ -115,6 +122,39 @@ class GameController extends Notifier<GameState> {
     final decks = [...state.decks];
     decks[turn.groupIndex] = deck;
     state = state.copyWith(decks: decks, turns: [...state.turns, turn]);
+  }
+
+  /// Palabras que le faltarían a cada grupo para sus turnos restantes,
+  /// calculando con el turno en que más palabras se usaron. Sirve para
+  /// pedir más palabras automáticas entre turnos.
+  List<int> wordsNeeded() {
+    if (state.turns.isEmpty) return List.filled(state.groups.length, 0);
+    final perTurn = state.turns
+        .map((t) => t.entries.length)
+        .reduce((a, b) => a > b ? a : b);
+    final needed = <int>[];
+    for (var g = 0; g < state.groups.length; g++) {
+      final turnsLeft =
+          state.config.rounds - state.round + (g > state.groupIndex ? 1 : 0);
+      final missing = turnsLeft * perTurn - state.decks[g].length;
+      needed.add(missing > 0 ? missing : 0);
+    }
+    return needed;
+  }
+
+  /// Agrega [words] a los mazos, llenando primero lo que le falta a cada
+  /// grupo según [needed].
+  void addWords(List<Word> words, List<int> needed) {
+    final decks = [
+      for (final d in state.decks) [...d],
+    ];
+    var next = 0;
+    for (var g = 0; g < decks.length && next < words.length; g++) {
+      for (var i = 0; i < needed[g] && next < words.length; i++) {
+        decks[g].add(words[next++]);
+      }
+    }
+    state = state.copyWith(decks: decks);
   }
 
   /// Pasa al siguiente grupo, o a la siguiente ronda cuando ya jugaron todos.

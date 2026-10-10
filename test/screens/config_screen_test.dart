@@ -24,6 +24,10 @@ Future<ProviderContainer> pumpConfig(
     routes: [
       GoRoute(path: Routes.config, builder: (_, _) => const ConfigScreen()),
       GoRoute(path: Routes.words, builder: (_, _) => const Text('Palabras')),
+      GoRoute(
+        path: Routes.autoWords,
+        builder: (_, _) => const Text('Descargando'),
+      ),
     ],
   );
   await tester.pumpWidget(
@@ -91,5 +95,22 @@ void main() {
       await tester.pump();
     }
     expect(find.textContaining('Nombre del grupo'), findsNWidgets(6));
+  });
+
+  testWidgets('con palabras automáticas no pide escribirlas', (tester) async {
+    await pumpConfig(
+      tester,
+      config: const GameConfig(wordSource: WordSource.random),
+    );
+    expect(
+      find.textContaining('Nosotros ponemos las palabras'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Recuerda: mientras más rondas'), findsNothing);
+
+    await tester.tap(find.text('Rellenar datos de prueba'));
+    await tester.pump();
+    await tapContinue(tester);
+    expect(find.text('Descargando'), findsOneWidget);
   });
 }
