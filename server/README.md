@@ -123,7 +123,7 @@ y `contents`. Lee el texto de Gemini en `respuesta` (o `texto`, `text`,
 
 ## Palabras iniciales
 
-`palabras_iniciales.json` tiene 1.000 palabras revisadas para empezar, cada
+`palabras/iniciales.json` tiene 1.000 palabras revisadas para empezar, cada
 una con `frase`, `categoria` y `dificultad`:
 
 ```json
@@ -139,8 +139,8 @@ una con `frase`, `categoria` y `dificultad`:
 - No hay frases repetidas ni variantes de una misma idea dentro de cada
   categoría.
 
-`palabras_libre.json` tiene 200 elementos con la categoría `LIBRE`. Se
-importa igual.
+`palabras/libre_AAAA-MM-DD.json` son tandas de 200 elementos con la
+categoría `LIBRE`, una por fecha. Se importan igual.
 
 Regla para la categoría `LIBRE`: no son palabras sueltas sino **frases** de
 1 a 4 palabras que describen una acción, situación o emoción para actuar,
@@ -159,5 +159,16 @@ Para importarlas en Directus:
    `dificultad` (tipo texto, interfaz desplegable con `FACIL`, `NORMAL` y
    `DIFICIL`).
 2. En **Contenido → palabras**, abrir el panel lateral **Importar / Exportar**
-   e importar `palabras_iniciales.json`. El archivo no trae `id`: Directus lo
-   crea.
+   e importar el archivo. El archivo no trae `id`: Directus lo crea.
+
+Para crear una tanda nueva de `LIBRE`, se guarda como
+`palabras/libre_AAAA-MM-DD.json` y se valida contra todas las anteriores:
+
+```sh
+python3 server/palabras/validar_libre.py server/palabras/libre_AAAA-MM-DD.json
+```
+
+El script revisa el formato, que las frases tengan de 1 a 4 palabras, que
+ninguna repita ni sea variante de otra tanda y que ningún verbo o palabra
+importante aparezca más de 3 veces. Si encuentra algo, lo lista y termina
+con error.
