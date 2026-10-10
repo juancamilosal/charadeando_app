@@ -1,0 +1,1002 @@
+[
+  {
+    "frase": "Espantapájaros",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Pirata",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Princesa",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Dinosaurio",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Gigante",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Extraterrestre",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Vampiro",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Bruja",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Sirena",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Unicornio",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Dragón",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Zombi",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Momia",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Superhéroe",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Vaquero",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Ninja",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Caballero",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Reina",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Arcoíris",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Muñeco de nieve",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Nube",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Tormenta",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Fuego",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Árbol de Navidad",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Santa Claus",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Halloween",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Fiesta",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Boda",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Picnic",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Campamento",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Fogata",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Carpa",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Mascota",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Bebé",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Abuelo",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Gemelos",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Novios",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Semáforo",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Ambulancia",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Camión",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Cohete",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Ovni",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Tesoro",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Diamante",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Moneda",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Billete",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Disfraz",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Máscara",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Confeti",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Bandera",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Trofeo",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Medalla",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Silbato",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Karaoke",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Concierto",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Violín",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Piano",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Flauta",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Trompeta",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Maracas",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Tobogán",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Casita del árbol",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Chiste",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Sorpresa",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Pesadilla",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Aplauso",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Mariachi",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Ola mexicana",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Hada madrina",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Frankenstein",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Drácula",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Mickey Mouse",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Bob Esponja",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Pikachu",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Mario Bros",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Caperucita Roja",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "El Chavo del 8",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Bart Simpson",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Cuerda floja",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Lonchera",
+    "categoria": "LIBRE",
+    "dificultad": "FACIL"
+  },
+  {
+    "frase": "Montura",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Rueda de la fortuna",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Carrusel",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Trampolín",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Fuegos artificiales",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Alfombra voladora",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Varita mágica",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Bola de cristal",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Capa de invisibilidad",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Caja fuerte",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Cofre",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Huella digital",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Contraseña",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Wifi",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Emoji",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Meme",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Videojuego",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Realidad virtual",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Dron",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Autógrafo",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Alfombra roja",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Paparazzi",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Telenovela",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Reality show",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Noticiero",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Pronóstico del clima",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Eclipse",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Huracán",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Terremoto",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Avalancha",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Granizo",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Relámpago",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Cascada",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Oasis",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Iceberg",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Arrecife de coral",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Cupido",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Pie grande",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "La Llorona",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Sherlock Holmes",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Robin Hood",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Cleopatra",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Napoleón",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Mona Lisa",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Don Quijote",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Rapunzel",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Tío Rico",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Chapulín Colorado",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Condorito",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Mafalda",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Sonic",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Pac-Man",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Acordeón",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Megáfono",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Podio",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Genio",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Luna de miel",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Cuento de hadas",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Sillas musicales",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Escondite",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Piedra papel o tijera",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Pirámide humana",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Mímica",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Conga",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Limbo",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Mimo",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Titiritero",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Marioneta",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Hombre bala",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Equilibrista",
+    "categoria": "LIBRE",
+    "dificultad": "NORMAL"
+  },
+  {
+    "frase": "Déjà vu",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Nostalgia",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Karma",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Eco",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Sombra",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Gravedad",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Agujero negro",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Viaje en el tiempo",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Teletransportación",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Hipnosis",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Telepatía",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Espejismo",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Efecto dominó",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Lluvia de ideas",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Horóscopo",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Superstición",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Trabalenguas",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Adivinanza",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Giro inesperado",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Spoiler",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Aurora boreal",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Géiser",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Glaciar",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Cráter",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Tsunami",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Neblina",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Chupacabras",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Pulgarcito",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Ricitos de Oro",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Matrioska",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Origami",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Grafiti",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Tatuaje",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Piercing",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Jet lag",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Insomnio",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Amnesia",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Claustrofobia",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Vértigo",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Calambre",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Cápsula del tiempo",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Mensaje secreto",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Lenguaje de señas",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Código morse",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Salto bungee",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Caída libre",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Cuarentena",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Horario de verano",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Año bisiesto",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  },
+  {
+    "frase": "Luna llena",
+    "categoria": "LIBRE",
+    "dificultad": "DIFICIL"
+  }
+]

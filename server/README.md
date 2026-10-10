@@ -139,6 +139,11 @@ una con `frase`, `categoria` y `dificultad`:
 - No hay frases repetidas ni variantes de una misma idea dentro de cada
   categoría.
 
+`palabras_libre.json` tiene 200 palabras más con la categoría `LIBRE`: de
+cualquier tema (personajes, situaciones, fenómenos, juegos…), con las mismas
+reglas que tenían las palabras de Gemini y sin repetir ni ser variantes de
+las 1.000 anteriores. Se importa igual.
+
 Para importarlas en Directus:
 
 1. En **Configuración → Modelo de datos → palabras**, crear el campo
