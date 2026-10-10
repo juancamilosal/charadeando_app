@@ -87,7 +87,20 @@ Todo en la terminal del servidor.
      https://charadeando.vps.webdock.cloud/items/palabras
    ```
 
+## Gemini
+
+La app pide las palabras primero al flujo de Directus
+`POST /flows/trigger/2d91a34a-b82c-4f97-9e2f-12154ba86323`, con el cuerpo
+de Gemini (`systemInstruction` y `contents`). La app acepta como respuesta
+la lista de textos directa, envuelta en `data`, o la respuesta cruda de
+Gemini (`candidates[].content.parts[].text`).
+
 ## Pendiente
+
+- Que el flujo de Gemini arme las instrucciones en el servidor y la app solo
+  mande la cantidad. Hoy el flujo acepta cualquier texto, así que alguien
+  podría usarlo para hacerle cualquier pregunta a Gemini con tu clave.
+- Límite de peticiones para el flujo de Gemini.
 
 - Firebase App Check (Play Integrity / App Attest) para que solo la app
   publicada pueda llamar a la ruta.

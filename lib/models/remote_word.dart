@@ -20,7 +20,12 @@ class RemoteWord {
     'categoria': categoria,
   };
 
-  Word toWord() => Word(frase, category: categoria, id: id);
+  /// Las palabras de Gemini no tienen id ni categoría.
+  Word toWord() => Word(
+    frase,
+    category: categoria.isEmpty ? null : categoria,
+    id: id.isEmpty ? null : id,
+  );
 
   final String id;
   final String frase;

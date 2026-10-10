@@ -123,6 +123,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     label: const Text('Probar Directus'),
                     onPressed: () => context.go(Routes.directusTest),
                   ),
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.auto_awesome),
+                    label: const Text('Probar Gemini'),
+                    onPressed: () => context.go(Routes.geminiTest),
+                  ),
                 ],
               ],
             ),

@@ -24,6 +24,7 @@ abstract final class Routes {
   static const video = '/video';
   static const finalResult = '/final';
   static const directusTest = '/directus';
+  static const geminiTest = '/gemini';
 }
 
 final router = GoRouter(
@@ -43,6 +44,10 @@ final router = GoRouter(
     GoRoute(
       path: Routes.directusTest,
       builder: (_, _) => const DirectusTestScreen(),
+    ),
+    GoRoute(
+      path: Routes.geminiTest,
+      builder: (_, _) => const DirectusTestScreen(gemini: true),
     ),
     GoRoute(
       path: Routes.finalResult,

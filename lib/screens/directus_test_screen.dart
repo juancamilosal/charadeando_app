@@ -9,10 +9,13 @@ import '../services/services.dart';
 import '../theme.dart';
 import '../widgets/play_background.dart';
 
-/// Pantalla de prueba: pide 20 palabras al azar a la ruta del juego y
-/// muestra la frase y la categoría de cada una, o el error si algo falla.
+/// Pantalla de prueba: pide 20 palabras a la ruta del juego de Directus, o
+/// a Gemini si [gemini] es verdadero, y muestra cada una con su categoría, o
+/// el error y la respuesta del servidor si algo falla.
 class DirectusTestScreen extends ConsumerStatefulWidget {
-  const DirectusTestScreen({super.key});
+  const DirectusTestScreen({super.key, this.gemini = false});
+
+  final bool gemini;
 
   @override
   ConsumerState<DirectusTestScreen> createState() => _DirectusTestScreenState();
@@ -28,17 +31,29 @@ class _DirectusTestScreenState extends ConsumerState<DirectusTestScreen> {
   }
 
   void _load() {
-    _words = ref.read(directusServiceProvider).fetchWords(count: 20);
+    _words = widget.gemini
+        ? ref
+              .read(geminiServiceProvider)
+              .fetchWords(20)
+              .then(
+                (words) => [
+                  for (final w in words)
+                    RemoteWord(id: '', frase: w, categoria: 'GEMINI'),
+                ],
+              )
+        : ref.read(directusServiceProvider).fetchWords(count: 20);
   }
 
   @override
   Widget build(BuildContext context) {
-    final service = ref.read(directusServiceProvider);
+    final url = widget.gemini
+        ? ref.read(geminiServiceProvider).flowUrl
+        : '${ref.read(directusServiceProvider).wordsUri}';
     return PlayBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text('Probar Directus'),
+          title: Text(widget.gemini ? 'Probar Gemini' : 'Probar Directus'),
           leading: BackButton(onPressed: () => context.go(Routes.welcome)),
           actions: [
             IconButton(
@@ -53,7 +68,7 @@ class _DirectusTestScreenState extends ConsumerState<DirectusTestScreen> {
           child: FutureBuilder<List<RemoteWord>>(
             future: _words,
             builder: (context, snapshot) {
-              final header = _UrlCard(url: 'POST ${service.wordsUri}');
+              final header = _UrlCard(url: 'POST $url');
               if (snapshot.connectionState != ConnectionState.done) {
                 return ListView(
                   padding: const EdgeInsets.all(20),
@@ -177,9 +192,23 @@ class _ErrorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final directus = error is DirectusException
-        ? error as DirectusException
-        : null;
+    final (int? status, String? hint, String? body) = switch (error) {
+      DirectusException(:final statusCode, :final hint, :final body) => (
+        statusCode,
+        hint,
+        body,
+      ),
+      GeminiException(:final statusCode, :final body) => (
+        statusCode,
+        statusCode == null
+            ? 'Revisa la conexión a internet y que Directus esté encendido.'
+            : 'El flujo de Gemini respondió con un error o con un formato '
+                  'que la app no reconoce.',
+        body,
+      ),
+      _ => (null, null, null),
+    };
+    final known = hint != null;
     return PlayPanel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,9 +219,11 @@ class _ErrorCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  directus?.statusCode == null
+                  !known
+                      ? 'Error'
+                      : status == null
                       ? 'Sin respuesta'
-                      : 'Error ${directus!.statusCode}',
+                      : 'Error $status',
                   style: const TextStyle(
                     fontFamily: AppFonts.display,
                     fontSize: 22,
@@ -204,12 +235,12 @@ class _ErrorCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            directus?.hint ?? 'Ocurrió un error inesperado.',
+            hint ?? 'Ocurrió un error inesperado.',
             style: const TextStyle(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
           SelectableText(
-            directus?.body ?? '$error',
+            body ?? '$error',
             style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
           ),
         ],
