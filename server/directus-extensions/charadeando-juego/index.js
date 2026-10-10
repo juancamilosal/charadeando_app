@@ -56,6 +56,9 @@ const MAX_CREATE = 100;
 /// DirectusService.maxCount.
 const MAX_COUNT = 450;
 
+/// Valores del campo `dificultad` de la colección.
+const DIFICULTADES = ['FACIL', 'NORMAL', 'DIFICIL'];
+
 /// Ids que la app puede pedir excluir (las últimas palabras que jugó).
 const MAX_EXCLUDE = 500;
 
@@ -345,6 +348,11 @@ export default {
         return error(res, 400, '"categoria" no es válida.');
       }
 
+      const dificultad = body.dificultad ?? null;
+      if (dificultad !== null && !DIFICULTADES.includes(dificultad)) {
+        return error(res, 400, `"dificultad" debe ser ${DIFICULTADES.join(', ')}.`);
+      }
+
       const excluir = body.excluir ?? [];
       if (
         !Array.isArray(excluir) ||
@@ -358,6 +366,7 @@ export default {
         const query = () => {
           const q = database(COLLECTION).select('id', 'frase', 'categoria').orderByRaw('random()');
           if (categoria) q.where('categoria', categoria);
+          if (dificultad) q.where('dificultad', dificultad);
           return q;
         };
 

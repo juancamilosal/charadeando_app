@@ -155,8 +155,8 @@ void main() {
     expect(find.text('Descargando'), findsNothing);
     expect(
       find.text(
-        'Elijan la duración del juego, la puntuación y cómo se marcan los '
-        'aciertos.',
+        'Elijan la dificultad, la duración del juego, la puntuación y cómo '
+        'se marcan los aciertos.',
       ),
       findsOneWidget,
     );
@@ -259,5 +259,58 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('Modo TV'), findsNothing);
+  });
+
+  testWidgets('con palabras automáticas hay que elegir la dificultad', (
+    tester,
+  ) async {
+    final container = await pumpConfig(
+      tester,
+      config: const GameConfig(
+        wordSource: WordSource.random,
+        groups: [Group('A'), Group('B')],
+      ),
+    );
+    await tester.tap(find.text('Rellenar datos de prueba'));
+    await tester.pump();
+    final hard = find.text('Difícil');
+    await tester.scrollUntilVisible(
+      hard,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(hard);
+    await tester.pumpAndSettle();
+    await tester.tap(hard);
+    await tester.pump();
+    expect(
+      find.text('Poco conocidas, abstractas o emociones.'),
+      findsOneWidget,
+    );
+
+    await tapContinue(tester);
+    expect(find.text('Descargando'), findsOneWidget);
+    expect(
+      container.read(gameControllerProvider).config.difficulty,
+      Difficulty.hard,
+    );
+  });
+
+  testWidgets('con palabras manuales no se pide dificultad', (tester) async {
+    await pumpConfig(tester);
+    expect(find.text('Dificultad'), findsNothing);
+  });
+
+  testWidgets('una categoría muestra su nombre en las palabras', (
+    tester,
+  ) async {
+    await pumpConfig(
+      tester,
+      config: const GameConfig(
+        wordSource: WordSource.random,
+        category: GameCategory.animals,
+      ),
+    );
+    expect(find.text('Palabras: Animales'), findsOneWidget);
   });
 }

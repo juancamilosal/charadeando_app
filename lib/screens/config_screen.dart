@@ -50,6 +50,9 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   ScoringMode? _scoring;
   HitMode? _hitMode;
 
+  /// Dificultad de las palabras automáticas. Las manuales no tienen.
+  Difficulty? _difficulty;
+
   /// Si juegan con el televisor. Solo se pregunta con palabras manuales.
   bool? _withTv;
 
@@ -63,6 +66,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
 
   /// Lo que falta elegir, para el aviso al tocar "Continuar".
   List<String> get _missingChoices => [
+    if (_automatic && _difficulty == null) 'la dificultad',
     if (_automatic && _gameEnd == null) 'la duración del juego',
     if (!_automatic && _withTv == null) 'si juegan con el televisor',
     if (_scoring == null) 'la puntuación',
@@ -95,6 +99,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
       _config = TestData.config.copyWith(
         resolution: _config.resolution,
         wordSource: _config.wordSource,
+        category: _config.category,
       );
       for (var i = 0; i < names.length; i++) {
         _names[i].text = names[i];
@@ -103,6 +108,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
       _scoring = _config.scoringMode;
       _hitMode = _config.hitMode;
       _withTv ??= false;
+      _difficulty ??= Difficulty.normal;
       _showErrors = false;
     });
   }
@@ -133,6 +139,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
             gameEnd: _gameEnd,
             scoringMode: _scoring,
             hitMode: _tvMode ? HitMode.tv : _hitMode,
+            difficulty: _automatic ? _difficulty : null,
           ),
         );
     context.go(
@@ -169,7 +176,13 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text('Configuración'),
-          leading: BackButton(onPressed: () => context.go(Routes.freeMode)),
+          leading: BackButton(
+            onPressed: () => context.go(
+              _config.category == GameCategory.free
+                  ? Routes.freeMode
+                  : Routes.categories,
+            ),
+          ),
         ),
         body: SafeArea(
           top: false,
@@ -204,6 +217,8 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
               gap,
               if (automatic) ...[
                 _autoWordsSection(),
+                gap,
+                _difficultySection(),
                 gap,
                 _durationSection(),
                 gap,
@@ -397,13 +412,34 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
     );
   }
 
+  /// Fácil, normal o difícil: qué palabras se traen de la categoría.
+  Widget _difficultySection() {
+    return ConfigSection(
+      icon: Icons.speed,
+      title: 'Dificultad',
+      children: [
+        OptionSelector<Difficulty>(
+          label: '¿Qué tan difíciles las quieren?',
+          options: Difficulty.values,
+          selected: _difficulty,
+          labelOf: (o) => o.label,
+          description: _difficulty?.description,
+          errorText: _choiceError(_difficulty),
+          onSelected: (o) => setState(() => _difficulty = o),
+        ),
+      ],
+    );
+  }
+
   /// Cuántas palabras automáticas se juegan en total.
   Widget _autoWordsSection() {
     final perGroup = _config.autoWordsPerGroup;
     final leftover = _config.autoWordCount - perGroup * _config.groupCount;
     return ConfigSection(
-      icon: Icons.auto_awesome,
-      title: 'Palabras',
+      icon: _config.category.icon,
+      title: _config.category == GameCategory.free
+          ? 'Palabras'
+          : 'Palabras: ${_config.category.label}',
       children: [
         const Text(
           'Nosotros ponemos las palabras al empezar la partida. ¿Cuántas '

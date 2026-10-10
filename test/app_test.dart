@@ -39,7 +39,7 @@ void main() {
 
     await tester.tap(find.text('Listo'));
     await settle(tester);
-    expect(find.text('Pronto'), findsNWidgets(7));
+    expect(find.text('Pronto'), findsNothing);
 
     await tester.tap(find.text('Libre'));
     await settle(tester);

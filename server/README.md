@@ -32,7 +32,7 @@ Directus 11 con PostgreSQL y Redis, desplegado con Coolify en el VPS.
 Cuerpo de `/juego/palabras` (todo opcional salvo `n`):
 
 ```json
-{ "n": 45, "categoria": "ANIMAL", "excluir": ["id1", "id2"] }
+{ "n": 45, "categoria": "ANIMALES", "dificultad": "FACIL", "excluir": ["id1", "id2"] }
 ```
 
 Respuesta de las dos rutas:

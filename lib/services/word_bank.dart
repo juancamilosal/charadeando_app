@@ -42,19 +42,26 @@ class WordBank {
   final Future<Directory> Function() _directory;
   final Random _random;
 
-  /// Trae [count] palabras nuevas. Sin internet usa el último lote guardado;
-  /// si tampoco hay lote, lanza el error de Directus.
-  Future<WordBatch> load(int count, {String? category}) async {
+  /// Trae [count] palabras nuevas de [category] y [difficulty] (códigos de
+  /// Directus). Sin internet usa el último lote guardado de esa misma
+  /// categoría y dificultad; si no hay, lanza el error de Directus.
+  Future<WordBatch> load(
+    int count, {
+    String? category,
+    String? difficulty,
+  }) async {
     final stored = await _read();
+    final cacheKey = '${category ?? ''}/${difficulty ?? ''}';
     final List<RemoteWord> fetched;
     try {
       fetched = await _directus.fetchWords(
         count: count,
         category: category,
+        difficulty: difficulty,
         exclude: stored.history,
       );
     } on DirectusException catch (e) {
-      if (stored.cache.isEmpty) rethrow;
+      if (stored.cache.isEmpty || stored.cacheKey != cacheKey) rethrow;
       debugPrint('[WordBank] Sin conexión, se usa el último lote: $e');
       final cache = [...stored.cache]..shuffle(_random);
       return WordBatch([
@@ -73,6 +80,7 @@ class WordBank {
             if (w.id.isNotEmpty) w.id,
         ]),
         cache: batch,
+        cacheKey: cacheKey,
       ),
     );
     return WordBatch([for (final w in batch) w.toWord()], offline: false);
@@ -106,6 +114,7 @@ class WordBank {
           for (final w in json['lote'] as List)
             RemoteWord.fromJson(w as Map<String, dynamic>),
         ],
+        cacheKey: '${json['loteDe'] ?? ''}',
       );
     } catch (e) {
       // Un archivo dañado no debe impedir jugar.
@@ -122,6 +131,7 @@ class WordBank {
         jsonEncode({
           'vistas': stored.history,
           'lote': [for (final w in stored.cache) w.toJson()],
+          'loteDe': stored.cacheKey,
         }),
       );
     } catch (e) {
@@ -131,10 +141,18 @@ class WordBank {
 }
 
 class _Stored {
-  const _Stored({this.history = const [], this.cache = const []});
+  const _Stored({
+    this.history = const [],
+    this.cache = const [],
+    this.cacheKey = '',
+  });
 
   /// Ids de Directus de las últimas palabras jugadas.
   final List<String> history;
 
   final List<RemoteWord> cache;
+
+  /// Categoría y dificultad del último lote ("ANIMALES/FACIL"), para no
+  /// jugar sin internet con palabras de otra categoría.
+  final String cacheKey;
 }

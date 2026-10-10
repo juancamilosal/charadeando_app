@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 
+import 'category.dart';
 import 'group.dart';
 
 /// Cómo se suman los puntos de una palabra acertada.
@@ -71,6 +72,22 @@ enum WordSource {
   final bool available;
 }
 
+/// Dificultad de las palabras automáticas. Las palabras escritas por los
+/// grupos no tienen dificultad.
+enum Difficulty {
+  easy('Fácil', 'FACIL', 'Palabras comunes y fáciles de actuar.'),
+  normal('Normal', 'NORMAL', 'Menos comunes o con más detalle.'),
+  hard('Difícil', 'DIFICIL', 'Poco conocidas, abstractas o emociones.');
+
+  const Difficulty(this.label, this.code, this.description);
+
+  final String label;
+
+  /// Valor del campo `dificultad` en Directus.
+  final String code;
+  final String description;
+}
+
 /// Cuándo termina la partida.
 enum GameEnd {
   /// Se juegan rondas hasta que no quede ninguna palabra.
@@ -120,7 +137,9 @@ class GameConfig {
     this.turnDuration = const Duration(seconds: 60),
     this.rounds = 3,
     this.groups = const [Group(''), Group('')],
+    this.category = GameCategory.free,
     this.wordSource = WordSource.groups,
+    this.difficulty,
     this.wordsPerGroup = 10,
     this.autoWordCount = 30,
     this.gameEnd = GameEnd.rounds,
@@ -143,7 +162,15 @@ class GameConfig {
   final Duration turnDuration;
   final int rounds;
   final List<Group> groups;
+
+  /// Categoría de las palabras automáticas. Las de una categoría distinta
+  /// de Libre siempre son automáticas.
+  final GameCategory category;
   final WordSource wordSource;
+
+  /// Dificultad de las palabras automáticas, o null si no aplica (palabras
+  /// escritas por los grupos).
+  final Difficulty? difficulty;
 
   /// Palabras que juega cada grupo: las que escriben sus rivales, o las
   /// que se descargan en el modo automático.
@@ -194,7 +221,9 @@ class GameConfig {
     Duration? turnDuration,
     int? rounds,
     List<Group>? groups,
+    GameCategory? category,
     WordSource? wordSource,
+    Difficulty? difficulty,
     int? wordsPerGroup,
     int? autoWordCount,
     GameEnd? gameEnd,
@@ -206,7 +235,9 @@ class GameConfig {
       turnDuration: turnDuration ?? this.turnDuration,
       rounds: rounds ?? this.rounds,
       groups: groups ?? this.groups,
+      category: category ?? this.category,
       wordSource: wordSource ?? this.wordSource,
+      difficulty: difficulty ?? this.difficulty,
       wordsPerGroup: wordsPerGroup ?? this.wordsPerGroup,
       autoWordCount: autoWordCount ?? this.autoWordCount,
       gameEnd: gameEnd ?? this.gameEnd,

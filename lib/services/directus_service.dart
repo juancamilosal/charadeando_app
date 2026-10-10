@@ -35,17 +35,20 @@ class DirectusService {
 
   Uri get wordsUri => Uri.parse('$baseUrl/juego/palabras');
 
-  /// Trae [count] palabras al azar, de [category] si se indica. Las de
+  /// Trae [count] palabras al azar, de [category] y [difficulty] si se
+  /// indican (códigos de Directus, como `ANIMALES` y `FACIL`). Las de
   /// [exclude] (ids ya jugados) solo se repiten si no alcanzan las demás.
   Future<List<RemoteWord>> fetchWords({
     required int count,
     String? category,
+    String? difficulty,
     Iterable<String> exclude = const [],
   }) async {
     final excluded = exclude.toList();
     return _post(wordsUri, {
       'n': count.clamp(1, maxCount),
       'categoria': ?category,
+      'dificultad': ?difficulty,
       'excluir': excluded.sublist(
         excluded.length > maxExclude ? excluded.length - maxExclude : 0,
       ),

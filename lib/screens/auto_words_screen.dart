@@ -48,7 +48,11 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
     try {
       final batch = await ref
           .read(wordBankProvider)
-          .load(AutoWordsScreen.countFor(config));
+          .load(
+            AutoWordsScreen.countFor(config),
+            category: config.category.code,
+            difficulty: config.difficulty?.code,
+          );
       if (!mounted) return;
       if (batch.words.length < config.groupCount) {
         setState(() {

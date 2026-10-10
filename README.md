@@ -9,9 +9,14 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Diseño colorido con fondo de gradiente y las fuentes Fredoka y Nunito
   (licencia OFL, en `assets/fonts`). Los colores no cambian con el modo oscuro
   del celular.
-- Pantalla de categorías: "Libre" (los grupos escriben las palabras) está
-  disponible; Animales, Geografía, Películas, Celebridades, Marcas, Deportes y
-  Equipos de fútbol aparecen como "Pronto" hasta tener el backend.
+- Pantalla de categorías: Libre, Animales, Geografía, Películas,
+  Celebridades, Marcas, Deportes y Equipos de fútbol. Libre deja elegir entre
+  palabras manuales (las escriben los grupos) y automáticas (frases de la
+  categoría LIBRE); las demás van directo a la configuración con palabras
+  automáticas de su categoría.
+- Dificultad (Fácil, Normal o Difícil): se elige en la configuración de las
+  palabras automáticas, en Libre y en todas las categorías, y solo se traen
+  palabras de esa dificultad. Las palabras manuales no tienen dificultad.
 - Libre explica con una animación cómo se juega y deja elegir entre palabras
   manuales (con la sugerencia de cuántas escribir) y automáticas.
 - Palabras automáticas: en la configuración se eligen los grupos, cuántas

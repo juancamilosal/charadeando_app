@@ -1,32 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../models/models.dart';
+import '../providers/providers.dart';
 import '../router.dart';
 import '../theme.dart';
 import '../widgets/play_background.dart';
 
-/// Elección de la categoría. "Libre" lleva a la configuración de siempre;
-/// las demás se habilitan cuando esté el backend de palabras.
-class CategoryScreen extends StatelessWidget {
+/// Elección de la categoría. "Libre" explica el juego y deja elegir entre
+/// palabras manuales y automáticas; las demás van directo a la
+/// configuración con palabras automáticas de su categoría.
+class CategoryScreen extends ConsumerWidget {
   const CategoryScreen({super.key});
 
-  void _choose(BuildContext context, GameCategory category) {
-    if (!category.available) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            content: Text('Muy pronto podrás jugar con ${category.label}.'),
-          ),
-        );
+  void _choose(BuildContext context, WidgetRef ref, GameCategory category) {
+    final controller = ref.read(gameControllerProvider.notifier);
+    final config = ref.read(gameControllerProvider).config;
+    if (category == GameCategory.free) {
+      controller.configure(config.copyWith(category: category));
+      context.go(Routes.freeMode);
       return;
     }
-    context.go(Routes.freeMode);
+    controller.configure(
+      config.copyWith(category: category, wordSource: WordSource.random),
+    );
+    context.go(Routes.config);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return PlayBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -51,7 +54,7 @@ class CategoryScreen extends StatelessWidget {
               _CategoryCard(
                 category: GameCategory.free,
                 large: true,
-                onTap: () => _choose(context, GameCategory.free),
+                onTap: () => _choose(context, ref, GameCategory.free),
               ),
               const SizedBox(height: 24),
               const Text(
@@ -75,7 +78,7 @@ class CategoryScreen extends StatelessWidget {
                   for (final category in GameCategory.themed)
                     _CategoryCard(
                       category: category,
-                      onTap: () => _choose(context, category),
+                      onTap: () => _choose(context, ref, category),
                     ),
                 ],
               ),
@@ -160,36 +163,6 @@ class _CategoryCard extends StatelessWidget {
                       ],
                     ),
             ),
-            if (!category.available)
-              Positioned(
-                top: 10,
-                right: 10,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.lock_clock, size: 14, color: category.color),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Pronto',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          color: category.color,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
           ],
         ),
       ),

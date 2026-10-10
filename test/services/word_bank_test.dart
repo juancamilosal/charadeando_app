@@ -95,4 +95,28 @@ void main() {
     online = false;
     await expectLater(bank().load(5), throwsA(isA<DirectusException>()));
   });
+
+  test('pide la categoría y la dificultad elegidas', () async {
+    await bank().load(2, category: 'LIBRE', difficulty: 'FACIL');
+    expect(collectionRequests.single['categoria'], 'LIBRE');
+    expect(collectionRequests.single['dificultad'], 'FACIL');
+  });
+
+  test(
+    'sin internet solo usa el lote de la misma categoría y dificultad',
+    () async {
+      await bank().load(3, category: 'ANIMALES', difficulty: 'FACIL');
+      online = false;
+      final batch = await bank().load(
+        2,
+        category: 'ANIMALES',
+        difficulty: 'FACIL',
+      );
+      expect(batch.offline, isTrue);
+      await expectLater(
+        bank().load(2, category: 'ANIMALES', difficulty: 'DIFICIL'),
+        throwsA(isA<DirectusException>()),
+      );
+    },
+  );
 }
