@@ -37,9 +37,9 @@ class TvDisplayPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
 
   func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
-    case "abrirAjustes":
-      // iOS no deja abrir "Duplicar pantalla" desde una app: la app explica
-      // cómo hacerlo desde el Centro de control.
+    case "abrirAjustes", "desconectar":
+      // iOS no deja abrir ni detener "Duplicar pantalla" desde una app: la
+      // app explica cómo hacerlo desde el Centro de control.
       result(false)
     default:
       result(FlutterMethodNotImplemented)

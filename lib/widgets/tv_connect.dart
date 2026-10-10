@@ -41,8 +41,12 @@ class TvConnect extends ConsumerWidget {
         ),
         const SizedBox(height: 8),
         OutlinedButton.icon(
-          icon: const Icon(Icons.cast),
-          label: const Text('Conectar las palabras a un televisor'),
+          icon: Icon(connected ? Icons.cancel_presentation : Icons.cast),
+          label: Text(
+            connected
+                ? 'Desconectar TV'
+                : 'Conectar las palabras a un televisor',
+          ),
           // El botón del tema es blanco, para el fondo de color; sobre la
           // tarjeta blanca de la configuración va en morado.
           style: light
@@ -56,7 +60,8 @@ class TvConnect extends ConsumerWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-          onPressed: () => connectTv(context, ref),
+          onPressed: () =>
+              connected ? disconnectTv(context, ref) : connectTv(context, ref),
         ),
       ],
     );
@@ -79,6 +84,32 @@ Future<void> connectTv(BuildContext context, WidgetRef ref) async {
             : 'Desliza hacia abajo los ajustes rápidos, toca "Transmitir '
                   'pantalla" (o "Smart View") y elige tu Chromecast o '
                   'televisor. También sirve un cable HDMI.',
+      ),
+      actions: [
+        FilledButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Entendido'),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Deja de duplicar la pantalla. Si el sistema no lo permite desde la app,
+/// como en iPhone, explica cómo detenerla.
+Future<void> disconnectTv(BuildContext context, WidgetRef ref) async {
+  final done = await ref.read(tvServiceProvider).disconnect();
+  if (done || !context.mounted) return;
+  await showDialog<void>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Desconectar el TV'),
+      content: Text(
+        Platform.isIOS
+            ? 'Abre el Centro de control, toca "Duplicar pantalla" y luego '
+                  '"Detener duplicación".'
+            : 'Desliza hacia abajo los ajustes rápidos y toca "Transmitir '
+                  'pantalla" (o "Smart View") para detener la transmisión.',
       ),
       actions: [
         FilledButton(

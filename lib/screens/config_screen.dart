@@ -53,22 +53,17 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   /// Dificultad de las palabras automáticas. Las manuales no tienen.
   Difficulty? _difficulty;
 
-  /// Si juegan con el televisor. Solo se pregunta con palabras manuales.
-  bool? _withTv;
-
   bool get _automatic => _config.wordSource == WordSource.random;
 
-  /// En el Modo TV el juez marca con botones y no se graba, así que las
-  /// secciones de aciertos y de video no se muestran.
-  bool get _tvMode => !_automatic && _withTv == true;
-
-  bool get _tvConnected => ref.read(tvConnectedProvider).value ?? false;
+  /// Modo TV: el celular está duplicando la pantalla en un televisor. El
+  /// juez marca con botones y no se graba, así que las secciones de
+  /// aciertos y de video no se muestran.
+  bool get _tvMode => ref.read(tvConnectedProvider).value ?? false;
 
   /// Lo que falta elegir, para el aviso al tocar "Continuar".
   List<String> get _missingChoices => [
     if (_automatic && _difficulty == null) 'la dificultad',
     if (_automatic && _gameEnd == null) 'la duración del juego',
-    if (!_automatic && _withTv == null) 'si juegan con el televisor',
     if (_scoring == null) 'la puntuación',
     if (!_tvMode && _hitMode == null) 'cómo se marcan los aciertos',
   ];
@@ -107,7 +102,6 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
       _gameEnd = _config.gameEnd;
       _scoring = _config.scoringMode;
       _hitMode = _config.hitMode;
-      _withTv ??= false;
       _difficulty ??= Difficulty.normal;
       _showErrors = false;
     });
@@ -116,15 +110,11 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   void _continue() {
     final missingNames = _names.any((c) => c.text.trim().isEmpty);
     final missing = _missingChoices;
-    final noTv = _tvMode && !_tvConnected;
-    if (missingNames || missing.isNotEmpty || noTv) {
+    if (missingNames || missing.isNotEmpty) {
       setState(() => _showErrors = true);
       final message = missingNames
           ? 'Escriban el nombre de cada grupo.'
-          : missing.isNotEmpty
-          ? 'Elijan ${_joinList(missing)}.'
-          : 'Conecten el televisor para continuar, o elijan jugar sin '
-                'televisor.';
+          : 'Elijan ${_joinList(missing)}.';
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(SnackBar(content: Text(message)));
@@ -159,17 +149,24 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
     final premium = ref.watch(premiumUnlockedProvider);
     final automatic = _automatic;
     const gap = SizedBox(height: 14);
-    // Avisa cuando el televisor se conecta mientras se configura el Modo TV.
+    // Se vuelve a dibujar al conectar o desconectar el TV, y se avisa.
+    ref.watch(tvConnectedProvider);
     ref.listen(tvConnectedProvider, (previous, next) {
-      if (_tvMode && previous?.value != true && next.value == true) {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            const SnackBar(
-              content: Text('El TV ya está conectado a este celular'),
+      final was = previous?.value ?? false;
+      final now = next.value ?? false;
+      // Solo al cambiar, no con el primer valor al abrir la pantalla.
+      if (previous == null || !previous.hasValue || was == now) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              now
+                  ? 'El TV ya está conectado a este celular: Modo TV activado'
+                  : 'TV desconectado: se juega sin televisor',
             ),
-          );
-      }
+          ),
+        );
     });
     return PlayBackground(
       child: Scaffold(
@@ -284,9 +281,9 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                   ],
                 ),
                 gap,
-                _tvSection(),
-                gap,
               ],
+              _tvSection(),
+              gap,
               ConfigSection(
                 icon: Icons.emoji_events,
                 title: 'Puntuación',
@@ -376,38 +373,21 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
     );
   }
 
-  /// Si juegan con el televisor y si ya está conectado.
+  /// Modo TV: se activa solo si el celular duplica la pantalla en un TV.
   Widget _tvSection() {
-    final connected = ref.watch(tvConnectedProvider).value ?? false;
     return ConfigSection(
       icon: Icons.tv,
       title: 'Modo TV',
       children: [
-        OptionSelector<bool>(
-          label: '¿Juegan con el televisor?',
-          options: const [false, true],
-          selected: _withTv,
-          labelOf: (o) => o ? 'Con televisor' : 'Sin televisor',
-          errorText: _choiceError(_withTv),
-          onSelected: (o) => setState(() => _withTv = o),
+        Text(
+          _tvMode
+              ? 'Modo TV activado: la palabra, el tiempo y el marcador se ven '
+                    'en el TV y un juez marca "Pasar" y "¡Correcto!" con '
+                    'botones. No se graba video.'
+              : 'Duplica la pantalla de tu celular en cualquier TV para jugar '
+                    'en Modo TV: un juez marca con botones y no se graba video.',
         ),
-        if (_tvMode) ...[
-          const Text(
-            'Duplica la pantalla de tu celular en cualquier TV. Un juez '
-            'marca "Pasar" y "¡Correcto!" con botones. No se graba video.',
-          ),
-          const TvConnect(),
-          if (_showErrors && !connected)
-            Text(
-              'Conecten el televisor para continuar, o elijan "Sin '
-              'televisor".',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.error,
-                fontWeight: FontWeight.w700,
-                fontSize: 13,
-              ),
-            ),
-        ],
+        const TvConnect(),
       ],
     );
   }

@@ -26,9 +26,16 @@ class TvService {
 
   /// Abre la lista de televisores del sistema. Devuelve falso si el sistema
   /// no tiene una pantalla para eso (en iPhone se usa el Centro de control).
-  Future<bool> openSettings() async {
+  Future<bool> openSettings() => _call('abrirAjustes');
+
+  /// Deja de duplicar la pantalla, o abre la pantalla del sistema donde se
+  /// detiene. Devuelve falso si no pudo hacer ninguna de las dos (en iPhone
+  /// se detiene desde el Centro de control).
+  Future<bool> disconnect() => _call('desconectar');
+
+  Future<bool> _call(String method) async {
     try {
-      return await _methods.invokeMethod<bool>('abrirAjustes') ?? false;
+      return await _methods.invokeMethod<bool>(method) ?? false;
     } on MissingPluginException {
       return false;
     } on PlatformException {

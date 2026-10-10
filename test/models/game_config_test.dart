@@ -38,7 +38,7 @@ void main() {
         hitMode: HitMode.tv,
         wordSource: WordSource.random,
       ).tvMode,
-      isFalse,
+      isTrue,
     );
   });
 }

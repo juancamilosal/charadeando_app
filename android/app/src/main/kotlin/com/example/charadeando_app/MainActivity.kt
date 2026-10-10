@@ -25,6 +25,7 @@ class MainActivity : FlutterActivity() {
         MethodChannel(messenger, "charadeando/tv").setMethodCallHandler { call, result ->
             when (call.method) {
                 "abrirAjustes" -> result.success(openCastSettings())
+                "desconectar" -> result.success(stopCasting())
                 else -> result.notImplemented()
             }
         }
@@ -33,6 +34,23 @@ class MainActivity : FlutterActivity() {
     override fun onDestroy() {
         tv?.onCancel(null)
         super.onDestroy()
+    }
+
+    // Deja de transmitir a un Chromecast u otra ruta de video. Si no hay
+    // una ruta que la app pueda cortar (HDMI, Miracast de algunas marcas),
+    // abre la pantalla del sistema para detenerla desde ahí.
+    private fun stopCasting(): Boolean {
+        try {
+            val router = getSystemService(Context.MEDIA_ROUTER_SERVICE) as MediaRouter
+            val route = router.getSelectedRoute(MediaRouter.ROUTE_TYPE_LIVE_VIDEO)
+            if (route != router.defaultRoute) {
+                router.selectRoute(MediaRouter.ROUTE_TYPE_LIVE_VIDEO, router.defaultRoute)
+                return true
+            }
+        } catch (e: SecurityException) {
+            // El sistema no deja cambiar la ruta desde la app.
+        }
+        return openCastSettings()
     }
 
     // Abre la lista de pantallas para transmitir del sistema.

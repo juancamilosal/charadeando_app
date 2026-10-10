@@ -32,8 +32,8 @@ enum HitMode {
   ),
 
   /// La palabra se ve en el televisor y un juez del grupo rival marca con
-  /// los botones del celular. Se elige en su propia sección de la
-  /// configuración, solo con palabras manuales.
+  /// los botones del celular. Se activa solo cuando el celular duplica la
+  /// pantalla en un TV, en cualquier categoría.
   tv('Modo TV', null, available: true),
 
   /// Un jugador rival marca desde un segundo celular.
@@ -189,9 +189,9 @@ class GameConfig {
 
   int get groupCount => groups.length;
 
-  /// Verdadero si se juega con el televisor. Solo existe con palabras
-  /// escritas por los grupos.
-  bool get tvMode => hitMode == HitMode.tv && wordSource == WordSource.groups;
+  /// Verdadero si se juega con el televisor: el celular estaba duplicando la
+  /// pantalla al configurar la partida.
+  bool get tvMode => hitMode == HitMode.tv;
 
   /// Si los turnos se graban. En el Modo TV el celular lo tiene el juez,
   /// así que no hay video.

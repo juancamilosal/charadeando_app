@@ -31,17 +31,16 @@ la cámara frontal graba a los participantes para revivir las risas.
   último lote para jugar sin internet. Ver `server/README.md`.
 - Un solo celular, aciertos con movimiento: inclinar hacia abajo es acierto y
   hacia arriba es pasar.
-- Modo TV, solo con palabras manuales: tiene su propia sección en la
-  configuración, con la explicación de cómo funciona. El celular se duplica
-  en el televisor (AirPlay, Chromecast o HDMI) y el TV muestra la palabra, el
-  tiempo, el grupo, el marcador y los resultados del turno. Un juez del grupo
-  rival marca "Pasar" y "¡Correcto!" en el celular donde se configuró el
-  juego. Al elegirlo se ocultan las secciones de aciertos y de video. Sin el
-  televisor conectado no se puede continuar ni empezar el turno; si se
+- Modo TV, en todas las categorías: se activa solo cuando el celular duplica
+  la pantalla en un TV (AirPlay, Chromecast o HDMI). Mientras está activo, la
+  configuración oculta las secciones de aciertos y de video, el TV muestra la
+  palabra, el tiempo, el grupo, el marcador y los resultados del turno, y un
+  juez del grupo rival marca "Pasar" y "¡Correcto!" con botones en el
+  celular. El botón "Desconectar TV" detiene la transmisión (en Android) o
+  explica cómo hacerlo, y todo vuelve a lo normal. Si el televisor se
   desconecta durante el turno, el juego queda en pausa y sigue al volver a
-  conectarlo. La
-  conexión se detecta con código nativo (`MainActivity.kt` y
-  `AppDelegate.swift`); falta probarla con AirPlay y Chromecast reales.
+  conectarlo. La conexión se detecta con código nativo (`MainActivity.kt` y
+  `AppDelegate.swift`).
 - La configuración y los resultados se ven en vertical. Al tocar "¡Listo!" la
   pantalla gira a horizontal para la cuenta regresiva y el juego, y al terminar
   el turno vuelve a vertical.
