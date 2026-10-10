@@ -28,7 +28,11 @@ void main() {
         final body = jsonDecode(request.body) as Map<String, dynamic>;
         if (request.url.path == '/juego/crear') {
           if (!geminiWorks) {
-            return http.Response('{"errors":[{"message":"Gemini"}]}', 502);
+            return http.Response(
+              '{"errors":[{"message":"Gemini no respondió: 429 '
+              'RESOURCE_EXHAUSTED, se acabaron los tokens"}]}',
+              502,
+            );
           }
           final data = [for (final w in geminiWords) word('g-$w', w, 'LIBRE')]
               .take(body['n'] as int)

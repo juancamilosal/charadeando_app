@@ -56,7 +56,9 @@ class WordBank {
     var fromGemini = const <RemoteWord>[];
     try {
       fromGemini = await _directus.createWords(count);
-    } on DirectusException catch (e) {
+    } catch (e) {
+      // Cualquier falla de Gemini (tiempo, tokens, servidor) se cubre con la
+      // colección.
       debugPrint('[WordBank] Gemini falló, se usa la colección: $e');
     }
     bool isRecent(RemoteWord w) =>

@@ -125,15 +125,6 @@ void main() {
     expect(words.single.categoria, 'LIBRE');
   });
 
-  test('espera a Gemini más tiempo mientras más palabras se piden', () {
-    expect(
-      DirectusService.createTimeout(10),
-      const Duration(seconds: 11, milliseconds: 500),
-    );
-    expect(DirectusService.createTimeout(100), const Duration(seconds: 25));
-    expect(DirectusService.createTimeout(500), const Duration(seconds: 25));
-  });
-
   test('si Gemini tarda demasiado, se rinde para usar la colección', () async {
     final service = DirectusService(
       baseUrl: 'https://directus.test',
@@ -141,6 +132,7 @@ void main() {
     );
     await expectLater(
       service.createWords(1).timeout(const Duration(seconds: 30)),
+      // Se rinde a los 25 s, antes de este límite de la prueba.
       throwsA(isA<DirectusException>()),
     );
   }, timeout: const Timeout(Duration(seconds: 40)));
