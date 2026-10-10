@@ -22,9 +22,9 @@ void main() {
     expect(const GameConfig().resolution, VideoResolution.hd);
   });
 
-  test('el Modo TV solo se ofrece con palabras manuales', () {
-    expect(HitMode.optionsFor(WordSource.groups), contains(HitMode.tv));
-    expect(HitMode.optionsFor(WordSource.random), isNot(contains(HitMode.tv)));
+  test('el Modo TV no está entre las opciones de aciertos', () {
+    expect(HitMode.selectable, isNot(contains(HitMode.tv)));
+    expect(HitMode.selectable, contains(HitMode.tilt));
   });
 
   test('el Modo TV no graba video', () {

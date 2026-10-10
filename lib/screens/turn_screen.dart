@@ -92,6 +92,11 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
 
   bool get _tvMode => ref.read(gameControllerProvider).config.tvMode;
 
+  /// Verdadero si es Modo TV y el televisor no está conectado: no se puede
+  /// empezar ni seguir el turno.
+  bool _watchTvMissing() =>
+      _tvMode && !(ref.watch(tvConnectedProvider).value ?? false);
+
   /// Pausa el turno si se desconecta el televisor, y lo retoma con la
   /// cuenta regresiva al volver a conectarlo.
   void _onTvChanged(AsyncValue<bool>? previous, AsyncValue<bool> next) {
@@ -412,6 +417,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
 
   Widget _readyView(BuildContext context, GameState game) {
     final controller = _camera.controller;
+    final tvMissing = _watchTvMissing();
     const white = TextStyle(
       color: Colors.white,
       fontSize: 16,
@@ -490,11 +496,18 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
                 style: white.copyWith(color: AppColors.yellow),
               ),
             ],
+            if (tvMissing) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Conecten el televisor para empezar el turno.',
+                style: white.copyWith(color: AppColors.yellow),
+              ),
+            ],
             const SizedBox(height: 16),
             FilledButton.icon(
               icon: const Icon(Icons.play_arrow),
               label: const Text('¡Listo!'),
-              onPressed: _cameraLoading ? null : _startCountdown,
+              onPressed: _cameraLoading || tvMissing ? null : _startCountdown,
             ),
           ],
         ),
@@ -503,6 +516,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   }
 
   Widget _pausedView(BuildContext context) {
+    final tvMissing = _watchTvMissing();
     return SafeArea(
       child: Center(
         child: SingleChildScrollView(
@@ -537,7 +551,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                if (_tvLost) ...[
+                if (tvMissing) ...[
                   const SizedBox(height: 8),
                   const Text(
                     'Vuelvan a conectarlo y el juego sigue donde quedó.',
@@ -561,11 +575,13 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
                   label: Text(
                     _cameraLoading
                         ? 'Preparando cámara…'
-                        : _tvLost
-                        ? 'Seguir sin televisor'
+                        : tvMissing
+                        ? 'Esperando el televisor…'
                         : 'Continuar',
                   ),
-                  onPressed: _cameraLoading ? null : _startCountdown,
+                  onPressed: _cameraLoading || tvMissing
+                      ? null
+                      : _startCountdown,
                 ),
                 TextButton(
                   onPressed: _confirmExit,

@@ -171,33 +171,72 @@ void main() {
     expect(noVideo, findsOneWidget);
   });
 
-  testWidgets('el Modo TV oculta el video y avisa al conectar el televisor', (
-    tester,
-  ) async {
+  testWidgets('el Modo TV es una sección aparte y no deja seguir sin el '
+      'televisor', (tester) async {
     final tv = StreamController<bool>();
     addTearDown(tv.close);
-    await pumpConfig(tester, tv: tv.stream);
+    final container = await pumpConfig(tester, tv: tv.stream);
     tv.add(false);
+    await tester.tap(find.text('Rellenar datos de prueba'));
+    await tester.pump();
 
-    final tvMode = find.text('Modo TV');
+    final withTv = find.text('Con televisor');
     await tester.scrollUntilVisible(
-      tvMode,
+      withTv,
       200,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
+    expect(find.text('Cómo se marcan los aciertos'), findsOneWidget);
     expect(find.text('Resolución'), findsOneWidget);
 
-    await tester.tap(tvMode);
+    await tester.tap(withTv);
     await tester.pump();
+    expect(find.text('Cómo funciona'), findsOneWidget);
+    expect(find.text('Cómo se marcan los aciertos'), findsNothing);
     expect(find.text('Resolución'), findsNothing);
-    expect(find.text('Sin televisor'), findsOneWidget);
-    expect(find.text('Conectar las palabras a un televisor'), findsOneWidget);
+    expect(find.text('Televisor sin conectar'), findsOneWidget);
+
+    await tapContinue(tester);
+    expect(find.text('Palabras'), findsNothing);
+    expect(
+      find.text(
+        'Conecten el televisor para continuar, o elijan jugar sin '
+        'televisor.',
+      ),
+      findsOneWidget,
+    );
 
     tv.add(true);
     await tester.pump();
-    await tester.pump();
+    // El aviso anterior se cierra antes de mostrar el nuevo.
+    await tester.pumpAndSettle();
     expect(find.text('Conectado al televisor'), findsNWidgets(2));
+    // Se espera a que el aviso se cierre para que no tape el botón.
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+
+    await tapContinue(tester);
+    expect(find.text('Palabras'), findsOneWidget);
+    final config = container.read(gameControllerProvider).config;
+    expect(config.hitMode, HitMode.tv);
+    expect(config.tvMode, isTrue);
+  });
+
+  testWidgets('con palabras manuales hay que elegir si juegan con '
+      'televisor', (tester) async {
+    await pumpConfig(
+      tester,
+      config: const GameConfig(groups: [Group('A'), Group('B')]),
+    );
+    await tapContinue(tester);
+    expect(
+      find.text(
+        'Elijan si juegan con el televisor, la puntuación y cómo se marcan '
+        'los aciertos.',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('con palabras automáticas no se ofrece el Modo TV', (

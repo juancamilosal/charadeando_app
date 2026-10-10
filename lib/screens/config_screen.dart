@@ -6,6 +6,7 @@ import '../models/models.dart';
 import '../providers/providers.dart';
 import '../router.dart';
 import '../services/services.dart';
+import '../theme.dart';
 import '../widgets/config_section.dart';
 import '../widgets/number_stepper.dart';
 import '../widgets/option_selector.dart';
@@ -50,16 +51,23 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   ScoringMode? _scoring;
   HitMode? _hitMode;
 
+  /// Si juegan con el televisor. Solo se pregunta con palabras manuales.
+  bool? _withTv;
+
   bool get _automatic => _config.wordSource == WordSource.random;
 
-  /// En el Modo TV no se graba, así que la opción de video no se muestra.
-  bool get _tvMode => _hitMode == HitMode.tv;
+  /// En el Modo TV el juez marca con botones y no se graba, así que las
+  /// secciones de aciertos y de video no se muestran.
+  bool get _tvMode => !_automatic && _withTv == true;
+
+  bool get _tvConnected => ref.read(tvConnectedProvider).value ?? false;
 
   /// Lo que falta elegir, para el aviso al tocar "Continuar".
   List<String> get _missingChoices => [
     if (_automatic && _gameEnd == null) 'la duración del juego',
+    if (!_automatic && _withTv == null) 'si juegan con el televisor',
     if (_scoring == null) 'la puntuación',
-    if (_hitMode == null) 'cómo se marcan los aciertos',
+    if (!_tvMode && _hitMode == null) 'cómo se marcan los aciertos',
   ];
 
   String? _choiceError(Object? choice) =>
@@ -95,6 +103,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
       _gameEnd = _config.gameEnd;
       _scoring = _config.scoringMode;
       _hitMode = _config.hitMode;
+      _withTv ??= false;
       _showErrors = false;
     });
   }
@@ -102,11 +111,15 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   void _continue() {
     final missingNames = _names.any((c) => c.text.trim().isEmpty);
     final missing = _missingChoices;
-    if (missingNames || missing.isNotEmpty) {
+    final noTv = _tvMode && !_tvConnected;
+    if (missingNames || missing.isNotEmpty || noTv) {
       setState(() => _showErrors = true);
       final message = missingNames
           ? 'Escriban el nombre de cada grupo.'
-          : 'Elijan ${_joinList(missing)}.';
+          : missing.isNotEmpty
+          ? 'Elijan ${_joinList(missing)}.'
+          : 'Conecten el televisor para continuar, o elijan jugar sin '
+                'televisor.';
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(SnackBar(content: Text(message)));
@@ -120,7 +133,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
             groups: groups,
             gameEnd: _gameEnd,
             scoringMode: _scoring,
-            hitMode: _hitMode,
+            hitMode: _tvMode ? HitMode.tv : _hitMode,
           ),
         );
     context.go(
@@ -255,6 +268,8 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                   ],
                 ),
                 gap,
+                _tvSection(),
+                gap,
               ],
               ConfigSection(
                 icon: Icons.emoji_events,
@@ -294,24 +309,23 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                 ),
                 gap,
               ],
-              ConfigSection(
-                icon: Icons.swap_vert,
-                title: 'Aciertos',
-                children: [
-                  OptionSelector<HitMode>(
-                    label: 'Cómo se marcan los aciertos',
-                    options: HitMode.optionsFor(_config.wordSource),
-                    selected: _hitMode,
-                    errorText: _choiceError(_hitMode),
-                    labelOf: (o) => o.label,
-                    lockReasonOf: (o) => o.available ? null : 'Próximamente',
-                    description: _hitMode?.description,
-                    onSelected: (o) => setState(() => _hitMode = o),
-                  ),
-                  if (_tvMode) const TvConnect(),
-                ],
-              ),
               if (!_tvMode) ...[
+                ConfigSection(
+                  icon: Icons.swap_vert,
+                  title: 'Aciertos',
+                  children: [
+                    OptionSelector<HitMode>(
+                      label: 'Cómo se marcan los aciertos',
+                      options: HitMode.selectable,
+                      selected: _hitMode,
+                      errorText: _choiceError(_hitMode),
+                      labelOf: (o) => o.label,
+                      lockReasonOf: (o) => o.available ? null : 'Próximamente',
+                      description: _hitMode?.description,
+                      onSelected: (o) => setState(() => _hitMode = o),
+                    ),
+                  ],
+                ),
                 gap,
                 ConfigSection(
                   icon: Icons.videocam,
@@ -343,6 +357,81 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  /// Si juegan con el televisor, cómo funciona y el botón para conectarlo.
+  Widget _tvSection() {
+    final connected = ref.watch(tvConnectedProvider).value ?? false;
+    const steps = [
+      'Conecten este celular al televisor con AirPlay, Chromecast o un '
+          'cable HDMI.',
+      'En el televisor se ven la palabra, el tiempo, el grupo, el marcador '
+          'y los resultados de cada turno.',
+      'El que adivina se para de espaldas al televisor y su grupo le da '
+          'pistas.',
+      'Un juez del grupo rival tiene este celular y toca "Pasar" o '
+          '"¡Correcto!".',
+      'Si el televisor se desconecta, el juego queda en pausa y sigue al '
+          'volver a conectarlo.',
+      'En el Modo TV no se graba video.',
+    ];
+    return ConfigSection(
+      icon: Icons.tv,
+      title: 'Modo TV',
+      children: [
+        const Text('Jueguen con las palabras en grande en el televisor.'),
+        OptionSelector<bool>(
+          label: '¿Juegan con el televisor?',
+          options: const [false, true],
+          selected: _withTv,
+          labelOf: (o) => o ? 'Con televisor' : 'Sin televisor',
+          errorText: _choiceError(_withTv),
+          onSelected: (o) => setState(() => _withTv = o),
+        ),
+        if (_tvMode) ...[
+          const Text(
+            'Cómo funciona',
+            style: TextStyle(fontWeight: FontWeight.w800),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (var i = 0; i < steps.length; i++)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 22,
+                        child: Text(
+                          '${i + 1}.',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.purple,
+                          ),
+                        ),
+                      ),
+                      Expanded(child: Text(steps[i])),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          const TvConnect(),
+          if (_showErrors && !connected)
+            Text(
+              'Conecten el televisor para continuar, o elijan "Sin '
+              'televisor".',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error,
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+              ),
+            ),
+        ],
+      ],
     );
   }
 

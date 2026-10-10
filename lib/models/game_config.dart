@@ -31,25 +31,14 @@ enum HitMode {
   ),
 
   /// La palabra se ve en el televisor y un juez del grupo rival marca con
-  /// los botones del celular. Solo con palabras manuales.
-  tv(
-    'Modo TV',
-    'Conecten el celular al televisor: allí se ven la palabra, el tiempo y '
-        'el marcador. Un juez del grupo rival marca "Pasar" y "¡Correcto!" '
-        'en este celular. No se graba video.',
-    available: true,
-    manualOnly: true,
-  ),
+  /// los botones del celular. Se elige en su propia sección de la
+  /// configuración, solo con palabras manuales.
+  tv('Modo TV', null, available: true),
 
   /// Un jugador rival marca desde un segundo celular.
   judge('Celular juez', null, available: false);
 
-  const HitMode(
-    this.label,
-    this.description, {
-    required this.available,
-    this.manualOnly = false,
-  });
+  const HitMode(this.label, this.description, {required this.available});
 
   final String label;
   final String? description;
@@ -57,14 +46,11 @@ enum HitMode {
   /// Falso mientras el modo no esté implementado.
   final bool available;
 
-  /// Verdadero si solo se puede elegir con palabras escritas por los grupos.
-  final bool manualOnly;
-
-  /// Modos que se muestran en la configuración según de dónde salen las
-  /// palabras.
-  static List<HitMode> optionsFor(WordSource source) => [
+  /// Modos que se muestran en la sección de aciertos. El Modo TV tiene su
+  /// propia sección.
+  static List<HitMode> get selectable => [
     for (final mode in values)
-      if (!mode.manualOnly || source == WordSource.groups) mode,
+      if (mode != tv) mode,
   ];
 }
 

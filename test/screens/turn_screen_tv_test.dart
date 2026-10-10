@@ -63,6 +63,16 @@ void main() {
         child: MaterialApp.router(routerConfig: router),
       ),
     );
+    tv.add(false);
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Conecten el televisor para empezar el turno.'),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('¡Listo!'));
+    await tester.pump();
+    expect(find.text('3'), findsNothing);
+
     tv.add(true);
     await tester.pumpAndSettle();
     expect(find.text('Conectado al televisor'), findsOneWidget);
@@ -82,6 +92,7 @@ void main() {
     tv.add(false);
     await tester.pumpAndSettle();
     expect(find.text('Se desconectó el televisor'), findsOneWidget);
+    expect(find.text('Esperando el televisor…'), findsOneWidget);
 
     tv.add(true);
     await countdown(tester);
