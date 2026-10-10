@@ -41,6 +41,19 @@ class TvConnect extends ConsumerWidget {
         OutlinedButton.icon(
           icon: const Icon(Icons.cast),
           label: const Text('Conectar las palabras a un televisor'),
+          // El botón del tema es blanco, para el fondo de color; sobre la
+          // tarjeta blanca de la configuración va en morado.
+          style: light
+              ? null
+              : OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.purple,
+                  side: const BorderSide(color: AppColors.purple, width: 2),
+                  textStyle: const TextStyle(
+                    fontFamily: AppFonts.display,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
           onPressed: () => connectTv(context, ref),
         ),
       ],
