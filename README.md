@@ -55,7 +55,17 @@ la cámara frontal graba a los participantes para revivir las risas.
 
 Pendiente para siguientes versiones: categorías con palabras de Directus,
 Firebase App Check, modo celular juez con Realtime Database, compras, anuncios y marca de
-agua.
+agua. Además:
+
+- Modo Reto: algunas palabras salen con una regla extra (solo mímica, sin
+  hablar, con una sola mano, tarareando) y valen más puntos.
+- Dificultad (fácil, media, difícil): nuevo campo `dificultad` en las palabras
+  de Directus. Gemini crea las palabras con la dificultad elegida y se guarda;
+  si Gemini no responde, `POST /juego/palabras` trae de la colección solo
+  palabras de esa dificultad.
+- Modo fiesta para adultos (+18): categoría con candado y aviso de edad.
+- Perfiles de grupo guardados en el celular, para no volver a escribir los
+  nombres, con historial de victorias.
 
 ## Estructura
 
