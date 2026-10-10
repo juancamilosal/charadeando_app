@@ -33,8 +33,12 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Puntuación por palabra (cuentan artículos y conectores) o por frase. Pasar
   no suma ni resta, y las palabras pasadas no vuelven al mazo. Igualdad de
   puntos es empate.
-- Video de cada turno con la cámara frontal, en 720p por defecto. 1080p y la
-  máxima resolución quedan bloqueadas como premium.
+- En la configuración ninguna opción viene elegida (duración, puntuación,
+  aciertos): hay que escogerlas antes de continuar. Solo el video tiene valor
+  por defecto.
+- Video de cada turno con la cámara frontal, en 720p por defecto. También se
+  puede jugar sin grabar. 1080p y la máxima resolución quedan bloqueadas como
+  premium.
 - El video se puede ver, guardar en la galería o compartir. Al continuar al
   siguiente turno se borra del celular; la app no guarda videos en ningún
   otro lugar.

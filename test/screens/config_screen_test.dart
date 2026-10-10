@@ -134,4 +134,33 @@ void main() {
     expect(config.autoWordCount, 35);
     expect(config.gameEnd, GameEnd.wordsRunOut);
   });
+
+  testWidgets('ninguna opción viene elegida, salvo el video', (tester) async {
+    await pumpConfig(
+      tester,
+      config: const GameConfig(
+        wordSource: WordSource.random,
+        groups: [Group('A'), Group('B')],
+      ),
+    );
+    await tapContinue(tester);
+
+    expect(find.text('Descargando'), findsNothing);
+    expect(
+      find.text(
+        'Elijan la duración del juego, la puntuación y cómo se marcan los '
+        'aciertos.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Elijan una opción'), findsWidgets);
+
+    final noVideo = find.text('Jugar sin grabar');
+    await tester.scrollUntilVisible(
+      noVideo,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(noVideo, findsOneWidget);
+  });
 }

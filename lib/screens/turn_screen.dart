@@ -77,7 +77,15 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     _initCamera();
   }
 
+  /// Falso si eligieron jugar sin grabar: no se abre la cámara.
+  bool get _records =>
+      ref.read(gameControllerProvider).config.resolution.records;
+
   Future<void> _initCamera() async {
+    if (!_records) {
+      setState(() => _cameraLoading = false);
+      return;
+    }
     setState(() {
       _cameraLoading = true;
       _cameraError = null;
@@ -111,7 +119,9 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
         }
       case AppLifecycleState.resumed:
         final waiting = _phase == _Phase.ready || _phase == _Phase.paused;
-        if (waiting && !_cameraReady && !_cameraLoading) _initCamera();
+        if (waiting && _records && !_cameraReady && !_cameraLoading) {
+          _initCamera();
+        }
       case AppLifecycleState.detached:
         break;
     }
@@ -399,10 +409,24 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
                         borderRadius: BorderRadius.circular(24),
                         child: CameraPreview(controller),
                       )
-                    : const Icon(
-                        Icons.videocam_off,
-                        size: 72,
-                        color: Colors.white70,
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.videocam_off,
+                            size: 72,
+                            color: Colors.white70,
+                          ),
+                          if (!_records)
+                            const Text(
+                              'Jugando sin grabar',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                        ],
                       ),
               ),
             ),

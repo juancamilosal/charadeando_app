@@ -77,6 +77,8 @@ enum GameEnd {
 
 /// Resolución de los videos de cada turno.
 enum VideoResolution {
+  /// No se abre la cámara ni se graba.
+  off('Jugar sin grabar', null, premium: false),
   normal('Normal (480p)', ResolutionPreset.medium, premium: false),
   hd('HD (720p)', ResolutionPreset.high, premium: false),
   fullHd('Full HD (1080p)', ResolutionPreset.veryHigh, premium: true),
@@ -85,7 +87,11 @@ enum VideoResolution {
   const VideoResolution(this.label, this.preset, {required this.premium});
 
   final String label;
-  final ResolutionPreset preset;
+
+  /// Null si no se graba.
+  final ResolutionPreset? preset;
+
+  bool get records => preset != null;
 
   /// Las resoluciones premium se desbloquean con una compra.
   final bool premium;

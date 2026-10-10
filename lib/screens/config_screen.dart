@@ -40,8 +40,26 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
     super.dispose();
   }
 
-  /// Verdadero después de tocar "Continuar" con algún nombre vacío.
-  bool _showNameErrors = false;
+  /// Verdadero después de tocar "Continuar" con algo sin completar.
+  bool _showErrors = false;
+
+  // Opciones que el usuario debe elegir: ninguna viene marcada. La
+  // resolución del video sí tiene valor por defecto.
+  GameEnd? _gameEnd;
+  ScoringMode? _scoring;
+  HitMode? _hitMode;
+
+  bool get _automatic => _config.wordSource == WordSource.random;
+
+  /// Lo que falta elegir, para el aviso al tocar "Continuar".
+  List<String> get _missingChoices => [
+    if (_automatic && _gameEnd == null) 'la duración del juego',
+    if (_scoring == null) 'la puntuación',
+    if (_hitMode == null) 'cómo se marcan los aciertos',
+  ];
+
+  String? _choiceError(Object? choice) =>
+      _showErrors && choice == null ? 'Elijan una opción' : null;
 
   void _setGroupCount(int count) {
     setState(() {
@@ -70,35 +88,53 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
       for (var i = 0; i < names.length; i++) {
         _names[i].text = names[i];
       }
-      _showNameErrors = false;
+      _gameEnd = _config.gameEnd;
+      _scoring = _config.scoringMode;
+      _hitMode = _config.hitMode;
+      _showErrors = false;
     });
   }
 
   void _continue() {
-    if (_names.any((c) => c.text.trim().isEmpty)) {
-      setState(() => _showNameErrors = true);
+    final missingNames = _names.any((c) => c.text.trim().isEmpty);
+    final missing = _missingChoices;
+    if (missingNames || missing.isNotEmpty) {
+      setState(() => _showErrors = true);
+      final message = missingNames
+          ? 'Escriban el nombre de cada grupo.'
+          : 'Elijan ${_joinList(missing)}.';
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(content: Text('Escriban el nombre de cada grupo.')),
-        );
+        ..showSnackBar(SnackBar(content: Text(message)));
       return;
     }
     final groups = [for (final c in _names) Group(c.text.trim())];
     ref
         .read(gameControllerProvider.notifier)
-        .configure(_config.copyWith(groups: groups));
+        .configure(
+          _config.copyWith(
+            groups: groups,
+            gameEnd: _gameEnd,
+            scoringMode: _scoring,
+            hitMode: _hitMode,
+          ),
+        );
     context.go(
       _config.wordSource == WordSource.random ? Routes.autoWords : Routes.words,
     );
   }
+
+  /// "a", "a y b", "a, b y c".
+  static String _joinList(List<String> items) => items.length == 1
+      ? items.single
+      : '${items.sublist(0, items.length - 1).join(', ')} y ${items.last}';
 
   void _update(GameConfig config) => setState(() => _config = config);
 
   @override
   Widget build(BuildContext context) {
     final premium = ref.watch(premiumUnlockedProvider);
-    final automatic = _config.wordSource == WordSource.random;
+    final automatic = _automatic;
     const gap = SizedBox(height: 14);
     return PlayBackground(
       child: Scaffold(
@@ -213,11 +249,11 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                   OptionSelector<ScoringMode>(
                     label: 'Cómo se cuentan los puntos',
                     options: ScoringMode.values,
-                    selected: _config.scoringMode,
+                    selected: _scoring,
                     labelOf: (o) => o.label,
-                    description: _config.scoringMode.description,
-                    onSelected: (o) =>
-                        _update(_config.copyWith(scoringMode: o)),
+                    description: _scoring?.description,
+                    errorText: _choiceError(_scoring),
+                    onSelected: (o) => setState(() => _scoring = o),
                   ),
                 ],
               ),
@@ -251,10 +287,11 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                   OptionSelector<HitMode>(
                     label: 'Cómo se marcan los aciertos',
                     options: HitMode.values,
-                    selected: _config.hitMode,
+                    selected: _hitMode,
+                    errorText: _choiceError(_hitMode),
                     labelOf: (o) => o.label,
                     lockReasonOf: (o) => o.available ? null : 'Próximamente',
-                    onSelected: (o) => _update(_config.copyWith(hitMode: o)),
+                    onSelected: (o) => setState(() => _hitMode = o),
                   ),
                 ],
               ),
@@ -325,7 +362,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
 
   /// Hasta que se acaben las palabras, o por número de rondas.
   Widget _durationSection() {
-    final byRounds = _config.gameEnd == GameEnd.rounds;
+    final byRounds = _gameEnd == GameEnd.rounds;
     return ConfigSection(
       icon: Icons.timer,
       title: 'Duración del juego',
@@ -333,10 +370,11 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
         OptionSelector<GameEnd>(
           label: '¿Hasta cuándo juegan?',
           options: GameEnd.values,
-          selected: _config.gameEnd,
+          selected: _gameEnd,
           labelOf: (o) => o.label,
-          description: _config.gameEnd.description,
-          onSelected: (o) => _update(_config.copyWith(gameEnd: o)),
+          description: _gameEnd?.description,
+          errorText: _choiceError(_gameEnd),
+          onSelected: (o) => setState(() => _gameEnd = o),
         ),
         if (byRounds)
           ConfigRow(
@@ -393,7 +431,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
             hintText: 'Ej: Los Invencibles',
             counterText: '',
             isDense: true,
-            errorText: _showNameErrors && empty ? 'Escribe un nombre' : null,
+            errorText: _showErrors && empty ? 'Escribe un nombre' : null,
           ),
         ),
       ],

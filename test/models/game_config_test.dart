@@ -14,4 +14,11 @@ void main() {
     expect(GameConfig.maxGroups, 6);
     expect(const GameConfig().wordsPerGroup, 10);
   });
+
+  test('jugar sin grabar no abre la cámara', () {
+    expect(VideoResolution.off.records, isFalse);
+    expect(VideoResolution.off.preset, isNull);
+    expect(VideoResolution.hd.records, isTrue);
+    expect(const GameConfig().resolution, VideoResolution.hd);
+  });
 }

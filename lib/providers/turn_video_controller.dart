@@ -96,7 +96,7 @@ class TurnVideoController extends Notifier<TurnVideoState> {
   }
 
   static int _bitrate(VideoResolution resolution) => switch (resolution) {
-    VideoResolution.normal => 3,
+    VideoResolution.off || VideoResolution.normal => 3,
     VideoResolution.hd => 6,
     VideoResolution.fullHd => 10,
     VideoResolution.max => 16,

@@ -12,16 +12,22 @@ class OptionSelector<T> extends StatelessWidget {
     required this.onSelected,
     this.lockReasonOf,
     this.description,
+    this.errorText,
   });
 
   final String label;
   final List<T> options;
-  final T selected;
+
+  /// Opción elegida, o null si todavía no eligen ninguna.
+  final T? selected;
   final String Function(T option) labelOf;
 
   /// Devuelve por qué la opción está bloqueada, o null si se puede elegir.
   final String? Function(T option)? lockReasonOf;
   final String? description;
+
+  /// Mensaje en rojo, por ejemplo si intentan seguir sin elegir.
+  final String? errorText;
   final ValueChanged<T> onSelected;
 
   @override
@@ -43,6 +49,16 @@ class OptionSelector<T> extends StatelessWidget {
         if (description != null) ...[
           const SizedBox(height: 4),
           Text(description!, style: theme.textTheme.bodySmall),
+        ],
+        if (errorText != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            errorText!,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.error,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ],
       ],
     );

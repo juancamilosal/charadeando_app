@@ -15,6 +15,8 @@ class CameraService {
   /// plugin usa la más cercana disponible.
   Future<void> initialize(VideoResolution resolution) async {
     await dispose();
+    final preset = resolution.preset;
+    if (preset == null) return;
     final cameras = await availableCameras();
     if (cameras.isEmpty) {
       throw CameraException('noCamera', 'El dispositivo no tiene cámara.');
@@ -23,7 +25,7 @@ class CameraService {
       (camera) => camera.lensDirection == CameraLensDirection.front,
       orElse: () => cameras.first,
     );
-    final controller = CameraController(front, resolution.preset);
+    final controller = CameraController(front, preset);
     _controller = controller;
     await controller.initialize();
     await controller.prepareForVideoRecording();
