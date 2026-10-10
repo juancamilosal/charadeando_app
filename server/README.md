@@ -144,6 +144,12 @@ cualquier tema (personajes, situaciones, fenómenos, juegos…), con las mismas
 reglas que tenían las palabras de Gemini y sin repetir ni ser variantes de
 las 1.000 anteriores. Se importa igual.
 
+Regla para la categoría `LIBRE`: sus palabras **pueden repetirse** con las de
+otras categorías (por ejemplo, "Perro" en `ANIMALES` y en `LIBRE`). Lo
+importante es que la lista no sea repetitiva: que no haya muchas palabras
+parecidas ni variantes de la misma idea seguidas ("Astronauta",
+"Astronauta flotando"). En las demás categorías sí se evitan las repetidas.
+
 Para importarlas en Directus:
 
 1. En **Configuración → Modelo de datos → palabras**, crear el campo
