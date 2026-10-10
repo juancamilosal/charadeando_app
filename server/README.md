@@ -121,54 +121,11 @@ y `contents`. Lee el texto de Gemini en `respuesta` (o `texto`, `text`,
 - Firebase App Check (Play Integrity / App Attest) para que solo la app
   publicada pueda llamar a la ruta.
 
-## Palabras iniciales
+## Palabras
 
-`palabras/iniciales.json` tiene 1.000 palabras revisadas para empezar, cada
-una con `frase`, `categoria` y `dificultad`:
+Las palabras del juego no están en este repositorio, que es público. Se
+guardan en el repositorio privado `juancamilosal/palabras-juego`, junto con el
+validador y la instrucción de la rutina que crea tandas nuevas.
 
-```json
-{ "frase": "Perro", "categoria": "ANIMALES", "dificultad": "FACIL" }
-```
-
-- Categorías: `ANIMALES`, `PAISES`, `PELICULAS`, `CELEBRIDADES`, `MARCAS`,
-  `DEPORTES`, `EQUIPOS_FUTBOL`, `OBJETOS`, `COMIDA`, `PROFESIONES`,
-  `ACCIONES` y `LUGARES`.
-- Dificultad: `FACIL` (cosas comunes y fáciles de describir o imitar),
-  `NORMAL` (menos comunes o de varias palabras) y `DIFICIL` (poco conocidas,
-  abstractas o situaciones). En todas hay frases de 1 a 4 palabras.
-- No hay frases repetidas ni variantes de una misma idea dentro de cada
-  categoría.
-
-`palabras/libre_AAAA-MM-DD.json` son tandas de 200 elementos con la
-categoría `LIBRE`, una por fecha. Se importan igual.
-
-Regla para la categoría `LIBRE`: no son palabras sueltas sino **frases** de
-1 a 4 palabras que describen una acción, situación o emoción para actuar,
-por ejemplo "Caminamos muy rápido", "Me duele la cabeza" o "Bailando bajo la
-lluvia". Lo importante es que no sean repetitivas: ninguna frase es variante
-de otra y ningún verbo o palabra importante aparece más de 3 veces.
-
-- `FACIL`: una acción o situación concreta, fácil de actuar.
-- `NORMAL`: una escena con más detalle o con dos ideas a la vez.
-- `DIFICIL`: emociones, estados o ideas abstractas, más difíciles de
-  mostrar.
-
-Para importarlas en Directus:
-
-1. En **Configuración → Modelo de datos → palabras**, crear el campo
-   `dificultad` (tipo texto, interfaz desplegable con `FACIL`, `NORMAL` y
-   `DIFICIL`).
-2. En **Contenido → palabras**, abrir el panel lateral **Importar / Exportar**
-   e importar el archivo. El archivo no trae `id`: Directus lo crea.
-
-Para crear una tanda nueva de `LIBRE`, se guarda como
-`palabras/libre_AAAA-MM-DD.json` y se valida contra todas las anteriores:
-
-```sh
-python3 server/palabras/validar_libre.py server/palabras/libre_AAAA-MM-DD.json
-```
-
-El script revisa el formato, que las frases tengan de 1 a 4 palabras, que
-ninguna repita ni sea variante de otra tanda y que ningún verbo o palabra
-importante aparezca más de 3 veces. Si encuentra algo, lo lista y termina
-con error.
+La colección `palabras` tiene el campo `dificultad` (`FACIL`, `NORMAL`,
+`DIFICIL`) además de `frase` y `categoria`.
