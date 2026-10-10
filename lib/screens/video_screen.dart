@@ -55,6 +55,11 @@ class _VideoScreenState extends ConsumerState<VideoScreen> {
       if (mounted) setState(() => _error = 'No se pudo reproducir el video.');
       return;
     }
+    final video = player.value;
+    debugPrint(
+      '[Charadeando] Video listo: ${video.size.width.toInt()}x'
+      '${video.size.height.toInt()}, ${video.duration.inMilliseconds} ms',
+    );
     if (!mounted) return;
     await player.setLooping(true);
     await player.play();
@@ -125,9 +130,25 @@ class _VideoScreenState extends ConsumerState<VideoScreen> {
                           ),
                         )
                       : ready
-                      ? AspectRatio(
-                          aspectRatio: player.value.aspectRatio,
-                          child: VideoPlayer(player),
+                      ? Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Flexible(
+                              child: AspectRatio(
+                                aspectRatio: player.value.aspectRatio,
+                                child: VideoPlayer(player),
+                              ),
+                            ),
+                            // La barra avanza mientras el video se reproduce.
+                            VideoProgressIndicator(
+                              player,
+                              allowScrubbing: true,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                            ),
+                          ],
                         )
                       : const CircularProgressIndicator(),
                 ),
