@@ -16,14 +16,10 @@ import '../widgets/play_background.dart';
 class AutoWordsScreen extends ConsumerStatefulWidget {
   const AutoWordsScreen({super.key});
 
-  /// Margen sobre las palabras de la partida, porque las que se pasan no
-  /// vuelven al mazo.
-  static const margin = 1.5;
-
-  /// Cuántas palabras pedir para [config].
-  static int countFor(GameConfig config) => (config.totalWords * margin)
-      .ceil()
-      .clamp(config.groupCount, DirectusService.maxCount);
+  /// Cuántas palabras pedir para [config]: las mismas para cada grupo.
+  /// No se piden más durante la partida; si se acaban, termina.
+  static int countFor(GameConfig config) =>
+      config.autoWordsPerGroup * config.groupCount;
 
   @override
   ConsumerState<AutoWordsScreen> createState() => _AutoWordsScreenState();

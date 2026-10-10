@@ -64,27 +64,6 @@ class WordBank {
     }
   }
 
-  /// Trae [count] palabras más durante la partida, sin repetir las de
-  /// [playing]. Devuelve una lista vacía si no hay internet.
-  Future<List<Word>> more(int count, Iterable<Word> playing) async {
-    final stored = await _read();
-    final exclude = {...stored.history, for (final w in playing) ?w.id};
-    try {
-      final words = await _directus.fetchWords(count: count, exclude: exclude);
-      final fresh = [
-        for (final w in words)
-          if (!exclude.contains(w.id)) w,
-      ];
-      await _write(
-        _Stored(history: _remember(stored.history, fresh), cache: stored.cache),
-      );
-      return [for (final w in fresh) w.toWord()];
-    } on DirectusException catch (e) {
-      debugPrint('[WordBank] No se pudieron traer más palabras: $e');
-      return const [];
-    }
-  }
-
   List<String> _remember(List<String> history, List<RemoteWord> words) {
     final ids = [...history, for (final w in words) w.id];
     // Sin duplicados, conservando el orden de la última vez que se jugaron.

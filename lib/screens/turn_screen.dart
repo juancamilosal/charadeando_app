@@ -379,7 +379,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Ronda ${game.round} de ${game.config.rounds}', style: white),
+            Text(game.config.roundLabel(game.round), style: white),
             Text(
               'Turno de ${game.currentGroup.name}',
               style: const TextStyle(

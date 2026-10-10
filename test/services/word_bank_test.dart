@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:charadeando_app/models/models.dart';
 import 'package:charadeando_app/services/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -70,18 +69,5 @@ void main() {
   test('sin internet y sin lote guardado avisa el error', () async {
     online = false;
     await expectLater(bank().load(5), throwsA(isA<DirectusException>()));
-  });
-
-  test('las palabras extra no repiten las que están en juego', () async {
-    final batch = await bank().load(3);
-    final playing = [...batch.words, Word('Escrita', id: 'id3')];
-    final more = await bank().more(2, playing);
-    expect(requests.last['excluir'], containsAll(['id0', 'id1', 'id2', 'id3']));
-    expect(more.map((w) => w.id), ['id4', 'id5']);
-  });
-
-  test('sin internet no hay palabras extra, pero no falla', () async {
-    online = false;
-    expect(await bank().more(5, const []), isEmpty);
   });
 }

@@ -98,7 +98,7 @@ void main() {
   });
 
   testWidgets('con palabras automáticas no pide escribirlas', (tester) async {
-    await pumpConfig(
+    final container = await pumpConfig(
       tester,
       config: const GameConfig(wordSource: WordSource.random),
     );
@@ -106,11 +106,32 @@ void main() {
       find.textContaining('Nosotros ponemos las palabras'),
       findsOneWidget,
     );
+    expect(find.text('Cada grupo tendrá 15 palabras.'), findsOneWidget);
     expect(find.textContaining('Recuerda: mientras más rondas'), findsNothing);
 
     await tester.tap(find.text('Rellenar datos de prueba'));
     await tester.pump();
+    await tester.tap(find.byIcon(Icons.add).at(1));
+    await tester.pump();
+    expect(find.text('35'), findsOneWidget);
+
+    final untilEnd = find.text('Hasta que se acaben las palabras');
+    await tester.scrollUntilVisible(
+      untilEnd,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(untilEnd);
+    await tester.pumpAndSettle();
+    await tester.tap(untilEnd);
+    await tester.pump();
+    expect(find.text('Rondas'), findsNothing);
+
     await tapContinue(tester);
     expect(find.text('Descargando'), findsOneWidget);
+    final config = container.read(gameControllerProvider).config;
+    expect(config.wordSource, WordSource.random);
+    expect(config.autoWordCount, 35);
+    expect(config.gameEnd, GameEnd.wordsRunOut);
   });
 }

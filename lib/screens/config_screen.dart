@@ -138,72 +138,74 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                 ],
               ),
               gap,
-              ConfigSection(
-                icon: Icons.edit_note,
-                title: 'Palabras por grupo',
-                children: [
-                  Text(
-                    automatic
-                        ? 'Nosotros ponemos las palabras al empezar la '
-                              'partida. ¿Cuántas jugará cada grupo?'
-                        : 'Antes de empezar, cada grupo escribirá sus propias '
-                              'palabras o frases secretas para los demás '
-                              'grupos. ¿Cuántas pondrá cada grupo?',
-                  ),
-                  ConfigRow(
-                    label: automatic
-                        ? 'Palabras por grupo'
-                        : 'Palabras o frases por grupo',
-                    child: NumberStepper(
-                      value: _config.wordsPerGroup,
-                      min: GameConfig.minWordsPerGroup,
-                      max: GameConfig.maxWordsPerGroup,
-                      onChanged: (v) =>
-                          _update(_config.copyWith(wordsPerGroup: v)),
+              if (automatic) ...[
+                _autoWordsSection(),
+                gap,
+                _durationSection(),
+                gap,
+              ] else ...[
+                ConfigSection(
+                  icon: Icons.edit_note,
+                  title: 'Palabras por grupo',
+                  children: [
+                    const Text(
+                      'Antes de empezar, cada grupo escribirá sus propias '
+                      'palabras o frases secretas para los demás grupos. '
+                      '¿Cuántas pondrá cada grupo?',
                     ),
-                  ),
-                  Text(
-                    'En total se jugará con ${_config.totalWords} palabras '
-                    'o frases.',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF6B5A86),
-                    ),
-                  ),
-                  if (!automatic) const WordsReminder(),
-                ],
-              ),
-              gap,
-              ConfigSection(
-                icon: Icons.timer,
-                title: 'Partida',
-                children: [
-                  ConfigRow(
-                    label: 'Rondas',
-                    hint: 'Cada grupo juega un turno por ronda.',
-                    child: NumberStepper(
-                      value: _config.rounds,
-                      min: GameConfig.minRounds,
-                      max: GameConfig.maxRounds,
-                      onChanged: (v) => _update(_config.copyWith(rounds: v)),
-                    ),
-                  ),
-                  ConfigRow(
-                    label: 'Tiempo por turno',
-                    child: NumberStepper(
-                      value: _config.turnDuration.inSeconds,
-                      min: GameConfig.minTurnSeconds,
-                      max: GameConfig.maxTurnSeconds,
-                      step: 15,
-                      format: (v) => '$v\u00A0s',
-                      onChanged: (v) => _update(
-                        _config.copyWith(turnDuration: Duration(seconds: v)),
+                    ConfigRow(
+                      label: 'Palabras o frases por grupo',
+                      child: NumberStepper(
+                        value: _config.wordsPerGroup,
+                        min: GameConfig.minWordsPerGroup,
+                        max: GameConfig.maxWordsPerGroup,
+                        onChanged: (v) =>
+                            _update(_config.copyWith(wordsPerGroup: v)),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              gap,
+                    Text(
+                      'En total se jugará con ${_config.totalWords} palabras '
+                      'o frases.',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF6B5A86),
+                      ),
+                    ),
+                    const WordsReminder(),
+                  ],
+                ),
+                gap,
+                ConfigSection(
+                  icon: Icons.timer,
+                  title: 'Partida',
+                  children: [
+                    ConfigRow(
+                      label: 'Rondas',
+                      hint: 'Cada grupo juega un turno por ronda.',
+                      child: NumberStepper(
+                        value: _config.rounds,
+                        min: GameConfig.minRounds,
+                        max: GameConfig.maxRounds,
+                        onChanged: (v) => _update(_config.copyWith(rounds: v)),
+                      ),
+                    ),
+                    ConfigRow(
+                      label: 'Tiempo por turno',
+                      child: NumberStepper(
+                        value: _config.turnDuration.inSeconds,
+                        min: GameConfig.minTurnSeconds,
+                        max: GameConfig.maxTurnSeconds,
+                        step: 15,
+                        format: (v) => '$v\u00A0s',
+                        onChanged: (v) => _update(
+                          _config.copyWith(turnDuration: Duration(seconds: v)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                gap,
+              ],
               ConfigSection(
                 icon: Icons.emoji_events,
                 title: 'Puntuación',
@@ -220,6 +222,28 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                 ],
               ),
               gap,
+              if (automatic) ...[
+                ConfigSection(
+                  icon: Icons.hourglass_bottom,
+                  title: 'Turnos',
+                  children: [
+                    ConfigRow(
+                      label: 'Tiempo por turno',
+                      child: NumberStepper(
+                        value: _config.turnDuration.inSeconds,
+                        min: GameConfig.minTurnSeconds,
+                        max: GameConfig.maxTurnSeconds,
+                        step: 15,
+                        format: (v) => '$v\u00A0s',
+                        onChanged: (v) => _update(
+                          _config.copyWith(turnDuration: Duration(seconds: v)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                gap,
+              ],
               ConfigSection(
                 icon: Icons.swap_vert,
                 title: 'Aciertos',
@@ -263,6 +287,69 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  /// Cuántas palabras automáticas se juegan en total.
+  Widget _autoWordsSection() {
+    final perGroup = _config.autoWordsPerGroup;
+    final leftover = _config.autoWordCount - perGroup * _config.groupCount;
+    return ConfigSection(
+      icon: Icons.auto_awesome,
+      title: 'Palabras',
+      children: [
+        const Text(
+          'Nosotros ponemos las palabras al empezar la partida. ¿Cuántas '
+          'quieren jugar?',
+        ),
+        ConfigRow(
+          label: 'Palabras de la partida',
+          child: NumberStepper(
+            value: _config.autoWordCount,
+            min: GameConfig.minAutoWords,
+            max: GameConfig.maxAutoWords,
+            step: 5,
+            onChanged: (v) => _update(_config.copyWith(autoWordCount: v)),
+          ),
+        ),
+        Text(
+          leftover == 0
+              ? 'Cada grupo tendrá $perGroup palabras.'
+              : 'Cada grupo tendrá $perGroup palabras, para que todos '
+                    'tengan las mismas.',
+          style: const TextStyle(fontSize: 13, color: Color(0xFF6B5A86)),
+        ),
+      ],
+    );
+  }
+
+  /// Hasta que se acaben las palabras, o por número de rondas.
+  Widget _durationSection() {
+    final byRounds = _config.gameEnd == GameEnd.rounds;
+    return ConfigSection(
+      icon: Icons.timer,
+      title: 'Duración del juego',
+      children: [
+        OptionSelector<GameEnd>(
+          label: '¿Hasta cuándo juegan?',
+          options: GameEnd.values,
+          selected: _config.gameEnd,
+          labelOf: (o) => o.label,
+          description: _config.gameEnd.description,
+          onSelected: (o) => _update(_config.copyWith(gameEnd: o)),
+        ),
+        if (byRounds)
+          ConfigRow(
+            label: 'Rondas',
+            hint: 'Cada grupo juega un turno por ronda.',
+            child: NumberStepper(
+              value: _config.rounds,
+              min: GameConfig.minRounds,
+              max: GameConfig.maxRounds,
+              onChanged: (v) => _update(_config.copyWith(rounds: v)),
+            ),
+          ),
+      ],
     );
   }
 

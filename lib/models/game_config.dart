@@ -54,6 +54,27 @@ enum WordSource {
   final bool available;
 }
 
+/// Cuándo termina la partida.
+enum GameEnd {
+  /// Se juegan rondas hasta que no quede ninguna palabra.
+  wordsRunOut(
+    'Hasta que se acaben las palabras',
+    'Se juegan rondas hasta mostrar todas las palabras.',
+  ),
+
+  /// Se juega un número fijo de rondas.
+  rounds(
+    'Por número de rondas',
+    'El juego termina al completar las rondas, o antes si se acaban las '
+        'palabras.',
+  );
+
+  const GameEnd(this.label, this.description);
+
+  final String label;
+  final String description;
+}
+
 /// Resolución de los videos de cada turno.
 enum VideoResolution {
   normal('Normal (480p)', ResolutionPreset.medium, premium: false),
@@ -78,6 +99,8 @@ class GameConfig {
     this.groups = const [Group(''), Group('')],
     this.wordSource = WordSource.groups,
     this.wordsPerGroup = 10,
+    this.autoWordCount = 30,
+    this.gameEnd = GameEnd.rounds,
     this.scoringMode = ScoringMode.perWord,
     this.hitMode = HitMode.tilt,
     this.resolution = VideoResolution.hd,
@@ -91,6 +114,8 @@ class GameConfig {
   static const maxTurnSeconds = 180;
   static const minWordsPerGroup = 5;
   static const maxWordsPerGroup = 50;
+  static const minAutoWords = 10;
+  static const maxAutoWords = 100;
 
   final Duration turnDuration;
   final int rounds;
@@ -100,6 +125,14 @@ class GameConfig {
   /// Palabras que juega cada grupo: las que escriben sus rivales, o las
   /// que se descargan en el modo automático.
   final int wordsPerGroup;
+
+  /// Palabras de toda la partida en el modo automático, repartidas parejo
+  /// entre los grupos.
+  final int autoWordCount;
+
+  /// Cuándo termina la partida. Las palabras escritas por los grupos
+  /// siempre se juegan por rondas.
+  final GameEnd gameEnd;
   final ScoringMode scoringMode;
   final HitMode hitMode;
   final VideoResolution resolution;
@@ -109,12 +142,31 @@ class GameConfig {
   /// Palabras de toda la partida, sumando las de todos los grupos.
   int get totalWords => wordsPerGroup * groupCount;
 
+  /// Palabras automáticas de cada grupo. Si no se dividen exacto, sobran
+  /// las del residuo para que todos tengan las mismas.
+  int get autoWordsPerGroup => autoWordCount ~/ groupCount;
+
+  /// Última ronda que se puede jugar, o null si se juega hasta que se
+  /// acaben las palabras.
+  int? get roundLimit =>
+      wordSource == WordSource.random && gameEnd == GameEnd.wordsRunOut
+      ? null
+      : rounds;
+
+  /// "Ronda 2 de 3", o "Ronda 2" si no hay número fijo de rondas.
+  String roundLabel(int round) {
+    final limit = roundLimit;
+    return limit == null ? 'Ronda $round' : 'Ronda $round de $limit';
+  }
+
   GameConfig copyWith({
     Duration? turnDuration,
     int? rounds,
     List<Group>? groups,
     WordSource? wordSource,
     int? wordsPerGroup,
+    int? autoWordCount,
+    GameEnd? gameEnd,
     ScoringMode? scoringMode,
     HitMode? hitMode,
     VideoResolution? resolution,
@@ -125,6 +177,8 @@ class GameConfig {
       groups: groups ?? this.groups,
       wordSource: wordSource ?? this.wordSource,
       wordsPerGroup: wordsPerGroup ?? this.wordsPerGroup,
+      autoWordCount: autoWordCount ?? this.autoWordCount,
+      gameEnd: gameEnd ?? this.gameEnd,
       scoringMode: scoringMode ?? this.scoringMode,
       hitMode: hitMode ?? this.hitMode,
       resolution: resolution ?? this.resolution,

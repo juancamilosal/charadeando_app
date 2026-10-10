@@ -97,22 +97,40 @@ void main() {
     expect((state().round, state().groupIndex), (1, 0));
   });
 
-  test('calcula cuántas palabras faltan y las agrega entre turnos', () {
-    controller().startWithWords(words('w', 6));
-    final deck = state().currentDeck;
-    controller().finishTurn(
-      Turn(
-        round: 1,
-        groupIndex: 0,
-        entries: [for (final w in deck.take(2)) TurnEntry(w, WordOutcome.hit)],
+  test('automático hasta que se acaben las palabras: no hay límite de '
+      'rondas', () {
+    controller().configure(
+      const GameConfig(
+        rounds: 1,
+        groups: [Group('A'), Group('B')],
+        wordSource: WordSource.random,
+        gameEnd: GameEnd.wordsRunOut,
       ),
     );
-    // A: le queda 1 turno y 1 palabra; B: 2 turnos y 3 palabras, a 2 por turno.
-    final needed = controller().wordsNeeded();
-    expect(needed, [1, 1]);
+    controller().startWithWords(words('w', 6));
+    for (var i = 0; i < 4; i++) {
+      play(hits: 1);
+    }
+    // Ya van 2 rondas aunque la configuración diga 1.
+    expect((state().round, state().finished), (3, false));
+    expect(state().config.roundLabel(3), 'Ronda 3');
+    play(hits: 1);
+    play(hits: 1);
+    expect(state().finished, isTrue);
+  });
 
-    controller().addWords(words('x', 2), needed);
-    expect(state().decks.map((d) => d.length), [2, 4]);
-    expect(controller().wordsNeeded(), [0, 0]);
+  test('automático por rondas termina antes si se acaban las palabras', () {
+    controller().configure(
+      const GameConfig(
+        rounds: 5,
+        groups: [Group('A'), Group('B')],
+        wordSource: WordSource.random,
+      ),
+    );
+    controller().startWithWords(words('w', 4));
+    play(hits: 2);
+    play(passes: 2);
+    expect(state().finished, isTrue);
+    expect(state().config.roundLabel(1), 'Ronda 1 de 5');
   });
 }

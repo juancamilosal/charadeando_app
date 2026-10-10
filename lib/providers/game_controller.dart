@@ -124,39 +124,6 @@ class GameController extends Notifier<GameState> {
     state = state.copyWith(decks: decks, turns: [...state.turns, turn]);
   }
 
-  /// Palabras que le faltarían a cada grupo para sus turnos restantes,
-  /// calculando con el turno en que más palabras se usaron. Sirve para
-  /// pedir más palabras automáticas entre turnos.
-  List<int> wordsNeeded() {
-    if (state.turns.isEmpty) return List.filled(state.groups.length, 0);
-    final perTurn = state.turns
-        .map((t) => t.entries.length)
-        .reduce((a, b) => a > b ? a : b);
-    final needed = <int>[];
-    for (var g = 0; g < state.groups.length; g++) {
-      final turnsLeft =
-          state.config.rounds - state.round + (g > state.groupIndex ? 1 : 0);
-      final missing = turnsLeft * perTurn - state.decks[g].length;
-      needed.add(missing > 0 ? missing : 0);
-    }
-    return needed;
-  }
-
-  /// Agrega [words] a los mazos, llenando primero lo que le falta a cada
-  /// grupo según [needed].
-  void addWords(List<Word> words, List<int> needed) {
-    final decks = [
-      for (final d in state.decks) [...d],
-    ];
-    var next = 0;
-    for (var g = 0; g < decks.length && next < words.length; g++) {
-      for (var i = 0; i < needed[g] && next < words.length; i++) {
-        decks[g].add(words[next++]);
-      }
-    }
-    state = state.copyWith(decks: decks);
-  }
-
   /// Pasa al siguiente grupo, o a la siguiente ronda cuando ya jugaron todos.
   void advance() {
     final next = state.groupIndex + 1;
@@ -170,9 +137,13 @@ class GameController extends Notifier<GameState> {
   /// Desde la posición de [from], busca el primer turno de un grupo al que
   /// le queden palabras. Si no hay ninguno, la partida termina.
   GameState _firstPlayableFrom(GameState from) {
+    if (from.decks.every((d) => d.isEmpty)) {
+      return from.copyWith(finished: true);
+    }
+    final limit = from.config.roundLimit;
     var round = from.round;
     var group = from.groupIndex;
-    while (round <= from.config.rounds) {
+    while (limit == null || round <= limit) {
       if (from.decks[group].isNotEmpty) {
         return from.copyWith(round: round, groupIndex: group, finished: false);
       }

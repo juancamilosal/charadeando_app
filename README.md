@@ -14,15 +14,14 @@ la cámara frontal graba a los participantes para revivir las risas.
   Equipos de fútbol aparecen como "Pronto" hasta tener el backend.
 - Libre explica con una animación cómo se juega y deja elegir entre palabras
   manuales (con la sugerencia de cuántas escribir) y automáticas.
-- Palabras automáticas: al empezar la partida se descargan de una vez todas
-  las que hacen falta (palabras por grupo × grupos, con 50 % de margen por
-  las que se pasan) desde la ruta `POST /juego/palabras` de Directus. Durante
-  el turno no se usa internet; si a un grupo no le van a alcanzar, se piden
-  más en los resultados del turno. El celular recuerda las últimas 500
-  palabras jugadas para no repetirlas, y guarda el último lote para jugar sin
-  internet. Ver `server/README.md`.
-  El botón "Ingresar valores de prueba" llena una partida de ejemplo y va
-  directo al turno; se oculta con `TestData.enabled = false` antes de publicar.
+- Palabras automáticas: en la configuración se eligen los grupos, cuántas
+  palabras jugar (de 10 a 100, repartidas parejo entre los grupos) y la
+  duración: hasta que se acaben las palabras, o por número de rondas (termina
+  al completar las rondas o antes si se acaban las palabras). Al empezar se
+  descargan todas de una vez desde la ruta `POST /juego/palabras` de
+  Directus; durante el juego no se usa internet ni se piden más. El celular
+  recuerda las últimas 500 palabras jugadas para no repetirlas, y guarda el
+  último lote para jugar sin internet. Ver `server/README.md`.
 - Un solo celular, aciertos con movimiento: inclinar hacia abajo es acierto y
   hacia arriba es pasar.
 - La configuración y los resultados se ven en vertical. Al tocar "¡Listo!" la
