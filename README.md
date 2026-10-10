@@ -10,7 +10,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   (licencia OFL, en `assets/fonts`). Los colores no cambian con el modo oscuro
   del celular.
 - Pantalla de categorías: "Libre" (los grupos escriben las palabras) está
-  disponible; Animales, Países, Películas, Celebridades, Marcas, Deportes y
+  disponible; Animales, Geografía, Películas, Celebridades, Marcas, Deportes y
   Equipos de fútbol aparecen como "Pronto" hasta tener el backend.
 - Libre explica con una animación cómo se juega y deja elegir entre palabras
   manuales (con la sugerencia de cuántas escribir) y automáticas.

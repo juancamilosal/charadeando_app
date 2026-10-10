@@ -14,7 +14,12 @@ enum GameCategory {
     available: true,
   ),
   animals('Animales', 'Del perro a la jirafa', Icons.pets, AppColors.green),
-  countries('Países', 'Alrededor del mundo', Icons.public, AppColors.blue),
+  geography(
+    'Geografía',
+    'Países, ciudades, ríos y más',
+    Icons.public,
+    AppColors.blue,
+  ),
   movies('Películas', 'Clásicos y estrenos', Icons.movie, AppColors.magenta),
   celebrities(
     'Celebridades',
