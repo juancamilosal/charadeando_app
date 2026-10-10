@@ -21,7 +21,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   "Continuar" se muestra "Creando palabras…" mientras Gemini las crea por la
   ruta `POST /juego/crear` de Directus, que además las guarda en la colección
   con la categoría LIBRE. Si Gemini tarda más de 25 s (a los 8 s se avisa
-  "Está tardando un poco más…"), responde cualquier error o repite palabras
+  "Seguimos creando palabras… ¡Ya casi terminamos!"), responde cualquier error o repite palabras
   recientes, se completan con palabras al azar de la colección (`POST /juego/palabras`) hasta la
   cantidad elegida. Durante el juego no se usa
   internet ni se piden más. El celular

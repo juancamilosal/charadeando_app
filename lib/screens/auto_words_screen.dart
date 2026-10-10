@@ -123,7 +123,9 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
           const CircularProgressIndicator(color: Colors.white),
           const SizedBox(height: 20),
           Text(
-            _slow ? 'Está tardando un poco más…' : 'Creando palabras…',
+            _slow
+                ? 'Seguimos creando palabras…\n¡Ya casi terminamos!'
+                : 'Creando palabras…',
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontFamily: AppFonts.display,
