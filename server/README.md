@@ -91,9 +91,10 @@ Todo en la terminal del servidor.
 
 La app pide las palabras primero al flujo de Directus
 `POST /flows/trigger/2d91a34a-b82c-4f97-9e2f-12154ba86323`, con el cuerpo
-de Gemini (`systemInstruction` y `contents`). La app acepta como respuesta
-la lista de textos directa, envuelta en `data`, o la respuesta cruda de
-Gemini (`candidates[].content.parts[].text`).
+de Gemini (`systemInstruction` con `role: system` y `contents`), igual que
+juego-palabras. La app lee el texto de Gemini en `respuesta` (o `texto`,
+`text`, `message`); también acepta la lista directa, envuelta en `data`, o
+la respuesta cruda de Gemini (`candidates[].content.parts[].text`).
 
 ## Pendiente
 

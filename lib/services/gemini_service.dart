@@ -35,6 +35,7 @@ class GeminiService {
 
   static Map<String, dynamic> requestBody(int count) => {
     'systemInstruction': {
+      'role': 'system',
       'parts': [
         {'text': instructions},
       ],
@@ -84,10 +85,11 @@ class GeminiService {
     return words.take(count).toList();
   }
 
-  /// Saca la lista de palabras de la respuesta del flujo. Acepta la lista
-  /// directa, envuelta en `data`, la respuesta cruda de Gemini
-  /// (`candidates[].content.parts[].text`) o el texto con la lista, aunque
-  /// venga dentro de un bloque de markdown.
+  /// Saca la lista de palabras de la respuesta del flujo. El flujo responde
+  /// el texto de Gemini en `respuesta` (o `texto`, `text`, `message`), como
+  /// en juego-palabras; también acepta la lista directa, envuelta en `data`,
+  /// la respuesta cruda de Gemini (`candidates[].content.parts[].text`) o el
+  /// texto con la lista, aunque venga dentro de un bloque de markdown.
   @visibleForTesting
   static List<String> parseWords(String body) {
     final seen = <String>{};
@@ -105,10 +107,19 @@ class GeminiService {
       return [for (final e in value) ..._list(e)];
     }
     if (value is Map) {
-      for (final key in ['data', 'candidates', 'content', 'parts', 'words']) {
+      for (final key in [
+        'respuesta',
+        'texto',
+        'text',
+        'message',
+        'data',
+        'candidates',
+        'content',
+        'parts',
+        'words',
+      ]) {
         if (value.containsKey(key)) return _list(value[key]);
       }
-      if (value['text'] is String) return _list(value['text']);
       return const [];
     }
     if (value is String) {

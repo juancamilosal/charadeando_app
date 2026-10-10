@@ -20,6 +20,7 @@ void main() {
     expect(sent.method, 'POST');
     expect(sent.url.path, '/flows/trigger/abc');
     final body = jsonDecode(sent.body) as Map<String, dynamic>;
+    expect(body['systemInstruction']['role'], 'system');
     expect(
       body['systemInstruction']['parts'][0]['text'],
       GeminiService.instructions,
@@ -33,6 +34,19 @@ void main() {
 
   group('lee la lista de palabras', () {
     const words = ['Peras', 'Silla de caballo', 'Una casa embrujada'];
+
+    test('en "respuesta", como responde el flujo de juego-palabras', () {
+      expect(
+        GeminiService.parseWords(jsonEncode({'respuesta': jsonEncode(words)})),
+        words,
+      );
+      expect(
+        GeminiService.parseWords(
+          jsonEncode({'texto': '```json\n${jsonEncode(words)}\n```'}),
+        ),
+        words,
+      );
+    });
 
     test('directa', () {
       expect(GeminiService.parseWords(jsonEncode(words)), words);
