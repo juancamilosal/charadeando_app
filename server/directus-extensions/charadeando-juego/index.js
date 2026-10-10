@@ -22,6 +22,19 @@ const DEFAULT_GEMINI_FLOW = '2d91a34a-b82c-4f97-9e2f-12154ba86323';
 /// Gemini puede tardar con listas largas.
 const GEMINI_TIMEOUT_MS = 60 * 1000;
 
+/// Gemini tarda más mientras más palabras escribe, así que las listas
+/// largas se piden en varios pedidos en paralelo de este tamaño.
+const GEMINI_CHUNK = 25;
+
+/// Con varios pedidos a la vez, a cada uno se le da un enfoque distinto
+/// para que no traigan las mismas palabras.
+const GEMINI_FOCUS = [
+  'objetos y cosas de todos los días',
+  'personajes, profesiones y animales',
+  'lugares y comidas',
+  'actividades y acciones',
+];
+
 const GEMINI_INSTRUCTIONS =
   'Responde SIEMPRE y ÚNICAMENTE con un array JSON de strings, sin ' +
   'explicaciones, sin markdown y sin texto fuera del array. Cada elemento ' +
@@ -122,19 +135,14 @@ export default {
     const flowId = env?.CHARADEANDO_GEMINI_FLOW || DEFAULT_GEMINI_FLOW;
     const flowUrl = `http://127.0.0.1:${env?.PORT || 8055}/flows/trigger/${flowId}`;
 
-    async function askGemini(n) {
+    async function askGeminiOnce(prompt) {
       const response = await fetch(flowUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         signal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
         body: JSON.stringify({
           systemInstruction: { role: 'system', parts: [{ text: GEMINI_INSTRUCTIONS }] },
-          contents: [
-            {
-              role: 'user',
-              parts: [{ text: `Genera exactamente ${n} palabras o frases para el juego.` }],
-            },
-          ],
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
         }),
       });
       const text = await response.text();
@@ -148,6 +156,41 @@ export default {
         body = text;
       }
       return parseGeminiWords(body);
+    }
+
+    /// Pide [n] palabras. Hasta GEMINI_CHUNK va en un solo pedido; más de
+    /// eso se reparte en pedidos en paralelo, cada uno con un enfoque.
+    /// Si alguno falla se usan los demás; solo falla si fallan todos.
+    async function askGemini(n) {
+      const chunks = Math.ceil(n / GEMINI_CHUNK);
+      if (chunks === 1) {
+        return askGeminiOnce(`Genera exactamente ${n} palabras o frases para el juego.`);
+      }
+      const results = await Promise.allSettled(
+        Array.from({ length: chunks }, (_, i) => {
+          const size = Math.ceil(n / chunks) + 2; // un margen por las repetidas
+          const focus = GEMINI_FOCUS[i % GEMINI_FOCUS.length];
+          return askGeminiOnce(
+            `Genera exactamente ${size} palabras o frases para el juego. ` +
+              `Enfócate sobre todo en ${focus}.`,
+          );
+        }),
+      );
+      const failed = results.filter((r) => r.status === 'rejected');
+      if (failed.length === results.length) throw failed[0].reason;
+      for (const r of failed) logger.warn(r.reason, '[juego] Un pedido a Gemini falló');
+
+      const seen = new Set();
+      const words = [];
+      for (const r of results) {
+        if (r.status !== 'fulfilled') continue;
+        for (const w of r.value) {
+          if (seen.has(key(w))) continue;
+          seen.add(key(w));
+          words.push(w);
+        }
+      }
+      return words;
     }
 
     /// Guarda las palabras que no existan todavía y devuelve todas, con su

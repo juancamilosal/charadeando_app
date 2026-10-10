@@ -38,8 +38,11 @@ class DirectusService {
 
   static const _timeout = Duration(seconds: 15);
 
-  /// Gemini puede tardar con listas largas; el servidor espera hasta 60 s.
-  static const _createTimeout = Duration(seconds: 75);
+  /// Cuánto esperar a Gemini antes de usar la colección: 10 s más 0,15 s
+  /// por palabra (12 s para 10, 25 s para 100). Si se pasa, el servidor
+  /// igual guarda las palabras cuando lleguen.
+  static Duration createTimeout(int count) =>
+      Duration(milliseconds: 10000 + 150 * count.clamp(1, maxCreate));
 
   final http.Client _client;
   final String baseUrl;
@@ -51,7 +54,7 @@ class DirectusService {
   /// colección. Puede devolver menos si Gemini trae menos.
   Future<List<RemoteWord>> createWords(int count) => _post(createUri, {
     'n': count.clamp(1, maxCreate),
-  }, timeout: _createTimeout);
+  }, timeout: createTimeout(count));
 
   /// Trae [count] palabras al azar, de [category] si se indica. Las de
   /// [exclude] (ids ya jugados) solo se repiten si no alcanzan las demás.

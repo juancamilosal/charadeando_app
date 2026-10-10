@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -123,4 +124,24 @@ void main() {
     expect(jsonDecode(sent.body), {'n': DirectusService.maxCreate});
     expect(words.single.categoria, 'LIBRE');
   });
+
+  test('espera a Gemini más tiempo mientras más palabras se piden', () {
+    expect(
+      DirectusService.createTimeout(10),
+      const Duration(seconds: 11, milliseconds: 500),
+    );
+    expect(DirectusService.createTimeout(100), const Duration(seconds: 25));
+    expect(DirectusService.createTimeout(500), const Duration(seconds: 25));
+  });
+
+  test('si Gemini tarda demasiado, se rinde para usar la colección', () async {
+    final service = DirectusService(
+      baseUrl: 'https://directus.test',
+      client: MockClient((_) => Completer<http.Response>().future),
+    );
+    await expectLater(
+      service.createWords(1).timeout(const Duration(seconds: 30)),
+      throwsA(isA<DirectusException>()),
+    );
+  }, timeout: const Timeout(Duration(seconds: 40)));
 }

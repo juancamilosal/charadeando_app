@@ -20,8 +20,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   al completar las rondas o antes si se acaban las palabras). Al tocar
   "Continuar" se muestra "Creando palabras…" mientras Gemini las crea por la
   ruta `POST /juego/crear` de Directus, que además las guarda en la colección
-  con la categoría LIBRE. Si Gemini falla o repite palabras recientes, se
-  completan con palabras de la colección (`POST /juego/palabras`) hasta la
+  con la categoría LIBRE. Si Gemini falla, tarda más de 10 s + 0,15 s por
+  palabra (a los 8 s se avisa "Está tardando un poco más…") o repite
+  palabras recientes, se completan con palabras de la colección (`POST /juego/palabras`) hasta la
   cantidad elegida. Durante el juego no se usa
   internet ni se piden más. El celular
   recuerda las últimas 500 palabras jugadas (ids y textos) para no repetirlas, y guarda el

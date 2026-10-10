@@ -27,7 +27,12 @@ class AutoWordsScreen extends ConsumerStatefulWidget {
 }
 
 class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
+  /// Después de este tiempo se avisa que Gemini está tardando.
+  static const _slowAfter = Duration(seconds: 8);
+
   bool _loading = true;
+  bool _slow = false;
+  Timer? _slowTimer;
   Object? _error;
 
   /// Lote guardado que se usará porque no hubo internet.
@@ -39,16 +44,28 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
     unawaited(_load());
   }
 
+  @override
+  void dispose() {
+    _slowTimer?.cancel();
+    super.dispose();
+  }
+
   Future<void> _load() async {
     setState(() {
       _loading = true;
+      _slow = false;
       _error = null;
+    });
+    _slowTimer?.cancel();
+    _slowTimer = Timer(_slowAfter, () {
+      if (mounted) setState(() => _slow = true);
     });
     final config = ref.read(gameControllerProvider).config;
     try {
       final batch = await ref
           .read(wordBankProvider)
           .load(AutoWordsScreen.countFor(config));
+      _slowTimer?.cancel();
       if (!mounted) return;
       if (batch.words.length < config.groupCount) {
         setState(() {
@@ -64,6 +81,7 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
         _play(batch);
       }
     } catch (e) {
+      _slowTimer?.cancel();
       if (!mounted) return;
       setState(() {
         _loading = false;
@@ -99,14 +117,15 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
 
   Widget _content() {
     if (_loading) {
-      return const Column(
+      return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CircularProgressIndicator(color: Colors.white),
-          SizedBox(height: 20),
+          const CircularProgressIndicator(color: Colors.white),
+          const SizedBox(height: 20),
           Text(
-            'Creando palabras…',
-            style: TextStyle(
+            _slow ? 'Está tardando un poco más…' : 'Creando palabras…',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
               fontFamily: AppFonts.display,
               fontSize: 26,
               fontWeight: FontWeight.w600,

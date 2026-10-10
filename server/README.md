@@ -11,8 +11,11 @@ Directus 11 con PostgreSQL y Redis, desplegado con Coolify en el VPS.
   `directus-extensions/charadeando-juego`:
   - `POST /juego/crear` con `{ "n": 20 }` (máximo 100): llama por dentro al
     flujo de Gemini con instrucciones fijas, guarda en `palabras` las que no
-    existan con la categoría `LIBRE` y las devuelve con su id. Responde 502
-    si Gemini falla. 5 peticiones por minuto por IP.
+    existan con la categoría `LIBRE` y las devuelve con su id. Más de 25
+    palabras se piden en varios pedidos a Gemini en paralelo (de hasta 25,
+    cada uno con un enfoque distinto) para que tarde lo mismo que uno solo;
+    si alguno falla se usan los demás. Responde 502 si fallan todos. 5
+    peticiones por minuto por IP.
   - `POST /juego/palabras`: solo lee; entrega palabras al azar, con un
     máximo de 450 por petición, excluye hasta 500 ids que la app ya jugó y
     completa con repetidas solo si no alcanzan. 10 peticiones por minuto
