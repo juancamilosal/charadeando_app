@@ -139,16 +139,19 @@ una con `frase`, `categoria` y `dificultad`:
 - No hay frases repetidas ni variantes de una misma idea dentro de cada
   categoría.
 
-`palabras_libre.json` tiene 200 palabras más con la categoría `LIBRE`: de
-cualquier tema (personajes, situaciones, fenómenos, juegos…), con las mismas
-reglas que tenían las palabras de Gemini y sin repetir ni ser variantes de
-las 1.000 anteriores. Se importa igual.
+`palabras_libre.json` tiene 200 elementos con la categoría `LIBRE`. Se
+importa igual.
 
-Regla para la categoría `LIBRE`: sus palabras **pueden repetirse** con las de
-otras categorías (por ejemplo, "Perro" en `ANIMALES` y en `LIBRE`). Lo
-importante es que la lista no sea repetitiva: que no haya muchas palabras
-parecidas ni variantes de la misma idea seguidas ("Astronauta",
-"Astronauta flotando"). En las demás categorías sí se evitan las repetidas.
+Regla para la categoría `LIBRE`: no son palabras sueltas sino **frases** de
+1 a 4 palabras que describen una acción, situación o emoción para actuar,
+por ejemplo "Caminamos muy rápido", "Me duele la cabeza" o "Bailando bajo la
+lluvia". Lo importante es que no sean repetitivas: ninguna frase es variante
+de otra y ningún verbo o palabra importante aparece más de 3 veces.
+
+- `FACIL`: una acción o situación concreta, fácil de actuar.
+- `NORMAL`: una escena con más detalle o con dos ideas a la vez.
+- `DIFICIL`: emociones, estados o ideas abstractas, más difíciles de
+  mostrar.
 
 Para importarlas en Directus:
 
