@@ -20,7 +20,7 @@ class RemoteWord {
     'categoria': categoria,
   };
 
-  /// Las palabras de Gemini no tienen id ni categoría.
+  /// Una palabra puede venir sin id ni categoría.
   Word toWord() => Word(
     frase,
     category: categoria.isEmpty ? null : categoria,

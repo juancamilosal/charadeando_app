@@ -5,13 +5,9 @@ import 'package:http/http.dart' as http;
 
 import '../models/models.dart';
 
-/// Habla con las rutas del juego en Directus (extensión en
-/// `server/directus-extensions`). La colección no es pública:
-///
-/// - `POST /juego/crear` le pide palabras nuevas a Gemini, las guarda con la
-///   categoría LIBRE y las devuelve. Las instrucciones para Gemini viven en
-///   el servidor; la app solo manda la cantidad.
-/// - `POST /juego/palabras` entrega palabras al azar de la colección.
+/// Habla con la ruta del juego en Directus (extensión en
+/// `server/directus-extensions`). La colección no es pública: la app pide
+/// palabras al azar con `POST /juego/palabras`.
 class DirectusService {
   DirectusService({http.Client? client, String? baseUrl})
     : _client = client ?? http.Client(),
@@ -32,28 +28,12 @@ class DirectusService {
   /// `MAX_EXCLUDE` de la extensión.
   static const maxExclude = 500;
 
-  /// Máximo de palabras que se le pueden pedir a Gemini. Debe coincidir con
-  /// `MAX_CREATE` de la extensión.
-  static const maxCreate = 100;
-
   static const _timeout = Duration(seconds: 15);
-
-  /// Cuánto esperar a Gemini. Si tarda más, o responde cualquier error, se
-  /// usan palabras al azar de la colección. El servidor igual guarda las
-  /// palabras de Gemini cuando lleguen.
-  static const createTimeout = Duration(seconds: 25);
 
   final http.Client _client;
   final String baseUrl;
 
   Uri get wordsUri => Uri.parse('$baseUrl/juego/palabras');
-  Uri get createUri => Uri.parse('$baseUrl/juego/crear');
-
-  /// Le pide a Gemini [count] palabras nuevas, que quedan guardadas en la
-  /// colección. Puede devolver menos si Gemini trae menos.
-  Future<List<RemoteWord>> createWords(int count) => _post(createUri, {
-    'n': count.clamp(1, maxCreate),
-  }, timeout: createTimeout);
 
   /// Trae [count] palabras al azar, de [category] si se indica. Las de
   /// [exclude] (ids ya jugados) solo se repiten si no alcanzan las demás.
@@ -72,11 +52,7 @@ class DirectusService {
     });
   }
 
-  Future<List<RemoteWord>> _post(
-    Uri uri,
-    Map<String, Object> body, {
-    Duration timeout = _timeout,
-  }) async {
+  Future<List<RemoteWord>> _post(Uri uri, Map<String, Object> body) async {
     final payload = jsonEncode(body);
     debugPrint('[Directus] POST $uri $payload');
     final http.Response response;
@@ -87,7 +63,7 @@ class DirectusService {
             headers: {'Content-Type': 'application/json'},
             body: payload,
           )
-          .timeout(timeout);
+          .timeout(_timeout);
     } on Exception catch (e) {
       debugPrint('[Directus] Sin respuesta: $e');
       throw DirectusException(null, 'No se pudo conectar con el servidor: $e');
@@ -134,7 +110,6 @@ class DirectusException implements Exception {
     404 =>
       'No existe la ruta del juego. Revisa que la extensión '
           'charadeando-juego esté instalada y actualizada en Directus.',
-    502 => 'Gemini no pudo crear las palabras.',
     429 => 'Demasiadas consultas seguidas. Espera un minuto.',
     _ => 'Directus respondió con un error.',
   };

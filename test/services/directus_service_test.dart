@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -101,39 +100,4 @@ void main() {
       ),
     );
   });
-
-  test('le pide a Gemini solo la cantidad, sin instrucciones', () async {
-    late http.Request sent;
-    final service = DirectusService(
-      baseUrl: 'https://directus.test',
-      client: MockClient((request) async {
-        sent = request;
-        return http.Response(
-          jsonEncode({
-            'data': [
-              {'id': 'a', 'frase': 'Astronauta', 'categoria': 'LIBRE'},
-            ],
-          }),
-          200,
-        );
-      }),
-    );
-    final words = await service.createWords(500);
-
-    expect(sent.url.path, '/juego/crear');
-    expect(jsonDecode(sent.body), {'n': DirectusService.maxCreate});
-    expect(words.single.categoria, 'LIBRE');
-  });
-
-  test('si Gemini tarda demasiado, se rinde para usar la colección', () async {
-    final service = DirectusService(
-      baseUrl: 'https://directus.test',
-      client: MockClient((_) => Completer<http.Response>().future),
-    );
-    await expectLater(
-      service.createWords(1).timeout(const Duration(seconds: 30)),
-      // Se rinde a los 25 s, antes de este límite de la prueba.
-      throwsA(isA<DirectusException>()),
-    );
-  }, timeout: const Timeout(Duration(seconds: 40)));
 }

@@ -9,14 +9,11 @@ import '../services/services.dart';
 import '../theme.dart';
 import '../widgets/play_background.dart';
 
-/// Pantalla de prueba: pide 20 palabras al azar a la colección de Directus,
-/// o le pide a Gemini 20 nuevas (que quedan guardadas) si [gemini] es
-/// verdadero. Muestra cada una con su categoría, o el error y la respuesta
-/// del servidor si algo falla.
+/// Pantalla de prueba: pide 20 palabras al azar a la colección de Directus.
+/// Muestra cada una con su categoría, o el error y la respuesta del servidor
+/// si algo falla.
 class DirectusTestScreen extends ConsumerStatefulWidget {
-  const DirectusTestScreen({super.key, this.gemini = false});
-
-  final bool gemini;
+  const DirectusTestScreen({super.key});
 
   @override
   ConsumerState<DirectusTestScreen> createState() => _DirectusTestScreenState();
@@ -33,20 +30,18 @@ class _DirectusTestScreenState extends ConsumerState<DirectusTestScreen> {
 
   void _load() {
     final directus = ref.read(directusServiceProvider);
-    _words = widget.gemini
-        ? directus.createWords(20)
-        : directus.fetchWords(count: 20);
+    _words = directus.fetchWords(count: 20);
   }
 
   @override
   Widget build(BuildContext context) {
     final directus = ref.read(directusServiceProvider);
-    final url = widget.gemini ? directus.createUri : directus.wordsUri;
+    final url = directus.wordsUri;
     return PlayBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: Text(widget.gemini ? 'Probar Gemini' : 'Probar Directus'),
+          title: const Text('Probar Directus'),
           leading: BackButton(onPressed: () => context.go(Routes.welcome)),
           actions: [
             IconButton(

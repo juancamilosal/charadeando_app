@@ -11,7 +11,7 @@ import '../services/services.dart';
 import '../theme.dart';
 import '../widgets/play_background.dart';
 
-/// Crea con Gemini las palabras automáticas de toda la partida, espera a
+/// Trae de Directus las palabras automáticas de toda la partida, espera a
 /// que estén listas y empieza el primer turno. Durante el juego no se usa
 /// internet.
 class AutoWordsScreen extends ConsumerStatefulWidget {
@@ -27,12 +27,7 @@ class AutoWordsScreen extends ConsumerStatefulWidget {
 }
 
 class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
-  /// Después de este tiempo se avisa que Gemini está tardando.
-  static const _slowAfter = Duration(seconds: 8);
-
   bool _loading = true;
-  bool _slow = false;
-  Timer? _slowTimer;
   Object? _error;
 
   /// Lote guardado que se usará porque no hubo internet.
@@ -44,28 +39,16 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
     unawaited(_load());
   }
 
-  @override
-  void dispose() {
-    _slowTimer?.cancel();
-    super.dispose();
-  }
-
   Future<void> _load() async {
     setState(() {
       _loading = true;
-      _slow = false;
       _error = null;
-    });
-    _slowTimer?.cancel();
-    _slowTimer = Timer(_slowAfter, () {
-      if (mounted) setState(() => _slow = true);
     });
     final config = ref.read(gameControllerProvider).config;
     try {
       final batch = await ref
           .read(wordBankProvider)
           .load(AutoWordsScreen.countFor(config));
-      _slowTimer?.cancel();
       if (!mounted) return;
       if (batch.words.length < config.groupCount) {
         setState(() {
@@ -81,7 +64,6 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
         _play(batch);
       }
     } catch (e) {
-      _slowTimer?.cancel();
       if (!mounted) return;
       setState(() {
         _loading = false;
@@ -122,12 +104,10 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
         children: [
           const CircularProgressIndicator(color: Colors.white),
           const SizedBox(height: 20),
-          Text(
-            _slow
-                ? 'Seguimos creando palabras…\n¡Ya casi terminamos!'
-                : 'Creando palabras…',
+          const Text(
+            'Buscando palabras…',
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppFonts.display,
               fontSize: 26,
               fontWeight: FontWeight.w600,

@@ -18,14 +18,11 @@ la cámara frontal graba a los participantes para revivir las risas.
   palabras jugar (de 10 a 100, repartidas parejo entre los grupos) y la
   duración: hasta que se acaben las palabras, o por número de rondas (termina
   al completar las rondas o antes si se acaban las palabras). Al tocar
-  "Continuar" se muestra "Creando palabras…" mientras Gemini las crea por la
-  ruta `POST /juego/crear` de Directus, que además las guarda en la colección
-  con la categoría LIBRE. Si Gemini tarda más de 25 s (a los 8 s se avisa
-  "Seguimos creando palabras… ¡Ya casi terminamos!"), responde cualquier error o repite palabras
-  recientes, se completan con palabras al azar de la colección (`POST /juego/palabras`) hasta la
-  cantidad elegida. Durante el juego no se usa
-  internet ni se piden más. El celular
-  recuerda las últimas 500 palabras jugadas (ids y textos) para no repetirlas, y guarda el
+  "Continuar" se muestra "Buscando palabras…" mientras se traen al azar de la
+  colección de Directus (`POST /juego/palabras`). La app ya no usa Gemini: las
+  palabras son una base propia, revisada por el equipo. Durante el juego no
+  se usa internet ni se piden más. El celular recuerda las últimas 500
+  palabras jugadas para no repetirlas, y guarda el
   último lote para jugar sin internet. Ver `server/README.md`.
 - Un solo celular, aciertos con movimiento: inclinar hacia abajo es acierto y
   hacia arriba es pasar.
@@ -70,10 +67,9 @@ agua. Además:
 
 - Modo Reto: algunas palabras salen con una regla extra (solo mímica, sin
   hablar, con una sola mano, tarareando) y valen más puntos.
-- Dificultad (fácil, media, difícil): nuevo campo `dificultad` en las palabras
-  de Directus. Gemini crea las palabras con la dificultad elegida y se guarda;
-  si Gemini no responde, `POST /juego/palabras` trae de la colección solo
-  palabras de esa dificultad.
+- Dificultad (fácil, normal, difícil): campo `dificultad` en las palabras de
+  Directus (`FACIL`, `NORMAL`, `DIFICIL`), para que `POST /juego/palabras`
+  traiga solo palabras de la dificultad elegida.
 - Modo fiesta para adultos (+18): categoría con candado y aviso de edad.
 - Perfiles de grupo guardados en el celular, para no volver a escribir los
   nombres, con historial de victorias.

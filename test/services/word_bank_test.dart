@@ -11,8 +11,7 @@ void main() {
   late Directory dir;
   late List<Map<String, dynamic>> collectionRequests;
   var online = true;
-  var geminiWorks = true;
-  var geminiWords = <String>[];
+  var collection = <Map<String, String>>[];
 
   Map<String, String> word(String id, String frase, String categoria) => {
     'id': id,
@@ -26,25 +25,11 @@ void main() {
       client: MockClient((request) async {
         if (!online) throw const SocketException('sin red');
         final body = jsonDecode(request.body) as Map<String, dynamic>;
-        if (request.url.path == '/juego/crear') {
-          if (!geminiWorks) {
-            return http.Response(
-              '{"errors":[{"message":"Gemini no respondió: 429 '
-              'RESOURCE_EXHAUSTED, se acabaron los tokens"}]}',
-              502,
-            );
-          }
-          final data = [for (final w in geminiWords) word('g-$w', w, 'LIBRE')]
-              .take(body['n'] as int)
-              .toList();
-          return http.Response(jsonEncode({'data': data}), 200);
-        }
         collectionRequests.add(body);
         final excluded = (body['excluir'] as List).toSet();
         final data = [
-          for (var i = 0; i < 20; i++)
-            if (!excluded.contains('id$i'))
-              word('id$i', 'Palabra $i', 'ANIMAL'),
+          for (final w in collection)
+            if (!excluded.contains(w['id'])) w,
         ].take(body['n'] as int).toList();
         return http.Response(jsonEncode({'data': data}), 200);
       }),
@@ -57,58 +42,42 @@ void main() {
     dir = await Directory.systemTemp.createTemp('word_bank');
     collectionRequests = [];
     online = true;
-    geminiWorks = true;
-    geminiWords = ['Peras', 'Silla de caballo', 'Una casa embrujada'];
+    collection = [
+      for (var i = 0; i < 20; i++) word('id$i', 'Palabra $i', 'ANIMALES'),
+    ];
   });
   tearDown(() => dir.delete(recursive: true));
 
-  test('usa las palabras que crea Gemini', () async {
-    final batch = await bank().load(3);
-    expect(batch.offline, isFalse);
-    expect(batch.words.map((w) => w.text), geminiWords);
-    expect(batch.words.first.category, 'LIBRE');
-    expect(collectionRequests, isEmpty);
-  });
-
-  test('si Gemini falla, usa la colección con la cantidad elegida', () async {
-    geminiWorks = false;
+  test('trae de la colección la cantidad elegida', () async {
     final batch = await bank().load(4);
+    expect(batch.offline, isFalse);
     expect(batch.words.map((w) => w.id), ['id0', 'id1', 'id2', 'id3']);
+    expect(batch.words.first.category, 'ANIMALES');
     expect(collectionRequests.single['n'], 4);
   });
 
-  test('si Gemini trae menos, completa con la colección', () async {
+  test('no repite las palabras de la partida anterior', () async {
+    await bank().load(5);
     final batch = await bank().load(5);
-    expect(batch.words, hasLength(5));
-    expect(collectionRequests.single['n'], 2);
-    expect(
-      collectionRequests.single['excluir'],
-      containsAll(['g-Peras', 'g-Silla de caballo']),
-    );
+    expect(collectionRequests.last['excluir'], [
+      'id0',
+      'id1',
+      'id2',
+      'id3',
+      'id4',
+    ]);
+    expect(batch.words.map((w) => w.id), ['id5', 'id6', 'id7', 'id8', 'id9']);
   });
 
-  test('no repite palabras de Gemini jugadas hace poco', () async {
-    await bank().load(3);
-    geminiWords = ['Peras', 'Mango', 'Silla de caballo'];
+  test('no juega dos veces la misma frase', () async {
+    collection = [
+      word('a', 'Perro', 'ANIMALES'),
+      word('b', 'perro', 'ANIMALES'),
+      word('c', 'Gato', 'ANIMALES'),
+    ];
     final batch = await bank().load(3);
-    expect(batch.words.map((w) => w.text), ['Mango', 'Palabra 0', 'Palabra 1']);
+    expect(batch.words.map((w) => w.text), ['Perro', 'Gato']);
   });
-
-  test(
-    'no repite las palabras de la colección de la partida anterior',
-    () async {
-      geminiWorks = false;
-      await bank().load(5);
-      await bank().load(5);
-      expect(collectionRequests.last['excluir'], [
-        'id0',
-        'id1',
-        'id2',
-        'id3',
-        'id4',
-      ]);
-    },
-  );
 
   test('sin internet juega con el último lote guardado', () async {
     await bank().load(3);
@@ -116,7 +85,10 @@ void main() {
     final batch = await bank().load(2);
     expect(batch.offline, isTrue);
     expect(batch.words, hasLength(2));
-    expect(batch.words.map((w) => w.text), everyElement(isIn(geminiWords)));
+    expect(
+      batch.words.map((w) => w.text),
+      everyElement(isIn(['Palabra 0', 'Palabra 1', 'Palabra 2'])),
+    );
   });
 
   test('sin internet y sin lote guardado avisa el error', () async {

@@ -19,13 +19,8 @@ class WordBatch {
   final bool offline;
 }
 
-/// Descarga las palabras automáticas:
-///
-/// 1. Se las pide a Gemini por `/juego/crear`, que además las guarda en la
-///    colección con la categoría LIBRE.
-/// 2. Si Gemini falla, o repite palabras jugadas hace poco, completa con la
-///    colección de palabras de Directus (`/juego/palabras`).
-/// 3. Sin internet, usa el último lote guardado.
+/// Descarga las palabras automáticas de la colección de Directus
+/// (`/juego/palabras`). Sin internet, usa el último lote guardado.
 ///
 /// En el celular guarda las últimas palabras jugadas, para no repetirlas
 /// entre partidas, y el último lote. Nada de esto sale del celular salvo los
@@ -51,62 +46,36 @@ class WordBank {
   /// si tampoco hay lote, lanza el error de Directus.
   Future<WordBatch> load(int count, {String? category}) async {
     final stored = await _read();
-    final recent = stored.texts.toSet();
-
-    var fromGemini = const <RemoteWord>[];
+    final List<RemoteWord> fetched;
     try {
-      fromGemini = await _directus.createWords(count);
-    } catch (e) {
-      // Cualquier falla de Gemini (tiempo, tokens, servidor) se cubre con la
-      // colección.
-      debugPrint('[WordBank] Gemini falló, se usa la colección: $e');
+      fetched = await _directus.fetchWords(
+        count: count,
+        category: category,
+        exclude: stored.history,
+      );
+    } on DirectusException catch (e) {
+      if (stored.cache.isEmpty) rethrow;
+      debugPrint('[WordBank] Sin conexión, se usa el último lote: $e');
+      final cache = [...stored.cache]..shuffle(_random);
+      return WordBatch([
+        for (final w in cache.take(count)) w.toWord(),
+      ], offline: true);
     }
-    bool isRecent(RemoteWord w) =>
-        stored.history.contains(w.id) || recent.contains(_key(w.frase));
-    final repeated = fromGemini.where(isRecent).toList();
-    final words = fromGemini.where((w) => !isRecent(w)).take(count).toList();
+    // Por si la colección tiene la misma frase dos veces.
+    final taken = <String>{};
+    final words = fetched.where((w) => taken.add(_key(w.frase))).take(count);
 
-    final missing = count - words.length;
-    if (missing > 0) {
-      try {
-        final taken = {for (final w in words) _key(w.frase)};
-        final extra = await _directus.fetchWords(
-          count: missing,
-          category: category,
-          exclude: [...stored.history, for (final w in words) w.id],
-        );
-        words.addAll(
-          extra.where((w) => taken.add(_key(w.frase))).take(missing),
-        );
-      } on DirectusException catch (e) {
-        if (words.isEmpty && repeated.isEmpty) {
-          if (stored.cache.isEmpty) rethrow;
-          debugPrint('[WordBank] Sin conexión, se usa el último lote: $e');
-          final cache = [...stored.cache]..shuffle(_random);
-          return WordBatch([
-            for (final w in cache.take(count)) w.toWord(),
-          ], offline: true);
-        }
-        debugPrint('[WordBank] Directus falló, se completa con Gemini: $e');
-      }
-      // Si aún faltan, mejor repetir alguna de Gemini que quedarse corto.
-      for (final w in repeated) {
-        if (words.length >= count) break;
-        words.add(w);
-      }
-    }
-
+    final batch = words.toList();
     await _write(
       _Stored(
         history: _remember(stored.history, [
-          for (final w in words)
+          for (final w in batch)
             if (w.id.isNotEmpty) w.id,
         ]),
-        texts: _remember(stored.texts, [for (final w in words) _key(w.frase)]),
-        cache: words,
+        cache: batch,
       ),
     );
-    return WordBatch([for (final w in words) w.toWord()], offline: false);
+    return WordBatch([for (final w in batch) w.toWord()], offline: false);
   }
 
   /// Forma de comparar palabras sin importar mayúsculas ni espacios.
@@ -133,7 +102,6 @@ class WordBank {
       final json = jsonDecode(await file.readAsString());
       return _Stored(
         history: [for (final id in json['vistas'] as List) '$id'],
-        texts: [for (final t in (json['textos'] as List?) ?? const []) '$t'],
         cache: [
           for (final w in json['lote'] as List)
             RemoteWord.fromJson(w as Map<String, dynamic>),
@@ -153,7 +121,6 @@ class WordBank {
       await file.writeAsString(
         jsonEncode({
           'vistas': stored.history,
-          'textos': stored.texts,
           'lote': [for (final w in stored.cache) w.toJson()],
         }),
       );
@@ -164,16 +131,10 @@ class WordBank {
 }
 
 class _Stored {
-  const _Stored({
-    this.history = const [],
-    this.texts = const [],
-    this.cache = const [],
-  });
+  const _Stored({this.history = const [], this.cache = const []});
 
   /// Ids de Directus de las últimas palabras jugadas.
   final List<String> history;
 
-  /// Las mismas palabras en texto, para reconocer las que repite Gemini.
-  final List<String> texts;
   final List<RemoteWord> cache;
 }
