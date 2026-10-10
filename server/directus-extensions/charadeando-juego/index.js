@@ -27,33 +27,9 @@ const GEMINI_TIMEOUT_MS = 60 * 1000;
 const GEMINI_CHUNK = 25;
 
 /// Gemini no recuerda los pedidos anteriores: si siempre se le pide lo
-/// mismo, tiende a dar las mismas palabras. Cada pedido arranca de un tema
-/// elegido al azar, distinto para cada pedido en paralelo.
-export const GEMINI_THEMES = [
-  'objetos de la casa',
-  'comidas y bebidas',
-  'animales',
-  'oficios y profesiones',
-  'deportes',
-  'lugares y ciudades',
-  'personajes de cuentos y películas',
-  'medios de transporte',
-  'instrumentos musicales',
-  'ropa y accesorios',
-  'fiestas y celebraciones',
-  'naturaleza y clima',
-  'acciones de todos los días',
-  'juegos y juguetes',
-  'cuerpo humano',
-  'tecnología',
-  'escuela y oficina',
-  'vacaciones y viajes',
-  'cine y televisión',
-  'situaciones graciosas',
-];
-
-/// Cuántas palabras de la colección se le muestran a Gemini para que no
-/// las repita. Una muestra al azar, para no alargar demasiado el pedido.
+/// mismo, tiende a dar las mismas palabras. Por eso cada pedido lleva una
+/// muestra al azar de las palabras ya guardadas, para que no las repita.
+/// Es una muestra para no alargar demasiado el pedido.
 const AVOID_SAMPLE = 120;
 
 /// Se le piden a Gemini algunas palabras de más, porque se descartan las
@@ -188,11 +164,12 @@ export function sample(items, count) {
   return copy.slice(0, count);
 }
 
-/// Pedido para Gemini: cuántas palabras, de qué tema y cuáles evitar.
-export function buildPrompt(size, theme, avoid) {
+/// Pedido para Gemini: cuántas palabras y cuáles evitar. Sin tema: las
+/// palabras son de cualquier cosa; los temas son las categorías del juego.
+export function buildPrompt(size, avoid) {
   let prompt =
-    `Genera exactamente ${size} palabras o frases para el juego. ` +
-    `Tema principal: ${theme}, pero incluye también otras ideas variadas.`;
+    `Genera exactamente ${size} palabras o frases para el juego, al azar ` +
+    'y de cualquier tema.';
   if (avoid.length > 0) {
     prompt += ` Evita estas palabras y sus variantes: ${avoid.join(', ')}.`;
   }
@@ -259,25 +236,19 @@ export default {
     }
 
     /// Pide [n] palabras nuevas. Hasta GEMINI_CHUNK va en un solo pedido;
-    /// más de eso se reparte en pedidos en paralelo, cada uno con un tema
-    /// distinto. Todos llevan una muestra de palabras ya guardadas para que
-    /// Gemini no las repita, y se descartan las que igual se parezcan a una
-    /// existente. Si algún pedido falla se usan los demás; solo falla si
+    /// más de eso se reparte en pedidos en paralelo. Cada pedido lleva su
+    /// propia muestra de palabras ya guardadas para que Gemini no las
+    /// repita, y se descartan las que igual se parezcan a una existente o a
+    /// otra del mismo lote. Si algún pedido falla se usan los demás; solo falla si
     /// fallan todos.
     async function askGemini(n) {
       const existing = (await database(COLLECTION).select('frase')).map((w) => w.frase);
-      const avoid = sample(existing, AVOID_SAMPLE);
       const wanted = Math.ceil(n * (1 + GEMINI_EXTRA));
       const chunks = Math.ceil(wanted / GEMINI_CHUNK);
-      const themes = sample(GEMINI_THEMES, chunks);
       const results = await Promise.allSettled(
-        Array.from({ length: chunks }, (_, i) =>
+        Array.from({ length: chunks }, () =>
           askGeminiOnce(
-            buildPrompt(
-              Math.ceil(wanted / chunks),
-              themes[i % themes.length],
-              avoid,
-            ),
+            buildPrompt(Math.ceil(wanted / chunks), sample(existing, AVOID_SAMPLE)),
           ),
         ),
       );

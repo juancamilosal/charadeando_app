@@ -12,12 +12,13 @@ Directus 11 con PostgreSQL y Redis, desplegado con Coolify en el VPS.
   - `POST /juego/crear` con `{ "n": 20 }` (máximo 100): llama por dentro al
     flujo de Gemini con instrucciones fijas, guarda en `palabras` las nuevas
     con la categoría `LIBRE` y las devuelve con su id. Gemini no recuerda
-    los pedidos anteriores, así que cada pedido lleva un tema elegido al
-    azar y una muestra de 120 palabras ya guardadas para que no las repita.
+    los pedidos anteriores, así que cada pedido lleva una muestra al azar
+    de 120 palabras ya guardadas para que no las repita. No se le da un tema:
+    las palabras son de cualquier cosa (los temas son las categorías).
     Se le piden 40 % de palabras de más y se descartan las que ya existen o
     son variantes de otra ("Astronauta flotando" si ya está "Astronauta").
     Más de 25 palabras se piden en varios pedidos a Gemini en paralelo (de
-    hasta 25, cada uno con un tema distinto) para que tarde lo mismo que uno
+    hasta 25, cada uno con su propia muestra a evitar) para que tarde lo mismo que uno
     solo; si alguno falla se usan los demás. Responde 502 si fallan todos o
     si no queda ninguna palabra nueva. 5 peticiones por minuto por IP.
   - `POST /juego/palabras`: solo lee; entrega palabras al azar, con un
