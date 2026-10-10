@@ -10,6 +10,7 @@ import '../widgets/config_section.dart';
 import '../widgets/number_stepper.dart';
 import '../widgets/option_selector.dart';
 import '../widgets/play_background.dart';
+import '../widgets/tv_connect.dart';
 import '../widgets/words_reminder.dart';
 
 class ConfigScreen extends ConsumerStatefulWidget {
@@ -50,6 +51,9 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   HitMode? _hitMode;
 
   bool get _automatic => _config.wordSource == WordSource.random;
+
+  /// En el Modo TV no se graba, así que la opción de video no se muestra.
+  bool get _tvMode => _hitMode == HitMode.tv;
 
   /// Lo que falta elegir, para el aviso al tocar "Continuar".
   List<String> get _missingChoices => [
@@ -136,6 +140,16 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
     final premium = ref.watch(premiumUnlockedProvider);
     final automatic = _automatic;
     const gap = SizedBox(height: 14);
+    // Avisa cuando el televisor se conecta mientras se configura el Modo TV.
+    ref.listen(tvConnectedProvider, (previous, next) {
+      if (_tvMode && previous?.value != true && next.value == true) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            const SnackBar(content: Text('Conectado al televisor')),
+          );
+      }
+    });
     return PlayBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -286,34 +300,39 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                 children: [
                   OptionSelector<HitMode>(
                     label: 'Cómo se marcan los aciertos',
-                    options: HitMode.values,
+                    options: HitMode.optionsFor(_config.wordSource),
                     selected: _hitMode,
                     errorText: _choiceError(_hitMode),
                     labelOf: (o) => o.label,
                     lockReasonOf: (o) => o.available ? null : 'Próximamente',
+                    description: _hitMode?.description,
                     onSelected: (o) => setState(() => _hitMode = o),
                   ),
+                  if (_tvMode) const TvConnect(),
                 ],
               ),
-              gap,
-              ConfigSection(
-                icon: Icons.videocam,
-                title: 'Video',
-                children: [
-                  OptionSelector<VideoResolution>(
-                    label: 'Resolución',
-                    options: VideoResolution.values,
-                    selected: _config.resolution,
-                    labelOf: (o) => o.label,
-                    lockReasonOf: (o) =>
-                        o.premium && !premium ? 'Premium' : null,
-                    description:
-                        'Si tu celular no soporta la resolución elegida, se '
-                        'usa la más cercana.',
-                    onSelected: (o) => _update(_config.copyWith(resolution: o)),
-                  ),
-                ],
-              ),
+              if (!_tvMode) ...[
+                gap,
+                ConfigSection(
+                  icon: Icons.videocam,
+                  title: 'Video',
+                  children: [
+                    OptionSelector<VideoResolution>(
+                      label: 'Resolución',
+                      options: VideoResolution.values,
+                      selected: _config.resolution,
+                      labelOf: (o) => o.label,
+                      lockReasonOf: (o) =>
+                          o.premium && !premium ? 'Premium' : null,
+                      description:
+                          'Si tu celular no soporta la resolución elegida, '
+                          'se usa la más cercana.',
+                      onSelected: (o) =>
+                          _update(_config.copyWith(resolution: o)),
+                    ),
+                  ],
+                ),
+              ],
               const SizedBox(height: 24),
               FilledButton.icon(
                 icon: const Icon(Icons.arrow_forward),

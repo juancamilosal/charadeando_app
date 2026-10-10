@@ -15,6 +15,8 @@ import '../services/services.dart';
 import '../theme.dart';
 import '../widgets/countdown_view.dart';
 import '../widgets/play_background.dart';
+import '../widgets/tv_connect.dart';
+import '../widgets/tv_turn_view.dart';
 import '../widgets/word_card.dart';
 
 enum _Phase { ready, countdown, playing, paused, saving }
@@ -22,6 +24,10 @@ enum _Phase { ready, countdown, playing, paused, saving }
 /// Un turno: preparación, cuenta regresiva, juego con el celular en la
 /// frente y grabación con la cámara frontal. Si la app se va a segundo
 /// plano, el turno se pausa y al volver sigue donde quedó.
+///
+/// En el Modo TV el celular se duplica en el televisor y lo tiene un juez
+/// del grupo rival, que marca con botones. No se graba, y si el televisor
+/// se desconecta el turno se pausa y sigue al volver a conectarlo.
 class TurnScreen extends ConsumerStatefulWidget {
   const TurnScreen({super.key});
 
@@ -55,6 +61,9 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   /// "¡Seguimos!" en el video.
   bool _resumed = false;
 
+  /// Verdadero si el turno se pausó porque se desconectó el televisor.
+  bool _tvLost = false;
+
   // Grabación: una parte de video por cada tramo sin pausas, y los textos
   // que se escriben encima, medidos en el tiempo total grabado.
   final List<String> _segments = [];
@@ -77,9 +86,28 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     _initCamera();
   }
 
-  /// Falso si eligieron jugar sin grabar: no se abre la cámara.
-  bool get _records =>
-      ref.read(gameControllerProvider).config.resolution.records;
+  /// Falso si eligieron jugar sin grabar o en Modo TV: no se abre la
+  /// cámara.
+  bool get _records => ref.read(gameControllerProvider).config.records;
+
+  bool get _tvMode => ref.read(gameControllerProvider).config.tvMode;
+
+  /// Pausa el turno si se desconecta el televisor, y lo retoma con la
+  /// cuenta regresiva al volver a conectarlo.
+  void _onTvChanged(AsyncValue<bool>? previous, AsyncValue<bool> next) {
+    if (!_tvMode) return;
+    final was = previous?.value ?? false;
+    final now = next.value ?? false;
+    if (was && !now) {
+      if (_phase == _Phase.countdown || _phase == _Phase.playing) {
+        _tvLost = true;
+        _pause();
+      }
+    } else if (!was && now && _phase == _Phase.paused && _tvLost) {
+      _tvLost = false;
+      _startCountdown();
+    }
+  }
 
   Future<void> _initCamera() async {
     if (!_records) {
@@ -188,6 +216,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   // --- Juego ---------------------------------------------------------------
 
   Future<void> _startCountdown() async {
+    _tvLost = false;
     setState(() {
       _phase = _Phase.countdown;
       _countdown = _countdownFrom;
@@ -223,14 +252,17 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     } else {
       _showCaption(_deck[_wordIndex].text, CaptionStyle.word);
     }
-    _tilt = ref
-        .read(tiltServiceProvider)
-        .actions()
-        .listen(
-          (action) => _mark(
-            action == TiltAction.hit ? WordOutcome.hit : WordOutcome.pass,
-          ),
-        );
+    // En el Modo TV el juez marca con los botones.
+    if (!_tvMode) {
+      _tilt = ref
+          .read(tiltServiceProvider)
+          .actions()
+          .listen(
+            (action) => _mark(
+              action == TiltAction.hit ? WordOutcome.hit : WordOutcome.pass,
+            ),
+          );
+    }
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       final remaining = _remaining - const Duration(seconds: 1);
       if (remaining <= Duration.zero) {
@@ -354,6 +386,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   @override
   Widget build(BuildContext context) {
     final game = ref.watch(gameControllerProvider);
+    ref.listen(tvConnectedProvider, _onTvChanged);
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -365,7 +398,8 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
           body: switch (_phase) {
             _Phase.ready => _readyView(context, game),
             _Phase.countdown => CountdownView(value: _countdown),
-            _Phase.playing => _playingView(context),
+            _Phase.playing =>
+              game.config.tvMode ? _tvView(game) : _playingView(context),
             _Phase.paused => _pausedView(context),
             _Phase.saving => const Center(
               child: CircularProgressIndicator(color: Colors.white),
@@ -412,14 +446,16 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
                     : Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
-                            Icons.videocam_off,
+                          Icon(
+                            game.config.tvMode ? Icons.tv : Icons.videocam_off,
                             size: 72,
                             color: Colors.white70,
                           ),
                           if (!_records)
-                            const Text(
-                              'Jugando sin grabar',
+                            Text(
+                              game.config.tvMode
+                                  ? 'Modo TV: sin video'
+                                  : 'Jugando sin grabar',
                               style: TextStyle(
                                 color: Colors.white70,
                                 fontSize: 16,
@@ -431,12 +467,22 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Al tocar "¡Listo!", la pantalla gira. Pon el celular en tu '
-              'frente con la pantalla hacia tu grupo.\n'
-              'Inclínalo hacia abajo si aciertas y hacia arriba para pasar.',
-              style: white,
-            ),
+            if (game.config.tvMode) ...[
+              const Text(
+                'El que adivina se pone de espaldas al televisor. Un juez '
+                'del grupo rival toma este celular y marca "Pasar" o '
+                '"¡Correcto!".',
+                style: white,
+              ),
+              const SizedBox(height: 12),
+              const TvConnect(light: true),
+            ] else
+              const Text(
+                'Al tocar "¡Listo!", la pantalla gira. Pon el celular en tu '
+                'frente con la pantalla hacia tu grupo.\n'
+                'Inclínalo hacia abajo si aciertas y hacia arriba para pasar.',
+                style: white,
+              ),
             if (_cameraError != null) ...[
               const SizedBox(height: 8),
               Text(
@@ -471,8 +517,8 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
                   size: 72,
                   color: AppColors.yellow,
                 ),
-                const Text(
-                  'Juego en pausa',
+                Text(
+                  _tvLost ? 'Se desconectó el televisor' : 'Juego en pausa',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: AppFonts.display,
@@ -491,11 +537,33 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
                     fontWeight: FontWeight.w700,
                   ),
                 ),
+                if (_tvLost) ...[
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Vuelvan a conectarlo y el juego sigue donde quedó.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.yellow,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.cast),
+                    label: const Text('Conectar el televisor'),
+                    onPressed: () => connectTv(context, ref),
+                  ),
+                ],
                 const SizedBox(height: 20),
                 FilledButton.icon(
                   icon: const Icon(Icons.play_arrow),
                   label: Text(
-                    _cameraLoading ? 'Preparando cámara…' : 'Continuar',
+                    _cameraLoading
+                        ? 'Preparando cámara…'
+                        : _tvLost
+                        ? 'Seguir sin televisor'
+                        : 'Continuar',
                   ),
                   onPressed: _cameraLoading ? null : _startCountdown,
                 ),
@@ -508,6 +576,28 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
           ),
         ),
       ),
+    );
+  }
+
+  /// Lo que se ve en el televisor, con los botones del juez.
+  Widget _tvView(GameState game) {
+    final scores = [...game.scores];
+    scores[game.groupIndex] += Turn(
+      round: game.round,
+      groupIndex: game.groupIndex,
+      entries: _entries,
+    ).points(game.config.scoringMode);
+    return TvTurnView(
+      word: _deck[_wordIndex],
+      remaining: _remaining,
+      feedback: _feedback,
+      groupName: game.currentGroup.name,
+      roundLabel: game.config.roundLabel(game.round),
+      groups: game.groups,
+      scores: scores,
+      groupIndex: game.groupIndex,
+      onPass: () => _mark(WordOutcome.pass),
+      onHit: () => _mark(WordOutcome.hit),
     );
   }
 

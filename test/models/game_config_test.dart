@@ -21,4 +21,24 @@ void main() {
     expect(VideoResolution.hd.records, isTrue);
     expect(const GameConfig().resolution, VideoResolution.hd);
   });
+
+  test('el Modo TV solo se ofrece con palabras manuales', () {
+    expect(HitMode.optionsFor(WordSource.groups), contains(HitMode.tv));
+    expect(HitMode.optionsFor(WordSource.random), isNot(contains(HitMode.tv)));
+  });
+
+  test('el Modo TV no graba video', () {
+    const tv = GameConfig(hitMode: HitMode.tv);
+    expect(tv.tvMode, isTrue);
+    expect(tv.resolution.records, isTrue);
+    expect(tv.records, isFalse);
+    expect(const GameConfig().records, isTrue);
+    expect(
+      const GameConfig(
+        hitMode: HitMode.tv,
+        wordSource: WordSource.random,
+      ).tvMode,
+      isFalse,
+    );
+  });
 }

@@ -24,17 +24,48 @@ enum ScoringMode {
 /// Cómo se marcan los aciertos durante un turno.
 enum HitMode {
   /// El jugador inclina el celular: abajo es acierto, arriba es pasar.
-  tilt('Movimiento', available: true),
+  tilt(
+    'Movimiento',
+    'Inclinen el celular hacia abajo si aciertan y hacia arriba para pasar.',
+    available: true,
+  ),
+
+  /// La palabra se ve en el televisor y un juez del grupo rival marca con
+  /// los botones del celular. Solo con palabras manuales.
+  tv(
+    'Modo TV',
+    'Conecten el celular al televisor: allí se ven la palabra, el tiempo y '
+        'el marcador. Un juez del grupo rival marca "Pasar" y "¡Correcto!" '
+        'en este celular. No se graba video.',
+    available: true,
+    manualOnly: true,
+  ),
 
   /// Un jugador rival marca desde un segundo celular.
-  judge('Celular juez', available: false);
+  judge('Celular juez', null, available: false);
 
-  const HitMode(this.label, {required this.available});
+  const HitMode(
+    this.label,
+    this.description, {
+    required this.available,
+    this.manualOnly = false,
+  });
 
   final String label;
+  final String? description;
 
   /// Falso mientras el modo no esté implementado.
   final bool available;
+
+  /// Verdadero si solo se puede elegir con palabras escritas por los grupos.
+  final bool manualOnly;
+
+  /// Modos que se muestran en la configuración según de dónde salen las
+  /// palabras.
+  static List<HitMode> optionsFor(WordSource source) => [
+    for (final mode in values)
+      if (!mode.manualOnly || source == WordSource.groups) mode,
+  ];
 }
 
 /// De dónde salen las palabras de la partida.
@@ -144,6 +175,14 @@ class GameConfig {
   final VideoResolution resolution;
 
   int get groupCount => groups.length;
+
+  /// Verdadero si se juega con el televisor. Solo existe con palabras
+  /// escritas por los grupos.
+  bool get tvMode => hitMode == HitMode.tv && wordSource == WordSource.groups;
+
+  /// Si los turnos se graban. En el Modo TV el celular lo tiene el juez,
+  /// así que no hay video.
+  bool get records => !tvMode && resolution.records;
 
   /// Palabras de toda la partida, sumando las de todos los grupos.
   int get totalWords => wordsPerGroup * groupCount;

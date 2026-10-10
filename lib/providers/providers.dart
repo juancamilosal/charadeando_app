@@ -13,6 +13,12 @@ final wordBankProvider = Provider(
   (ref) => WordBank(ref.watch(directusServiceProvider)),
 );
 final tiltServiceProvider = Provider((ref) => TiltService());
+final tvServiceProvider = Provider((ref) => TvService());
+
+/// Si hay un televisor conectado al celular, para el Modo TV.
+final tvConnectedProvider = StreamProvider<bool>(
+  (ref) => ref.watch(tvServiceProvider).connection(),
+);
 final videoServiceProvider = Provider((ref) => VideoService());
 final videoRendererProvider = Provider((ref) => VideoRenderer());
 

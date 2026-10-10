@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:charadeando_app/models/models.dart';
 import 'package:charadeando_app/providers/providers.dart';
 import 'package:charadeando_app/router.dart';
@@ -11,10 +13,15 @@ import 'package:go_router/go_router.dart';
 Future<ProviderContainer> pumpConfig(
   WidgetTester tester, {
   GameConfig? config,
+  Stream<bool>? tv,
 }) async {
   tester.view.physicalSize = const Size(1080, 2400);
   addTearDown(tester.view.reset);
-  final container = ProviderContainer();
+  final container = ProviderContainer(
+    overrides: [
+      tvConnectedProvider.overrideWith((ref) => tv ?? Stream.value(false)),
+    ],
+  );
   addTearDown(container.dispose);
   if (config != null) {
     container.read(gameControllerProvider.notifier).configure(config);
@@ -162,5 +169,50 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(noVideo, findsOneWidget);
+  });
+
+  testWidgets('el Modo TV oculta el video y avisa al conectar el televisor', (
+    tester,
+  ) async {
+    final tv = StreamController<bool>();
+    addTearDown(tv.close);
+    await pumpConfig(tester, tv: tv.stream);
+    tv.add(false);
+
+    final tvMode = find.text('Modo TV');
+    await tester.scrollUntilVisible(
+      tvMode,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Resolución'), findsOneWidget);
+
+    await tester.tap(tvMode);
+    await tester.pump();
+    expect(find.text('Resolución'), findsNothing);
+    expect(find.text('Sin televisor'), findsOneWidget);
+    expect(find.text('Conectar las palabras a un televisor'), findsOneWidget);
+
+    tv.add(true);
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('Conectado al televisor'), findsNWidgets(2));
+  });
+
+  testWidgets('con palabras automáticas no se ofrece el Modo TV', (
+    tester,
+  ) async {
+    await pumpConfig(
+      tester,
+      config: const GameConfig(wordSource: WordSource.random),
+    );
+    final tilt = find.text('Movimiento');
+    await tester.scrollUntilVisible(
+      tilt,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Modo TV'), findsNothing);
   });
 }
