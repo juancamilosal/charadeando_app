@@ -26,21 +26,50 @@ const GEMINI_TIMEOUT_MS = 60 * 1000;
 /// largas se piden en varios pedidos en paralelo de este tamaño.
 const GEMINI_CHUNK = 25;
 
-/// Con varios pedidos a la vez, a cada uno se le da un enfoque distinto
-/// para que no traigan las mismas palabras.
-const GEMINI_FOCUS = [
-  'objetos y cosas de todos los días',
-  'personajes, profesiones y animales',
-  'lugares y comidas',
-  'actividades y acciones',
+/// Gemini no recuerda los pedidos anteriores: si siempre se le pide lo
+/// mismo, tiende a dar las mismas palabras. Cada pedido arranca de un tema
+/// elegido al azar, distinto para cada pedido en paralelo.
+export const GEMINI_THEMES = [
+  'objetos de la casa',
+  'comidas y bebidas',
+  'animales',
+  'oficios y profesiones',
+  'deportes',
+  'lugares y ciudades',
+  'personajes de cuentos y películas',
+  'medios de transporte',
+  'instrumentos musicales',
+  'ropa y accesorios',
+  'fiestas y celebraciones',
+  'naturaleza y clima',
+  'acciones de todos los días',
+  'juegos y juguetes',
+  'cuerpo humano',
+  'tecnología',
+  'escuela y oficina',
+  'vacaciones y viajes',
+  'cine y televisión',
+  'situaciones graciosas',
 ];
+
+/// Cuántas palabras de la colección se le muestran a Gemini para que no
+/// las repita. Una muestra al azar, para no alargar demasiado el pedido.
+const AVOID_SAMPLE = 120;
+
+/// Se le piden a Gemini algunas palabras de más, porque se descartan las
+/// que ya existen o se parecen a otras.
+const GEMINI_EXTRA = 0.4;
 
 const GEMINI_INSTRUCTIONS =
   'Responde SIEMPRE y ÚNICAMENTE con un array JSON de strings, sin ' +
   'explicaciones, sin markdown y sin texto fuera del array. Cada elemento ' +
   'debe ser una palabra o frase coherente (sustantivo, objeto, lugar, ' +
   'personaje o actividad) de entre 1 y 4 palabras, apta para que alguien la ' +
-  'describa y otra persona la adivine en un juego. Ejemplo de respuesta ' +
+  'describa y otra persona la adivine en un juego. Elige palabras variadas ' +
+  'y poco obvias, de temas distintos entre sí. No repitas palabras dentro ' +
+  'de la lista ni des variantes de una misma idea (por ejemplo, no ' +
+  '"Astronauta" y "Astronauta flotando"). Si te doy una lista de palabras a ' +
+  'evitar, no uses ninguna de ellas ni variantes. Ejemplo de respuesta ' +
   'válida: ["Peras", "Silla de caballo", "Una casa embrujada"]';
 
 /// Tope de palabras que se crean por petición. Debe coincidir con
@@ -97,6 +126,77 @@ function clientIp(req) {
 /// Normaliza para comparar sin importar mayúsculas ni espacios.
 function key(text) {
   return text.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+/// Palabras que no cuentan para saber si dos frases son la misma idea.
+const STOP_WORDS = new Set([
+  'el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'de', 'del', 'al',
+  'a', 'y', 'e', 'o', 'u', 'en', 'con', 'sin', 'por', 'para', 'mi', 'tu',
+  'su', 'se', 'que',
+]);
+
+/// Palabras importantes de una frase, sin tildes ni artículos:
+/// "El Astronauta flotando" → {astronauta, flotando}.
+export function significantWords(text) {
+  const plain = text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9ñ ]/g, ' ');
+  return new Set(plain.split(/\s+/).filter((w) => w && !STOP_WORDS.has(w)));
+}
+
+/// Recuerda frases para reconocer las variantes de una misma idea: dos
+/// frases se parecen si las palabras importantes de una están todas en la
+/// otra ("Astronauta" y "Astronauta flotando").
+export class SimilarWords {
+  constructor(texts = []) {
+    this.byWord = new Map();
+    for (const text of texts) this.add(text);
+  }
+
+  add(text) {
+    const words = significantWords(text);
+    if (words.size === 0) return;
+    for (const w of words) {
+      if (!this.byWord.has(w)) this.byWord.set(w, []);
+      this.byWord.get(w).push(words);
+    }
+  }
+
+  has(text) {
+    const words = significantWords(text);
+    if (words.size === 0) return false;
+    for (const w of words) {
+      for (const other of this.byWord.get(w) ?? []) {
+        const small = other.size <= words.size ? other : words;
+        const big = small === other ? words : other;
+        if ([...small].every((x) => big.has(x))) return true;
+      }
+    }
+    return false;
+  }
+}
+
+/// [count] elementos distintos de [items], al azar.
+export function sample(items, count) {
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy.slice(0, count);
+}
+
+/// Pedido para Gemini: cuántas palabras, de qué tema y cuáles evitar.
+export function buildPrompt(size, theme, avoid) {
+  let prompt =
+    `Genera exactamente ${size} palabras o frases para el juego. ` +
+    `Tema principal: ${theme}, pero incluye también otras ideas variadas.`;
+  if (avoid.length > 0) {
+    prompt += ` Evita estas palabras y sus variantes: ${avoid.join(', ')}.`;
+  }
+  return prompt;
 }
 
 /// Saca la lista de palabras de la respuesta del flujo, que trae el texto
@@ -158,37 +258,49 @@ export default {
       return parseGeminiWords(body);
     }
 
-    /// Pide [n] palabras. Hasta GEMINI_CHUNK va en un solo pedido; más de
-    /// eso se reparte en pedidos en paralelo, cada uno con un enfoque.
-    /// Si alguno falla se usan los demás; solo falla si fallan todos.
+    /// Pide [n] palabras nuevas. Hasta GEMINI_CHUNK va en un solo pedido;
+    /// más de eso se reparte en pedidos en paralelo, cada uno con un tema
+    /// distinto. Todos llevan una muestra de palabras ya guardadas para que
+    /// Gemini no las repita, y se descartan las que igual se parezcan a una
+    /// existente. Si algún pedido falla se usan los demás; solo falla si
+    /// fallan todos.
     async function askGemini(n) {
-      const chunks = Math.ceil(n / GEMINI_CHUNK);
-      if (chunks === 1) {
-        return askGeminiOnce(`Genera exactamente ${n} palabras o frases para el juego.`);
-      }
+      const existing = (await database(COLLECTION).select('frase')).map((w) => w.frase);
+      const avoid = sample(existing, AVOID_SAMPLE);
+      const wanted = Math.ceil(n * (1 + GEMINI_EXTRA));
+      const chunks = Math.ceil(wanted / GEMINI_CHUNK);
+      const themes = sample(GEMINI_THEMES, chunks);
       const results = await Promise.allSettled(
-        Array.from({ length: chunks }, (_, i) => {
-          const size = Math.ceil(n / chunks) + 2; // un margen por las repetidas
-          const focus = GEMINI_FOCUS[i % GEMINI_FOCUS.length];
-          return askGeminiOnce(
-            `Genera exactamente ${size} palabras o frases para el juego. ` +
-              `Enfócate sobre todo en ${focus}.`,
-          );
-        }),
+        Array.from({ length: chunks }, (_, i) =>
+          askGeminiOnce(
+            buildPrompt(
+              Math.ceil(wanted / chunks),
+              themes[i % themes.length],
+              avoid,
+            ),
+          ),
+        ),
       );
       const failed = results.filter((r) => r.status === 'rejected');
       if (failed.length === results.length) throw failed[0].reason;
       for (const r of failed) logger.warn(r.reason, '[juego] Un pedido a Gemini falló');
 
-      const seen = new Set();
+      const similar = new SimilarWords(existing);
       const words = [];
+      let skipped = 0;
       for (const r of results) {
         if (r.status !== 'fulfilled') continue;
         for (const w of r.value) {
-          if (seen.has(key(w))) continue;
-          seen.add(key(w));
+          if (similar.has(w)) {
+            skipped++;
+            continue;
+          }
+          similar.add(w);
           words.push(w);
         }
+      }
+      if (skipped > 0) {
+        logger.info(`[juego] Se descartaron ${skipped} palabras repetidas o parecidas`);
       }
       return words;
     }
@@ -235,7 +347,7 @@ export default {
         return error(res, 502, `Gemini no respondió: ${e.message}`);
       }
       if (words.length === 0) {
-        return error(res, 502, 'Gemini no devolvió una lista de palabras.');
+        return error(res, 502, 'Gemini no devolvió palabras nuevas.');
       }
 
       try {
