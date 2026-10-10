@@ -6,25 +6,33 @@ Directus 11 con PostgreSQL y Redis, desplegado con Coolify en el VPS.
 
 - La colección `palabras` (campos `id`, `frase`, `categoria`) **no es
   pública**: el rol Public no tiene ningún permiso sobre ella. Solo se edita
-  desde el panel de Directus.
-- La app pide las palabras a una ruta propia, `POST /juego/palabras`
-  (extensión `directus-extensions/charadeando-juego`), que:
-  - solo lee;
-  - entrega palabras al azar, con un máximo de 450 por petición;
-  - excluye hasta 500 ids que la app ya jugó, y completa con repetidas solo
-    si no alcanzan;
-  - permite 10 peticiones por minuto por IP (responde 429 al pasarse).
+  desde el panel de Directus o por la extensión.
+- La app usa dos rutas propias de la extensión
+  `directus-extensions/charadeando-juego`:
+  - `POST /juego/crear` con `{ "n": 20 }` (máximo 100): llama por dentro al
+    flujo de Gemini con instrucciones fijas, guarda en `palabras` las que no
+    existan con la categoría `LIBRE` y las devuelve con su id. Responde 502
+    si Gemini falla. 5 peticiones por minuto por IP.
+  - `POST /juego/palabras`: solo lee; entrega palabras al azar, con un
+    máximo de 450 por petición, excluye hasta 500 ids que la app ya jugó y
+    completa con repetidas solo si no alcanzan. 10 peticiones por minuto
+    por IP.
+- El flujo de Gemini se cambia con la variable de entorno
+  `CHARADEANDO_GEMINI_FLOW` (id del flujo); por defecto
+  `2d91a34a-b82c-4f97-9e2f-12154ba86323`.
 
-Cuerpo de la petición (todo opcional salvo `n`):
+Cuerpo de `/juego/palabras` (todo opcional salvo `n`):
 
 ```json
 { "n": 45, "categoria": "ANIMAL", "excluir": ["id1", "id2"] }
 ```
 
-Respuesta: `{ "data": [{ "id": "...", "frase": "...", "categoria": "..." }] }`.
+Respuesta de las dos rutas:
+`{ "data": [{ "id": "...", "frase": "...", "categoria": "..." }] }`.
 
-Los topes `MAX_COUNT` y `MAX_EXCLUDE` de `index.js` deben coincidir con
-`DirectusService.maxCount` y `DirectusService.maxExclude` en la app.
+Los topes `MAX_CREATE`, `MAX_COUNT` y `MAX_EXCLUDE` de `index.js` deben
+coincidir con `DirectusService.maxCreate`, `maxCount` y `maxExclude` en la
+app.
 
 ## Instalar o actualizar la extensión
 
@@ -47,24 +55,21 @@ Todo en la terminal del servidor.
 
    Guarda, toca **Restart current version** y repite este paso.
 
-2. Crear la carpeta de la extensión (cambia la ruta por la del paso 1):
+2. Descargar los archivos desde GitHub (la terminal web de Webdock corta
+   los textos largos al pegarlos, así que no conviene copiarlos a mano).
+   Cambia `COMMIT` por el commit que quieras instalar:
 
    ```sh
    EXT=/ruta/del/paso/1/charadeando-juego
+   COMMIT=develop
+   BASE=https://raw.githubusercontent.com/juancamilosal/charadeando_app/$COMMIT/server/directus-extensions/charadeando-juego
    sudo mkdir -p $EXT
+   sudo curl -fsSL -o $EXT/index.js $BASE/index.js
+   sudo curl -fsSL -o $EXT/package.json $BASE/package.json
    ```
 
-3. Copiar los dos archivos de `server/directus-extensions/charadeando-juego`
-   de este repositorio: abre cada uno en GitHub, copia su contenido y
-   pégalo con:
-
-   ```sh
-   sudo nano $EXT/package.json
-   sudo nano $EXT/index.js
-   ```
-
-   (En nano: pegar con clic derecho o Ctrl+Shift+V, guardar con Ctrl+O y
-   Enter, salir con Ctrl+X.)
+3. Revisar que se descargaron completos: `sudo sha256sum $EXT/index.js` y
+   comparar con `sha256sum` del archivo en el repositorio.
 
 4. En Coolify, toca **Restart current version** y revisa que cargó:
 
@@ -89,19 +94,21 @@ Todo en la terminal del servidor.
 
 ## Gemini
 
-La app pide las palabras primero al flujo de Directus
-`POST /flows/trigger/2d91a34a-b82c-4f97-9e2f-12154ba86323`, con el cuerpo
-de Gemini (`systemInstruction` con `role: system` y `contents`), igual que
-juego-palabras. La app lee el texto de Gemini en `respuesta` (o `texto`,
-`text`, `message`); también acepta la lista directa, envuelta en `data`, o
-la respuesta cruda de Gemini (`candidates[].content.parts[].text`).
+La extensión llama al flujo de Directus que habla con Gemini con este
+cuerpo, igual que juego-palabras: `systemInstruction` (con `role: system`)
+y `contents`. Lee el texto de Gemini en `respuesta` (o `texto`, `text`,
+`message`), por ejemplo:
+
+```json
+{ "respuesta": "[\"Astronauta\", \"Bailar tango\"]" }
+```
 
 ## Pendiente
 
-- Que el flujo de Gemini arme las instrucciones en el servidor y la app solo
-  mande la cantidad. Hoy el flujo acepta cualquier texto, así que alguien
-  podría usarlo para hacerle cualquier pregunta a Gemini con tu clave.
-- Límite de peticiones para el flujo de Gemini.
+- La URL pública del flujo (`/flows/trigger/...`) sigue aceptando cualquier
+  texto. La app ya no la usa, así que se puede proteger, por ejemplo
+  pidiendo un token en el flujo o pasándole a la extensión un id de flujo
+  que no sea público.
 
 - Firebase App Check (Play Integrity / App Attest) para que solo la app
   publicada pueda llamar a la ruta.

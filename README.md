@@ -18,10 +18,11 @@ la cámara frontal graba a los participantes para revivir las risas.
   palabras jugar (de 10 a 100, repartidas parejo entre los grupos) y la
   duración: hasta que se acaben las palabras, o por número de rondas (termina
   al completar las rondas o antes si se acaban las palabras). Al tocar
-  "Continuar" se descargan todas de una vez: primero se piden a Gemini
-  (flujo de Directus `flows/trigger/...`, la clave vive solo en el
-  servidor) y, si Gemini falla o repite palabras recientes, se completan con
-  la ruta `POST /juego/palabras` de Directus. Durante el juego no se usa
+  "Continuar" se muestra "Creando palabras…" mientras Gemini las crea por la
+  ruta `POST /juego/crear` de Directus, que además las guarda en la colección
+  con la categoría LIBRE. Si Gemini falla o repite palabras recientes, se
+  completan con palabras de la colección (`POST /juego/palabras`) hasta la
+  cantidad elegida. Durante el juego no se usa
   internet ni se piden más. El celular
   recuerda las últimas 500 palabras jugadas (ids y textos) para no repetirlas, y guarda el
   último lote para jugar sin internet. Ver `server/README.md`.

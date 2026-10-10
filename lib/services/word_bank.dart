@@ -7,7 +7,6 @@ import 'package:path_provider/path_provider.dart';
 
 import '../models/models.dart';
 import 'directus_service.dart';
-import 'gemini_service.dart';
 
 /// Palabras descargadas para una partida automática.
 class WordBatch {
@@ -22,7 +21,8 @@ class WordBatch {
 
 /// Descarga las palabras automáticas:
 ///
-/// 1. Se las pide a Gemini (flujo de Directus).
+/// 1. Se las pide a Gemini por `/juego/crear`, que además las guarda en la
+///    colección con la categoría LIBRE.
 /// 2. Si Gemini falla, o repite palabras jugadas hace poco, completa con la
 ///    colección de palabras de Directus (`/juego/palabras`).
 /// 3. Sin internet, usa el último lote guardado.
@@ -32,7 +32,6 @@ class WordBatch {
 /// ids que se piden excluir a Directus.
 class WordBank {
   WordBank(
-    this._gemini,
     this._directus, {
     Future<Directory> Function()? directory,
     Random? random,
@@ -44,7 +43,6 @@ class WordBank {
   /// Cuántos ids de palabras jugadas se recuerdan.
   static const historySize = DirectusService.maxExclude;
 
-  final GeminiService _gemini;
   final DirectusService _directus;
   final Future<Directory> Function() _directory;
   final Random _random;
@@ -55,24 +53,16 @@ class WordBank {
     final stored = await _read();
     final recent = stored.texts.toSet();
 
-    var fromGemini = const <String>[];
+    var fromGemini = const <RemoteWord>[];
     try {
-      fromGemini = await _gemini.fetchWords(count);
-    } on GeminiException catch (e) {
-      debugPrint('[WordBank] Gemini falló, se usa Directus: $e');
+      fromGemini = await _directus.createWords(count);
+    } on DirectusException catch (e) {
+      debugPrint('[WordBank] Gemini falló, se usa la colección: $e');
     }
-    final fresh = [
-      for (final t in fromGemini)
-        if (!recent.contains(_key(t))) t,
-    ];
-    final repeated = [
-      for (final t in fromGemini)
-        if (recent.contains(_key(t))) t,
-    ];
-    final words = [
-      for (final t in fresh.take(count))
-        RemoteWord(id: '', frase: t, categoria: ''),
-    ];
+    bool isRecent(RemoteWord w) =>
+        stored.history.contains(w.id) || recent.contains(_key(w.frase));
+    final repeated = fromGemini.where(isRecent).toList();
+    final words = fromGemini.where((w) => !isRecent(w)).take(count).toList();
 
     final missing = count - words.length;
     if (missing > 0) {
@@ -81,9 +71,11 @@ class WordBank {
         final extra = await _directus.fetchWords(
           count: missing,
           category: category,
-          exclude: stored.history,
+          exclude: [...stored.history, for (final w in words) w.id],
         );
-        words.addAll(extra.where((w) => taken.add(_key(w.frase))));
+        words.addAll(
+          extra.where((w) => taken.add(_key(w.frase))).take(missing),
+        );
       } on DirectusException catch (e) {
         if (words.isEmpty && repeated.isEmpty) {
           if (stored.cache.isEmpty) rethrow;
@@ -96,9 +88,9 @@ class WordBank {
         debugPrint('[WordBank] Directus falló, se completa con Gemini: $e');
       }
       // Si aún faltan, mejor repetir alguna de Gemini que quedarse corto.
-      for (final t in repeated) {
+      for (final w in repeated) {
         if (words.length >= count) break;
-        words.add(RemoteWord(id: '', frase: t, categoria: ''));
+        words.add(w);
       }
     }
 

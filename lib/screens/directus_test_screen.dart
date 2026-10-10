@@ -9,9 +9,10 @@ import '../services/services.dart';
 import '../theme.dart';
 import '../widgets/play_background.dart';
 
-/// Pantalla de prueba: pide 20 palabras a la ruta del juego de Directus, o
-/// a Gemini si [gemini] es verdadero, y muestra cada una con su categoría, o
-/// el error y la respuesta del servidor si algo falla.
+/// Pantalla de prueba: pide 20 palabras al azar a la colección de Directus,
+/// o le pide a Gemini 20 nuevas (que quedan guardadas) si [gemini] es
+/// verdadero. Muestra cada una con su categoría, o el error y la respuesta
+/// del servidor si algo falla.
 class DirectusTestScreen extends ConsumerStatefulWidget {
   const DirectusTestScreen({super.key, this.gemini = false});
 
@@ -31,24 +32,16 @@ class _DirectusTestScreenState extends ConsumerState<DirectusTestScreen> {
   }
 
   void _load() {
+    final directus = ref.read(directusServiceProvider);
     _words = widget.gemini
-        ? ref
-              .read(geminiServiceProvider)
-              .fetchWords(20)
-              .then(
-                (words) => [
-                  for (final w in words)
-                    RemoteWord(id: '', frase: w, categoria: 'GEMINI'),
-                ],
-              )
-        : ref.read(directusServiceProvider).fetchWords(count: 20);
+        ? directus.createWords(20)
+        : directus.fetchWords(count: 20);
   }
 
   @override
   Widget build(BuildContext context) {
-    final url = widget.gemini
-        ? ref.read(geminiServiceProvider).flowUrl
-        : '${ref.read(directusServiceProvider).wordsUri}';
+    final directus = ref.read(directusServiceProvider);
+    final url = widget.gemini ? directus.createUri : directus.wordsUri;
     return PlayBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -196,14 +189,6 @@ class _ErrorCard extends StatelessWidget {
       DirectusException(:final statusCode, :final hint, :final body) => (
         statusCode,
         hint,
-        body,
-      ),
-      GeminiException(:final statusCode, :final body) => (
-        statusCode,
-        statusCode == null
-            ? 'Revisa la conexión a internet y que Directus esté encendido.'
-            : 'El flujo de Gemini respondió con un error o con un formato '
-                  'que la app no reconoce.',
         body,
       ),
       _ => (null, null, null),

@@ -11,8 +11,9 @@ import '../services/services.dart';
 import '../theme.dart';
 import '../widgets/play_background.dart';
 
-/// Descarga de una vez las palabras automáticas de toda la partida y
-/// empieza el primer turno. Durante el juego no se usa internet.
+/// Crea con Gemini las palabras automáticas de toda la partida, espera a
+/// que estén listas y empieza el primer turno. Durante el juego no se usa
+/// internet.
 class AutoWordsScreen extends ConsumerStatefulWidget {
   const AutoWordsScreen({super.key});
 
@@ -104,7 +105,7 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
           CircularProgressIndicator(color: Colors.white),
           SizedBox(height: 20),
           Text(
-            'Buscando palabras…',
+            'Creando palabras…',
             style: TextStyle(
               fontFamily: AppFonts.display,
               fontSize: 26,

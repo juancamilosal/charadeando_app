@@ -9,12 +9,8 @@ export 'turn_video_controller.dart';
 
 final wordServiceProvider = Provider((ref) => WordService());
 final directusServiceProvider = Provider((ref) => DirectusService());
-final geminiServiceProvider = Provider((ref) => GeminiService());
 final wordBankProvider = Provider(
-  (ref) => WordBank(
-    ref.watch(geminiServiceProvider),
-    ref.watch(directusServiceProvider),
-  ),
+  (ref) => WordBank(ref.watch(directusServiceProvider)),
 );
 final tiltServiceProvider = Provider((ref) => TiltService());
 final videoServiceProvider = Provider((ref) => VideoService());
