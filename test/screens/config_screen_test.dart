@@ -192,10 +192,13 @@ void main() {
 
     await tester.tap(withTv);
     await tester.pump();
-    expect(find.text('Cómo funciona'), findsOneWidget);
+    expect(
+      find.textContaining('Duplica la pantalla de tu celular'),
+      findsOneWidget,
+    );
     expect(find.text('Cómo se marcan los aciertos'), findsNothing);
     expect(find.text('Resolución'), findsNothing);
-    expect(find.text('Televisor sin conectar'), findsOneWidget);
+    expect(find.text('Ningún TV conectado todavía'), findsOneWidget);
 
     await tapContinue(tester);
     expect(find.text('Palabras'), findsNothing);
@@ -211,7 +214,10 @@ void main() {
     await tester.pump();
     // El aviso anterior se cierra antes de mostrar el nuevo.
     await tester.pumpAndSettle();
-    expect(find.text('Conectado al televisor'), findsNWidgets(2));
+    expect(
+      find.text('El TV ya está conectado a este celular'),
+      findsNWidgets(2),
+    );
     // Se espera a que el aviso se cierre para que no tape el botón.
     await tester.pump(const Duration(seconds: 5));
     await tester.pumpAndSettle();

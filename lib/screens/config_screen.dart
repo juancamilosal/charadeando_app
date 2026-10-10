@@ -6,7 +6,6 @@ import '../models/models.dart';
 import '../providers/providers.dart';
 import '../router.dart';
 import '../services/services.dart';
-import '../theme.dart';
 import '../widgets/config_section.dart';
 import '../widgets/number_stepper.dart';
 import '../widgets/option_selector.dart';
@@ -159,7 +158,9 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
-            const SnackBar(content: Text('Conectado al televisor')),
+            const SnackBar(
+              content: Text('El TV ya está conectado a este celular'),
+            ),
           );
       }
     });
@@ -360,27 +361,13 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
     );
   }
 
-  /// Si juegan con el televisor, cómo funciona y el botón para conectarlo.
+  /// Si juegan con el televisor y si ya está conectado.
   Widget _tvSection() {
     final connected = ref.watch(tvConnectedProvider).value ?? false;
-    const steps = [
-      'Conecten este celular al televisor con AirPlay, Chromecast o un '
-          'cable HDMI.',
-      'En el televisor se ven la palabra, el tiempo, el grupo, el marcador '
-          'y los resultados de cada turno.',
-      'El que adivina se para de espaldas al televisor y su grupo le da '
-          'pistas.',
-      'Un juez del grupo rival tiene este celular y toca "Pasar" o '
-          '"¡Correcto!".',
-      'Si el televisor se desconecta, el juego queda en pausa y sigue al '
-          'volver a conectarlo.',
-      'En el Modo TV no se graba video.',
-    ];
     return ConfigSection(
       icon: Icons.tv,
       title: 'Modo TV',
       children: [
-        const Text('Jueguen con las palabras en grande en el televisor.'),
         OptionSelector<bool>(
           label: '¿Juegan con el televisor?',
           options: const [false, true],
@@ -391,33 +378,8 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
         ),
         if (_tvMode) ...[
           const Text(
-            'Cómo funciona',
-            style: TextStyle(fontWeight: FontWeight.w800),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (var i = 0; i < steps.length; i++)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 22,
-                        child: Text(
-                          '${i + 1}.',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.purple,
-                          ),
-                        ),
-                      ),
-                      Expanded(child: Text(steps[i])),
-                    ],
-                  ),
-                ),
-            ],
+            'Duplica la pantalla de tu celular en cualquier TV. Un juez '
+            'marca "Pasar" y "¡Correcto!" con botones. No se graba video.',
           ),
           const TvConnect(),
           if (_showErrors && !connected)

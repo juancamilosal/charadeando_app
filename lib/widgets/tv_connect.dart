@@ -28,7 +28,9 @@ class TvConnect extends ConsumerWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                connected ? 'Conectado al televisor' : 'Televisor sin conectar',
+                connected
+                    ? 'El TV ya está conectado a este celular'
+                    : 'Ningún TV conectado todavía',
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
                   color: light ? Colors.white : AppColors.ink,
