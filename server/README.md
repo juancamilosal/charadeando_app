@@ -21,9 +21,12 @@ Directus 11 con PostgreSQL y Redis, desplegado con Coolify en el VPS.
     hasta 25, cada uno con su propia muestra a evitar) para que tarde lo mismo que uno
     solo; si alguno falla se usan los demás. Responde 502 si fallan todos o
     si no queda ninguna palabra nueva. 5 peticiones por minuto por IP.
-  - `POST /juego/palabras`: solo lee; entrega palabras al azar, con un
-    máximo de 450 por petición, excluye hasta 500 ids que la app ya jugó y
-    completa con repetidas solo si no alcanzan. 10 peticiones por minuto
+  - `POST /juego/palabras`: solo lee; entrega palabras al azar de la
+    categoría y dificultad pedidas, con un máximo de 450 por petición, y
+    excluye hasta 500 ids que la app ya jugó. Si no alcanzan, completa con
+    palabras no jugadas de las otras dificultades, luego con ya jugadas de
+    la misma dificultad y por último con ya jugadas de cualquier
+    dificultad, siempre de la misma categoría. 10 peticiones por minuto
     por IP.
 - El flujo de Gemini se cambia con la variable de entorno
   `CHARADEANDO_GEMINI_FLOW` (id del flujo); por defecto

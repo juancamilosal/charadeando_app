@@ -363,21 +363,29 @@ export default {
       }
 
       try {
-        const query = () => {
+        const query = (conDificultad) => {
           const q = database(COLLECTION).select('id', 'frase', 'categoria').orderByRaw('random()');
           if (categoria) q.where('categoria', categoria);
-          if (dificultad) q.where('dificultad', dificultad);
+          if (conDificultad && dificultad) q.where('dificultad', dificultad);
           return q;
         };
 
-        // Primero las que la app no ha jugado; si no alcanzan, se completa
-        // con palabras ya jugadas para que la partida no quede corta.
-        const fresh = await query().whereNotIn('id', excluir).limit(n);
-        let data = fresh;
-        if (fresh.length < n) {
-          const used = fresh.map((w) => w.id);
-          const repeated = await query().whereNotIn('id', used).limit(n - fresh.length);
-          data = [...fresh, ...repeated];
+        // Para que la partida no quede corta, se completa en este orden:
+        // 1. palabras que la app no ha jugado, de la dificultad elegida;
+        // 2. palabras no jugadas de las otras dificultades;
+        // 3. palabras ya jugadas de la dificultad elegida;
+        // 4. palabras ya jugadas de cualquier dificultad.
+        const pasos = [
+          () => query(true).whereNotIn('id', excluir),
+          () => query(false).whereNotIn('id', excluir),
+          () => query(true),
+          () => query(false),
+        ];
+        const data = [];
+        for (const paso of pasos) {
+          if (data.length >= n) break;
+          const tomadas = data.map((w) => w.id);
+          data.push(...(await paso().whereNotIn('id', tomadas).limit(n - data.length)));
         }
         return res.json({ data });
       } catch (e) {

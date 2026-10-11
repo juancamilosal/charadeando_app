@@ -118,21 +118,29 @@ void main() {
 
     await tester.tap(find.text('Rellenar datos de prueba'));
     await tester.pump();
-    await tester.tap(find.byIcon(Icons.add).at(1));
-    await tester.pump();
-    expect(find.text('35'), findsOneWidget);
+    // Los datos de prueba juegan por rondas: no se elige la cantidad.
+    expect(find.text('Palabras de la partida'), findsNothing);
 
     final untilEnd = find.text('Hasta que se acaben las palabras');
-    await tester.scrollUntilVisible(
-      untilEnd,
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
     await tester.ensureVisible(untilEnd);
     await tester.pumpAndSettle();
     await tester.tap(untilEnd);
     await tester.pump();
     expect(find.text('Rondas'), findsNothing);
+    expect(find.text('Palabras de la partida'), findsOneWidget);
+
+    final more = find.descendant(
+      of: find.ancestor(
+        of: find.text('Palabras de la partida'),
+        matching: find.byType(Row),
+      ),
+      matching: find.byIcon(Icons.add),
+    );
+    await tester.ensureVisible(more.first);
+    await tester.pumpAndSettle();
+    await tester.tap(more.first);
+    await tester.pump();
+    expect(find.text('35'), findsOneWidget);
 
     await tapContinue(tester);
     expect(find.text('Descargando'), findsOneWidget);

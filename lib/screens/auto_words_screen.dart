@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,8 +20,21 @@ class AutoWordsScreen extends ConsumerStatefulWidget {
 
   /// Cuántas palabras pedir para [config]: las mismas para cada grupo.
   /// No se piden más durante la partida; si se acaban, termina.
-  static int countFor(GameConfig config) =>
-      config.autoWordsPerGroup * config.groupCount;
+  ///
+  /// Por número de rondas no se elige la cantidad: se piden las que alcanzan
+  /// para todas las rondas, una cada 3 segundos de turno (mínimo 10 por
+  /// turno), sin pasar del tope del servidor.
+  static int countFor(GameConfig config) {
+    if (config.gameEnd == GameEnd.rounds) {
+      final perTurn = max(10, config.turnDuration.inSeconds ~/ 3);
+      final perGroup = min(
+        config.rounds * perTurn,
+        DirectusService.maxCount ~/ config.groupCount,
+      );
+      return perGroup * config.groupCount;
+    }
+    return config.autoWordsPerGroup * config.groupCount;
+  }
 
   @override
   ConsumerState<AutoWordsScreen> createState() => _AutoWordsScreenState();

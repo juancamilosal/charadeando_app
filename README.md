@@ -29,6 +29,11 @@ la cámara frontal graba a los participantes para revivir las risas.
   se usa internet ni se piden más. El celular recuerda las últimas 500
   palabras jugadas para no repetirlas, y guarda el
   último lote para jugar sin internet. Ver `server/README.md`.
+- Con palabras automáticas, la duración del juego va primero. Por número
+  de rondas no se elige la cantidad de palabras: se traen las que alcanzan
+  para todas las rondas (una cada 3 segundos de turno). Si una dificultad
+  se queda sin palabras, se completa con las otras, y si se acaban todas se
+  vuelven a usar las ya jugadas.
 - En el turno se ve cuántas palabras faltan por adivinar en toda la partida
   ("Faltan 12 palabras"), también antes de empezar y en el Modo TV.
 - Un solo celular, aciertos con movimiento: inclinar hacia abajo es acierto y

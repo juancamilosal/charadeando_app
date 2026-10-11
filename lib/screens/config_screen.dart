@@ -213,11 +213,12 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
               ),
               gap,
               if (automatic) ...[
-                _autoWordsSection(),
-                gap,
-                _difficultySection(),
-                gap,
                 _durationSection(),
+                gap,
+                // Por número de rondas se traen las palabras que alcancen:
+                // no se elige la cantidad.
+                if (_gameEnd != GameEnd.rounds) ...[_autoWordsSection(), gap],
+                _difficultySection(),
                 gap,
               ] else ...[
                 ConfigSection(
