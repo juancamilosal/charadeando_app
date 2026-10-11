@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/models.dart';
 import '../theme.dart';
+import 'end_game_dialog.dart';
 import 'word_card.dart';
 
 /// Turno del Modo TV. El celular se duplica en el televisor, así que esta
@@ -22,6 +23,7 @@ class TvTurnView extends StatelessWidget {
     required this.wordsLeft,
     required this.onPass,
     required this.onHit,
+    this.onEndGame,
   });
 
   static const _hitColors = [AppColors.green, Color(0xFF0E9F55)];
@@ -44,6 +46,9 @@ class TvTurnView extends StatelessWidget {
   final int wordsLeft;
   final VoidCallback onPass;
   final VoidCallback onHit;
+
+  /// "Finalizar juego", para terminar la partida sin esperar el turno.
+  final VoidCallback? onEndGame;
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +102,19 @@ class TvTurnView extends StatelessWidget {
                       ],
                     ),
                   ),
+                  if (onEndGame != null) ...[
+                    // En pantallas angostas solo la bandera, para que
+                    // quepan el grupo y el tiempo.
+                    if (MediaQuery.sizeOf(context).width < 600)
+                      IconButton(
+                        icon: const Icon(Icons.flag, color: Colors.white),
+                        tooltip: 'Finalizar juego',
+                        onPressed: onEndGame,
+                      )
+                    else
+                      EndGameButton(onPressed: onEndGame, compact: true),
+                    const SizedBox(width: 8),
+                  ],
                   _Timer(remaining: remaining),
                 ],
               ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/models.dart';
 import '../theme.dart';
+import 'end_game_dialog.dart';
 
 /// Lo que ven los demás mientras el jugador tiene el celular en la frente:
 /// la palabra en grande, el tiempo restante y el resultado de cada palabra.
@@ -13,6 +14,7 @@ class WordCard extends StatelessWidget {
     required this.feedback,
     required this.recording,
     required this.wordsLeft,
+    this.onEndGame,
   });
 
   /// "Faltan 12 palabras", o "Falta 1 palabra".
@@ -29,6 +31,10 @@ class WordCard extends StatelessWidget {
 
   /// Palabras que faltan por adivinar en toda la partida.
   final int wordsLeft;
+
+  /// "Finalizar juego" en una esquina, para terminar la partida sin
+  /// esperar a que se acabe el turno.
+  final VoidCallback? onEndGame;
 
   @override
   Widget build(BuildContext context) {
@@ -122,6 +128,12 @@ class WordCard extends StatelessWidget {
                 ),
               ),
             ),
+            if (onEndGame != null)
+              Positioned(
+                left: 8,
+                bottom: 8,
+                child: EndGameButton(onPressed: onEndGame, compact: true),
+              ),
             if (recording)
               const Positioned(
                 top: 20,

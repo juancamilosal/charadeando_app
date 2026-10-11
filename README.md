@@ -34,8 +34,14 @@ la cámara frontal graba a los participantes para revivir las risas.
   se usa internet ni se piden más. El celular recuerda las últimas 500
   palabras jugadas para no repetirlas, y guarda el
   último lote para jugar sin internet. Ver `server/README.md`.
-- Con palabras automáticas, la duración del juego va primero. Por número
-  de rondas no se elige la cantidad de palabras: se traen las que alcanzan
+- "Llenar automáticamente" (arriba en la configuración): el juego pone los
+  nombres de los grupos (por defecto 2; si agregan más, también los nombra)
+  y elige al azar el resto: duración, rondas, tiempo por turno, cantidad de
+  palabras según los grupos (8 a 15 por grupo), dificultad, puntuación y
+  aciertos. Cada toque da una configuración nueva, con otros nombres.
+- Con palabras automáticas, la duración del juego va primero. La cantidad
+  de palabras solo se pregunta al elegir "Hasta que se acaben las
+  palabras". Por número de rondas no se elige la cantidad de palabras: se traen las que alcanzan
   para todas las rondas (una cada 3 segundos de turno). Si una dificultad
   se queda sin palabras, se completa con las otras, y si se acaban todas se
   vuelven a usar las ya jugadas.
@@ -100,8 +106,9 @@ la cámara frontal graba a los participantes para revivir las risas.
 - El video final muestra las palabras que se están adivinando, los aciertos y
   los pases. Se arma con FFmpeg (`ffmpeg_kit_flutter_new_video`, licencia
   LGPL) mientras se ven los resultados del turno.
-- "Finalizar juego": antes de cada turno (arriba a la derecha), con el turno
-  en pausa y en la tabla de puntajes. Pregunta antes de terminar y lleva a
+- "Finalizar juego": antes de cada turno (arriba a la derecha), mientras
+  se muestran las palabras (abajo a la izquierda; en Modo TV, arriba junto
+  al tiempo), con el turno en pausa y en la tabla de puntajes. Pregunta antes de terminar y lleva a
   los resultados finales con los puntajes de ese momento (si el turno estaba
   en pausa, sus palabras marcadas cuentan). Si todavía no se jugó ningún
   turno, vuelve al inicio.

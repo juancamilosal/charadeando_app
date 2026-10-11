@@ -673,6 +673,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
       wordsLeft: _wordsLeft(game),
       onPass: () => _mark(WordOutcome.pass),
       onHit: () => _mark(WordOutcome.hit),
+      onEndGame: _endGame,
     );
   }
 
@@ -683,6 +684,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
       feedback: _feedback,
       recording: _camera.isRecording,
       wordsLeft: _wordsLeft(game),
+      onEndGame: _endGame,
     );
     if (!kDebugMode) return card;
     // En desarrollo, tocar la mitad izquierda pasa y la derecha acierta,

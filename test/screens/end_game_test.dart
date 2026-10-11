@@ -4,6 +4,7 @@ import 'package:charadeando_app/router.dart';
 import 'package:charadeando_app/screens/turn_result_screen.dart';
 import 'package:charadeando_app/screens/turn_screen.dart';
 import 'package:charadeando_app/services/services.dart';
+import 'package:charadeando_app/widgets/word_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -137,5 +138,65 @@ void main() {
     await _endGame(tester);
     expect(find.text('Final'), findsOneWidget);
     expect(container.read(gameControllerProvider).finished, isTrue);
+  });
+
+  testWidgets('mientras se muestran las palabras también se puede '
+      'finalizar, y cuenta lo que ya se marcó', (tester) async {
+    final container = ProviderContainer(
+      overrides: [
+        tvConnectedProvider.overrideWith((ref) => Stream.value(true)),
+        videoServiceProvider.overrideWithValue(_NoVideos()),
+      ],
+    );
+    addTearDown(container.dispose);
+    final game = container.read(gameControllerProvider.notifier);
+    game.configure(
+      const GameConfig(
+        groups: _groups,
+        hitMode: HitMode.tv,
+        scoringMode: ScoringMode.perPhrase,
+      ),
+    );
+    game.startWithDecks([
+      [Word('Pizza'), Word('Jirafa')],
+      [Word('Titanic')],
+    ]);
+    await _show(tester, container, Routes.turn);
+    await tester.tap(find.text('¡Listo!'));
+    // El juego se ve en horizontal.
+    tester.view.physicalSize = const Size(2400, 1080);
+    for (var i = 0; i < 4; i++) {
+      await tester.pump(const Duration(seconds: 1));
+    }
+    expect(find.text('Pizza'), findsOneWidget);
+    await tester.tap(find.text('¡Correcto!'));
+    await tester.pump(const Duration(milliseconds: 800));
+    expect(find.text('Jirafa'), findsOneWidget);
+
+    await _endGame(tester);
+    expect(find.text('Final'), findsOneWidget);
+    final state = container.read(gameControllerProvider);
+    expect(state.finished, isTrue);
+    expect(state.scores, [1, 0]);
+  });
+
+  testWidgets('la tarjeta de la palabra muestra "Finalizar juego"', (
+    tester,
+  ) async {
+    var ended = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: WordCard(
+          word: Word('Pizza'),
+          remaining: const Duration(seconds: 30),
+          feedback: null,
+          recording: false,
+          wordsLeft: 5,
+          onEndGame: () => ended = true,
+        ),
+      ),
+    );
+    await tester.tap(find.text('Finalizar juego'));
+    expect(ended, isTrue);
   });
 }
