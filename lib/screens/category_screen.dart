@@ -84,6 +84,13 @@ class CategoryScreen extends ConsumerWidget {
                     ),
                 ],
               ),
+              const SizedBox(height: 28),
+              // Sección aparte, no es una categoría de palabras.
+              OutlinedButton.icon(
+                icon: const Icon(Icons.casino),
+                label: const Text('Ruleta de castigos'),
+                onPressed: () => context.go(Routes.punishments),
+              ),
             ],
           ),
         ),

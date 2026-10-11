@@ -41,6 +41,28 @@ la cámara frontal graba a los participantes para revivir las risas.
   vuelven a usar las ya jugadas.
 - En el turno se ve cuántas palabras faltan por adivinar en toda la partida
   ("Faltan 12 palabras"), también antes de empezar y en el Modo TV.
+- Ruleta de castigos: una sección propia (botón "Ruleta de castigos" en la
+  pantalla de categorías, no es una categoría de palabras). Se elige la
+  cantidad de campos (de 2 a 10, la ruleta se divide en partes iguales) y de
+  dónde salen los castigos: "Los escribimos nosotros", "Que los ponga el
+  juego" (unos 30 castigos para todo público, en `services/punishments.dart`)
+  o "Mezclados" (el grupo escribe algunos y el juego completa los vacíos sin
+  repetir). La ruleta queda guardada en el celular.
+- Cómo gira: "Girar" la pone a toda velocidad y sigue sola hasta que tocan
+  "¡Parar!" (o pasan 30 segundos). Entonces se elige el castigo al azar (el
+  momento del toque no influye) y la ruleta frena durante 10 segundos con una
+  curva que es rápida al principio y muy lenta al final, hasta quedar justo en
+  el centro de ese campo. Cada campo que pasa por el indicador hace un "tic"
+  con vibración, y al caer el castigo aparece en grande con una vibración
+  fuerte, con "Girar otra vez" y "Listo".
+- Al final de la partida, el grupo con menos puntos ve "¡Ruleta de castigo
+  para …!" con "Girar" o "Sin castigo". Si varios empatan con menos puntos,
+  cada uno gira su ruleta, uno después del otro; si todos empatan, no hay
+  castigo. Usa la ruleta guardada en la sección o, si nunca se configuró, 8
+  castigos del juego. En Modo TV la ruleta se ve en el televisor porque el
+  celular duplica su pantalla. Queda preparado `PunishmentService` para
+  traer los castigos de una colección `castigos` de Directus
+  (`POST /juego/castigos`), pero todavía no se usa.
 - Un solo celular, aciertos con movimiento: inclinar hacia abajo es acierto y
   hacia arriba es pasar.
 - Modo TV, en todas las categorías: se activa solo cuando el celular duplica

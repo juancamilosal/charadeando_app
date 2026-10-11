@@ -7,6 +7,7 @@ import 'screens/config_screen.dart';
 import 'screens/directus_test_screen.dart';
 import 'screens/final_result_screen.dart';
 import 'screens/free_mode_screen.dart';
+import 'screens/roulette_screen.dart';
 import 'screens/turn_result_screen.dart';
 import 'screens/turn_screen.dart';
 import 'screens/video_screen.dart';
@@ -26,6 +27,13 @@ abstract final class Routes {
   static const video = '/video';
   static const finalResult = '/final';
   static const directusTest = '/directus';
+
+  /// Sección "Ruleta de castigos".
+  static const punishments = '/ruleta';
+
+  /// Ruleta de castigo de un grupo al final de la partida. Recibe el nombre
+  /// del grupo como `extra`.
+  static const punishmentSpin = '/castigo';
 }
 
 final router = GoRouter(
@@ -49,6 +57,15 @@ final router = GoRouter(
     GoRoute(
       path: Routes.directusTest,
       builder: (_, _) => const DirectusTestScreen(),
+    ),
+    GoRoute(
+      path: Routes.punishments,
+      builder: (_, _) => const RouletteScreen(),
+    ),
+    GoRoute(
+      path: Routes.punishmentSpin,
+      builder: (_, state) =>
+          PunishmentSpinScreen(groupName: state.extra as String? ?? ''),
     ),
     GoRoute(
       path: Routes.finalResult,
