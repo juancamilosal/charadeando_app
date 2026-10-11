@@ -8,7 +8,7 @@ import '../theme.dart';
 enum GameCategory {
   free(
     'Libre',
-    'Escriban sus palabras o nosotros las ponemos.',
+    'Sus palabras o las nuestras',
     Icons.edit_note,
     AppColors.yellow,
     'LIBRE',

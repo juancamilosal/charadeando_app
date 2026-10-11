@@ -43,6 +43,8 @@ void main() {
       200,
       scrollable: find.byType(Scrollable).first,
     );
+    await tester.ensureVisible(movies);
+    await tester.pump();
     await tester.tap(movies);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
