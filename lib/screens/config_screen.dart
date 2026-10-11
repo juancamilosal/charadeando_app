@@ -85,24 +85,24 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
     });
   }
 
-  /// Llena la configuración con los valores de prueba, para no escribirlos
-  /// en cada prueba.
-  void _fillTestData() {
-    final names = [for (final g in TestData.config.groups) g.name];
-    _setGroupCount(names.length);
+  /// "Llenar automáticamente": el juego pone los nombres de los grupos y
+  /// elige el resto al azar, con valores que tienen sentido para la
+  /// cantidad de grupos. Cada toque da una configuración nueva.
+  void _autoFill() {
+    final result = AutoFill.pick(
+      _config,
+      groups: _names.length,
+      previousNames: [for (final c in _names) c.text],
+    );
     setState(() {
-      _config = TestData.config.copyWith(
-        resolution: _config.resolution,
-        wordSource: _config.wordSource,
-        category: _config.category,
-      );
-      for (var i = 0; i < names.length; i++) {
-        _names[i].text = names[i];
+      _config = result.config;
+      for (var i = 0; i < result.names.length; i++) {
+        _names[i].text = result.names[i];
       }
-      _gameEnd = _config.gameEnd;
-      _scoring = _config.scoringMode;
-      _hitMode = _config.hitMode;
-      _difficulty ??= Difficulty.normal;
+      _gameEnd = result.gameEnd;
+      _scoring = result.scoring;
+      _hitMode = result.hitMode;
+      _difficulty = result.difficulty;
       _showErrors = false;
     });
   }
@@ -186,14 +186,23 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
             children: [
-              if (TestData.enabled) ...[
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.science),
-                  label: const Text('Rellenar datos de prueba'),
-                  onPressed: _fillTestData,
+              OutlinedButton.icon(
+                icon: const Icon(Icons.auto_awesome),
+                label: const Text('Llenar automáticamente'),
+                onPressed: _autoFill,
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'El juego pone los nombres de los grupos y elige la '
+                'configuración por ti. Tócalo otra vez para cambiarla.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
                 ),
-                gap,
-              ],
+              ),
+              gap,
               ConfigSection(
                 icon: Icons.groups,
                 title: 'Grupos',
@@ -215,9 +224,13 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
               if (automatic) ...[
                 _durationSection(),
                 gap,
-                // Por número de rondas se traen las palabras que alcancen:
-                // no se elige la cantidad.
-                if (_gameEnd != GameEnd.rounds) ...[_autoWordsSection(), gap],
+                // La cantidad de palabras solo se elige cuando se juega hasta
+                // que se acaben. Por número de rondas se traen las que
+                // alcancen, y mientras no elijan la duración no se muestra.
+                if (_gameEnd == GameEnd.wordsRunOut) ...[
+                  _autoWordsSection(),
+                  gap,
+                ],
                 _difficultySection(),
                 gap,
               ] else ...[

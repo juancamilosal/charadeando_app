@@ -11,3 +11,4 @@ export 'word_service.dart';
 export 'punishment_service.dart';
 export 'punishment_store.dart';
 export 'punishments.dart';
+export 'auto_fill.dart';

@@ -5,6 +5,8 @@ import 'package:charadeando_app/providers/providers.dart';
 import 'package:charadeando_app/router.dart';
 import 'package:charadeando_app/screens/config_screen.dart';
 import 'package:charadeando_app/services/services.dart';
+import 'package:charadeando_app/widgets/config_section.dart';
+import 'package:charadeando_app/widgets/number_stepper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -53,29 +55,40 @@ Future<void> tapContinue(WidgetTester tester) async {
     300,
     scrollable: find.byType(Scrollable).first,
   );
+  await tester.ensureVisible(button);
+  await tester.pumpAndSettle();
   await tester.tap(button);
   await tester.pumpAndSettle();
 }
 
 void main() {
-  testWidgets('rellena la configuración con los datos de prueba', (
-    tester,
-  ) async {
+  testWidgets('llena la configuración automáticamente y la cambia en cada '
+      'toque', (tester) async {
     final container = await pumpConfig(tester);
-    await tester.tap(find.text('Rellenar datos de prueba'));
+    await tester.tap(find.text('Llenar automáticamente'));
     await tester.pump();
-    await tapContinue(tester);
+    List<String> names() => [
+      for (final f in tester.widgetList<TextField>(find.byType(TextField)))
+        f.controller!.text,
+    ];
+    final first = names();
+    expect(first, hasLength(2));
+    expect(first.every(AutoFill.groupNames.contains), isTrue);
 
+    // Al agregar un grupo y volver a tocar, el juego también lo nombra.
+    await tester.tap(find.byIcon(Icons.add).first);
+    await tester.pump();
+    await tester.tap(find.text('Llenar automáticamente'));
+    await tester.pump();
+    final second = names();
+    expect(second, hasLength(3));
+    expect(second.toSet(), hasLength(3));
+    expect(second.any(first.contains), isFalse);
+
+    await tapContinue(tester);
     expect(find.text('Palabras'), findsOneWidget);
     final config = container.read(gameControllerProvider).config;
-    final expected = TestData.config;
-    expect(
-      config.groups.map((g) => g.name),
-      expected.groups.map((g) => g.name),
-    );
-    expect(config.rounds, expected.rounds);
-    expect(config.turnDuration, expected.turnDuration);
-    expect(config.wordsPerGroup, expected.wordsPerGroup);
+    expect(config.groups.map((g) => g.name), second);
   });
 
   testWidgets('no continúa si falta el nombre de algún grupo', (tester) async {
@@ -109,17 +122,20 @@ void main() {
       tester,
       config: const GameConfig(wordSource: WordSource.random),
     );
-    expect(
-      find.textContaining('Nosotros ponemos las palabras'),
-      findsOneWidget,
-    );
-    expect(find.text('Cada grupo tendrá 15 palabras.'), findsOneWidget);
     expect(find.textContaining('Recuerda: mientras más rondas'), findsNothing);
-
-    await tester.tap(find.text('Rellenar datos de prueba'));
-    await tester.pump();
-    // Los datos de prueba juegan por rondas: no se elige la cantidad.
+    // Mientras no elijan la duración, no se pregunta cuántas palabras.
     expect(find.text('Palabras de la partida'), findsNothing);
+
+    await tester.tap(find.text('Llenar automáticamente'));
+    await tester.pump();
+
+    final byRounds = find.text('Por número de rondas');
+    await tester.ensureVisible(byRounds);
+    await tester.pumpAndSettle();
+    await tester.tap(byRounds);
+    await tester.pump();
+    expect(find.text('Palabras de la partida'), findsNothing);
+    expect(find.text('Rondas'), findsOneWidget);
 
     final untilEnd = find.text('Hasta que se acaben las palabras');
     await tester.ensureVisible(untilEnd);
@@ -128,25 +144,34 @@ void main() {
     await tester.pump();
     expect(find.text('Rondas'), findsNothing);
     expect(find.text('Palabras de la partida'), findsOneWidget);
-
-    final more = find.descendant(
-      of: find.ancestor(
-        of: find.text('Palabras de la partida'),
-        matching: find.byType(Row),
-      ),
-      matching: find.byIcon(Icons.add),
+    expect(
+      find.textContaining('Nosotros ponemos las palabras'),
+      findsOneWidget,
     );
-    await tester.ensureVisible(more.first);
+
+    final row = find.ancestor(
+      of: find.text('Palabras de la partida'),
+      matching: find.byType(ConfigRow),
+    );
+    int words() => tester
+        .widget<NumberStepper>(
+          find.descendant(of: row, matching: find.byType(NumberStepper)),
+        )
+        .value;
+    final before = words();
+    final more = find.descendant(of: row, matching: find.byIcon(Icons.add));
+    await tester.ensureVisible(more);
     await tester.pumpAndSettle();
-    await tester.tap(more.first);
+    await tester.tap(more);
     await tester.pump();
-    expect(find.text('35'), findsOneWidget);
+    final chosen = words();
+    expect(chosen, before + 5 > 100 ? 100 : before + 5);
 
     await tapContinue(tester);
     expect(find.text('Descargando'), findsOneWidget);
     final config = container.read(gameControllerProvider).config;
     expect(config.wordSource, WordSource.random);
-    expect(config.autoWordCount, 35);
+    expect(config.autoWordCount, chosen);
     expect(config.gameEnd, GameEnd.wordsRunOut);
   });
 
@@ -185,7 +210,7 @@ void main() {
     addTearDown(tv.close);
     final container = await pumpConfig(tester, tv: tv.stream);
     tv.add(false);
-    await tester.tap(find.text('Rellenar datos de prueba'));
+    await tester.tap(find.text('Llenar automáticamente'));
     await tester.pump();
 
     final connect = find.text('Conectar las palabras a un televisor');
@@ -263,7 +288,7 @@ void main() {
         groups: [Group('A'), Group('B')],
       ),
     );
-    await tester.tap(find.text('Rellenar datos de prueba'));
+    await tester.tap(find.text('Llenar automáticamente'));
     await tester.pump();
     final hard = find.text('Difícil');
     await tester.scrollUntilVisible(
@@ -302,6 +327,17 @@ void main() {
         wordSource: WordSource.random,
         category: GameCategory.animals,
       ),
+    );
+    expect(find.text('Palabras: Animales'), findsNothing);
+    final untilEnd = find.text('Hasta que se acaben las palabras');
+    await tester.ensureVisible(untilEnd);
+    await tester.pumpAndSettle();
+    await tester.tap(untilEnd);
+    await tester.pump();
+    await tester.scrollUntilVisible(
+      find.text('Palabras: Animales'),
+      200,
+      scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('Palabras: Animales'), findsOneWidget);
   });
