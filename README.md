@@ -29,6 +29,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   se usa internet ni se piden más. El celular recuerda las últimas 500
   palabras jugadas para no repetirlas, y guarda el
   último lote para jugar sin internet. Ver `server/README.md`.
+- En el turno se ve cuántas palabras faltan por adivinar en toda la partida
+  ("Faltan 12 palabras"), también antes de empezar y en el Modo TV.
 - Un solo celular, aciertos con movimiento: inclinar hacia abajo es acierto y
   hacia arriba es pasar.
 - Modo TV, en todas las categorías: se activa solo cuando el celular duplica

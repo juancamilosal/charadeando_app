@@ -12,7 +12,12 @@ class WordCard extends StatelessWidget {
     required this.remaining,
     required this.feedback,
     required this.recording,
+    required this.wordsLeft,
   });
+
+  /// "Faltan 12 palabras", o "Falta 1 palabra".
+  static String wordsLeftLabel(int count) =>
+      count == 1 ? 'Falta 1 palabra' : 'Faltan $count palabras';
 
   static const _hitColors = [AppColors.green, Color(0xFF0E9F55)];
   static const _passColors = [AppColors.orange, AppColors.coral];
@@ -21,6 +26,9 @@ class WordCard extends StatelessWidget {
   final Duration remaining;
   final WordOutcome? feedback;
   final bool recording;
+
+  /// Palabras que faltan por adivinar en toda la partida.
+  final int wordsLeft;
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +93,31 @@ class WordCard extends StatelessWidget {
                     fontSize: 30,
                     fontWeight: FontWeight.w700,
                     color: AppColors.ink,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 12,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    wordsLeftLabel(wordsLeft),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ),

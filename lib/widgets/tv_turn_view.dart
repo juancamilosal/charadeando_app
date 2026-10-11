@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/models.dart';
 import '../theme.dart';
+import 'word_card.dart';
 
 /// Turno del Modo TV. El celular se duplica en el televisor, así que esta
 /// vista es la que ve todo el grupo: el grupo y la ronda arriba, la palabra
@@ -18,6 +19,7 @@ class TvTurnView extends StatelessWidget {
     required this.groups,
     required this.scores,
     required this.groupIndex,
+    required this.wordsLeft,
     required this.onPass,
     required this.onHit,
   });
@@ -37,6 +39,9 @@ class TvTurnView extends StatelessWidget {
 
   /// Grupo que está jugando.
   final int groupIndex;
+
+  /// Palabras que faltan por adivinar en toda la partida.
+  final int wordsLeft;
   final VoidCallback onPass;
   final VoidCallback onHit;
 
@@ -70,7 +75,8 @@ class TvTurnView extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          roundLabel,
+                          '$roundLabel · '
+                          '${WordCard.wordsLeftLabel(wordsLeft)}',
                           style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 14,

@@ -404,7 +404,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
             _Phase.ready => _readyView(context, game),
             _Phase.countdown => CountdownView(value: _countdown),
             _Phase.playing =>
-              game.config.tvMode ? _tvView(game) : _playingView(context),
+              game.config.tvMode ? _tvView(game) : _playingView(context, game),
             _Phase.paused => _pausedView(context),
             _Phase.saving => const Center(
               child: CircularProgressIndicator(color: Colors.white),
@@ -429,7 +429,11 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(game.config.roundLabel(game.round), style: white),
+            Text(
+              '${game.config.roundLabel(game.round)} · '
+              '${WordCard.wordsLeftLabel(_wordsLeft(game))} en total',
+              style: white,
+            ),
             Text(
               'Turno de ${game.currentGroup.name}',
               style: const TextStyle(
@@ -595,6 +599,11 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     );
   }
 
+  /// Palabras que faltan por adivinar en toda la partida: las de todos los
+  /// mazos menos las que ya se marcaron en este turno.
+  int _wordsLeft(GameState game) =>
+      game.decks.fold(0, (sum, deck) => sum + deck.length) - _entries.length;
+
   /// Lo que se ve en el televisor, con los botones del juez.
   Widget _tvView(GameState game) {
     final scores = [...game.scores];
@@ -612,17 +621,19 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
       groups: game.groups,
       scores: scores,
       groupIndex: game.groupIndex,
+      wordsLeft: _wordsLeft(game),
       onPass: () => _mark(WordOutcome.pass),
       onHit: () => _mark(WordOutcome.hit),
     );
   }
 
-  Widget _playingView(BuildContext context) {
+  Widget _playingView(BuildContext context, GameState game) {
     final card = WordCard(
       word: _deck[_wordIndex],
       remaining: _remaining,
       feedback: _feedback,
       recording: _camera.isRecording,
+      wordsLeft: _wordsLeft(game),
     );
     if (!kDebugMode) return card;
     // En desarrollo, tocar la mitad izquierda pasa y la derecha acierta,
