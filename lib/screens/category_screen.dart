@@ -108,26 +108,26 @@ class _CategoryCard extends StatelessWidget {
     final onColor = category.color == AppColors.yellow
         ? AppColors.ink
         : Colors.white;
-    final title = Text(
+    Widget title([double size = 30]) => Text(
       category.label,
       maxLines: large ? 1 : 2,
       overflow: TextOverflow.ellipsis,
       textAlign: large ? TextAlign.start : TextAlign.center,
       style: TextStyle(
         fontFamily: AppFonts.display,
-        fontSize: large ? 30 : 24,
+        fontSize: size,
         height: 1.1,
         fontWeight: FontWeight.w600,
         color: onColor,
       ),
     );
-    final description = Text(
+    Widget description([double size = 15]) => Text(
       category.description,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
       textAlign: large ? TextAlign.start : TextAlign.center,
       style: TextStyle(
-        fontSize: large ? 15 : 14,
+        fontSize: size,
         fontWeight: FontWeight.w700,
         color: onColor.withValues(alpha: 0.85),
       ),
@@ -155,33 +155,46 @@ class _CategoryCard extends StatelessWidget {
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [title, description],
+                            children: [title(), description()],
                           ),
                         ),
                         Icon(Icons.arrow_forward_ios, color: onColor),
                       ],
                     )
-                  : Column(
-                      children: [
-                        Expanded(
-                          child: Center(
-                            child: CategoryArt(
-                              category: category,
-                              size: 96,
-                              color: onColor,
+                  : LayoutBuilder(
+                      // El dibujo y los textos crecen con la tarjeta, para
+                      // que se vean igual en celulares angostos y anchos.
+                      builder: (context, box) {
+                        final w = box.maxWidth;
+                        return Column(
+                          children: [
+                            Expanded(
+                              // Si los textos ocupan más (letra grande en el
+                              // celular), el dibujo se achica para caber.
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: CategoryArt(
+                                  category: category,
+                                  size: w * 0.75,
+                                  color: onColor,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        // Una sola palabra larga ("Celebridades") se achica
-                        // en vez de partirse en dos renglones.
-                        if (category.label.contains(' '))
-                          title
-                        else
-                          FittedBox(fit: BoxFit.scaleDown, child: title),
-                        const SizedBox(height: 4),
-                        description,
-                      ],
+                            const SizedBox(height: 8),
+                            // Una sola palabra larga ("Celebridades") se
+                            // achica en vez de partirse en dos renglones.
+                            if (category.label.contains(' '))
+                              title(w * 0.18)
+                            else
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: title(w * 0.18),
+                              ),
+                            const SizedBox(height: 4),
+                            description(w * 0.105),
+                          ],
+                        );
+                      },
                     ),
             ),
           ],
