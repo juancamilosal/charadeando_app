@@ -403,4 +403,31 @@ void main() {
     );
     expect(find.text('Partida: Animales'), findsOneWidget);
   });
+
+  testWidgets('con una categoría propia no se pide dificultad', (tester) async {
+    final container = await pumpConfig(
+      tester,
+      config: GameConfig(
+        wordSource: WordSource.random,
+        groups: const [Group('A'), Group('B')],
+        customCategory: CustomCategory(
+          id: 'f1',
+          name: 'Mi familia',
+          words: [for (var i = 0; i < 10; i++) 'P$i'],
+        ),
+      ),
+    );
+    await tester.scrollUntilVisible(
+      find.text('Partida: Mi familia'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Partida: Mi familia'), findsOneWidget);
+    expect(find.text('Dificultad'), findsNothing);
+    await tapContinue(tester);
+    expect(find.text('Descargando'), findsOneWidget);
+    final config = container.read(gameControllerProvider).config;
+    expect(config.difficulty, isNull);
+    expect(config.customCategory?.name, 'Mi familia');
+  });
 }

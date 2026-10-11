@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:camera/camera.dart';
 
 import 'category.dart';
+import 'custom_category.dart';
 import 'group.dart';
 
 /// Cómo se suman los puntos de una palabra acertada.
@@ -129,6 +130,7 @@ class GameConfig {
     this.rounds = 3,
     this.groups = const [Group(''), Group('')],
     this.category = GameCategory.free,
+    this.customCategory,
     this.wordSource = WordSource.groups,
     this.difficulty,
     this.wordsPerGroup = 10,
@@ -152,6 +154,13 @@ class GameConfig {
   /// Categoría de las palabras automáticas. Las de una categoría distinta
   /// de Libre siempre son automáticas.
   final GameCategory category;
+
+  /// Categoría propia que se juega, o null. Sus palabras salen del
+  /// celular, no de Directus, y no tienen dificultad.
+  final CustomCategory? customCategory;
+
+  /// Nombre de la categoría que se juega, propia o del juego.
+  String get categoryLabel => customCategory?.name ?? category.label;
   final WordSource wordSource;
 
   /// Dificultad de las palabras automáticas, o null si no aplica (palabras
@@ -206,6 +215,9 @@ class GameConfig {
     int? rounds,
     List<Group>? groups,
     GameCategory? category,
+    CustomCategory? customCategory,
+    bool clearCustomCategory = false,
+    bool clearDifficulty = false,
     WordSource? wordSource,
     Difficulty? difficulty,
     int? wordsPerGroup,
@@ -218,8 +230,11 @@ class GameConfig {
       rounds: rounds ?? this.rounds,
       groups: groups ?? this.groups,
       category: category ?? this.category,
+      customCategory: clearCustomCategory
+          ? null
+          : customCategory ?? this.customCategory,
       wordSource: wordSource ?? this.wordSource,
-      difficulty: difficulty ?? this.difficulty,
+      difficulty: clearDifficulty ? null : difficulty ?? this.difficulty,
       wordsPerGroup: wordsPerGroup ?? this.wordsPerGroup,
       scoringMode: scoringMode ?? this.scoringMode,
       hitMode: hitMode ?? this.hitMode,

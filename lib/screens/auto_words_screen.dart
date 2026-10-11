@@ -47,6 +47,17 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
       _error = null;
     });
     final config = ref.read(gameControllerProvider).config;
+    final custom = config.customCategory;
+    if (custom != null) {
+      // Las palabras de una categoría propia están en el celular: no se usa
+      // internet. Si no alcanzan, durante el juego vuelven las ya jugadas.
+      final words = [for (final w in custom.words) Word(w)]..shuffle();
+      // Se navega después del primer cuadro: _load empieza en initState.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _play(WordBatch(words, offline: false));
+      });
+      return;
+    }
     try {
       final batch = await ref
           .read(wordBankProvider)

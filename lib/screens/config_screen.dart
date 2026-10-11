@@ -28,7 +28,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   void initState() {
     super.initState();
     _config = ref.read(gameControllerProvider).config;
-    if (_automatic) {
+    if (_automatic && !_custom) {
       // Las palabras vienen mezcladas.
       _difficulty = Difficulty.mixed;
       _config = _config.copyWith(difficulty: _difficulty);
@@ -74,7 +74,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
       );
       _scoring = saved.scoringMode;
       _hitMode = saved.hitMode;
-      if (_automatic && saved.difficulty != null) {
+      if (_automatic && !_custom && saved.difficulty != null) {
         _difficulty = saved.difficulty;
         _config = _config.copyWith(difficulty: _difficulty);
       }
@@ -94,7 +94,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
             scoringMode: _scoring ?? ScoringMode.perPhrase,
             hitMode: _hitMode ?? HitMode.tilt,
             resolution: config.resolution,
-            difficulty: _automatic ? _difficulty : null,
+            difficulty: _automatic && !_custom ? _difficulty : null,
           ),
         )
         .ignore();
@@ -121,6 +121,9 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
 
   bool get _automatic => _config.wordSource == WordSource.random;
 
+  /// Se juega una categoría propia: sus palabras no tienen dificultad.
+  bool get _custom => _config.customCategory != null;
+
   /// Modo TV: el celular está duplicando la pantalla en un televisor. El
   /// juez marca con botones y no se graba, así que las secciones de
   /// aciertos y de video no se muestran.
@@ -128,7 +131,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
 
   /// Lo que falta elegir, para el aviso al tocar "Continuar".
   List<String> get _missingChoices => [
-    if (_automatic && _difficulty == null) 'la dificultad',
+    if (_automatic && !_custom && _difficulty == null) 'la dificultad',
     if (_scoring == null) 'la puntuación',
     if (!_tvMode && _hitMode == null) 'cómo se marcan los aciertos',
   ];
@@ -193,7 +196,8 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
             groups: groups,
             scoringMode: _scoring,
             hitMode: _tvMode ? HitMode.tv : _hitMode,
-            difficulty: _automatic ? _difficulty : null,
+            difficulty: _automatic && !_custom ? _difficulty : null,
+            clearDifficulty: _custom,
           ),
         );
     context.go(
@@ -239,7 +243,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
           title: const Text('Configuración'),
           leading: BackButton(
             onPressed: () => context.go(
-              _config.category == GameCategory.free
+              _config.category == GameCategory.free && !_custom
                   ? Routes.freeMode
                   : Routes.categoryIntro,
             ),
@@ -288,8 +292,8 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
               if (automatic) ...[
                 _autoGameSection(),
                 gap,
-                _difficultySection(),
-                gap,
+                // Las palabras propias no tienen dificultad.
+                if (!_custom) ...[_difficultySection(), gap],
               ] else ...[
                 ConfigSection(
                   icon: Icons.edit_note,
@@ -468,10 +472,10 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   /// dura hasta que se acabe el tiempo, sin límite de palabras.
   Widget _autoGameSection() {
     return ConfigSection(
-      icon: _config.category.icon,
-      title: _config.category == GameCategory.free
+      icon: _config.customCategory?.icon ?? _config.category.icon,
+      title: _config.category == GameCategory.free && !_custom
           ? 'Partida'
-          : 'Partida: ${_config.category.label}',
+          : 'Partida: ${_config.categoryLabel}',
       children: [
         ConfigRow(
           label: 'Rondas',

@@ -57,6 +57,32 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Con las palabras escritas por los grupos, en el turno se ve cuántas
   faltan de toda la partida. Con las automáticas no se muestra, porque el
   turno dura hasta que se acabe el tiempo.
+- Mis categorías: en la pantalla de categorías hay un selector en forma de
+  píldora, "Todas | ✨ Mías" (animado, y la app recuerda la última pestaña).
+  "Todas" es lo de siempre; "Mías" muestra las categorías que creó el
+  usuario ("Mi familia", "La oficina", "Viaje a Cartagena"), con la misma
+  tarjeta que las demás: su nombre, ícono, color y cuántas palabras tiene.
+  La primera tarjeta es "Nueva categoría"; si no hay ninguna, se explica la
+  idea con el botón "Crear mi primera categoría". Mantener presionada una
+  tarjeta, o su botón de tres puntos, abre "Editar" y "Borrar" (pide
+  confirmación).
+- Crear o editar una categoría propia: nombre (obligatorio, hasta 24
+  letras), descripción corta (opcional, hasta 60), color de la paleta de la
+  app, uno de 20 íconos y las palabras. Las palabras se agregan una por una
+  o pegando varias separadas por comas o saltos de línea; no se aceptan
+  repetidas (sin importar mayúsculas ni tildes) y se pueden borrar. Se
+  necesitan 10 para jugar ("Te faltan 4 palabras"), y se sugieren 30 o más
+  para que no se repitan tan rápido. Arriba se ve la tarjeta mientras se
+  edita.
+- Una categoría propia se juega como las del juego: su "¿Cómo se juega?" y
+  la configuración, sin dificultad (sus palabras no tienen). Las palabras
+  salen del celular, así que funciona sin internet, también en Modo TV.
+  Mis categorías se guardan solo en el celular (`mis_categorias.json`): no
+  se suben a Directus ni a ningún servidor, y se pierden si se desinstala la
+  app. `CustomCategoryStore.freeLimit` deja preparado el límite de
+  categorías gratis (por ahora sin límite).
+- Los nombres de las tarjetas nunca se parten a la mitad de una palabra: si
+  no caben, se achica la letra y, como último recurso, se cortan con "…".
 - Ruleta de castigos: una sección propia (en la pantalla de categorías, debajo
   de las tarjetas, una tarjeta blanca con una ruleta pequeña que gira y el
   nombre "Ruleta de castigos"; no es una categoría de palabras). Se elige la

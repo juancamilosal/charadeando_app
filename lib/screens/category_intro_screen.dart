@@ -89,8 +89,13 @@ class CategoryIntroScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final category = ref.watch(gameControllerProvider).config.category;
-    final guide = _guides[category] ?? _guides[GameCategory.animals]!;
+    final config = ref.watch(gameControllerProvider).config;
+    final category = config.category;
+    final custom = config.customCategory;
+    // Una categoría propia usa el ejemplo general (Pizza, Jirafa…).
+    final guide = custom != null
+        ? const _Guide('la palabra', 'todas las palabras', [])
+        : _guides[category] ?? _guides[GameCategory.animals]!;
     const white = TextStyle(
       color: Colors.white,
       fontSize: 16,
@@ -122,7 +127,7 @@ class CategoryIntroScreen extends ConsumerWidget {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: Text(category.label),
+          title: Text(config.categoryLabel),
           leading: BackButton(onPressed: () => context.go(Routes.categories)),
         ),
         body: SafeArea(
@@ -130,7 +135,21 @@ class CategoryIntroScreen extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
             children: [
-              Center(child: CategoryArt(category: category, size: 120)),
+              Center(
+                child: custom != null
+                    ? _CustomArt(category: custom)
+                    : CategoryArt(category: category, size: 120),
+              ),
+              if (custom != null && custom.description.isNotEmpty)
+                Text(
+                  custom.description,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               const Text(
                 '¿Cómo se juega?',
                 textAlign: TextAlign.center,
@@ -155,7 +174,9 @@ class CategoryIntroScreen extends ConsumerWidget {
                   horizontal: 12,
                   vertical: 20,
                 ),
-                child: HowToPlayDemo(rounds: guide.rounds),
+                child: guide.rounds.isEmpty
+                    ? const HowToPlayDemo()
+                    : HowToPlayDemo(rounds: guide.rounds),
               ),
               const SizedBox(height: 12),
               GridView.count(
@@ -178,13 +199,34 @@ class CategoryIntroScreen extends ConsumerWidget {
               const SizedBox(height: 24),
               FilledButton.icon(
                 icon: const Icon(Icons.arrow_forward),
-                label: Text('Jugar ${category.label}'),
+                label: Text('Jugar ${config.categoryLabel}'),
                 onPressed: () => context.go(Routes.config),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Dibujo de una categoría propia: su ícono en un círculo de su color.
+class _CustomArt extends StatelessWidget {
+  const _CustomArt({required this.category});
+
+  final CustomCategory category;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 120,
+      height: 120,
+      decoration: BoxDecoration(
+        color: category.color,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 4),
+      ),
+      child: Icon(category.icon, size: 64, color: Colors.white),
     );
   }
 }

@@ -1,9 +1,11 @@
 import 'package:go_router/go_router.dart';
 
+import 'models/models.dart';
 import 'screens/auto_words_screen.dart';
 import 'screens/category_intro_screen.dart';
 import 'screens/category_screen.dart';
 import 'screens/config_screen.dart';
+import 'screens/custom_category_screen.dart';
 import 'screens/directus_test_screen.dart';
 import 'screens/final_result_screen.dart';
 import 'screens/free_mode_screen.dart';
@@ -30,6 +32,10 @@ abstract final class Routes {
 
   /// Sección "Ruleta de castigos".
   static const punishments = '/ruleta';
+
+  /// Crear o editar una categoría propia. Para editar recibe la categoría
+  /// como `extra`.
+  static const customCategory = '/mis-categorias';
 
   /// Ruleta de castigo de un grupo al final de la partida. Recibe el nombre
   /// del grupo como `extra`.
@@ -61,6 +67,11 @@ final router = GoRouter(
     GoRoute(
       path: Routes.punishments,
       builder: (_, _) => const RouletteScreen(),
+    ),
+    GoRoute(
+      path: Routes.customCategory,
+      builder: (_, state) =>
+          CustomCategoryScreen(category: state.extra as CustomCategory?),
     ),
     GoRoute(
       path: Routes.punishmentSpin,
