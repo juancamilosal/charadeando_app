@@ -8,6 +8,7 @@ import '../router.dart';
 import '../theme.dart';
 import '../widgets/category_art.dart';
 import '../widgets/play_background.dart';
+import '../widgets/roulette_banner.dart';
 
 /// Elección de la categoría. "Libre" explica el juego y deja elegir entre
 /// palabras manuales y automáticas; las demás explican el juego con
@@ -86,11 +87,7 @@ class CategoryScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 28),
               // Sección aparte, no es una categoría de palabras.
-              OutlinedButton.icon(
-                icon: const Icon(Icons.casino),
-                label: const Text('Ruleta de castigos'),
-                onPressed: () => context.go(Routes.punishments),
-              ),
+              RouletteBanner(onTap: () => context.go(Routes.punishments)),
             ],
           ),
         ),

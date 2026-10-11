@@ -41,8 +41,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   vuelven a usar las ya jugadas.
 - En el turno se ve cuántas palabras faltan por adivinar en toda la partida
   ("Faltan 12 palabras"), también antes de empezar y en el Modo TV.
-- Ruleta de castigos: una sección propia (botón "Ruleta de castigos" en la
-  pantalla de categorías, no es una categoría de palabras). Se elige la
+- Ruleta de castigos: una sección propia (en la pantalla de categorías, debajo
+  de las tarjetas, una tarjeta blanca con una ruleta pequeña que gira y el
+  nombre "Ruleta de castigos"; no es una categoría de palabras). Se elige la
   cantidad de campos (de 2 a 10, la ruleta se divide en partes iguales) y de
   dónde salen los castigos: "Los escribimos nosotros", "Que los ponga el
   juego" (unos 30 castigos para todo público, en `services/punishments.dart`)
