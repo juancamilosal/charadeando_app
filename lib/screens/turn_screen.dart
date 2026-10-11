@@ -655,22 +655,11 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
 
   /// Lo que se ve en el televisor, con los botones del juez.
   Widget _tvView(GameState game) {
-    final scores = [...game.scores];
-    scores[game.groupIndex] += Turn(
-      round: game.round,
-      groupIndex: game.groupIndex,
-      entries: _entries,
-    ).points(game.config.scoringMode);
     return TvTurnView(
       word: _deck[_wordIndex],
       remaining: _remaining,
       feedback: _feedback,
       groupName: game.currentGroup.name,
-      roundLabel: game.config.roundLabel(game.round),
-      groups: game.groups,
-      scores: scores,
-      groupIndex: game.groupIndex,
-      wordsLeft: _wordsLeft(game),
       onPass: () => _mark(WordOutcome.pass),
       onHit: () => _mark(WordOutcome.hit),
       onEndGame: _endGame,

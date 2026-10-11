@@ -3,12 +3,11 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../theme.dart';
 import 'end_game_dialog.dart';
-import 'word_card.dart';
 
 /// Turno del Modo TV. El celular se duplica en el televisor, así que esta
-/// vista es la que ve todo el grupo: el grupo y la ronda arriba, la palabra
-/// en grande, el tiempo y el marcador. Abajo van los botones del juez,
-/// grandes para tocarlos sin mirar mucho.
+/// vista es la que ve todo el grupo. Es sencilla a propósito: el turno del
+/// grupo y el tiempo arriba, la palabra en grande y abajo los botones del
+/// juez, grandes para tocarlos sin mirar mucho.
 class TvTurnView extends StatelessWidget {
   const TvTurnView({
     super.key,
@@ -16,11 +15,6 @@ class TvTurnView extends StatelessWidget {
     required this.remaining,
     required this.feedback,
     required this.groupName,
-    required this.roundLabel,
-    required this.groups,
-    required this.scores,
-    required this.groupIndex,
-    required this.wordsLeft,
     required this.onPass,
     required this.onHit,
     this.onEndGame,
@@ -33,17 +27,6 @@ class TvTurnView extends StatelessWidget {
   final Duration remaining;
   final WordOutcome? feedback;
   final String groupName;
-  final String roundLabel;
-  final List<Group> groups;
-
-  /// Puntajes de cada grupo, con los puntos del turno en curso incluidos.
-  final List<int> scores;
-
-  /// Grupo que está jugando.
-  final int groupIndex;
-
-  /// Palabras que faltan por adivinar en toda la partida.
-  final int wordsLeft;
   final VoidCallback onPass;
   final VoidCallback onHit;
 
@@ -76,30 +59,16 @@ class TvTurnView extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '$roundLabel · '
-                          '${WordCard.wordsLeftLabel(wordsLeft)}',
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        Text(
-                          'Turno de $groupName',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: AppFonts.display,
-                            fontSize: 24,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      'Turno de $groupName',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: AppFonts.display,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                   if (onEndGame != null) ...[
@@ -142,12 +111,6 @@ class TvTurnView extends StatelessWidget {
                   ),
                 ),
               ),
-              _ScoreStrip(
-                groups: groups,
-                scores: scores,
-                groupIndex: groupIndex,
-              ),
-              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
@@ -207,48 +170,6 @@ class _Timer extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// Marcador de todos los grupos en una fila; el que juega va resaltado.
-class _ScoreStrip extends StatelessWidget {
-  const _ScoreStrip({
-    required this.groups,
-    required this.scores,
-    required this.groupIndex,
-  });
-
-  final List<Group> groups;
-  final List<int> scores;
-  final int groupIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      alignment: WrapAlignment.center,
-      spacing: 8,
-      runSpacing: 6,
-      children: [
-        for (var i = 0; i < groups.length; i++)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-            decoration: BoxDecoration(
-              color: i == groupIndex
-                  ? Colors.white
-                  : Colors.white.withValues(alpha: 0.22),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              '${groups[i].name}  ${scores[i]}',
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 16,
-                color: i == groupIndex ? AppColors.ink : Colors.white,
-              ),
-            ),
-          ),
-      ],
     );
   }
 }

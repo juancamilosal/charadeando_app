@@ -77,8 +77,10 @@ la cámara frontal graba a los participantes para revivir las risas.
   hacia arriba es pasar.
 - Modo TV, en todas las categorías: se activa solo cuando el celular duplica
   la pantalla en un TV (AirPlay, Chromecast o HDMI). Mientras está activo, la
-  configuración oculta las secciones de aciertos y de video, el TV muestra la
-  palabra, el tiempo, el grupo, el marcador y los resultados del turno, y un
+  configuración oculta las secciones de aciertos y de video, durante el turno el
+  TV muestra solo el turno del grupo, el tiempo, "Finalizar juego", la
+  palabra y los botones (sin marcador, para no confundir), y después los
+  resultados del turno, y un
   juez del grupo rival marca "Pasar" y "¡Correcto!" con botones en el
   celular. El botón "Desconectar TV" detiene la transmisión (en Android) o
   explica cómo hacerlo, y todo vuelve a lo normal. Si el televisor se

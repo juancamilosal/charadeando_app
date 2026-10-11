@@ -80,14 +80,14 @@ void main() {
     await tester.tap(find.text('¡Listo!'));
     await countdown(tester);
     expect(find.text('Pizza'), findsOneWidget);
-    expect(find.text('Tigres  0'), findsOneWidget);
-    // Pizza y Jirafa de los Tigres, más Titanic de las Águilas.
-    expect(find.textContaining('Faltan 3 palabras'), findsOneWidget);
+    // En el TV solo el turno, el tiempo, la palabra y los botones: sin
+    // marcador ni cuántas palabras faltan.
+    expect(find.text('Turno de Tigres'), findsOneWidget);
+    expect(find.text('Tigres  0'), findsNothing);
+    expect(find.textContaining('Faltan'), findsNothing);
 
     await tester.tap(find.text('¡Correcto!'));
     await tester.pump();
-    expect(find.text('Tigres  1'), findsOneWidget);
-    expect(find.textContaining('Faltan 2 palabras'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 700));
     await tester.pump();
     expect(find.text('Jirafa'), findsOneWidget);
