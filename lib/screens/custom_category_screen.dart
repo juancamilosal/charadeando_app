@@ -387,7 +387,7 @@ class _WordRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 6),
+      padding: const EdgeInsets.only(left: 6, top: 4, bottom: 4),
       child: Row(
         children: [
           Expanded(
