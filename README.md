@@ -86,7 +86,6 @@ agua. Además:
 - Dificultad (fácil, normal, difícil): campo `dificultad` en las palabras de
   Directus (`FACIL`, `NORMAL`, `DIFICIL`), para que `POST /juego/palabras`
   traiga solo palabras de la dificultad elegida.
-- Modo fiesta para adultos (+18): categoría con candado y aviso de edad.
 - Perfiles de grupo guardados en el celular, para no volver a escribir los
   nombres, con historial de victorias.
 
