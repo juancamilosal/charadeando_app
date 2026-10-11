@@ -10,7 +10,7 @@ enum GameCategory {
     'Libre',
     'Sus palabras o las nuestras',
     Icons.edit_note,
-    AppColors.yellow,
+    AppColors.blue,
     'LIBRE',
   ),
   animals(
