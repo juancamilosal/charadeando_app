@@ -17,6 +17,7 @@ class CategoryArt extends StatelessWidget {
     GameCategory.animals,
     GameCategory.geography,
     GameCategory.movies,
+    GameCategory.celebrities,
   };
 
   final GameCategory category;
