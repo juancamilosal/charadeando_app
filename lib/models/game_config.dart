@@ -110,15 +110,14 @@ enum Difficulty {
 }
 
 /// Cómo se define la duración de la partida con palabras automáticas. En
-/// los dos casos se juegan las rondas elegidas y cada turno tiene su
-/// propio mazo; cambia quién decide cuántas palabras tiene.
+/// los dos casos se juegan las rondas elegidas; cambia si el turno tiene un
+/// número fijo de palabras.
 enum GameLength {
-  /// Se eligen las rondas y el juego calcula las palabras de cada turno
-  /// según el tiempo.
+  /// Se eligen las rondas y cada turno dura hasta que se acabe el tiempo:
+  /// las palabras no tienen límite.
   rounds(
     'Por número de rondas',
-    'Ustedes eligen las rondas y nosotros las palabras de cada turno, '
-        'según el tiempo.',
+    'Cada turno dura hasta que se acabe el tiempo, sin límite de palabras.',
   ),
 
   /// Se eligen también cuántas palabras tiene cada grupo en su turno.
@@ -166,6 +165,7 @@ class GameConfig {
     this.difficulty,
     this.wordsPerGroup = 10,
     this.wordsPerTurn = 12,
+    this.gameLength = GameLength.rounds,
     this.scoringMode = ScoringMode.perWord,
     this.hitMode = HitMode.tilt,
     this.resolution = VideoResolution.hd,
@@ -201,6 +201,10 @@ class GameConfig {
   /// Palabras automáticas de cada turno: cada grupo tiene estas palabras
   /// cuando le toca, distintas a las de todos los demás turnos.
   final int wordsPerTurn;
+
+  /// Con palabras automáticas: por número de rondas (el turno dura hasta
+  /// que se acabe el tiempo) o con palabras por ronda.
+  final GameLength gameLength;
   final ScoringMode scoringMode;
   final HitMode hitMode;
   final VideoResolution resolution;
@@ -218,9 +222,16 @@ class GameConfig {
   /// Palabras de toda la partida, sumando las de todos los grupos.
   int get totalWords => wordsPerGroup * groupCount;
 
-  /// Si cada turno tiene su propio mazo de [wordsPerTurn] palabras (las
-  /// automáticas). Las escritas por los grupos se juegan hasta acabarlas.
-  bool get perTurnDecks => wordSource == WordSource.random;
+  /// Si cada turno tiene su propio mazo de [wordsPerTurn] palabras: con
+  /// palabras automáticas y palabras por ronda.
+  bool get perTurnDecks =>
+      wordSource == WordSource.random && gameLength == GameLength.wordsPerRound;
+
+  /// Si el turno dura hasta que se acabe el tiempo, sin límite de palabras:
+  /// palabras automáticas por número de rondas. Las palabras nunca se
+  /// acaban antes del tiempo: si faltan, vuelven las ya jugadas.
+  bool get untilTimeRunsOut =>
+      wordSource == WordSource.random && gameLength == GameLength.rounds;
 
   /// Turnos de toda la partida.
   int get turns => groupCount * rounds;
@@ -247,8 +258,11 @@ class GameConfig {
   int get suggestedWordsPerTurn =>
       (turnDuration.inSeconds ~/ 5).clamp(minWordsPerTurn, maxWordsPerTurn);
 
-  /// Palabras automáticas que se piden al empezar la partida.
-  int get autoWordsNeeded => wordsPerTurn * turns;
+  /// Palabras automáticas que se piden al empezar la partida: con palabras
+  /// por ronda, las de todos los turnos; por número de rondas, las que
+  /// alcanzaría un grupo rápido en todos los turnos.
+  int get autoWordsNeeded =>
+      (perTurnDecks ? wordsPerTurn : maxWordsPerTurnByTime) * turns;
 
   /// Última ronda de la partida.
   int get roundLimit => rounds;
@@ -265,6 +279,7 @@ class GameConfig {
     Difficulty? difficulty,
     int? wordsPerGroup,
     int? wordsPerTurn,
+    GameLength? gameLength,
     ScoringMode? scoringMode,
     HitMode? hitMode,
     VideoResolution? resolution,
@@ -278,6 +293,7 @@ class GameConfig {
       difficulty: difficulty ?? this.difficulty,
       wordsPerGroup: wordsPerGroup ?? this.wordsPerGroup,
       wordsPerTurn: wordsPerTurn ?? this.wordsPerTurn,
+      gameLength: gameLength ?? this.gameLength,
       scoringMode: scoringMode ?? this.scoringMode,
       hitMode: hitMode ?? this.hitMode,
       resolution: resolution ?? this.resolution,

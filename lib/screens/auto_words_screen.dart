@@ -18,16 +18,20 @@ import '../widgets/play_background.dart';
 class AutoWordsScreen extends ConsumerStatefulWidget {
   const AutoWordsScreen({super.key});
 
-  /// Cuántas palabras pedir para [config]: las de todos los turnos de la
-  /// partida (palabras por turno × grupos × rondas), sin pasar del tope del
-  /// servidor. No se piden más durante la partida.
+  /// Cuántas palabras pedir para [config] (ver
+  /// [GameConfig.autoWordsNeeded]), sin pasar del tope del servidor. No se
+  /// piden más durante la partida.
   static int countFor(GameConfig config) =>
       min(config.autoWordsNeeded, DirectusService.maxCount);
 
   /// Palabras por turno que alcanzan con [words] palabras: las elegidas, o
   /// menos si llegaron menos (por ejemplo, sin internet).
+  /// Por número de rondas no hay palabras por turno: basta con una por
+  /// grupo, y las que falten se repiten.
   static int wordsPerTurnFor(GameConfig config, int words) =>
-      min(config.wordsPerTurn, words ~/ config.turns);
+      config.perTurnDecks
+      ? min(config.wordsPerTurn, words ~/ config.turns)
+      : (words >= config.groupCount ? config.wordsPerTurn : 0);
 
   @override
   ConsumerState<AutoWordsScreen> createState() => _AutoWordsScreenState();

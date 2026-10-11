@@ -128,27 +128,26 @@ void main() {
     for (var i = 0; i < 2; i++) {
       await tester.enterText(find.byType(TextField).at(i), 'G$i');
     }
-    // Por número de rondas viene elegida: el juego calcula las palabras,
-    // una cada 5 segundos.
-    await tester.scrollUntilVisible(
-      find.text('Cada turno tendrá 12 palabras.'),
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    expect(find.text('Cada turno tendrá 12 palabras.'), findsOneWidget);
-    expect(find.text('Palabras por grupo'), findsNothing);
-
-    // Con más tiempo, las palabras suben solas.
+    // Por número de rondas viene elegida: el turno dura hasta que se acabe
+    // el tiempo, sin límite de palabras.
     final time = find.ancestor(
       of: find.text('Tiempo por turno'),
       matching: find.byType(ConfigRow),
     );
+    await tester.scrollUntilVisible(
+      time,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Palabras por grupo'), findsNothing);
+    expect(find.textContaining('Cada turno tendrá'), findsNothing);
+
+    // Con más tiempo, las palabras sugeridas suben solas.
     final longer = find.descendant(of: time, matching: find.byIcon(Icons.add));
     await tester.ensureVisible(longer);
     await tester.pumpAndSettle();
     await tester.tap(longer);
     await tester.pump();
-    expect(find.text('Cada turno tendrá 15 palabras.'), findsOneWidget);
 
     final perRound = find.text('Palabras por ronda');
     await tester.scrollUntilVisible(

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/models.dart';
@@ -95,6 +97,8 @@ class GameState {
 }
 
 class GameController extends Notifier<GameState> {
+  final _random = Random();
+
   @override
   GameState build() => GameState.fromConfig(const GameConfig());
 
@@ -136,6 +140,9 @@ class GameController extends Notifier<GameState> {
       for (final entry in turn.entries) {
         deck.remove(entry.word);
       }
+      if (state.config.untilTimeRunsOut) {
+        deck = _refill(deck, turn);
+      }
     }
     final decks = [...state.decks];
     decks[turn.groupIndex] = deck;
@@ -146,6 +153,27 @@ class GameController extends Notifier<GameState> {
   /// turnos jugados hasta ahora.
   void endGame() {
     state = state.copyWith(finished: true);
+  }
+
+  /// Por número de rondas el turno dura hasta que se acabe el tiempo: si al
+  /// grupo le quedan menos palabras de las que alcanzaría un grupo rápido,
+  /// se completan con palabras ya jugadas, al azar.
+  List<Word> _refill(List<Word> deck, Turn justPlayed) {
+    final need = state.config.maxWordsPerTurnByTime - deck.length;
+    if (need <= 0) return deck;
+    // Las que siguen en algún mazo no se repiten; el del grupo que acaba de
+    // jugar es [deck], porque el estado todavía tiene el anterior.
+    final inDecks = {
+      for (var g = 0; g < state.decks.length; g++)
+        if (g != justPlayed.groupIndex) ...state.decks[g],
+      ...deck,
+    };
+    final played = <Word>{
+      for (final t in [...state.turns, justPlayed])
+        for (final e in t.entries)
+          if (!inDecks.contains(e.word)) e.word,
+    }.toList()..shuffle(_random);
+    return [...deck, ...played.take(need)];
   }
 
   /// Pasa al siguiente grupo, o a la siguiente ronda cuando ya jugaron todos.

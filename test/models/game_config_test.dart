@@ -47,8 +47,15 @@ void main() {
   test('se piden las palabras de todos los turnos de la partida', () {
     const config = GameConfig(
       wordSource: WordSource.random,
+      gameLength: GameLength.wordsPerRound,
       rounds: 3,
       wordsPerTurn: 12,
+    );
+    // Por número de rondas: las que alcanza un grupo rápido (una cada 3 s),
+    // 20 por turno × 2 grupos × 3 rondas.
+    expect(
+      AutoWordsScreen.countFor(config.copyWith(gameLength: GameLength.rounds)),
+      120,
     );
     // 12 por turno × 2 grupos × 3 rondas.
     expect(AutoWordsScreen.countFor(config), 72);
@@ -68,6 +75,7 @@ void main() {
   test('si llegan menos palabras, cada turno tiene menos', () {
     const config = GameConfig(
       wordSource: WordSource.random,
+      gameLength: GameLength.wordsPerRound,
       rounds: 3,
       wordsPerTurn: 12,
     );

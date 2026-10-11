@@ -105,7 +105,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   /// Ajusta las palabras por turno a [config]: el valor sugerido si el
   /// usuario no las ha cambiado, o lo que eligió dentro del nuevo máximo.
   GameConfig _fitWords(GameConfig config) {
-    if (!config.perTurnDecks) return config;
+    if (config.wordSource != WordSource.random) return config;
     return config.copyWith(
       wordsPerTurn: _wordsTouched && _length == GameLength.wordsPerRound
           ? config.wordsPerTurn.clamp(
@@ -158,6 +158,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
         .configure(
           _config.copyWith(
             groups: groups,
+            gameLength: _length,
             scoringMode: _scoring,
             hitMode: _tvMode ? HitMode.tv : _hitMode,
             difficulty: _automatic ? _difficulty : null,
@@ -480,9 +481,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                 _config = _config.copyWith(wordsPerTurn: v);
               }),
             ),
-          )
-        else
-          Text('Cada turno tendrá $perTurn palabras.', style: note),
+          ),
         // Solo se avisa cuando la base de palabras limita el máximo.
         if (chooseWords &&
             _config.limitedByStock &&

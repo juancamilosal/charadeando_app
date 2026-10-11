@@ -13,7 +13,7 @@ class WordCard extends StatelessWidget {
     required this.remaining,
     required this.feedback,
     required this.recording,
-    required this.wordsLeft,
+    this.wordsLeft,
     this.onEndGame,
   });
 
@@ -30,7 +30,9 @@ class WordCard extends StatelessWidget {
   final bool recording;
 
   /// Palabras que faltan por adivinar en toda la partida.
-  final int wordsLeft;
+  /// Null si no se muestra (por número de rondas: el turno dura hasta que
+  /// se acabe el tiempo).
+  final int? wordsLeft;
 
   /// "Finalizar juego" en una esquina, para terminar la partida sin
   /// esperar a que se acabe el turno.
@@ -103,31 +105,32 @@ class WordCard extends StatelessWidget {
                 ),
               ),
             ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 12,
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    wordsLeftLabel(wordsLeft),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
+            if (wordsLeft != null)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 12,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      wordsLeftLabel(wordsLeft!),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
             if (onEndGame != null)
               Positioned(
                 left: 8,

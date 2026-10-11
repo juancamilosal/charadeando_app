@@ -104,6 +104,7 @@ void main() {
         rounds: 2,
         groups: [Group('A'), Group('B')],
         wordSource: WordSource.random,
+        gameLength: GameLength.wordsPerRound,
         wordsPerTurn: 3,
         scoringMode: ScoringMode.perPhrase,
       ),
@@ -133,12 +134,14 @@ void main() {
     expect(state().scores, [1, 3]);
   });
 
-  test('automático por rondas termina antes si se acaban las palabras', () {
+  test('automático con palabras por ronda termina antes si se acaban las '
+      'palabras', () {
     controller().configure(
       const GameConfig(
         rounds: 5,
         groups: [Group('A'), Group('B')],
         wordSource: WordSource.random,
+        gameLength: GameLength.wordsPerRound,
       ),
     );
     controller().startWithWords(words('w', 4));
@@ -146,5 +149,30 @@ void main() {
     play(passes: 2);
     expect(state().finished, isTrue);
     expect(state().config.roundLabel(1), 'Ronda 1 de 5');
+  });
+
+  test('por número de rondas las palabras no se acaban antes del tiempo: '
+      'vuelven las ya jugadas', () {
+    controller().configure(
+      const GameConfig(
+        rounds: 3,
+        groups: [Group('A'), Group('B')],
+        wordSource: WordSource.random,
+        turnDuration: Duration(seconds: 30),
+      ),
+    );
+    // Solo 8 palabras; un grupo rápido alcanza 10 en 30 segundos.
+    controller().startWithWords(words('w', 8));
+    expect(state().currentTurnWords, hasLength(4));
+    play(hits: 4);
+    // El grupo A se queda sin palabras propias y recibe las ya jugadas.
+    expect(state().decks[0], isNotEmpty);
+    play(hits: 4);
+    for (var i = 0; i < 4; i++) {
+      expect(state().finished, isFalse);
+      play(hits: 2);
+    }
+    expect(state().finished, isTrue);
+    expect(state().turns, hasLength(6));
   });
 }

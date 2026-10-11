@@ -27,9 +27,9 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Libre explica con una animación cómo se juega y deja elegir entre palabras
   manuales (con la sugerencia de cuántas escribir) y automáticas.
 - Palabras automáticas: en la configuración se eligen los grupos, la
-  duración del juego, las rondas y el tiempo por turno. Cada turno tiene su
-  propio mazo, distinto al de todos los demás: el turno termina al acabarse
-  el tiempo o sus palabras, y las que no alcanzaron a salir se descartan.
+  duración del juego, las rondas y el tiempo por turno. Con palabras por
+  ronda cada turno tiene su propio mazo, distinto al de los demás, y las
+  que no alcanzaron a salir se descartan.
   La partida termina al completar las rondas. Al tocar
   "Continuar" se muestra "Buscando palabras…" mientras se traen al azar de la
   colección de Directus (`POST /juego/palabras`). La app ya no usa Gemini: las
@@ -43,12 +43,15 @@ la cámara frontal graba a los participantes para revivir las risas.
   palabras por turno (las sugeridas), dificultad, puntuación y
   aciertos. Cada toque da una configuración nueva, con otros nombres.
 - Duración del juego, con palabras automáticas: "Por número de rondas"
-  (viene elegida: se eligen las rondas y el tiempo, y el juego calcula las
-  palabras de cada turno, "Cada turno tendrá 12 palabras") o "Palabras por
-  ronda" (además se eligen las palabras de cada grupo en cada ronda).
-  Debajo va la sección "Partida" con esas opciones. El valor sugerido es una
-  palabra cada 5 segundos (60 s → 12, 180 s → 36) y sigue al tiempo mientras
-  no lo cambien. El máximo es el menor
+  (viene elegida: se eligen las rondas y el tiempo, y cada turno dura hasta
+  que se acabe el tiempo, sin límite de palabras) o "Palabras por ronda"
+  (además se eligen las palabras de cada grupo en cada ronda; el turno
+  termina con el tiempo o al acabarse sus palabras). Debajo va la sección
+  "Partida" con esas opciones. Por número de rondas se piden las palabras
+  que alcanzaría un grupo rápido (una cada 3 segundos) y, si a un grupo se
+  le acaban, vuelven palabras ya jugadas: nunca se acaban antes del tiempo.
+  Con palabras por ronda, el valor sugerido es una palabra cada 5 segundos
+  (60 s → 12, 180 s → 36) y sigue al tiempo mientras no lo cambien. El máximo es el menor
   entre lo que permite el tiempo (una cada 3 segundos) y lo que alcanza la
   base sin repetir (palabras de la dificultad ÷ turnos de la partida); si
   la base es la que limita, se avisa ("Máximo 5 por grupo para no repetir
@@ -56,8 +59,10 @@ la cámara frontal graba a los participantes para revivir las risas.
   turno × grupos × rondas). Si llegan menos, cada turno tiene menos y se
   avisa. Si una dificultad se queda sin palabras, el servidor completa con
   las otras, y si se acaban todas vuelve a usar las ya jugadas.
-- En el turno se ve cuántas palabras faltan: con palabras automáticas, las
+- En el turno se ve cuántas palabras faltan: con palabras por ronda, las
   de ese turno; con las escritas por los grupos, las de toda la partida.
+  Por número de rondas no se muestra, porque el turno dura hasta que se
+  acabe el tiempo.
 - Ruleta de castigos: una sección propia (en la pantalla de categorías, debajo
   de las tarjetas, una tarjeta blanca con una ruleta pequeña que gira y el
   nombre "Ruleta de castigos"; no es una categoría de palabras). Se elige la

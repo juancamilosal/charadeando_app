@@ -80,12 +80,14 @@ abstract final class AutoFill {
     final names = pool.take(count).toList();
 
     final difficulty = any(Difficulty.values);
+    final length = any(GameLength.values);
     var config = current.copyWith(
       groups: [for (final n in names) Group(n)],
       rounds: between(2, 4),
       turnDuration: Duration(seconds: any(turnSeconds)),
       wordsPerGroup: between(5, 10),
-      difficulty: current.perTurnDecks ? difficulty : null,
+      difficulty: current.wordSource == WordSource.random ? difficulty : null,
+      gameLength: length,
     );
     // Palabras por turno: el valor sugerido para el tiempo del turno, sin
     // pasar de lo que alcanza la base de palabras.
@@ -99,7 +101,7 @@ abstract final class AutoFill {
           if (m.available) m,
       ]),
       difficulty: difficulty,
-      length: any(GameLength.values),
+      length: length,
     );
   }
 }
