@@ -12,8 +12,10 @@ void main() {
     expect(config.totalWords, 45);
   });
 
-  test('permite hasta 6 grupos y empieza con 10 palabras por grupo', () {
-    expect(GameConfig.maxGroups, 6);
+  test('permite hasta 4 grupos, turnos de 1:30 y empieza con 10 palabras '
+      'por grupo', () {
+    expect(GameConfig.maxGroups, 4);
+    expect(GameConfig.maxTurnSeconds, 90);
     expect(const GameConfig().wordsPerGroup, 10);
   });
 
@@ -64,8 +66,10 @@ void main() {
       AutoWordsScreen.countFor(
         config.copyWith(
           rounds: 10,
-          wordsPerTurn: 60,
-          groups: List.filled(6, const Group('G')),
+          wordsPerTurn: 15,
+          gameLength: GameLength.rounds,
+          turnDuration: const Duration(seconds: 90),
+          groups: List.filled(4, const Group('G')),
         ),
       ),
       DirectusService.maxCount,
@@ -85,20 +89,25 @@ void main() {
   });
 
   group('palabras por turno', () {
-    test('el tiempo pone el máximo y sugiere una cada 5 segundos', () {
+    test('el tiempo pone el máximo, con tope de 15, y se sugiere una cada '
+        '5 segundos', () {
       const config = GameConfig(
         wordSource: WordSource.random,
         difficulty: Difficulty.mixed,
         rounds: 3,
+        turnDuration: Duration(seconds: 30),
       );
-      expect(config.maxWordsPerTurn, 20);
-      expect(config.suggestedWordsPerTurn, 12);
-      expect(config.limitedByStock, isFalse);
-      final long = config.copyWith(turnDuration: const Duration(seconds: 180));
-      // 300 palabras mezcladas / 6 turnos = 50; el tiempo permite 60.
-      expect(long.maxWordsPerTurn, 50);
-      expect(long.limitedByStock, isTrue);
-      expect(long.suggestedWordsPerTurn, 36);
+      // 30 s: una cada 3 s da 10.
+      expect(config.maxWordsPerTurn, 10);
+      expect(config.suggestedWordsPerTurn, 6);
+      // 60 s permitiría 20, pero el tope es 15.
+      final minute = config.copyWith(turnDuration: const Duration(seconds: 60));
+      expect(minute.maxWordsPerTurn, GameConfig.wordsPerTurnCap);
+      expect(minute.suggestedWordsPerTurn, 12);
+      expect(minute.limitedByStock, isFalse);
+      final long = config.copyWith(turnDuration: const Duration(seconds: 90));
+      expect(long.maxWordsPerTurn, 15);
+      expect(long.suggestedWordsPerTurn, 15);
     });
 
     test('con muchos grupos y rondas, la base pone el máximo', () {
@@ -106,12 +115,12 @@ void main() {
         wordSource: WordSource.random,
         difficulty: Difficulty.mixed,
         rounds: 10,
-        groups: List.filled(6, const Group('G')),
+        groups: List.filled(4, const Group('G')),
       );
-      // 300 palabras / 60 turnos.
-      expect(config.maxWordsPerTurn, 5);
+      // 300 palabras / 40 turnos.
+      expect(config.maxWordsPerTurn, 7);
       expect(config.limitedByStock, isTrue);
-      expect(config.suggestedWordsPerTurn, 5);
+      expect(config.suggestedWordsPerTurn, 7);
       // Una sola dificultad tiene 100: aun así hay un mínimo por turno.
       expect(
         config.copyWith(difficulty: Difficulty.easy).maxWordsPerTurn,

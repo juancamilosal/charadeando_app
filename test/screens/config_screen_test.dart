@@ -107,14 +107,14 @@ void main() {
     );
   });
 
-  testWidgets('no deja pasar de 6 grupos', (tester) async {
+  testWidgets('no deja pasar de 4 grupos', (tester) async {
     await pumpConfig(tester);
     final add = find.byIcon(Icons.add).first;
-    for (var i = 0; i < 6; i++) {
+    for (var i = 0; i < 4; i++) {
       await tester.tap(add);
       await tester.pump();
     }
-    expect(find.textContaining('Nombre del grupo'), findsNWidgets(6));
+    expect(find.textContaining('Nombre del grupo'), findsNWidgets(4));
   });
 
   testWidgets('con palabras automáticas se juega por rondas, o eligiendo '
@@ -167,13 +167,14 @@ void main() {
           find.descendant(of: row, matching: find.byType(NumberStepper)),
         )
         .value;
+    // 75 s sugiere 15, que también es el tope.
     expect(words(), 15);
-    final more = find.descendant(of: row, matching: find.byIcon(Icons.add));
-    await tester.ensureVisible(more);
+    final less = find.descendant(of: row, matching: find.byIcon(Icons.remove));
+    await tester.ensureVisible(less);
     await tester.pumpAndSettle();
-    await tester.tap(more);
+    await tester.tap(less);
     await tester.pump();
-    expect(words(), 16);
+    expect(words(), 14);
 
     // Faltan la puntuación y los aciertos.
     final perPhrase = find.text('Por frase');
@@ -200,11 +201,11 @@ void main() {
     expect(find.text('Descargando'), findsOneWidget);
     final config = container.read(gameControllerProvider).config;
     expect(config.wordSource, WordSource.random);
-    expect(config.wordsPerTurn, 16);
+    expect(config.wordsPerTurn, 14);
     expect(config.difficulty, Difficulty.mixed);
   });
 
-  testWidgets('con 6 grupos y 10 rondas avisa que la base pone el máximo', (
+  testWidgets('con 4 grupos y 10 rondas avisa que la base pone el máximo', (
     tester,
   ) async {
     await pumpConfig(
@@ -212,7 +213,7 @@ void main() {
       config: GameConfig(
         wordSource: WordSource.random,
         rounds: 10,
-        groups: List.filled(6, const Group('')),
+        groups: List.filled(4, const Group('')),
       ),
     );
     final perRound = find.text('Palabras por ronda');
@@ -225,7 +226,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(perRound);
     await tester.pump();
-    final note = find.text('Máximo 5 por grupo para no repetir palabras.');
+    final note = find.text('Máximo 7 por grupo para no repetir palabras.');
     await tester.scrollUntilVisible(
       note,
       200,

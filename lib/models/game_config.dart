@@ -172,14 +172,18 @@ class GameConfig {
   });
 
   static const minGroups = 2;
-  static const maxGroups = 6;
+  static const maxGroups = 4;
   static const minRounds = 1;
   static const maxRounds = 10;
   static const minTurnSeconds = 30;
-  static const maxTurnSeconds = 180;
+  static const maxTurnSeconds = 90;
   static const minWordsPerGroup = 5;
   static const maxWordsPerGroup = 50;
   static const minWordsPerTurn = 3;
+
+  /// Tope de palabras por grupo en cada ronda, aunque el tiempo o la base
+  /// permitan más.
+  static const wordsPerTurnCap = 15;
 
   final Duration turnDuration;
   final int rounds;
@@ -247,11 +251,19 @@ class GameConfig {
       (difficulty ?? Difficulty.mixed).stock ~/ turns;
 
   /// Máximo del selector de palabras por turno.
-  int get maxWordsPerTurn =>
-      max(minWordsPerTurn, min(maxWordsPerTurnByTime, maxWordsPerTurnByStock));
+  int get maxWordsPerTurn => max(
+    minWordsPerTurn,
+    [
+      wordsPerTurnCap,
+      maxWordsPerTurnByTime,
+      maxWordsPerTurnByStock,
+    ].reduce(min),
+  );
 
-  /// Verdadero si el máximo lo pone la base de palabras y no el tiempo.
-  bool get limitedByStock => maxWordsPerTurnByStock < maxWordsPerTurnByTime;
+  /// Verdadero si el máximo lo pone la base de palabras, y no el tiempo
+  /// ni el tope.
+  bool get limitedByStock =>
+      maxWordsPerTurnByStock < min(maxWordsPerTurnByTime, wordsPerTurnCap);
 
   /// Valor sugerido: una palabra cada 5 segundos, el ritmo de un grupo
   /// normal.

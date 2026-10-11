@@ -24,6 +24,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   elige en la configuración de las palabras automáticas, en Libre y en todas
   las categorías. Las palabras manuales no tienen dificultad. En Directus se
   conserva la columna `dificultad`.
+- Límites: de 2 a 4 grupos, de 1 a 10 rondas y de 30 segundos a 1:30 por
+  turno.
 - Libre explica con una animación cómo se juega y deja elegir entre palabras
   manuales (con la sugerencia de cuántas escribir) y automáticas.
 - Palabras automáticas: en la configuración se eligen los grupos, la
@@ -51,11 +53,12 @@ la cámara frontal graba a los participantes para revivir las risas.
   que alcanzaría un grupo rápido (una cada 3 segundos) y, si a un grupo se
   le acaban, vuelven palabras ya jugadas: nunca se acaban antes del tiempo.
   Con palabras por ronda, el valor sugerido es una palabra cada 5 segundos
-  (60 s → 12, 180 s → 36) y sigue al tiempo mientras no lo cambien. El máximo es el menor
-  entre lo que permite el tiempo (una cada 3 segundos) y lo que alcanza la
-  base sin repetir (palabras de la dificultad ÷ turnos de la partida); si
-  la base es la que limita, se avisa ("Máximo 5 por grupo para no repetir
-  palabras"). Se piden todas al empezar en una sola petición (palabras por
+  (60 s → 12, 90 s → 15) y sigue al tiempo mientras no lo cambien. El
+  máximo es el menor entre 15, lo que permite el tiempo (una cada 3
+  segundos) y lo que alcanza la base sin repetir (palabras de la
+  dificultad ÷ turnos de la partida); si la base es la que limita, se
+  avisa ("Máximo 7 por grupo para no repetir palabras" con 4 grupos y 10
+  rondas). Se piden todas al empezar en una sola petición (palabras por
   turno × grupos × rondas). Si llegan menos, cada turno tiene menos y se
   avisa. Si una dificultad se queda sin palabras, el servidor completa con
   las otras, y si se acaban todas vuelve a usar las ya jugadas.

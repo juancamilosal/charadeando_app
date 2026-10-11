@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('nombra cada grupo con un nombre distinto', () {
-    for (final groups in [2, 4, 6]) {
+    for (final groups in [2, 3, 4]) {
       final result = AutoFill.pick(
         const GameConfig(),
         groups: groups,
@@ -19,10 +19,10 @@ void main() {
   });
 
   test('al volver a llenar no repite los nombres de antes', () {
-    final first = AutoFill.pick(const GameConfig(), groups: 6);
+    final first = AutoFill.pick(const GameConfig(), groups: 4);
     final second = AutoFill.pick(
       first.config,
-      groups: 6,
+      groups: 4,
       previousNames: first.names,
     );
     expect(second.names.any(first.names.contains), isFalse);
@@ -31,7 +31,7 @@ void main() {
   test('las palabras por turno son las sugeridas y respetan los límites', () {
     final random = Random(9);
     for (var i = 0; i < 200; i++) {
-      final groups = 2 + i % 5;
+      final groups = 2 + i % 3;
       final result = AutoFill.pick(
         const GameConfig(wordSource: WordSource.random),
         groups: groups,
