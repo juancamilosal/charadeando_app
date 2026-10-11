@@ -41,7 +41,7 @@ class CategoryScreen extends ConsumerWidget {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text('Categorías'),
+          title: const Text('Selección de categoría'),
           leading: BackButton(onPressed: () => context.go(Routes.welcome)),
         ),
         body: SafeArea(
@@ -51,10 +51,11 @@ class CategoryScreen extends ConsumerWidget {
             children: [
               const Text(
                 '¿Con qué palabras quieren jugar?',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 16),
@@ -82,7 +83,7 @@ class CategoryScreen extends ConsumerWidget {
                 style: TextStyle(
                   fontFamily: AppFonts.display,
                   color: Colors.white,
-                  fontSize: 34,
+                  fontSize: 38,
                   fontWeight: FontWeight.w600,
                 ),
               ),
