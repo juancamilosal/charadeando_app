@@ -13,6 +13,7 @@ abstract final class AppColors {
   static const blue = Color(0xFF2F80FF);
   static const green = Color(0xFF18C26B);
   static const coral = Color(0xFFFF5A5F);
+  static const indigo = Color(0xFF3D2C9E);
 
   /// Morado oscuro para textos sobre fondos claros.
   static const ink = Color(0xFF2B0A57);

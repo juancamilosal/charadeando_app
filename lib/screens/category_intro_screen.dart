@@ -6,6 +6,7 @@ import '../models/models.dart';
 import '../providers/providers.dart';
 import '../router.dart';
 import '../theme.dart';
+import '../widgets/category_art.dart';
 import '../widgets/how_to_play_demo.dart';
 import '../widgets/play_background.dart';
 import '../widgets/step_card.dart';
@@ -129,7 +130,7 @@ class CategoryIntroScreen extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
             children: [
-              Icon(category.icon, size: 48, color: Colors.white),
+              Center(child: CategoryArt(category: category, size: 120)),
               const Text(
                 '¿Cómo se juega?',
                 textAlign: TextAlign.center,
