@@ -4,6 +4,9 @@ import 'dart:math';
 
 import 'package:charadeando_app/models/models.dart';
 import 'package:charadeando_app/services/services.dart';
+import 'package:charadeando_app/widgets/punishment_roulette.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -166,5 +169,46 @@ void main() {
     expect(await service.fetchPunishments(8), ['Cantar']);
     expect(sent.url.path, '/juego/castigos');
     expect(jsonDecode(sent.body), {'n': 8});
+  });
+
+  group('texto en la ruleta', () {
+    const longest =
+        'Inventar una canción de cuatro versos sobre el grupo que ganó';
+    for (final fields in [2, 3, 6, 10]) {
+      testWidgets('cada castigo cabe completo con $fields campos', (
+        tester,
+      ) async {
+        await tester.runAsync(() async {
+          final loader = FontLoader('Nunito');
+          final bytes = File('assets/fonts/Nunito_800ExtraBold.ttf')
+              .readAsBytesSync();
+          loader.addFont(Future.value(ByteData.view(bytes.buffer)));
+          await loader.load();
+        });
+        // Ruleta de un celular común: unos 150 puntos de radio.
+        const radius = 150.0;
+        for (final text in [...systemPunishments, longest.substring(0, 60)]) {
+          final p = RoulettePainter.fitLabel(
+            text,
+            color: Colors.white,
+            radius: radius,
+            outer: radius * 0.86,
+            seg: Roulette.segment(fields),
+          );
+          expect(p.didExceedMaxLines, isFalse, reason: text);
+          expect(p.plainText, text);
+          expect(p.width, lessThanOrEqualTo(radius * 0.65 + 0.5));
+          // Ninguna palabra queda partida por la mitad.
+          final style = (p.text! as TextSpan).style;
+          for (final word in text.split(' ')) {
+            final w = TextPainter(
+              text: TextSpan(text: word, style: style),
+              textDirection: TextDirection.ltr,
+            )..layout();
+            expect(p.width + 0.5, greaterThanOrEqualTo(w.width), reason: word);
+          }
+        }
+      });
+    }
   });
 }

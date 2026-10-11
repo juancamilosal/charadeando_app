@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -306,6 +307,10 @@ class _PunishmentRouletteState extends State<PunishmentRoulette>
 
 /// Dibujo de la ruleta: los campos de colores con su castigo, el centro
 /// redondo y el indicador fijo arriba.
+///
+/// La cara de la ruleta (campos y textos) se dibuja una sola vez y luego
+/// solo se gira: así los textos quedan pegados a la ruleta mientras da
+/// vueltas, y no se vuelven a acomodar en cada cuadro.
 class RoulettePainter extends CustomPainter {
   RoulettePainter({required this.punishments, required this.angle});
 
@@ -314,17 +319,17 @@ class RoulettePainter extends CustomPainter {
   /// Giro de la ruleta en radianes, en el sentido del reloj.
   final double angle;
 
+  /// Caras ya dibujadas, por castigos y tamaño.
+  static final _faces = <int, ui.Picture>{};
+
   @override
   void paint(Canvas canvas, Size size) {
-    final fields = punishments.length;
-    final seg = Roulette.segment(fields);
     final pointerHeight = size.width * 0.08;
     final radius = size.width / 2 - pointerHeight * 0.55;
     final center = Offset(
       size.width / 2,
       size.height / 2 + pointerHeight * 0.3,
     );
-    final rect = Rect.fromCircle(center: center, radius: radius);
 
     canvas.drawCircle(
       center.translate(0, 4),
@@ -335,19 +340,11 @@ class RoulettePainter extends CustomPainter {
     );
     canvas.drawCircle(center, radius + 6, Paint()..color = Colors.white);
 
-    for (var i = 0; i < fields; i++) {
-      final color = PunishmentRoulette.colors[i % 10];
-      final start = -pi / 2 + angle + i * seg;
-      canvas.drawArc(rect, start, seg, true, Paint()..color = color);
-      canvas.drawLine(
-        center,
-        center + Offset(cos(start), sin(start)) * radius,
-        Paint()
-          ..color = Colors.white
-          ..strokeWidth = 2,
-      );
-      _paintLabel(canvas, center, radius, start + seg / 2, seg, i, color);
-    }
+    canvas.save();
+    canvas.translate(center.dx, center.dy);
+    canvas.rotate(angle);
+    canvas.drawPicture(_face(radius));
+    canvas.restore();
 
     // Centro redondo.
     canvas.drawCircle(center, radius * 0.17, Paint()..color = Colors.white);
@@ -386,41 +383,58 @@ class RoulettePainter extends CustomPainter {
     );
   }
 
+  /// Campos y textos sin girar, con el centro en (0, 0).
+  ui.Picture _face(double radius) {
+    final key = Object.hash(Object.hashAll(punishments), radius.round());
+    final cached = _faces[key];
+    if (cached != null) return cached;
+    if (_faces.length > 8) _faces.clear();
+
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final fields = punishments.length;
+    final seg = Roulette.segment(fields);
+    final rect = Rect.fromCircle(center: Offset.zero, radius: radius);
+    for (var i = 0; i < fields; i++) {
+      final color = PunishmentRoulette.colors[i % 10];
+      final start = -pi / 2 + i * seg;
+      canvas.drawArc(rect, start, seg, true, Paint()..color = color);
+      canvas.drawLine(
+        Offset.zero,
+        Offset(cos(start), sin(start)) * radius,
+        Paint()
+          ..color = Colors.white
+          ..strokeWidth = 2,
+      );
+      if (punishments[i].isNotEmpty) {
+        _paintLabel(canvas, radius, start + seg / 2, seg, i, color);
+      }
+    }
+    return _faces[key] = recorder.endRecording();
+  }
+
   void _paintLabel(
     Canvas canvas,
-    Offset center,
     double radius,
     double direction,
     double seg,
     int index,
     Color color,
   ) {
-    final inner = radius * 0.22;
     // Deja libre la punta del indicador, que entra un poco en la ruleta.
-    final outer = radius * 0.85;
-    final fontSize = radius * (punishments.length > 6 ? 0.075 : 0.09);
+    final outer = radius * 0.86;
+    final painter = fitLabel(
+      punishments[index],
+      color: color == AppColors.yellow ? AppColors.ink : Colors.white,
+      radius: radius,
+      outer: outer,
+      seg: seg,
+    );
+    // Los textos de la mitad izquierda (con la ruleta quieta) se giran
+    // media vuelta para que no queden de cabeza. Se decide una sola vez,
+    // así que al girar el texto no cambia de lado.
     final left = cos(direction) < -1e-6;
-    final painter = TextPainter(
-      text: TextSpan(
-        text: punishments[index],
-        style: TextStyle(
-          fontFamily: AppFonts.body,
-          fontSize: fontSize,
-          height: 1.1,
-          fontWeight: FontWeight.w800,
-          color: color == AppColors.yellow ? AppColors.ink : Colors.white,
-        ),
-      ),
-      textAlign: left ? TextAlign.start : TextAlign.end,
-      textDirection: TextDirection.ltr,
-      // Con dos campos cada uno es media ruleta: caben tres renglones.
-      maxLines: punishments.length > 2 ? 2 : 3,
-      ellipsis: '…',
-    )..layout(maxWidth: outer - inner);
     canvas.save();
-    canvas.translate(center.dx, center.dy);
-    // Los textos de la mitad izquierda se giran media vuelta para que no
-    // queden de cabeza; se leen desde el borde hacia el centro.
     if (left) {
       canvas.rotate(direction + pi);
       painter.paint(canvas, Offset(-outer, -painter.height / 2));
@@ -429,6 +443,76 @@ class RoulettePainter extends CustomPainter {
       painter.paint(canvas, Offset(outer - painter.width, -painter.height / 2));
     }
     canvas.restore();
+  }
+
+  /// Acomoda [text] en un campo de ángulo [seg]: busca la letra más grande
+  /// con la que el castigo cabe completo, partiéndolo en los renglones que
+  /// haga falta. El texto va pegado al borde ([outer]) y hacia el centro el
+  /// campo se angosta, así que un texto más corto deja más alto disponible.
+  static TextPainter fitLabel(
+    String text, {
+    required Color color,
+    required double radius,
+    required double outer,
+    required double seg,
+  }) {
+    final inner = radius * 0.21;
+    final halfAngle = min(seg / 2, pi / 2);
+    // Alto máximo para que las esquinas del texto no salgan del círculo.
+    final rimLimit = 2 * sqrt(max(0, pow(radius * 0.98, 2) - outer * outer));
+    TextPainter layout(
+      double fontSize,
+      double maxWidth, [
+      String? only,
+      int? maxLines,
+    ]) => TextPainter(
+      text: TextSpan(
+        text: only ?? text,
+        style: TextStyle(
+          fontFamily: AppFonts.body,
+          fontSize: fontSize,
+          height: 1.05,
+          fontWeight: FontWeight.w800,
+          color: color,
+        ),
+      ),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+      maxLines: maxLines,
+      ellipsis: maxLines == null ? null : '…',
+    )..layout(maxWidth: maxWidth);
+
+    bool fits(TextPainter p) {
+      final start = outer - p.width;
+      if (start < inner - 0.5) return false;
+      final room = halfAngle >= pi / 2 ? 2 * start : 2 * start * sin(halfAngle);
+      return p.height <= min(room * 0.9 - 2, rimLimit);
+    }
+
+    final length = outer - inner;
+    final maxFont = radius * 0.1;
+    final minFont = max(7.0, radius * 0.04);
+    final words = text.split(RegExp(r'\s+')).where((w) => w.isNotEmpty);
+    for (var size = maxFont; size >= minFont; size -= 0.5) {
+      // Ninguna palabra se parte por la mitad: el ancho del texto nunca es
+      // menor que su palabra más larga.
+      final longestWord = words.fold<double>(
+        0,
+        (widest, w) => max(widest, layout(size, double.infinity, w).width),
+      );
+      for (final share in const [1.0, 0.85, 0.7, 0.55, 0.42]) {
+        final width = length * share;
+        if (width + 0.5 < longestWord) continue;
+        final p = layout(size, width);
+        if (fits(p)) return p;
+      }
+    }
+    // Ni con la letra más pequeña cabe todo: se corta con "…".
+    for (var lines = 6; lines > 1; lines--) {
+      final p = layout(minFont, length, null, lines);
+      if (fits(p)) return p;
+    }
+    return layout(minFont, length, null, 1);
   }
 
   @override

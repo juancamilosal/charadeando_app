@@ -55,7 +55,10 @@ la cámara frontal graba a los participantes para revivir las risas.
   curva que es rápida al principio y muy lenta al final, hasta quedar justo en
   el centro de ese campo. Cada campo que pasa por el indicador hace un "tic"
   con vibración, y al caer el castigo aparece en grande con una vibración
-  fuerte, con "Girar otra vez" y "Listo".
+  fuerte, con "Girar otra vez" y "Listo". Cada castigo se ve completo en su
+  campo: se busca la letra más grande con la que cabe, en varios renglones
+  y sin partir palabras. La cara de la ruleta se dibuja una vez y solo se
+  gira, así los textos quedan fijos a la ruleta mientras da vueltas.
 - Al final de la partida, el grupo con menos puntos ve "¡Ruleta de castigo
   para …!" con "Girar" o "Sin castigo". Si varios empatan con menos puntos,
   cada uno gira su ruleta, uno después del otro; si todos empatan, no hay
