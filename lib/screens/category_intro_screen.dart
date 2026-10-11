@@ -9,7 +9,6 @@ import '../theme.dart';
 import '../widgets/category_art.dart';
 import '../widgets/how_to_play_demo.dart';
 import '../widgets/play_background.dart';
-import '../widgets/step_card.dart';
 
 /// Qué se adivina en cada categoría y las palabras del ejemplo animado.
 class _Guide {
@@ -101,28 +100,6 @@ class CategoryIntroScreen extends ConsumerWidget {
       fontSize: 16,
       fontWeight: FontWeight.w700,
     );
-    final steps = [
-      (
-        Icons.smartphone,
-        AppColors.purple,
-        'Una persona se pone el celular en la frente.',
-      ),
-      (
-        Icons.record_voice_over,
-        AppColors.turquoise,
-        'Su grupo le describe ${guide.item} sin decir el nombre.',
-      ),
-      (
-        Icons.psychology_alt,
-        AppColors.orange,
-        'Intenta adivinar ${guide.items} que pueda.',
-      ),
-      (
-        Icons.swap_vert,
-        AppColors.green,
-        'Abajo si acierta, arriba para pasar.',
-      ),
-    ];
     return PlayBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -174,27 +151,12 @@ class CategoryIntroScreen extends ConsumerWidget {
                   horizontal: 12,
                   vertical: 20,
                 ),
-                child: guide.rounds.isEmpty
-                    ? const HowToPlayDemo()
-                    : HowToPlayDemo(rounds: guide.rounds),
-              ),
-              const SizedBox(height: 12),
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                childAspectRatio: 1.1,
-                children: [
-                  for (var i = 0; i < steps.length; i++)
-                    StepCard(
-                      number: i + 1,
-                      icon: steps[i].$1,
-                      color: steps[i].$2,
-                      text: steps[i].$3,
-                    ),
-                ],
+                child: HowToPlayDemo(
+                  rounds: guide.rounds.isEmpty
+                      ? HowToPlayDemo.defaultRounds
+                      : guide.rounds,
+                  tvMode: ref.watch(tvConnectedProvider).value ?? false,
+                ),
               ),
               const SizedBox(height: 24),
               FilledButton.icon(

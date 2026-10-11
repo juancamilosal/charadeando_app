@@ -13,7 +13,11 @@ typedef DemoRound = (String word, List<String> clues, String guess);
 /// su grupo le describe la palabra secreta sin decirla y, cuando acierta,
 /// inclina el celular y sale la siguiente palabra.
 class HowToPlayDemo extends StatefulWidget {
-  const HowToPlayDemo({super.key, this.rounds = defaultRounds});
+  const HowToPlayDemo({
+    super.key,
+    this.rounds = defaultRounds,
+    this.tvMode = false,
+  });
 
   /// Palabras del ejemplo de Libre.
   static const defaultRounds = <DemoRound>[
@@ -24,6 +28,10 @@ class HowToPlayDemo extends StatefulWidget {
 
   /// Palabras que se muestran, una tras otra.
   final List<DemoRound> rounds;
+
+  /// Hay un televisor conectado: los aciertos los marca el juez en el
+  /// celular, no se inclina.
+  final bool tvMode;
 
   @override
   State<HowToPlayDemo> createState() => _HowToPlayDemoState();
@@ -126,16 +134,22 @@ class _HowToPlayDemoState extends State<HowToPlayDemo>
           ),
         ),
         const SizedBox(height: 12),
-        const Row(
+        Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.swap_vert, size: 18, color: AppColors.purple),
-            SizedBox(width: 6),
+            Icon(
+              widget.tvMode ? Icons.touch_app : Icons.swap_vert,
+              size: 18,
+              color: AppColors.purple,
+            ),
+            const SizedBox(width: 6),
             Flexible(
               child: Text(
-                'Inclina el celular hacia abajo si aciertas y hacia arriba '
-                'para pasar.',
-                style: TextStyle(fontSize: 13),
+                widget.tvMode
+                    ? 'El juez toca ¡Correcto! o Pasar en el celular.'
+                    : 'Inclina el celular hacia abajo si aciertas y hacia '
+                          'arriba para pasar.',
+                style: const TextStyle(fontSize: 13),
               ),
             ),
           ],

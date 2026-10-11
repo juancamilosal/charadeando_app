@@ -10,31 +10,11 @@ import '../theme.dart';
 import '../widgets/category_art.dart';
 import '../widgets/how_to_play_demo.dart';
 import '../widgets/play_background.dart';
-import '../widgets/step_card.dart';
 
 /// Presentación de la categoría Libre: cómo se juega y de dónde salen las
 /// palabras.
 class FreeModeScreen extends ConsumerWidget {
   const FreeModeScreen({super.key});
-
-  static const _steps = [
-    (
-      Icons.smartphone,
-      AppColors.purple,
-      'Una persona se pone el celular en la frente.',
-    ),
-    (
-      Icons.record_voice_over,
-      AppColors.turquoise,
-      'Su grupo ve la palabra y la describe sin decirla.',
-    ),
-    (
-      Icons.psychology_alt,
-      AppColors.orange,
-      'Intenta adivinar todas las que pueda.',
-    ),
-    (Icons.swap_vert, AppColors.green, 'Abajo si acierta, arriba para pasar.'),
-  ];
 
   void _choose(BuildContext context, WidgetRef ref, WordSource source) {
     ref
@@ -98,27 +78,14 @@ class FreeModeScreen extends ConsumerWidget {
                 style: white,
               ),
               const SizedBox(height: 16),
-              const PlayPanel(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 20),
-                child: HowToPlayDemo(),
-              ),
-              const SizedBox(height: 12),
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                childAspectRatio: 1.1,
-                children: [
-                  for (var i = 0; i < _steps.length; i++)
-                    StepCard(
-                      number: i + 1,
-                      icon: _steps[i].$1,
-                      color: _steps[i].$2,
-                      text: _steps[i].$3,
-                    ),
-                ],
+              PlayPanel(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 20,
+                ),
+                child: HowToPlayDemo(
+                  tvMode: ref.watch(tvConnectedProvider).value ?? false,
+                ),
               ),
               const SizedBox(height: 24),
               const Text(
