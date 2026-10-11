@@ -174,6 +174,19 @@ la cámara frontal graba a los participantes para revivir las risas.
   los resultados finales con los puntajes de ese momento (si el turno estaba
   en pausa, sus palabras marcadas cuentan). Si todavía no se jugó ningún
   turno, vuelve a Categorías.
+- Mis videos (botón de video arriba en Categorías): al tocar "Guardar" en
+  el video de un turno, se guarda en la galería (en Android, en
+  `Movies/Charadeando`) y aparece en Mis videos, del más nuevo al más
+  viejo, con su miniatura, el grupo y los puntos del turno, la categoría,
+  la ronda, la fecha y los puntajes de ese momento. El video vive una sola
+  vez, en la galería: Mis videos guarda solo su referencia y los datos de
+  la partida en `mis_videos.json`, en el celular, y nunca se sube a ningún
+  servidor. Al abrir la sección se quitan los que ya se borraron de la
+  galería. Al borrar uno desde la app pregunta si se borra también de la
+  galería. En iPhone con acceso limitado a las fotos no se quita ninguno
+  (no se puede saber si siguen) y se ofrece "Elegir videos". En Android la
+  app no pide el permiso de leer toda la galería: ve sin permiso los videos
+  que ella misma guardó.
 - Si la app sale a segundo plano durante el turno, el juego se pausa y al
   volver sigue donde quedó. El video se graba por partes y se unen al final.
 

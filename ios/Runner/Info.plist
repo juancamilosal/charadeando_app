@@ -73,5 +73,7 @@
 	<string>Charadeando graba el audio de cada turno junto con el video.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Charadeando guarda en tu galería los videos que elijas conservar.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Charadeando muestra en Mis videos los videos de tus partidas que guardaste en la galería.</string>
 </dict>
 </plist>

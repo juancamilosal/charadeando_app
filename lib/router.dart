@@ -9,6 +9,7 @@ import 'screens/custom_category_screen.dart';
 import 'screens/directus_test_screen.dart';
 import 'screens/final_result_screen.dart';
 import 'screens/free_mode_screen.dart';
+import 'screens/my_videos_screen.dart';
 import 'screens/roulette_screen.dart';
 import 'screens/turn_result_screen.dart';
 import 'screens/turn_screen.dart';
@@ -38,6 +39,10 @@ abstract final class Routes {
   /// Crear o editar una categoría propia. Para editar recibe la categoría
   /// como `extra`.
   static const customCategory = '/mis-categorias';
+
+  /// "Mis videos" y ver uno de ellos, que recibe el video como `extra`.
+  static const myVideos = '/mis-videos';
+  static const myVideo = '/mis-videos/ver';
 
   /// Ruleta de castigo de un grupo al final de la partida. Recibe el nombre
   /// del grupo como `extra`.
@@ -81,6 +86,11 @@ GoRouter createRouter({required bool Function() welcomeSeen}) => GoRouter(
       path: Routes.customCategory,
       builder: (_, state) =>
           CustomCategoryScreen(category: state.extra as CustomCategory?),
+    ),
+    GoRoute(path: Routes.myVideos, builder: (_, _) => const MyVideosScreen()),
+    GoRoute(
+      path: Routes.myVideo,
+      builder: (_, state) => MyVideoScreen(video: state.extra! as SavedVideo),
     ),
     GoRoute(
       path: Routes.punishmentSpin,

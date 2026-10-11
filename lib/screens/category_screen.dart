@@ -56,6 +56,11 @@ class CategoryScreen extends ConsumerWidget {
           automaticallyImplyLeading: false,
           actions: [
             IconButton(
+              icon: const Icon(Icons.video_library_outlined),
+              tooltip: 'Mis videos',
+              onPressed: () => context.push(Routes.myVideos),
+            ),
+            IconButton(
               icon: const Icon(Icons.info_outline),
               tooltip: 'Cómo se juega',
               onPressed: () => context.push(Routes.welcome),

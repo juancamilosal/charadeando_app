@@ -2,10 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/services.dart';
 import 'custom_categories_controller.dart';
+import 'my_videos_controller.dart';
 import 'game_controller.dart';
 import 'turn_video_controller.dart';
 
 export 'custom_categories_controller.dart';
+export 'my_videos_controller.dart';
 export 'game_controller.dart';
 export 'turn_video_controller.dart';
 
@@ -20,6 +22,14 @@ final punishmentStoreProvider = Provider((ref) => PunishmentStore());
 final configStoreProvider = Provider((ref) => ConfigStore());
 final customCategoryStoreProvider = Provider((ref) => CustomCategoryStore());
 final welcomeStoreProvider = Provider((ref) => WelcomeStore());
+final videoGalleryProvider = Provider((ref) => VideoGallery());
+final myVideosStoreProvider = Provider((ref) => MyVideosStore());
+
+/// "Mis videos": los videos guardados en la galería desde la app.
+final myVideosProvider =
+    AsyncNotifierProvider<MyVideosController, MyVideosData>(
+      MyVideosController.new,
+    );
 
 /// Si ya se vio la bienvenida. `main` lo lee del celular antes de abrir la
 /// app, para que la primera pantalla sea la correcta desde el principio.

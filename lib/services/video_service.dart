@@ -1,12 +1,11 @@
 import 'dart:io';
 
-import 'package:gal/gal.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// Maneja los videos temporales de los turnos. Los videos viven en una
 /// carpeta temporal de la app y solo salen de ella si el usuario los guarda
-/// en la galería o los comparte.
+/// en la galería ([VideoGallery]) o los comparte.
 class VideoService {
   static const _folder = 'charadeando_videos';
 
@@ -46,15 +45,6 @@ class VideoService {
     await for (final entity in dir.list()) {
       await entity.delete(recursive: true);
     }
-  }
-
-  /// Guarda una copia en la galería del celular. Lanza [GalException] si el
-  /// usuario niega el permiso.
-  Future<void> saveToGallery(String path) async {
-    if (!await Gal.hasAccess()) {
-      await Gal.requestAccess();
-    }
-    await Gal.putVideo(path);
   }
 
   Future<void> share(String path) async {

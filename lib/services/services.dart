@@ -15,3 +15,5 @@ export 'auto_fill.dart';
 export 'config_store.dart';
 export 'custom_category_store.dart';
 export 'welcome_store.dart';
+export 'video_gallery.dart';
+export 'my_videos_store.dart';
