@@ -7,6 +7,7 @@ import '../providers/providers.dart';
 import '../router.dart';
 import '../services/services.dart';
 import '../theme.dart';
+import '../widgets/category_art.dart';
 import '../widgets/how_to_play_demo.dart';
 import '../widgets/play_background.dart';
 import '../widgets/step_card.dart';
@@ -75,6 +76,9 @@ class FreeModeScreen extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
             children: [
+              const Center(
+                child: CategoryArt(category: GameCategory.free, size: 120),
+              ),
               const Text(
                 '¿Cómo se juega?',
                 textAlign: TextAlign.center,

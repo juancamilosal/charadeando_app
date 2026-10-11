@@ -18,6 +18,8 @@ Future<void> tapVisible(WidgetTester tester, String text) async {
     200,
     scrollable: find.byType(Scrollable).first,
   );
+  await tester.ensureVisible(finder);
+  await tester.pump();
   await tester.tap(finder);
   await settle(tester);
 }
