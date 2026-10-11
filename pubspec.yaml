@@ -68,6 +68,10 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  # Animaciones de cada categoría (GIF de 256 px, nombre = categoría).
+  assets:
+    - assets/img/categorias/
+
   fonts:
     - family: Fredoka
       fonts:
