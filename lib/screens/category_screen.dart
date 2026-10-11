@@ -75,7 +75,7 @@ class CategoryScreen extends ConsumerWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 mainAxisSpacing: 14,
                 crossAxisSpacing: 14,
-                childAspectRatio: 0.82,
+                childAspectRatio: 0.7,
                 children: [
                   for (final category in GameCategory.themed)
                     _CategoryCard(
@@ -112,9 +112,11 @@ class _CategoryCard extends StatelessWidget {
       category.label,
       maxLines: large ? 1 : 2,
       overflow: TextOverflow.ellipsis,
+      textAlign: large ? TextAlign.start : TextAlign.center,
       style: TextStyle(
         fontFamily: AppFonts.display,
-        fontSize: large ? 30 : 20,
+        fontSize: large ? 30 : 24,
+        height: 1.1,
         fontWeight: FontWeight.w600,
         color: onColor,
       ),
@@ -123,8 +125,9 @@ class _CategoryCard extends StatelessWidget {
       category.description,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
+      textAlign: large ? TextAlign.start : TextAlign.center,
       style: TextStyle(
-        fontSize: large ? 15 : 13,
+        fontSize: large ? 15 : 14,
         fontWeight: FontWeight.w700,
         color: onColor.withValues(alpha: 0.85),
       ),
@@ -159,17 +162,25 @@ class _CategoryCard extends StatelessWidget {
                       ],
                     )
                   : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        CategoryArt(
-                          category: category,
-                          size: 56,
-                          color: onColor,
+                        Expanded(
+                          child: Center(
+                            child: CategoryArt(
+                              category: category,
+                              size: 96,
+                              color: onColor,
+                            ),
+                          ),
                         ),
-                        const Spacer(),
-                        Flexible(flex: 0, child: title),
-                        Flexible(flex: 0, child: description),
+                        const SizedBox(height: 8),
+                        // Una sola palabra larga ("Celebridades") se achica
+                        // en vez de partirse en dos renglones.
+                        if (category.label.contains(' '))
+                          title
+                        else
+                          FittedBox(fit: BoxFit.scaleDown, child: title),
+                        const SizedBox(height: 4),
+                        description,
                       ],
                     ),
             ),
