@@ -24,7 +24,7 @@ enum GameCategory {
     'Geografía',
     'Países, ciudades, ríos y más',
     Icons.public,
-    AppColors.pink,
+    AppColors.indigo,
     'GEOGRAFIA',
   ),
   movies(
