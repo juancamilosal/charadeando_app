@@ -140,10 +140,6 @@ class FreeModeScreen extends ConsumerWidget {
                 description:
                     'Ustedes escriben sus propias palabras antes de empezar. '
                     '¡Perfecto para bromas internas y palabras de la familia!',
-                suggestion:
-                    'Entre más rondas y más tiempo por turno, más palabras '
-                    'se juegan. Ustedes eligen cuántas escribir en la '
-                    'configuración.',
                 onTap: () => _choose(context, ref, WordSource.groups),
               ),
               const SizedBox(height: 12),
@@ -154,9 +150,6 @@ class FreeModeScreen extends ConsumerWidget {
                 description:
                     'Nosotros ponemos las palabras por ustedes. Solo denle '
                     'comenzar y a jugar sin pensar en nada más.',
-                suggestion:
-                    'Necesitan internet al empezar. Si no hay, se juega con '
-                    'las últimas palabras descargadas.',
                 onTap: () => _choose(context, ref, WordSource.random),
               ),
               if (TestData.enabled) ...[
@@ -188,14 +181,12 @@ class _ModeCard extends StatelessWidget {
     required this.title,
     required this.description,
     required this.onTap,
-    this.suggestion,
   });
 
   final IconData icon;
   final Color color;
   final String title;
   final String description;
-  final String? suggestion;
   final VoidCallback onTap;
 
   @override
@@ -226,38 +217,6 @@ class _ModeCard extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 14),
               ),
-              if (suggestion != null) ...[
-                const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFF6D6),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.lightbulb,
-                        size: 20,
-                        color: AppColors.orange,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          suggestion!,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.symmetric(

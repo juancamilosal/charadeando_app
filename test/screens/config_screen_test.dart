@@ -11,16 +11,31 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+/// Configuración guardada en memoria, sin archivos.
+class MemoryConfigStore extends ConfigStore {
+  MemoryConfigStore([this.saved]);
+
+  SavedConfig? saved;
+
+  @override
+  Future<SavedConfig?> load() async => saved;
+
+  @override
+  Future<void> save(SavedConfig config) async => saved = config;
+}
+
 Future<ProviderContainer> pumpConfig(
   WidgetTester tester, {
   GameConfig? config,
   Stream<bool>? tv,
+  ConfigStore? store,
 }) async {
   tester.view.physicalSize = const Size(1080, 2400);
   addTearDown(tester.view.reset);
   final container = ProviderContainer(
     overrides: [
       tvConnectedProvider.overrideWith((ref) => tv ?? Stream.value(false)),
+      configStoreProvider.overrideWithValue(store ?? MemoryConfigStore()),
     ],
   );
   addTearDown(container.dispose);
@@ -64,7 +79,7 @@ void main() {
   testWidgets('llena la configuración automáticamente y la cambia en cada '
       'toque', (tester) async {
     final container = await pumpConfig(tester);
-    await tester.tap(find.text('Llenar automáticamente'));
+    await tester.tap(find.text('Configuración aleatoria'));
     await tester.pump();
     List<String> names() => [
       for (final f in tester.widgetList<TextField>(find.byType(TextField)))
@@ -77,7 +92,7 @@ void main() {
     // Al agregar un grupo y volver a tocar, el juego también lo nombra.
     await tester.tap(find.byIcon(Icons.add).first);
     await tester.pump();
-    await tester.tap(find.text('Llenar automáticamente'));
+    await tester.tap(find.text('Configuración aleatoria'));
     await tester.pump();
     final second = names();
     expect(second, hasLength(3));
@@ -191,28 +206,68 @@ void main() {
     expect(mixed, findsOneWidget);
   });
 
-  testWidgets('ninguna opción viene elegida, salvo el video', (tester) async {
-    await pumpConfig(
+  testWidgets('vienen marcadas Por frase, Movimiento y el video; solo '
+      'faltan los nombres', (tester) async {
+    final container = await pumpConfig(
       tester,
-      config: const GameConfig(
-        wordSource: WordSource.random,
-        groups: [Group('A'), Group('B')],
-      ),
+      config: const GameConfig(wordSource: WordSource.random),
     );
     await tapContinue(tester);
+    expect(find.text('Escriban el nombre de cada grupo.'), findsOneWidget);
+    // Se espera a que el aviso se cierre para que no tape el botón.
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
 
-    expect(find.text('Descargando'), findsNothing);
-    expect(
-      find.text('Elijan la puntuación y cómo se marcan los aciertos.'),
-      findsOneWidget,
-    );
-    final noVideo = find.text('Jugar sin grabar');
     await tester.scrollUntilVisible(
-      noVideo,
-      200,
+      find.text('Configuración aleatoria'),
+      -300,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(noVideo, findsOneWidget);
+    await tester.enterText(find.byType(TextField).at(0), 'A');
+    await tester.enterText(find.byType(TextField).at(1), 'B');
+    await tapContinue(tester);
+    expect(find.text('Descargando'), findsOneWidget);
+    final config = container.read(gameControllerProvider).config;
+    expect(config.scoringMode, ScoringMode.perPhrase);
+    expect(config.hitMode, HitMode.tilt);
+    expect(config.difficulty, Difficulty.mixed);
+    expect(config.resolution, VideoResolution.hd);
+  });
+
+  testWidgets('guarda la configuración y la próxima vez aparece llena', (
+    tester,
+  ) async {
+    final store = MemoryConfigStore();
+    await pumpConfig(
+      tester,
+      config: const GameConfig(wordSource: WordSource.random),
+      store: store,
+    );
+    await tester.tap(find.text('Configuración aleatoria'));
+    await tester.pump();
+    await tapContinue(tester);
+    final saved = store.saved!;
+    expect(saved.groupNames, hasLength(2));
+
+    // Una partida nueva: los nombres y las opciones vienen de la guardada.
+    await tester.pumpWidget(const SizedBox());
+    final container = await pumpConfig(
+      tester,
+      config: const GameConfig(wordSource: WordSource.random),
+      store: store,
+    );
+    await tester.pumpAndSettle();
+    final names = [
+      for (final f in tester.widgetList<TextField>(find.byType(TextField)))
+        f.controller!.text,
+    ];
+    expect(names, saved.groupNames);
+    await tapContinue(tester);
+    final config = container.read(gameControllerProvider).config;
+    expect(config.rounds, saved.rounds);
+    expect(config.turnDuration, saved.turnDuration);
+    expect(config.scoringMode, saved.scoringMode);
+    expect(config.difficulty, saved.difficulty);
   });
 
   testWidgets('al duplicar la pantalla se activa el Modo TV y se ocultan '
@@ -221,7 +276,7 @@ void main() {
     addTearDown(tv.close);
     final container = await pumpConfig(tester, tv: tv.stream);
     tv.add(false);
-    await tester.tap(find.text('Llenar automáticamente'));
+    await tester.tap(find.text('Configuración aleatoria'));
     await tester.pump();
 
     final connect = find.text('Conectar las palabras a un televisor');
@@ -303,7 +358,7 @@ void main() {
         groups: [Group('A'), Group('B')],
       ),
     );
-    await tester.tap(find.text('Llenar automáticamente'));
+    await tester.tap(find.text('Configuración aleatoria'));
     await tester.pump();
     final hard = find.text('Difícil');
     await tester.scrollUntilVisible(

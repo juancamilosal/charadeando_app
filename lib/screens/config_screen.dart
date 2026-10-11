@@ -36,6 +36,68 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
     for (final group in _config.groups) {
       _names.add(TextEditingController(text: group.name));
     }
+    // Si es una partida nueva (sin nombres), se llena con la última
+    // configuración guardada.
+    if (_names.every((c) => c.text.trim().isEmpty)) _loadSaved();
+  }
+
+  Future<void> _loadSaved() async {
+    final saved = await ref.read(configStoreProvider).load();
+    if (saved == null || !mounted) return;
+    setState(() {
+      final names = saved.groupNames.take(GameConfig.maxGroups).toList();
+      if (names.length >= GameConfig.minGroups) {
+        while (_names.length < names.length) {
+          _names.add(TextEditingController());
+        }
+        while (_names.length > names.length) {
+          _names.removeLast().dispose();
+        }
+        for (var i = 0; i < names.length; i++) {
+          _names[i].text = names[i];
+        }
+      }
+      _config = _config.copyWith(
+        groups: [for (final c in _names) Group(c.text.trim())],
+        rounds: saved.rounds.clamp(GameConfig.minRounds, GameConfig.maxRounds),
+        turnDuration: Duration(
+          seconds: saved.turnDuration.inSeconds.clamp(
+            GameConfig.minTurnSeconds,
+            GameConfig.maxTurnSeconds,
+          ),
+        ),
+        wordsPerGroup: saved.wordsPerGroup.clamp(
+          GameConfig.minWordsPerGroup,
+          GameConfig.maxWordsPerGroup,
+        ),
+        resolution: saved.resolution,
+      );
+      _scoring = saved.scoringMode;
+      _hitMode = saved.hitMode;
+      if (_automatic && saved.difficulty != null) {
+        _difficulty = saved.difficulty;
+        _config = _config.copyWith(difficulty: _difficulty);
+      }
+    });
+  }
+
+  /// Guarda la configuración para la próxima partida.
+  void _save(GameConfig config) {
+    ref
+        .read(configStoreProvider)
+        .save(
+          SavedConfig(
+            groupNames: [for (final g in config.groups) g.name],
+            rounds: config.rounds,
+            turnDuration: config.turnDuration,
+            wordsPerGroup: config.wordsPerGroup,
+            scoringMode: _scoring ?? ScoringMode.perPhrase,
+            hitMode: _hitMode ?? HitMode.tilt,
+            resolution: config.resolution,
+            difficulty: _automatic ? _difficulty : null,
+          ),
+        )
+        .ignore();
   }
 
   @override
@@ -49,11 +111,10 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   /// Verdadero después de tocar "Continuar" con algo sin completar.
   bool _showErrors = false;
 
-  // Opciones que el usuario debe elegir: ninguna viene marcada. La
-  // resolución del video y la dificultad (Mezcladas) sí tienen valor por
-  // defecto.
-  ScoringMode? _scoring;
-  HitMode? _hitMode;
+  // Vienen marcadas por defecto: puntuación por frase, aciertos con
+  // movimiento, dificultad Mezcladas y video HD. Se pueden cambiar.
+  ScoringMode? _scoring = ScoringMode.perPhrase;
+  HitMode? _hitMode = HitMode.tilt;
 
   /// Dificultad de las palabras automáticas. Las manuales no tienen.
   Difficulty? _difficulty;
@@ -89,7 +150,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
     });
   }
 
-  /// "Llenar automáticamente": el juego pone los nombres de los grupos y
+  /// "Configuración aleatoria": el juego pone los nombres de los grupos y
   /// elige el resto al azar, con valores que tienen sentido para la
   /// cantidad de grupos. Cada toque da una configuración nueva.
   void _autoFill() {
@@ -124,6 +185,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
       return;
     }
     final groups = [for (final c in _names) Group(c.text.trim())];
+    _save(_config.copyWith(groups: groups));
     ref
         .read(gameControllerProvider.notifier)
         .configure(
@@ -190,7 +252,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
             children: [
               OutlinedButton.icon(
                 icon: const Icon(Icons.auto_awesome),
-                label: const Text('Llenar automáticamente'),
+                label: const Text('Configuración aleatoria'),
                 onPressed: _autoFill,
               ),
               const SizedBox(height: 6),

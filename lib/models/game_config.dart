@@ -7,11 +7,11 @@ import 'group.dart';
 
 /// Cómo se suman los puntos de una palabra acertada.
 enum ScoringMode {
-  /// Un punto por cada palabra de la frase.
-  perWord('Por palabra', 'Un punto por cada palabra de la frase'),
+  /// Un punto por frase, sin importar su largo. Es la que viene elegida.
+  perPhrase('Por frase', 'Un punto por frase, sin importar su largo'),
 
-  /// Un punto por frase, sin importar su largo.
-  perPhrase('Por frase', 'Un punto por frase, sin importar su largo');
+  /// Un punto por cada palabra de la frase.
+  perWord('Por palabra', 'Un punto por cada palabra de la frase');
 
   const ScoringMode(this.label, this.description);
 
@@ -132,7 +132,7 @@ class GameConfig {
     this.wordSource = WordSource.groups,
     this.difficulty,
     this.wordsPerGroup = 10,
-    this.scoringMode = ScoringMode.perWord,
+    this.scoringMode = ScoringMode.perPhrase,
     this.hitMode = HitMode.tilt,
     this.resolution = VideoResolution.hd,
   });

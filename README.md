@@ -27,7 +27,7 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Límites: de 2 a 4 grupos, de 1 a 10 rondas y de 30 segundos a 1:30 por
   turno.
 - Libre explica con una animación cómo se juega y deja elegir entre palabras
-  manuales (con la sugerencia de cuántas escribir) y automáticas.
+  manuales y automáticas.
 - Palabras automáticas: en la configuración se eligen los grupos, las
   rondas (hasta 10) y el tiempo por turno. Cada turno dura hasta que se
   acabe el tiempo, sin límite de palabras: se piden las que alcanzaría un
@@ -40,7 +40,14 @@ la cámara frontal graba a los participantes para revivir las risas.
   se usa internet ni se piden más. El celular recuerda las últimas 500
   palabras jugadas para no repetirlas, y guarda el
   último lote para jugar sin internet. Ver `server/README.md`.
-- "Llenar automáticamente" (arriba en la configuración): el juego pone los
+- La configuración viene con "Por frase" (la primera opción, antes de "Por
+  palabra"), aciertos con "Movimiento", dificultad Mezcladas y video HD ya
+  marcados. Al tocar "Continuar" se guarda en el celular la última
+  configuración (nombres de los grupos, rondas, tiempo, palabras por grupo,
+  dificultad, puntuación, aciertos y video), y la próxima partida aparece
+  llena con ella. Es una sola para todas las categorías; el Modo TV no se
+  guarda porque depende del televisor conectado.
+- "Configuración aleatoria" (arriba en la configuración): el juego pone los
   nombres de los grupos (por defecto 2; si agregan más, también los nombra)
   y elige al azar el resto: rondas, tiempo por turno, dificultad,
   puntuación y aciertos. Cada toque da una configuración nueva, con otros nombres.
@@ -99,9 +106,6 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Puntuación por palabra (cuentan artículos y conectores) o por frase. Pasar
   no suma ni resta, y las palabras pasadas no vuelven al mazo. Igualdad de
   puntos es empate.
-- En la configuración ninguna opción viene elegida (duración, puntuación,
-  aciertos): hay que escogerlas antes de continuar. Solo el video tiene valor
-  por defecto.
 - Video de cada turno con la cámara frontal, en 720p por defecto. También se
   puede jugar sin grabar. 1080p y la máxima resolución quedan bloqueadas como
   premium.

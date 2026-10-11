@@ -68,4 +68,9 @@ void main() {
     expect(Difficulty.mixed.code, isNull);
     expect(Difficulty.values.first, Difficulty.mixed);
   });
+
+  test('"Por frase" es la primera opción y la que viene elegida', () {
+    expect(ScoringMode.values.first, ScoringMode.perPhrase);
+    expect(const GameConfig().scoringMode, ScoringMode.perPhrase);
+  });
 }

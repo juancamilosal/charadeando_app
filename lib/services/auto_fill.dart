@@ -2,7 +2,7 @@ import 'dart:math';
 
 import '../models/models.dart';
 
-/// Configuración que el juego elige solo con "Llenar automáticamente".
+/// Configuración que el juego elige solo con "Configuración aleatoria".
 class AutoFillResult {
   const AutoFillResult({
     required this.config,
