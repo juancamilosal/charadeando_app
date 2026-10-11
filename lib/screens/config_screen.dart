@@ -87,7 +87,8 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
         .read(configStoreProvider)
         .save(
           SavedConfig(
-            groupNames: [for (final g in config.groups) g.name],
+            // Sin grupos se conservan los nombres de la vez anterior.
+            groupNames: [for (final c in _names) c.text.trim()],
             rounds: config.rounds,
             turnDuration: config.turnDuration,
             wordsPerGroup: config.wordsPerGroup,
@@ -120,6 +121,10 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   Difficulty? _difficulty;
 
   bool get _automatic => _config.wordSource == WordSource.random;
+
+  /// Se juega en grupos. Sin grupos no se piden nombres ni palabras por
+  /// grupo.
+  bool get _inGroups => _config.inGroups;
 
   /// Se juega una categoría propia: sus palabras no tienen dificultad.
   bool get _custom => _config.customCategory != null;
@@ -175,7 +180,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   }
 
   void _continue() {
-    final missingNames = _names.any((c) => c.text.trim().isEmpty);
+    final missingNames = _inGroups && _names.any((c) => c.text.trim().isEmpty);
     final missing = _missingChoices;
     if (missingNames || missing.isNotEmpty) {
       setState(() => _showErrors = true);
@@ -187,7 +192,9 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
         ..showSnackBar(SnackBar(content: Text(message)));
       return;
     }
-    final groups = [for (final c in _names) Group(c.text.trim())];
+    final groups = _inGroups
+        ? [for (final c in _names) Group(c.text.trim())]
+        : const [Group('')];
     _save(_config.copyWith(groups: groups));
     ref
         .read(gameControllerProvider.notifier)
@@ -260,79 +267,90 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                 onPressed: _autoFill,
               ),
               const SizedBox(height: 6),
-              const Text(
-                'El juego pone los nombres de los grupos y elige la '
-                'configuración por ti. Tócalo otra vez para cambiarla.',
+              Text(
+                _inGroups
+                    ? 'El juego pone los nombres de los grupos y elige la '
+                          'configuración por ti. Tócalo otra vez para '
+                          'cambiarla.'
+                    : 'El juego elige la configuración por ti. Tócalo otra '
+                          'vez para cambiarla.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),
               ),
               gap,
-              ConfigSection(
-                icon: Icons.groups,
-                title: 'Grupos',
-                children: [
-                  ConfigRow(
-                    label: 'Número de grupos',
-                    hint: 'Hasta ${GameConfig.maxGroups} grupos.',
-                    child: NumberStepper(
-                      value: _names.length,
-                      min: GameConfig.minGroups,
-                      max: GameConfig.maxGroups,
-                      onChanged: _setGroupCount,
+              if (_inGroups) ...[
+                ConfigSection(
+                  icon: Icons.groups,
+                  title: 'Grupos',
+                  children: [
+                    ConfigRow(
+                      label: 'Número de grupos',
+                      hint: 'Hasta ${GameConfig.maxGroups} grupos.',
+                      child: NumberStepper(
+                        value: _names.length,
+                        min: GameConfig.minGroups,
+                        max: GameConfig.maxGroups,
+                        onChanged: _setGroupCount,
+                      ),
                     ),
-                  ),
-                  _nameFields(),
-                ],
-              ),
-              gap,
+                    _nameFields(),
+                  ],
+                ),
+                gap,
+              ],
               if (automatic) ...[
                 _autoGameSection(),
                 gap,
                 // Las palabras propias no tienen dificultad.
                 if (!_custom) ...[_difficultySection(), gap],
               ] else ...[
-                ConfigSection(
-                  icon: Icons.edit_note,
-                  title: 'Palabras por grupo',
-                  children: [
-                    const Text(
-                      'Antes de empezar, cada grupo escribirá sus propias '
-                      'palabras o frases secretas para los demás grupos. '
-                      '¿Cuántas pondrá cada grupo?',
-                    ),
-                    ConfigRow(
-                      label: 'Palabras o frases por grupo',
-                      child: NumberStepper(
-                        value: _config.wordsPerGroup,
-                        min: GameConfig.minWordsPerGroup,
-                        max: GameConfig.maxWordsPerGroup,
-                        onChanged: (v) =>
-                            _update(_config.copyWith(wordsPerGroup: v)),
+                // Sin grupos, las palabras se escriben en una sola lista.
+                if (_inGroups) ...[
+                  ConfigSection(
+                    icon: Icons.edit_note,
+                    title: 'Palabras por grupo',
+                    children: [
+                      const Text(
+                        'Antes de empezar, cada grupo escribirá sus propias '
+                        'palabras o frases secretas para los demás grupos. '
+                        '¿Cuántas pondrá cada grupo?',
                       ),
-                    ),
-                    Text(
-                      'En total se jugará con ${_config.totalWords} palabras '
-                      'o frases.',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF6B5A86),
+                      ConfigRow(
+                        label: 'Palabras o frases por grupo',
+                        child: NumberStepper(
+                          value: _config.wordsPerGroup,
+                          min: GameConfig.minWordsPerGroup,
+                          max: GameConfig.maxWordsPerGroup,
+                          onChanged: (v) =>
+                              _update(_config.copyWith(wordsPerGroup: v)),
+                        ),
                       ),
-                    ),
-                    const WordsReminder(),
-                  ],
-                ),
-                gap,
+                      Text(
+                        'En total se jugará con ${_config.totalWords} palabras '
+                        'o frases.',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF6B5A86),
+                        ),
+                      ),
+                      const WordsReminder(),
+                    ],
+                  ),
+                  gap,
+                ],
                 ConfigSection(
                   icon: Icons.timer,
                   title: 'Partida',
                   children: [
                     ConfigRow(
                       label: 'Rondas',
-                      hint: 'Cada grupo juega un turno por ronda.',
+                      hint: _inGroups
+                          ? 'Cada grupo juega un turno por ronda.'
+                          : 'Un turno por ronda.',
                       child: NumberStepper(
                         value: _config.rounds,
                         min: GameConfig.minRounds,

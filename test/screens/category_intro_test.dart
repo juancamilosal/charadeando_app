@@ -151,4 +151,58 @@ void main() {
     expect(find.textContaining('Inclina el celular'), findsNothing);
     await tester.pumpWidget(const SizedBox());
   });
+
+  testWidgets('se juega sin grupos por defecto y se puede cambiar', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    addTearDown(tester.view.reset);
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    final router = GoRouter(
+      initialLocation: Routes.categories,
+      routes: [
+        GoRoute(
+          path: Routes.categories,
+          builder: (_, _) => const CategoryScreen(),
+        ),
+        GoRoute(
+          path: Routes.categoryIntro,
+          builder: (_, _) => const CategoryIntroScreen(),
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    final animals = find.text('Animales');
+    await tester.ensureVisible(animals);
+    await tester.pump();
+    await tester.tap(animals);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    bool inGroups() => container.read(gameControllerProvider).config.inGroups;
+    expect(inGroups(), isFalse);
+    final groups = find.text('En grupos');
+    await tester.scrollUntilVisible(
+      groups,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(
+      find.text('Solo salen las palabras: ustedes se organizan.'),
+      findsOneWidget,
+    );
+    await tester.ensureVisible(groups);
+    await tester.pump();
+    await tester.tap(groups);
+    await tester.pump();
+    expect(inGroups(), isTrue);
+    expect(find.text('Cada grupo con su nombre y sus puntos.'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
 }

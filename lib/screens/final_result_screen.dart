@@ -44,7 +44,10 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
     final game = ref.watch(gameControllerProvider);
     final leaders = [for (final i in game.leaders) game.groups[i].name];
     final losers = [for (final i in game.losers) game.groups[i].name];
-    final title = game.isTie
+    // Sin grupos no hay ganador ni castigo: solo el total.
+    final title = !game.inGroups
+        ? '¡Fin del juego!'
+        : game.isTie
         ? '¡Empate entre ${_joinNames(leaders)}!'
         : '¡Ganó ${leaders.single}!';
 
@@ -83,7 +86,19 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        Scoreboard(groups: game.groups, scores: game.scores),
+                        if (game.inGroups)
+                          Scoreboard(groups: game.groups, scores: game.scores)
+                        else
+                          Text(
+                            '${game.totalScore} puntos en total',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontFamily: AppFonts.display,
+                              fontSize: 28,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
                         if (_punished < losers.length) ...[
                           const SizedBox(height: 20),
                           _PunishmentCard(

@@ -10,6 +10,7 @@ import '../theme.dart';
 import '../widgets/category_art.dart';
 import '../widgets/how_to_play_demo.dart';
 import '../widgets/play_background.dart';
+import '../widgets/play_mode_selector.dart';
 
 /// Presentación de la categoría Libre: cómo se juega y de dónde salen las
 /// palabras.
@@ -39,6 +40,7 @@ class FreeModeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final config = ref.watch(gameControllerProvider).config;
     const white = TextStyle(
       color: Colors.white,
       fontSize: 16,
@@ -86,6 +88,13 @@ class FreeModeScreen extends ConsumerWidget {
                 child: HowToPlayDemo(
                   tvMode: ref.watch(tvConnectedProvider).value ?? false,
                 ),
+              ),
+              const SizedBox(height: 16),
+              PlayModeSelector(
+                inGroups: config.inGroups,
+                onChanged: (v) => ref
+                    .read(gameControllerProvider.notifier)
+                    .configure(config.copyWith(inGroups: v)),
               ),
               const SizedBox(height: 24),
               const Text(

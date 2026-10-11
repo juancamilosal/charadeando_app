@@ -75,8 +75,10 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
                       children: [
                         Text(game.config.roundLabel(turn.round), style: white),
                         Text(
-                          '${game.groups[turn.groupIndex].name}: '
-                          '+${turn.points(mode)} puntos',
+                          game.inGroups
+                              ? '${game.groups[turn.groupIndex].name}: '
+                                    '+${turn.points(mode)} puntos'
+                              : '+${turn.points(mode)} puntos',
                           style: const TextStyle(
                             fontFamily: AppFonts.display,
                             fontSize: 30,
@@ -103,21 +105,26 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
                                 ),
                         ),
                         const SizedBox(height: 20),
-                        const Text(
-                          'Puntajes',
-                          style: TextStyle(
+                        Text(
+                          game.inGroups
+                              ? 'Puntajes'
+                              : 'Total: ${game.totalScore} puntos',
+                          style: const TextStyle(
                             fontFamily: AppFonts.display,
                             fontSize: 24,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Scoreboard(
-                          groups: game.groups,
-                          scores: game.scores,
-                          highlight: turn.groupIndex,
-                        ),
+                        // Sin grupos no hay tabla: solo el total.
+                        if (game.inGroups) ...[
+                          const SizedBox(height: 8),
+                          Scoreboard(
+                            groups: game.groups,
+                            scores: game.scores,
+                            highlight: turn.groupIndex,
+                          ),
+                        ],
                       ],
                     ),
                   ),

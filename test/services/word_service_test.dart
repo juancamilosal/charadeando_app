@@ -51,4 +51,11 @@ void main() {
     final all = decks.expand((d) => d).toList();
     expect(all.toSet(), hasLength(10));
   });
+
+  test('sin grupos se juegan todas las palabras escritas', () {
+    final words = [for (var i = 0; i < 10; i++) Word('Palabra $i')];
+    final decks = WordService().decksFromGroupWords([words]);
+    expect(decks, hasLength(1));
+    expect(decks.single.toSet(), words.toSet());
+  });
 }

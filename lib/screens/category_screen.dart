@@ -27,7 +27,12 @@ class CategoryScreen extends ConsumerWidget {
     final config = ref
         .read(gameControllerProvider)
         .config
-        .copyWith(category: category, clearCustomCategory: true);
+        // Por defecto se juega sin grupos; se cambia en "¿Cómo se juega?".
+        .copyWith(
+          category: category,
+          clearCustomCategory: true,
+          inGroups: false,
+        );
     if (category == GameCategory.free) {
       controller.configure(config);
       context.go(Routes.freeMode);
@@ -278,6 +283,7 @@ class _MyCategories extends ConsumerWidget {
             category: GameCategory.free,
             customCategory: category,
             wordSource: WordSource.random,
+            inGroups: false,
           ),
         );
     context.go(Routes.categoryIntro);

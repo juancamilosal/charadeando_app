@@ -13,6 +13,12 @@ class WordService {
   /// mazos quedan de tamaños parecidos.
   List<List<Word>> decksFromGroupWords(List<List<Word>> writtenByGroup) {
     final count = writtenByGroup.length;
+    // Sin grupos se juegan las palabras que escribieron todos juntos.
+    if (count == 1) {
+      return [
+        [...writtenByGroup.single]..shuffle(_random),
+      ];
+    }
     final decks = List.generate(count, (_) => <Word>[]);
     for (var author = 0; author < count; author++) {
       final words = [...writtenByGroup[author]]..shuffle(_random);

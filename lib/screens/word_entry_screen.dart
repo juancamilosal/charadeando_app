@@ -10,7 +10,9 @@ import '../theme.dart';
 import '../widgets/play_background.dart';
 
 /// Cada grupo, por turnos, escribe las palabras que adivinará su rival.
-/// El texto se oculta al guardarlo para que nadie vea las suyas.
+/// El texto se oculta al guardarlo para que nadie vea las suyas. Sin grupos
+/// se muestra una sola vez: todos escriben una lista de al menos
+/// [GameConfig.minSoloWords] palabras.
 class WordEntryScreen extends ConsumerStatefulWidget {
   const WordEntryScreen({super.key});
 
@@ -27,8 +29,9 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
   final Set<Word> _revealed = {};
   int _author = 0;
 
-  /// Pantalla intermedia para entregar el celular al siguiente grupo.
-  bool _handoff = true;
+  /// Pantalla intermedia para entregar el celular al siguiente grupo. Sin
+  /// grupos no hace falta.
+  late bool _handoff = ref.read(gameControllerProvider).config.inGroups;
 
   @override
   void dispose() {
@@ -80,6 +83,7 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
   @override
   Widget build(BuildContext context) {
     final game = ref.watch(gameControllerProvider);
+    if (!game.config.inGroups) return _soloView(context);
     final author = game.groups[_author];
     final rivals = WordService.rivalsLabel(_author, game.groups);
     final single = game.groups.length == 2;
@@ -99,7 +103,45 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
                   single: single,
                   onReady: () => setState(() => _handoff = false),
                 )
-              : _entryView(context, game.config.wordsPerGroup, rivals, single),
+              : _entryView(
+                  context,
+                  game.config.wordsPerGroup,
+                  message: single
+                      ? 'Escriban palabras o frases para que $rivals las '
+                            'adivine.'
+                      : 'Escriban palabras o frases para $rivals. Ustedes no '
+                            'las verán en su turno.',
+                  counter:
+                      '${_words.length} de ${game.config.wordsPerGroup} '
+                      'palabras',
+                ),
+        ),
+      ),
+    );
+  }
+
+  /// Sin grupos: una sola lista con las palabras de todos.
+  Widget _soloView(BuildContext context) {
+    return PlayBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: const Text('Palabras'),
+          leading: BackButton(onPressed: () => context.go(Routes.config)),
+        ),
+        body: SafeArea(
+          top: false,
+          child: _entryView(
+            context,
+            GameConfig.minSoloWords,
+            message:
+                'Escriban las palabras o frases que van a jugar. Mínimo '
+                '${GameConfig.minSoloWords}.',
+            counter:
+                '${_words.length} '
+                '${_words.length == 1 ? 'palabra' : 'palabras'} · mínimo '
+                '${GameConfig.minSoloWords}',
+          ),
         ),
       ),
     );
@@ -107,10 +149,10 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
 
   Widget _entryView(
     BuildContext context,
-    int required,
-    String rivals,
-    bool single,
-  ) {
+    int required, {
+    required String message,
+    required String counter,
+  }) {
     final enough = _words.length >= required;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
@@ -118,10 +160,7 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            single
-                ? 'Escriban palabras o frases para que $rivals las adivine.'
-                : 'Escriban palabras o frases para $rivals. Ustedes no las '
-                      'verán en su turno.',
+            message,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 17,
@@ -151,7 +190,7 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
                     ),
                   ),
                   Text(
-                    '${_words.length} de $required palabras',
+                    counter,
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
                       color: enough ? AppColors.green : AppColors.ink,

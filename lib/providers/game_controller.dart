@@ -46,6 +46,17 @@ class GameState {
 
   Turn? get lastTurn => turns.isEmpty ? null : turns.last;
 
+  /// Se juega en grupos. Sin grupos hay un único grupo sin nombre y no hay
+  /// ganador.
+  bool get inGroups => config.inGroups;
+
+  /// "Turno de Los Tigres", o "¡A jugar!" sin grupos.
+  String get turnTitle =>
+      inGroups ? 'Turno de ${currentGroup.name}' : '¡A jugar!';
+
+  /// Puntos de toda la partida, sumando los de todos los grupos.
+  int get totalScore => scores.fold(0, (a, b) => a + b);
+
   List<int> get scores {
     final scores = List.filled(groups.length, 0);
     for (final turn in turns) {

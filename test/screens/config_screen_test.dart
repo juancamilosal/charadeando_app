@@ -430,4 +430,24 @@ void main() {
     expect(config.difficulty, isNull);
     expect(config.customCategory?.name, 'Mi familia');
   });
+
+  testWidgets('sin grupos no se ven Grupos ni Palabras por grupo', (
+    tester,
+  ) async {
+    final container = await pumpConfig(
+      tester,
+      config: const GameConfig(inGroups: false),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Grupos'), findsNothing);
+    expect(find.text('Palabras por grupo'), findsNothing);
+    expect(find.text('Un turno por ronda.'), findsOneWidget);
+
+    // No pide nombres: sigue directo a escribir las palabras.
+    await tapContinue(tester);
+    expect(find.text('Palabras'), findsOneWidget);
+    final config = container.read(gameControllerProvider).config;
+    expect(config.inGroups, isFalse);
+    expect(config.groupCount, 1);
+  });
 }

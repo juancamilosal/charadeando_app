@@ -9,6 +9,7 @@ import '../theme.dart';
 import '../widgets/category_art.dart';
 import '../widgets/how_to_play_demo.dart';
 import '../widgets/play_background.dart';
+import '../widgets/play_mode_selector.dart';
 
 /// Qué se adivina en cada categoría y las palabras del ejemplo animado.
 class _Guide {
@@ -158,7 +159,14 @@ class CategoryIntroScreen extends ConsumerWidget {
                   tvMode: ref.watch(tvConnectedProvider).value ?? false,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
+              PlayModeSelector(
+                inGroups: config.inGroups,
+                onChanged: (v) => ref
+                    .read(gameControllerProvider.notifier)
+                    .configure(config.copyWith(inGroups: v)),
+              ),
+              const SizedBox(height: 16),
               FilledButton.icon(
                 icon: const Icon(Icons.arrow_forward),
                 label: Text('Jugar ${config.categoryLabel}'),

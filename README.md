@@ -32,6 +32,13 @@ la cámara frontal graba a los participantes para revivir las risas.
   elige en la configuración de las palabras automáticas, en Libre y en todas
   las categorías. Las palabras manuales no tienen dificultad. En Directus se
   conserva la columna `dificultad`.
+- "Sin grupos" o "En grupos": en "¿Cómo se juega?" de todas las categorías
+  (también Libre y las propias) se elige cómo van a jugar, con "Sin grupos"
+  marcado por defecto. Sin grupos solo salen las palabras y los jugadores
+  se organizan como quieran: la configuración no muestra Grupos ni Palabras
+  por grupo, con palabras manuales se escribe una sola lista (mínimo 10) y
+  el turno, los resultados y el final muestran solo los puntos en total,
+  sin ganador ni ruleta de castigo.
 - Límites: de 2 a 4 grupos, de 1 a 10 rondas y de 30 segundos a 1:30 por
   turno.
 - Libre explica con una animación cómo se juega y deja elegir entre palabras

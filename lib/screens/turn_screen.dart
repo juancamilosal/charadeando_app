@@ -245,9 +245,13 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     await ScreenOrientation.landscape();
     await _startSegment();
     if (_phase != _Phase.countdown) return;
-    final group = ref.read(gameControllerProvider).currentGroup.name;
+    final game = ref.read(gameControllerProvider);
     _showCaption(
-      _resumed ? '¡Seguimos!' : '¡Turno de $group!',
+      _resumed
+          ? '¡Seguimos!'
+          : game.inGroups
+          ? '¡Turno de ${game.currentGroup.name}!'
+          : '¡A jugar!',
       CaptionStyle.title,
     );
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -483,7 +487,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
             ),
             Text(_readyLabel(game), style: white),
             Text(
-              'Turno de ${game.currentGroup.name}',
+              game.turnTitle,
               style: const TextStyle(
                 fontFamily: AppFonts.display,
                 fontSize: 34,
@@ -667,7 +671,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
       word: _deck[_wordIndex],
       remaining: _remaining,
       feedback: _feedback,
-      groupName: game.currentGroup.name,
+      title: game.turnTitle,
       onPass: () => _mark(WordOutcome.pass),
       onHit: () => _mark(WordOutcome.hit),
       onEndGame: _endGame,

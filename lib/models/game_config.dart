@@ -129,6 +129,7 @@ class GameConfig {
     this.turnDuration = const Duration(seconds: 60),
     this.rounds = 3,
     this.groups = const [Group(''), Group('')],
+    this.inGroups = true,
     this.category = GameCategory.free,
     this.customCategory,
     this.wordSource = WordSource.groups,
@@ -147,9 +148,17 @@ class GameConfig {
   static const maxTurnSeconds = 90;
   static const minWordsPerGroup = 5;
   static const maxWordsPerGroup = 50;
+
+  /// Palabras manuales sin grupos: una sola lista, de al menos estas.
+  static const minSoloWords = 10;
   final Duration turnDuration;
   final int rounds;
   final List<Group> groups;
+
+  /// Se juega en grupos, cada uno con su nombre y su puntaje. Sin grupos
+  /// solo salen las palabras y los jugadores se organizan como quieran: se
+  /// juega como un único grupo sin nombre.
+  final bool inGroups;
 
   /// Categoría de las palabras automáticas. Las de una categoría distinta
   /// de Libre siempre son automáticas.
@@ -214,6 +223,7 @@ class GameConfig {
     Duration? turnDuration,
     int? rounds,
     List<Group>? groups,
+    bool? inGroups,
     GameCategory? category,
     CustomCategory? customCategory,
     bool clearCustomCategory = false,
@@ -229,6 +239,7 @@ class GameConfig {
       turnDuration: turnDuration ?? this.turnDuration,
       rounds: rounds ?? this.rounds,
       groups: groups ?? this.groups,
+      inGroups: inGroups ?? this.inGroups,
       category: category ?? this.category,
       customCategory: clearCustomCategory
           ? null

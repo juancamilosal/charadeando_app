@@ -14,7 +14,7 @@ class TvTurnView extends StatelessWidget {
     required this.word,
     required this.remaining,
     required this.feedback,
-    required this.groupName,
+    required this.title,
     required this.onPass,
     required this.onHit,
     this.onEndGame,
@@ -26,7 +26,9 @@ class TvTurnView extends StatelessWidget {
   final Word word;
   final Duration remaining;
   final WordOutcome? feedback;
-  final String groupName;
+
+  /// "Turno de Los Tigres", o "¡A jugar!" sin grupos.
+  final String title;
   final VoidCallback onPass;
   final VoidCallback onHit;
 
@@ -60,7 +62,7 @@ class TvTurnView extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Turno de $groupName',
+                      title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
