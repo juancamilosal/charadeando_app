@@ -192,6 +192,11 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Tía Rosa'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Tía Rosa'), findsOneWidget);
     final p = tester.renderObject<RenderParagraph>(find.text(long));
     expect(p.maxLines, isNull);

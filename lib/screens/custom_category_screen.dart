@@ -222,6 +222,19 @@ class _CustomCategoryScreenState extends ConsumerState<CustomCategoryScreen> {
                 ),
                 const SizedBox(height: 14),
                 _wordsSection(draft),
+                // Una palabra por renglón sobre el fondo, la última agregada
+                // arriba.
+                if (_words.isNotEmpty) const SizedBox(height: 10),
+                for (final w in _words.reversed)
+                  _WordRow(
+                    word: w,
+                    onDelete: () => _touch(
+                      () => _words = [
+                        for (final x in _words)
+                          if (x != w) x,
+                      ],
+                    ),
+                  ),
                 const SizedBox(height: 24),
                 FilledButton.icon(
                   icon: const Icon(Icons.check),
@@ -275,23 +288,6 @@ class _CustomCategoryScreenState extends ConsumerState<CustomCategoryScreen> {
           'Puedes pegar varias separadas por comas o en renglones distintos.',
           style: hint,
         ),
-        if (_words.isNotEmpty)
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: [
-              for (final w in _words.reversed)
-                _WordChip(
-                  word: w,
-                  onDelete: () => _touch(
-                    () => _words = [
-                      for (final x in _words)
-                        if (x != w) x,
-                    ],
-                  ),
-                ),
-            ],
-          ),
         Text(
           missing > 0
               ? 'Te ${missing == 1 ? 'falta 1 palabra' : 'faltan $missing palabras'} '
@@ -379,40 +375,36 @@ class _IconChoice extends StatelessWidget {
   }
 }
 
-/// Una palabra de la lista, con su botón para borrarla. La palabra se ve
-/// completa: si no cabe en un renglón, sigue en el siguiente.
-class _WordChip extends StatelessWidget {
-  const _WordChip({required this.word, required this.onDelete});
+/// Un renglón de la lista de palabras, en blanco sobre el fondo de
+/// colores, con su botón para borrarla. La palabra se ve completa: si es
+/// muy larga, sigue en el renglón de abajo.
+class _WordRow extends StatelessWidget {
+  const _WordRow({required this.word, required this.onDelete});
 
   final String word;
   final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFD9CCF2), width: 1.5),
-      ),
+    return Padding(
+      padding: const EdgeInsets.only(left: 6),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Flexible(
+          Expanded(
             child: Text(
               word,
-              softWrap: true,
               style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: AppColors.ink,
+                fontFamily: AppFonts.display,
+                fontSize: 26,
+                height: 1.15,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
               ),
             ),
           ),
           IconButton(
             tooltip: 'Borrar "$word"',
-            visualDensity: VisualDensity.compact,
-            icon: const Icon(Icons.close, size: 18),
+            icon: const Icon(Icons.close, size: 30, color: Colors.white),
             onPressed: onDelete,
           ),
         ],
