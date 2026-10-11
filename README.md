@@ -27,6 +27,14 @@ la cámara frontal graba a los participantes para revivir las risas.
   tarjeta y en su "¿Cómo se juega?". Ya lo tienen todas: Libre (una hoja
   a la que se le van escribiendo las líneas), Animales, Geografía, Películas, Celebridades, Marcas,
   Deportes y Equipos de fútbol.
+- En la pantalla de categorías los dibujos no se mueven todos a la vez: se
+  animan uno por uno, en orden (Libre, Animales, Geografía, Películas,
+  Celebridades, Marcas, Deportes y Equipos de fútbol), con una pausa corta
+  entre uno y otro, y el ciclo vuelve a empezar. Los que no se ven en la
+  pantalla se saltan. Quietos muestran su mejor cuadro: la hoja con sus
+  líneas, el balón de Deportes en el centro después de rebotar. La ruleta
+  de castigos sigue moviéndose siempre y en "¿Cómo se juega?" el dibujo se
+  mueve sin parar.
 - Dificultad: Mezcladas (viene elegida: trae de todas, 300 palabras por
   categoría), Fácil (ideal con niños), Normal o Difícil (100 cada una). Se
   elige en la configuración de las palabras automáticas, en Libre y en todas

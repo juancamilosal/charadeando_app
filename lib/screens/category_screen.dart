@@ -7,6 +7,7 @@ import '../providers/providers.dart';
 import '../router.dart';
 import '../services/services.dart';
 import '../theme.dart';
+import '../widgets/art_cycle.dart';
 import '../widgets/category_card.dart';
 import '../widgets/play_background.dart';
 import '../widgets/roulette_banner.dart';
@@ -61,40 +62,43 @@ class CategoryScreen extends ConsumerWidget {
             ),
           ],
         ),
-        body: SafeArea(
-          top: false,
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-            children: [
-              const Text(
-                '¿Con qué palabras quieren jugar?',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
+        // Los dibujos de las categorías se animan uno por uno.
+        body: ArtCycle(
+          child: SafeArea(
+            top: false,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+              children: [
+                const Text(
+                  '¿Con qué palabras quieren jugar?',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 14),
-              CategoryTabSelector(
-                selected: tab,
-                onChanged: (t) =>
-                    ref.read(customCategoriesProvider.notifier).setTab(t),
-              ),
-              const SizedBox(height: 18),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 250),
-                child: tab == CategoryTab.all
-                    ? KeyedSubtree(
-                        key: const ValueKey('todas'),
-                        child: _allCategories(context, ref),
-                      )
-                    : KeyedSubtree(
-                        key: const ValueKey('mias'),
-                        child: _MyCategories(data: data),
-                      ),
-              ),
-            ],
+                const SizedBox(height: 14),
+                CategoryTabSelector(
+                  selected: tab,
+                  onChanged: (t) =>
+                      ref.read(customCategoriesProvider.notifier).setTab(t),
+                ),
+                const SizedBox(height: 18),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  child: tab == CategoryTab.all
+                      ? KeyedSubtree(
+                          key: const ValueKey('todas'),
+                          child: _allCategories(context, ref),
+                        )
+                      : KeyedSubtree(
+                          key: const ValueKey('mias'),
+                          child: _MyCategories(data: data),
+                        ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
