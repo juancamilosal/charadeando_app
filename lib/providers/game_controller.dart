@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/models.dart';
+import '../services/punishments.dart';
 import 'providers.dart';
 
 class GameState {
@@ -61,6 +62,10 @@ class GameState {
   }
 
   bool get isTie => leaders.length > 1;
+
+  /// Índices de los grupos que giran la ruleta de castigos: los de menos
+  /// puntos. Vacío si todos empatan.
+  List<int> get losers => Roulette.losers(scores);
 
   GameState copyWith({
     List<List<Word>>? writtenWords,

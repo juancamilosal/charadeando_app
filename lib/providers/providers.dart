@@ -14,6 +14,7 @@ final wordBankProvider = Provider(
 );
 final tiltServiceProvider = Provider((ref) => TiltService());
 final tvServiceProvider = Provider((ref) => TvService());
+final punishmentStoreProvider = Provider((ref) => PunishmentStore());
 
 /// Si hay un televisor conectado al celular, para el Modo TV.
 final tvConnectedProvider = StreamProvider<bool>(

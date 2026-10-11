@@ -5,3 +5,4 @@ export 'remote_word.dart';
 export 'turn.dart';
 export 'turn_recording.dart';
 export 'word.dart';
+export 'punishment.dart';

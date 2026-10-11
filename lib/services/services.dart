@@ -8,3 +8,6 @@ export 'video_renderer.dart';
 export 'video_service.dart';
 export 'word_bank.dart';
 export 'word_service.dart';
+export 'punishment_service.dart';
+export 'punishment_store.dart';
+export 'punishments.dart';
