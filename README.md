@@ -17,8 +17,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   configuración con palabras automáticas de su categoría.
 - Cada categoría puede tener un dibujo animado (GIF de 256 px en
   `assets/img/categorias/`, con el nombre de la categoría) que se ve en su
-  tarjeta y en su "¿Cómo se juega?". Ya lo tienen Animales y Geografía; las
-  demás muestran su ícono mientras tanto.
+  tarjeta y en su "¿Cómo se juega?". Ya lo tienen Animales, Geografía y
+  Películas; las demás muestran su ícono mientras tanto.
 - Dificultad (Fácil, Normal o Difícil): se elige en la configuración de las
   palabras automáticas, en Libre y en todas las categorías, y solo se traen
   palabras de esa dificultad. Las palabras manuales no tienen dificultad.

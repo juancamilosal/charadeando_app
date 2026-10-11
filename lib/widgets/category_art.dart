@@ -13,7 +13,11 @@ class CategoryArt extends StatelessWidget {
   });
 
   /// Categorías que ya tienen su GIF en la carpeta.
-  static const _animated = {GameCategory.animals, GameCategory.geography};
+  static const _animated = {
+    GameCategory.animals,
+    GameCategory.geography,
+    GameCategory.movies,
+  };
 
   final GameCategory category;
   final double size;
