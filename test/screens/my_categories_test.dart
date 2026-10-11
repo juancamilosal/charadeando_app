@@ -6,6 +6,7 @@ import 'package:charadeando_app/screens/category_screen.dart';
 import 'package:charadeando_app/screens/custom_category_screen.dart';
 import 'package:charadeando_app/services/services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -170,5 +171,30 @@ void main() {
     final config = container.read(gameControllerProvider).config;
     expect(config.customCategory?.id, saved.id);
     expect(config.wordSource, WordSource.random);
+  });
+
+  testWidgets('en el editor las palabras se ven completas, aunque sean '
+      'largas', (tester) async {
+    tester.view.physicalSize = const Size(960, 3600);
+    addTearDown(tester.view.reset);
+    const long = 'Una palabra larguísima de cuarenta letra';
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: CustomCategoryScreen(
+            category: CustomCategory(
+              id: '1',
+              name: 'Mi familia',
+              words: const ['Tía Rosa', long],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Tía Rosa'), findsOneWidget);
+    final p = tester.renderObject<RenderParagraph>(find.text(long));
+    expect(p.maxLines, isNull);
+    expect(p.didExceedMaxLines, isFalse);
   });
 }

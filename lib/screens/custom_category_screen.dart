@@ -281,9 +281,9 @@ class _CustomCategoryScreenState extends ConsumerState<CustomCategoryScreen> {
             runSpacing: 6,
             children: [
               for (final w in _words.reversed)
-                InputChip(
-                  label: Text(w),
-                  onDeleted: () => _touch(
+                _WordChip(
+                  word: w,
+                  onDelete: () => _touch(
                     () => _words = [
                       for (final x in _words)
                         if (x != w) x,
@@ -374,6 +374,48 @@ class _IconChoice extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
         ),
         child: Icon(icon, color: selected ? Colors.white : AppColors.ink),
+      ),
+    );
+  }
+}
+
+/// Una palabra de la lista, con su botón para borrarla. La palabra se ve
+/// completa: si no cabe en un renglón, sigue en el siguiente.
+class _WordChip extends StatelessWidget {
+  const _WordChip({required this.word, required this.onDelete});
+
+  final String word;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFD9CCF2), width: 1.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: Text(
+              word,
+              softWrap: true,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: AppColors.ink,
+              ),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Borrar "$word"',
+            visualDensity: VisualDensity.compact,
+            icon: const Icon(Icons.close, size: 18),
+            onPressed: onDelete,
+          ),
+        ],
       ),
     );
   }
