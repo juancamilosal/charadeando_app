@@ -26,8 +26,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   conserva la columna `dificultad`.
 - Libre explica con una animación cómo se juega y deja elegir entre palabras
   manuales (con la sugerencia de cuántas escribir) y automáticas.
-- Palabras automáticas: en la configuración se eligen los grupos, las
-  rondas, el tiempo por turno y las palabras por turno. Cada turno tiene su
+- Palabras automáticas: en la configuración se eligen los grupos, la
+  duración del juego, las rondas y el tiempo por turno. Cada turno tiene su
   propio mazo, distinto al de todos los demás: el turno termina al acabarse
   el tiempo o sus palabras, y las que no alcanzaron a salir se descartan.
   La partida termina al completar las rondas. Al tocar
@@ -42,13 +42,16 @@ la cámara frontal graba a los participantes para revivir las risas.
   y elige al azar el resto: rondas, tiempo por turno,
   palabras por turno (las sugeridas), dificultad, puntuación y
   aciertos. Cada toque da una configuración nueva, con otros nombres.
-- Palabras por turno: en la sección "Partida" (rondas y tiempo por turno)
-  se ve en una línea, "12 palabras por turno", y solo con "Cambiar" aparece
-  el selector. El valor sugerido es una cada 5 segundos (60 s → 12, 180 s →
-  36) y sigue al tiempo mientras no lo cambien. El máximo es el menor
+- Duración del juego, con palabras automáticas: "Por número de rondas"
+  (viene elegida: se eligen las rondas y el tiempo, y el juego calcula las
+  palabras de cada turno, "Cada turno tendrá 12 palabras") o "Palabras por
+  ronda" (además se eligen las palabras de cada grupo en cada ronda).
+  Debajo va la sección "Partida" con esas opciones. El valor sugerido es una
+  palabra cada 5 segundos (60 s → 12, 180 s → 36) y sigue al tiempo mientras
+  no lo cambien. El máximo es el menor
   entre lo que permite el tiempo (una cada 3 segundos) y lo que alcanza la
   base sin repetir (palabras de la dificultad ÷ turnos de la partida); si
-  la base es la que limita, se avisa ("Máximo 5 por turno para no repetir
+  la base es la que limita, se avisa ("Máximo 5 por grupo para no repetir
   palabras"). Se piden todas al empezar en una sola petición (palabras por
   turno × grupos × rondas). Si llegan menos, cada turno tiene menos y se
   avisa. Si una dificultad se queda sin palabras, el servidor completa con

@@ -117,20 +117,28 @@ void main() {
     expect(find.textContaining('Nombre del grupo'), findsNWidgets(6));
   });
 
-  testWidgets('con palabras automáticas se eligen las palabras por turno', (
-    tester,
-  ) async {
+  testWidgets('con palabras automáticas se juega por rondas, o eligiendo '
+      'las palabras por ronda', (tester) async {
     final container = await pumpConfig(
       tester,
       config: const GameConfig(wordSource: WordSource.random),
     );
     expect(find.textContaining('Recuerda: mientras más rondas'), findsNothing);
-    expect(find.text('¿Hasta cuándo juegan?'), findsNothing);
-    // 60 s por turno: se sugieren 12, una cada 5 segundos, sin selector.
-    expect(find.text('12 palabras por turno'), findsOneWidget);
-    expect(find.text('Palabras por turno'), findsNothing);
+    expect(find.text('Duración del juego'), findsOneWidget);
+    for (var i = 0; i < 2; i++) {
+      await tester.enterText(find.byType(TextField).at(i), 'G$i');
+    }
+    // Por número de rondas viene elegida: el juego calcula las palabras,
+    // una cada 5 segundos.
+    await tester.scrollUntilVisible(
+      find.text('Cada turno tendrá 12 palabras.'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Cada turno tendrá 12 palabras.'), findsOneWidget);
+    expect(find.text('Palabras por grupo'), findsNothing);
 
-    // Con más tiempo, el valor sugerido sube solo.
+    // Con más tiempo, las palabras suben solas.
     final time = find.ancestor(
       of: find.text('Tiempo por turno'),
       matching: find.byType(ConfigRow),
@@ -140,12 +148,19 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(longer);
     await tester.pump();
-    expect(find.text('15 palabras por turno'), findsOneWidget);
+    expect(find.text('Cada turno tendrá 15 palabras.'), findsOneWidget);
 
-    await tester.tap(find.text('Cambiar'));
+    final perRound = find.text('Palabras por ronda');
+    await tester.scrollUntilVisible(
+      perRound,
+      -200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(perRound);
     await tester.pump();
     final row = find.ancestor(
-      of: find.text('Palabras por turno'),
+      of: find.text('Palabras por grupo'),
       matching: find.byType(ConfigRow),
     );
     int words() => tester
@@ -154,8 +169,6 @@ void main() {
         )
         .value;
     expect(words(), 15);
-
-    // Si el usuario lo cambia, se respeta.
     final more = find.descendant(of: row, matching: find.byIcon(Icons.add));
     await tester.ensureVisible(more);
     await tester.pumpAndSettle();
@@ -163,23 +176,33 @@ void main() {
     await tester.pump();
     expect(words(), 16);
 
+    // Faltan la puntuación y los aciertos.
+    final perPhrase = find.text('Por frase');
     await tester.scrollUntilVisible(
-      find.text('Llenar automáticamente'),
-      -200,
+      perPhrase,
+      200,
       scrollable: find.byType(Scrollable).first,
     );
+    await tester.ensureVisible(perPhrase);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Llenar automáticamente'));
+    await tester.tap(perPhrase);
+    final tilt = find.text('Movimiento');
+    await tester.scrollUntilVisible(
+      tilt,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(tilt);
+    await tester.pumpAndSettle();
+    await tester.tap(tilt);
     await tester.pump();
-    // "Llenar automáticamente" vuelve al valor sugerido de su configuración.
-    final filled = words();
-    expect(filled, greaterThanOrEqualTo(GameConfig.minWordsPerTurn));
 
     await tapContinue(tester);
     expect(find.text('Descargando'), findsOneWidget);
     final config = container.read(gameControllerProvider).config;
     expect(config.wordSource, WordSource.random);
-    expect(config.wordsPerTurn, filled);
+    expect(config.wordsPerTurn, 16);
+    expect(config.difficulty, Difficulty.mixed);
   });
 
   testWidgets('con 6 grupos y 10 rondas avisa que la base pone el máximo', (
@@ -193,7 +216,17 @@ void main() {
         groups: List.filled(6, const Group('')),
       ),
     );
-    final note = find.text('Máximo 5 por turno para no repetir palabras.');
+    final perRound = find.text('Palabras por ronda');
+    await tester.scrollUntilVisible(
+      perRound,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(perRound);
+    await tester.pumpAndSettle();
+    await tester.tap(perRound);
+    await tester.pump();
+    final note = find.text('Máximo 5 por grupo para no repetir palabras.');
     await tester.scrollUntilVisible(
       note,
       200,
@@ -367,6 +400,11 @@ void main() {
         wordSource: WordSource.random,
         category: GameCategory.animals,
       ),
+    );
+    await tester.scrollUntilVisible(
+      find.text('Partida: Animales'),
+      200,
+      scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('Partida: Animales'), findsOneWidget);
   });

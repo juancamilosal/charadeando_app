@@ -109,6 +109,30 @@ enum Difficulty {
       : wordsPerDifficulty;
 }
 
+/// Cómo se define la duración de la partida con palabras automáticas. En
+/// los dos casos se juegan las rondas elegidas y cada turno tiene su
+/// propio mazo; cambia quién decide cuántas palabras tiene.
+enum GameLength {
+  /// Se eligen las rondas y el juego calcula las palabras de cada turno
+  /// según el tiempo.
+  rounds(
+    'Por número de rondas',
+    'Ustedes eligen las rondas y nosotros las palabras de cada turno, '
+        'según el tiempo.',
+  ),
+
+  /// Se eligen también cuántas palabras tiene cada grupo en su turno.
+  wordsPerRound(
+    'Palabras por ronda',
+    'Ustedes eligen cuántas palabras tiene cada grupo en cada ronda.',
+  );
+
+  const GameLength(this.label, this.description);
+
+  final String label;
+  final String description;
+}
+
 /// Resolución de los videos de cada turno.
 enum VideoResolution {
   /// No se abre la cámara ni se graba.

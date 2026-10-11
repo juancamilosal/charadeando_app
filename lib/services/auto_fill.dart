@@ -10,6 +10,7 @@ class AutoFillResult {
     required this.scoring,
     required this.hitMode,
     required this.difficulty,
+    required this.length,
   });
 
   /// Rondas, tiempo y palabras por turno; los nombres van en [names].
@@ -20,6 +21,9 @@ class AutoFillResult {
 
   /// Solo se usa con palabras automáticas.
   final Difficulty difficulty;
+
+  /// Duración de la partida con palabras automáticas.
+  final GameLength length;
 }
 
 /// Llena la configuración por el usuario, al azar pero con valores que
@@ -95,6 +99,7 @@ abstract final class AutoFill {
           if (m.available) m,
       ]),
       difficulty: difficulty,
+      length: any(GameLength.values),
     );
   }
 }
