@@ -42,7 +42,7 @@ class _DirectusTestScreenState extends ConsumerState<DirectusTestScreen> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text('Probar Directus'),
-          leading: BackButton(onPressed: () => context.go(Routes.welcome)),
+          leading: BackButton(onPressed: () => context.go(Routes.categories)),
           actions: [
             IconButton(
               icon: const Icon(Icons.refresh),

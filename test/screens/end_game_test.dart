@@ -73,7 +73,10 @@ Future<void> _show(
         builder: (_, _) => const TurnResultScreen(),
       ),
       GoRoute(path: Routes.finalResult, builder: (_, _) => const Text('Final')),
-      GoRoute(path: Routes.welcome, builder: (_, _) => const Text('Inicio')),
+      GoRoute(
+        path: Routes.categories,
+        builder: (_, _) => const Text('Categorías'),
+      ),
     ],
   );
   await tester.pumpWidget(
@@ -125,7 +128,7 @@ void main() {
     addTearDown(container.dispose);
     await _show(tester, container, Routes.turn);
     await _endGame(tester);
-    expect(find.text('Inicio'), findsOneWidget);
+    expect(find.text('Categorías'), findsOneWidget);
   });
 
   testWidgets('en la tabla de puntajes se puede finalizar el juego', (

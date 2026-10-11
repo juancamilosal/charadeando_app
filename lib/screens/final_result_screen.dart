@@ -103,7 +103,7 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
                   ),
                   const SizedBox(height: 8),
                   TextButton(
-                    onPressed: () => context.go(Routes.welcome),
+                    onPressed: () => context.go(Routes.categories),
                     child: const Text('Volver al inicio'),
                   ),
                 ],

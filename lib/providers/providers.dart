@@ -19,6 +19,29 @@ final tvServiceProvider = Provider((ref) => TvService());
 final punishmentStoreProvider = Provider((ref) => PunishmentStore());
 final configStoreProvider = Provider((ref) => ConfigStore());
 final customCategoryStoreProvider = Provider((ref) => CustomCategoryStore());
+final welcomeStoreProvider = Provider((ref) => WelcomeStore());
+
+/// Si ya se vio la bienvenida. `main` lo lee del celular antes de abrir la
+/// app, para que la primera pantalla sea la correcta desde el principio.
+final welcomeSeenProvider = NotifierProvider<WelcomeSeen, bool>(
+  WelcomeSeen.new,
+);
+
+class WelcomeSeen extends Notifier<bool> {
+  WelcomeSeen([this._initial = false]);
+
+  final bool _initial;
+
+  @override
+  bool build() => _initial;
+
+  /// Se tocó "Listo": las próximas veces la app abre en Categorías.
+  void markSeen() {
+    if (state) return;
+    state = true;
+    ref.read(welcomeStoreProvider).markSeen().ignore();
+  }
+}
 
 /// "Mis categorías", guardadas en el celular.
 final customCategoriesProvider =

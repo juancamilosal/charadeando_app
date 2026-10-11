@@ -120,6 +120,8 @@ void main() {
       const CustomCategoriesData(tab: CategoryTab.mine),
     );
     final container = await _pump(tester, store);
+    await tester.ensureVisible(find.text('Crear mi primera categoría'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Crear mi primera categoría'));
     await tester.pumpAndSettle();
     expect(find.text('Nueva categoría'), findsOneWidget);

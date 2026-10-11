@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'screens/welcome_test.dart' show MemoryWelcomeStore;
+
 /// Varias pantallas tienen animaciones que se repiten, así que se avanza el
 /// tiempo a mano en vez de esperar a que todo se detenga.
 Future<void> settle(WidgetTester tester) async {
@@ -25,38 +27,42 @@ Future<void> tapVisible(WidgetTester tester, String text) async {
 }
 
 void main() {
-  testWidgets('del inicio se llega a la configuración pasando por Libre', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(1080, 2400);
-    addTearDown(tester.view.reset);
+  testWidgets(
+    'la primera vez, de la bienvenida se llega a la configuración por Libre',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [premiumUnlockedProvider.overrideWithValue(false)],
-        child: const CharadeandoApp(),
-      ),
-    );
-    expect(find.text('Charadeando'), findsOneWidget);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            premiumUnlockedProvider.overrideWithValue(false),
+            welcomeStoreProvider.overrideWithValue(MemoryWelcomeStore()),
+          ],
+          child: const CharadeandoApp(),
+        ),
+      );
+      expect(find.text('Charadeando'), findsOneWidget);
 
-    await tester.tap(find.text('Listo'));
-    await settle(tester);
-    expect(find.text('Pronto'), findsNothing);
+      await tester.tap(find.text('Listo'));
+      await settle(tester);
+      expect(find.text('Pronto'), findsNothing);
 
-    await tester.tap(find.text('Libre'));
-    await settle(tester);
-    expect(find.text('¿Cómo se juega?'), findsOneWidget);
-    expect(find.text('PALABRA SECRETA'), findsOneWidget);
+      await tester.tap(find.text('Libre'));
+      await settle(tester);
+      expect(find.text('¿Cómo se juega?'), findsOneWidget);
+      expect(find.text('PALABRA SECRETA'), findsOneWidget);
 
-    await tapVisible(tester, 'Palabras manuales');
-    expect(find.text('Configuración'), findsOneWidget);
+      await tapVisible(tester, 'Palabras manuales');
+      expect(find.text('Configuración'), findsOneWidget);
 
-    final premium = find.text('Full HD (1080p) · Premium');
-    await tester.scrollUntilVisible(
-      premium,
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    expect(premium, findsOneWidget);
-  });
+      final premium = find.text('Full HD (1080p) · Premium');
+      await tester.scrollUntilVisible(
+        premium,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(premium, findsOneWidget);
+    },
+  );
 }

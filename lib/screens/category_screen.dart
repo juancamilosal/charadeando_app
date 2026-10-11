@@ -46,7 +46,15 @@ class CategoryScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text('Selección de categoría'),
-          leading: BackButton(onPressed: () => context.go(Routes.welcome)),
+          // Es la primera pantalla: no hay a dónde volver.
+          automaticallyImplyLeading: false,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.info_outline),
+              tooltip: 'Cómo se juega',
+              onPressed: () => context.push(Routes.welcome),
+            ),
+          ],
         ),
         body: SafeArea(
           top: false,
@@ -131,6 +139,14 @@ class CategoryScreen extends ConsumerWidget {
         const SizedBox(height: 28),
         // Sección aparte, no es una categoría de palabras.
         RouletteBanner(onTap: () => context.go(Routes.punishments)),
+        if (TestData.enabled) ...[
+          const SizedBox(height: 20),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.cloud_sync),
+            label: const Text('Probar Directus'),
+            onPressed: () => context.go(Routes.directusTest),
+          ),
+        ],
       ],
     );
   }

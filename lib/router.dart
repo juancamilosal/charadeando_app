@@ -17,8 +17,10 @@ import 'screens/welcome_screen.dart';
 import 'screens/word_entry_screen.dart';
 
 abstract final class Routes {
-  static const welcome = '/';
-  static const categories = '/categories';
+  /// Solo se ve la primera vez que se abre la app, o con el botón "i" de
+  /// Categorías.
+  static const welcome = '/bienvenida';
+  static const categories = '/';
   static const categoryIntro = '/categoria';
   static const freeMode = '/libre';
   static const config = '/config';
@@ -42,7 +44,14 @@ abstract final class Routes {
   static const punishmentSpin = '/castigo';
 }
 
-final router = GoRouter(
+/// Las rutas de la app. La primera vez abre en la bienvenida y no deja ir
+/// a otra pantalla hasta tocar "Listo"; después, abre directo en Categorías.
+GoRouter createRouter({required bool Function() welcomeSeen}) => GoRouter(
+  initialLocation: welcomeSeen() ? Routes.categories : Routes.welcome,
+  redirect: (_, state) =>
+      !welcomeSeen() && state.matchedLocation != Routes.welcome
+      ? Routes.welcome
+      : null,
   routes: [
     GoRoute(path: Routes.welcome, builder: (_, _) => const WelcomeScreen()),
     GoRoute(path: Routes.categories, builder: (_, _) => const CategoryScreen()),

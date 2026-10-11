@@ -398,7 +398,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     await _stopSegment();
     await ref.read(videoServiceProvider).deleteAll();
     await ScreenOrientation.portrait();
-    if (mounted) context.go(Routes.welcome);
+    if (mounted) context.go(Routes.categories);
   }
 
   /// "Finalizar juego": termina la partida y muestra los puntajes. Si el
@@ -433,7 +433,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
       );
     }
     controller.endGame();
-    if (mounted) context.go(played ? Routes.finalResult : Routes.welcome);
+    if (mounted) context.go(played ? Routes.finalResult : Routes.categories);
   }
 
   @override

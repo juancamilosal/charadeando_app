@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../providers/providers.dart';
 import '../router.dart';
-import '../services/services.dart';
 import '../theme.dart';
 import '../widgets/category_ticker.dart';
 import '../widgets/play_background.dart';
 
-class WelcomeScreen extends StatefulWidget {
+/// Bienvenida: se ve la primera vez que se abre la app y cuando se toca el
+/// botón "i" de Categorías.
+class WelcomeScreen extends ConsumerStatefulWidget {
   const WelcomeScreen({super.key});
 
   @override
-  State<WelcomeScreen> createState() => _WelcomeScreenState();
+  ConsumerState<WelcomeScreen> createState() => _WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen>
+class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
     with SingleTickerProviderStateMixin {
   static const _steps = [
-    (Icons.groups, AppColors.blue, 'Formen grupos y escriban palabras.'),
+    (Icons.groups, AppColors.blue, 'Formen grupos y elijan una categoría.'),
     (Icons.face, AppColors.orange, 'Uno se pone el celular en la frente.'),
     (
       Icons.record_voice_over,
@@ -38,6 +41,17 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   void dispose() {
     _pulse.dispose();
     super.dispose();
+  }
+
+  /// La primera vez queda guardado que ya se vio y se va a Categorías; si
+  /// se abrió con el botón "i", se regresa a Categorías.
+  void _done() {
+    ref.read(welcomeSeenProvider.notifier).markSeen();
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(Routes.categories);
+    }
   }
 
   @override
@@ -112,18 +126,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 const SizedBox(height: 20),
                 const CategoryTicker(),
                 const SizedBox(height: 24),
-                FilledButton(
-                  onPressed: () => context.go(Routes.categories),
-                  child: const Text('Listo'),
-                ),
-                if (TestData.enabled) ...[
-                  const SizedBox(height: 10),
-                  OutlinedButton.icon(
-                    icon: const Icon(Icons.cloud_sync),
-                    label: const Text('Probar Directus'),
-                    onPressed: () => context.go(Routes.directusTest),
-                  ),
-                ],
+                FilledButton(onPressed: _done, child: const Text('Listo')),
               ],
             ),
           ),
