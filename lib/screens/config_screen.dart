@@ -29,11 +29,9 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
     super.initState();
     _config = ref.read(gameControllerProvider).config;
     if (_automatic) {
-      // Las palabras vienen mezcladas, y las palabras por turno empiezan en
-      // el valor sugerido para el tiempo del turno.
+      // Las palabras vienen mezcladas.
       _difficulty = Difficulty.mixed;
       _config = _config.copyWith(difficulty: _difficulty);
-      _config = _config.copyWith(wordsPerTurn: _config.suggestedWordsPerTurn);
     }
     for (final group in _config.groups) {
       _names.add(TextEditingController(text: group.name));
@@ -60,15 +58,6 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   /// Dificultad de las palabras automáticas. Las manuales no tienen.
   Difficulty? _difficulty;
 
-  /// Verdadero si el usuario cambió las palabras por turno. Mientras no,
-  /// siguen el valor sugerido al cambiar el tiempo, las rondas o los
-  /// grupos.
-  bool _wordsTouched = false;
-
-  /// Duración de la partida con palabras automáticas. Viene elegida por
-  /// número de rondas.
-  GameLength _length = GameLength.rounds;
-
   bool get _automatic => _config.wordSource == WordSource.random;
 
   /// Modo TV: el celular está duplicando la pantalla en un televisor. El
@@ -94,26 +83,10 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
       while (_names.length > count) {
         _names.removeLast().dispose();
       }
-      _config = _fitWords(
-        _config.copyWith(
-          groups: [for (final c in _names) Group(c.text.trim())],
-        ),
+      _config = _config.copyWith(
+        groups: [for (final c in _names) Group(c.text.trim())],
       );
     });
-  }
-
-  /// Ajusta las palabras por turno a [config]: el valor sugerido si el
-  /// usuario no las ha cambiado, o lo que eligió dentro del nuevo máximo.
-  GameConfig _fitWords(GameConfig config) {
-    if (config.wordSource != WordSource.random) return config;
-    return config.copyWith(
-      wordsPerTurn: _wordsTouched && _length == GameLength.wordsPerRound
-          ? config.wordsPerTurn.clamp(
-              GameConfig.minWordsPerTurn,
-              config.maxWordsPerTurn,
-            )
-          : config.suggestedWordsPerTurn,
-    );
   }
 
   /// "Llenar automáticamente": el juego pone los nombres de los grupos y
@@ -130,8 +103,6 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
       for (var i = 0; i < result.names.length; i++) {
         _names[i].text = result.names[i];
       }
-      _wordsTouched = false;
-      _length = result.length;
       _scoring = result.scoring;
       _hitMode = result.hitMode;
       _difficulty = result.difficulty;
@@ -158,7 +129,6 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
         .configure(
           _config.copyWith(
             groups: groups,
-            gameLength: _length,
             scoringMode: _scoring,
             hitMode: _tvMode ? HitMode.tv : _hitMode,
             difficulty: _automatic ? _difficulty : null,
@@ -174,8 +144,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
       ? items.single
       : '${items.sublist(0, items.length - 1).join(', ')} y ${items.last}';
 
-  void _update(GameConfig config) =>
-      setState(() => _config = _fitWords(config));
+  void _update(GameConfig config) => setState(() => _config = config);
 
   @override
   Widget build(BuildContext context) {
@@ -255,8 +224,6 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
               ),
               gap,
               if (automatic) ...[
-                _durationSection(),
-                gap,
                 _autoGameSection(),
                 gap,
                 _difficultySection(),
@@ -428,19 +395,16 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
           errorText: _choiceError(_difficulty),
           onSelected: (o) => setState(() {
             _difficulty = o;
-            _config = _fitWords(_config.copyWith(difficulty: o));
+            _config = _config.copyWith(difficulty: o);
           }),
         ),
       ],
     );
   }
 
-  /// Partida con palabras automáticas: rondas, tiempo y palabras por turno.
-  /// Cada turno tiene su propio mazo de palabras.
+  /// Partida con palabras automáticas: rondas y tiempo por turno. El turno
+  /// dura hasta que se acabe el tiempo, sin límite de palabras.
   Widget _autoGameSection() {
-    final perTurn = _config.wordsPerTurn;
-    const note = TextStyle(fontSize: 13, color: Color(0xFF6B5A86));
-    final chooseWords = _length == GameLength.wordsPerRound;
     return ConfigSection(
       icon: _config.category.icon,
       title: _config.category == GameCategory.free
@@ -449,6 +413,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
       children: [
         ConfigRow(
           label: 'Rondas',
+          hint: 'Cada turno dura hasta que se acabe el tiempo.',
           child: NumberStepper(
             value: _config.rounds,
             min: GameConfig.minRounds,
@@ -467,51 +432,6 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
             onChanged: (v) =>
                 _update(_config.copyWith(turnDuration: Duration(seconds: v))),
           ),
-        ),
-        if (chooseWords)
-          ConfigRow(
-            label: 'Palabras por grupo',
-            hint: 'En cada ronda.',
-            child: NumberStepper(
-              value: perTurn,
-              min: GameConfig.minWordsPerTurn,
-              max: _config.maxWordsPerTurn,
-              onChanged: (v) => setState(() {
-                _wordsTouched = true;
-                _config = _config.copyWith(wordsPerTurn: v);
-              }),
-            ),
-          ),
-        // Solo se avisa cuando la base de palabras limita el máximo.
-        if (chooseWords &&
-            _config.limitedByStock &&
-            perTurn >= _config.maxWordsPerTurn)
-          Text(
-            'Máximo ${_config.maxWordsPerTurn} por grupo para no repetir '
-            'palabras.',
-            style: note,
-          ),
-      ],
-    );
-  }
-
-  /// Cómo se define la duración: por número de rondas (viene elegida) o
-  /// eligiendo también las palabras por ronda.
-  Widget _durationSection() {
-    return ConfigSection(
-      icon: Icons.timer,
-      title: 'Duración del juego',
-      children: [
-        OptionSelector<GameLength>(
-          label: '¿Cómo quieren jugar?',
-          options: GameLength.values,
-          selected: _length,
-          labelOf: (o) => o.label,
-          description: _length.description,
-          onSelected: (o) => setState(() {
-            _length = o;
-            _config = _fitWords(_config);
-          }),
         ),
       ],
     );

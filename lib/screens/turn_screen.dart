@@ -85,7 +85,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     final game = ref.read(gameControllerProvider);
-    _deck = [...game.currentTurnWords];
+    _deck = [...game.currentDeck];
     _remaining = game.config.turnDuration;
     WakelockPlus.enable();
     _initCamera();
@@ -644,26 +644,20 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     );
   }
 
-  /// Palabras que faltan: con palabras por ronda, las de este turno; con
-  /// las escritas por los grupos, las de toda la partida. Por número de
-  /// rondas no se muestra: el turno dura hasta que se acabe el tiempo.
+  /// Palabras que faltan de toda la partida, con las escritas por los
+  /// grupos. Con palabras automáticas no se muestra: el turno dura hasta
+  /// que se acabe el tiempo.
   int? _wordsLeft(GameState game) {
-    final config = game.config;
-    if (config.untilTimeRunsOut) return null;
-    if (config.perTurnDecks) return _deck.length - _entries.length;
+    if (game.config.untilTimeRunsOut) return null;
     return game.decks.fold<int>(0, (sum, deck) => sum + deck.length) -
         _entries.length;
   }
 
-  /// "Ronda 1 de 3 · 12 palabras en este turno", según el modo.
+  /// "Ronda 1 de 3 · hasta que se acabe el tiempo", según las palabras.
   String _readyLabel(GameState game) {
-    final config = game.config;
-    final round = config.roundLabel(game.round);
+    final round = game.config.roundLabel(game.round);
     final left = _wordsLeft(game);
     if (left == null) return '$round · hasta que se acabe el tiempo';
-    if (config.perTurnDecks) {
-      return '$round · ${_deck.length} palabras en este turno';
-    }
     return '$round · ${WordCard.wordsLeftLabel(left)} en total';
   }
 

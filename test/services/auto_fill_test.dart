@@ -28,7 +28,7 @@ void main() {
     expect(second.names.any(first.names.contains), isFalse);
   });
 
-  test('las palabras por turno son las sugeridas y respetan los límites', () {
+  test('elige rondas, tiempo y palabras dentro de los límites', () {
     final random = Random(9);
     for (var i = 0; i < 200; i++) {
       final groups = 2 + i % 3;
@@ -36,12 +36,6 @@ void main() {
         const GameConfig(wordSource: WordSource.random),
         groups: groups,
         random: random,
-      );
-      final config = result.config;
-      expect(config.wordsPerTurn, config.suggestedWordsPerTurn);
-      expect(
-        config.wordsPerTurn,
-        inInclusiveRange(GameConfig.minWordsPerTurn, config.maxWordsPerTurn),
       );
       expect(result.config.rounds, inInclusiveRange(2, 4));
       expect(result.config.wordsPerGroup, inInclusiveRange(5, 10));

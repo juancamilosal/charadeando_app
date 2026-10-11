@@ -10,10 +10,9 @@ class AutoFillResult {
     required this.scoring,
     required this.hitMode,
     required this.difficulty,
-    required this.length,
   });
 
-  /// Rondas, tiempo y palabras por turno; los nombres van en [names].
+  /// Rondas y tiempo por turno; los nombres van en [names].
   final GameConfig config;
   final List<String> names;
   final ScoringMode scoring;
@@ -21,9 +20,6 @@ class AutoFillResult {
 
   /// Solo se usa con palabras automáticas.
   final Difficulty difficulty;
-
-  /// Duración de la partida con palabras automáticas.
-  final GameLength length;
 }
 
 /// Llena la configuración por el usuario, al azar pero con valores que
@@ -80,18 +76,13 @@ abstract final class AutoFill {
     final names = pool.take(count).toList();
 
     final difficulty = any(Difficulty.values);
-    final length = any(GameLength.values);
-    var config = current.copyWith(
+    final config = current.copyWith(
       groups: [for (final n in names) Group(n)],
       rounds: between(2, 4),
       turnDuration: Duration(seconds: any(turnSeconds)),
       wordsPerGroup: between(5, 10),
       difficulty: current.wordSource == WordSource.random ? difficulty : null,
-      gameLength: length,
     );
-    // Palabras por turno: el valor sugerido para el tiempo del turno, sin
-    // pasar de lo que alcanza la base de palabras.
-    config = config.copyWith(wordsPerTurn: config.suggestedWordsPerTurn);
     return AutoFillResult(
       config: config,
       names: names,
@@ -101,7 +92,6 @@ abstract final class AutoFill {
           if (m.available) m,
       ]),
       difficulty: difficulty,
-      length: length,
     );
   }
 }

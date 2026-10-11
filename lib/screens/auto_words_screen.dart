@@ -24,15 +24,6 @@ class AutoWordsScreen extends ConsumerStatefulWidget {
   static int countFor(GameConfig config) =>
       min(config.autoWordsNeeded, DirectusService.maxCount);
 
-  /// Palabras por turno que alcanzan con [words] palabras: las elegidas, o
-  /// menos si llegaron menos (por ejemplo, sin internet).
-  /// Por número de rondas no hay palabras por turno: basta con una por
-  /// grupo, y las que falten se repiten.
-  static int wordsPerTurnFor(GameConfig config, int words) =>
-      config.perTurnDecks
-      ? min(config.wordsPerTurn, words ~/ config.turns)
-      : (words >= config.groupCount ? config.wordsPerTurn : 0);
-
   @override
   ConsumerState<AutoWordsScreen> createState() => _AutoWordsScreenState();
 }
@@ -65,7 +56,7 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
             difficulty: config.difficulty?.code,
           );
       if (!mounted) return;
-      if (AutoWordsScreen.wordsPerTurnFor(config, batch.words.length) < 1) {
+      if (batch.words.length < config.groupCount) {
         setState(() {
           _loading = false;
           _error = 'Todavía no hay suficientes palabras en el servidor.';
@@ -88,18 +79,7 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
   }
 
   void _play(WordBatch batch) {
-    final controller = ref.read(gameControllerProvider.notifier);
-    final config = ref.read(gameControllerProvider).config;
-    final perTurn = AutoWordsScreen.wordsPerTurnFor(config, batch.words.length);
-    if (perTurn < config.wordsPerTurn) {
-      controller.configure(config.copyWith(wordsPerTurn: perTurn));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Llegaron menos palabras: cada turno tendrá $perTurn.'),
-        ),
-      );
-    }
-    controller.startWithWords(batch.words);
+    ref.read(gameControllerProvider.notifier).startWithWords(batch.words);
     context.go(Routes.turn);
   }
 

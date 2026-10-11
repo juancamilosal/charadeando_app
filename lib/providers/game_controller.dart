@@ -44,12 +44,6 @@ class GameState {
   Group get currentGroup => groups[groupIndex];
   List<Word> get currentDeck => decks[groupIndex];
 
-  /// Palabras del turno que va a jugar el grupo actual. Con palabras
-  /// automáticas, cada turno tiene su propio mazo: las primeras
-  /// [GameConfig.wordsPerTurn] del grupo.
-  List<Word> get currentTurnWords => config.perTurnDecks
-      ? currentDeck.take(config.wordsPerTurn).toList()
-      : currentDeck;
   Turn? get lastTurn => turns.isEmpty ? null : turns.last;
 
   List<int> get scores {
@@ -130,19 +124,15 @@ class GameController extends Notifier<GameState> {
   }
 
   /// Registra el turno recién jugado y saca sus palabras del mazo.
-  /// Con palabras automáticas, las palabras del turno que no alcanzaron a
-  /// salir se descartan: el siguiente turno trae palabras nuevas.
+  /// Con palabras automáticas, si al grupo le quedan pocas, se completan
+  /// con palabras ya jugadas.
   void finishTurn(Turn turn) {
     var deck = [...state.decks[turn.groupIndex]];
-    if (state.config.perTurnDecks) {
-      deck = deck.skip(state.config.wordsPerTurn).toList();
-    } else {
-      for (final entry in turn.entries) {
-        deck.remove(entry.word);
-      }
-      if (state.config.untilTimeRunsOut) {
-        deck = _refill(deck, turn);
-      }
+    for (final entry in turn.entries) {
+      deck.remove(entry.word);
+    }
+    if (state.config.untilTimeRunsOut) {
+      deck = _refill(deck, turn);
     }
     final decks = [...state.decks];
     decks[turn.groupIndex] = deck;
@@ -155,11 +145,11 @@ class GameController extends Notifier<GameState> {
     state = state.copyWith(finished: true);
   }
 
-  /// Por número de rondas el turno dura hasta que se acabe el tiempo: si al
+  /// Con palabras automáticas el turno dura hasta que se acabe el tiempo: si al
   /// grupo le quedan menos palabras de las que alcanzaría un grupo rápido,
   /// se completan con palabras ya jugadas, al azar.
   List<Word> _refill(List<Word> deck, Turn justPlayed) {
-    final need = state.config.maxWordsPerTurnByTime - deck.length;
+    final need = state.config.fastWordsPerTurn - deck.length;
     if (need <= 0) return deck;
     // Las que siguen en algún mazo no se repiten; el del grupo que acaba de
     // jugar es [deck], porque el estado todavía tiene el anterior.

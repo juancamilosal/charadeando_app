@@ -97,62 +97,8 @@ void main() {
     expect((state().round, state().groupIndex), (1, 0));
   });
 
-  test('automático: cada turno tiene su mazo y las palabras que no '
-      'salieron se descartan', () {
-    controller().configure(
-      const GameConfig(
-        rounds: 2,
-        groups: [Group('A'), Group('B')],
-        wordSource: WordSource.random,
-        gameLength: GameLength.wordsPerRound,
-        wordsPerTurn: 3,
-        scoringMode: ScoringMode.perPhrase,
-      ),
-    );
-    controller().startWithWords(words('w', 12));
-    final firstTurn = state().currentTurnWords;
-    expect(firstTurn, hasLength(3));
-    // Acierta 1 de 3: las otras 2 no vuelven.
-    final deck = state().currentTurnWords;
-    controller().finishTurn(
-      Turn(
-        round: 1,
-        groupIndex: 0,
-        entries: [TurnEntry(deck.first, WordOutcome.hit)],
-      ),
-    );
-    controller().advance();
-    expect(state().decks[0], hasLength(3));
-    play(hits: 3);
-    expect((state().round, state().groupIndex), (2, 0));
-    final secondTurn = state().currentTurnWords;
-    expect(secondTurn, hasLength(3));
-    expect(secondTurn.any(firstTurn.contains), isFalse);
-    play();
-    play();
-    expect(state().finished, isTrue);
-    expect(state().scores, [1, 3]);
-  });
-
-  test('automático con palabras por ronda termina antes si se acaban las '
-      'palabras', () {
-    controller().configure(
-      const GameConfig(
-        rounds: 5,
-        groups: [Group('A'), Group('B')],
-        wordSource: WordSource.random,
-        gameLength: GameLength.wordsPerRound,
-      ),
-    );
-    controller().startWithWords(words('w', 4));
-    play(hits: 2);
-    play(passes: 2);
-    expect(state().finished, isTrue);
-    expect(state().config.roundLabel(1), 'Ronda 1 de 5');
-  });
-
-  test('por número de rondas las palabras no se acaban antes del tiempo: '
-      'vuelven las ya jugadas', () {
+  test('con palabras automáticas no se acaban antes del tiempo: vuelven '
+      'las ya jugadas y se juegan todas las rondas', () {
     controller().configure(
       const GameConfig(
         rounds: 3,
@@ -163,7 +109,7 @@ void main() {
     );
     // Solo 8 palabras; un grupo rápido alcanza 10 en 30 segundos.
     controller().startWithWords(words('w', 8));
-    expect(state().currentTurnWords, hasLength(4));
+    expect(state().currentDeck, hasLength(4));
     play(hits: 4);
     // El grupo A se queda sin palabras propias y recibe las ya jugadas.
     expect(state().decks[0], isNotEmpty);
