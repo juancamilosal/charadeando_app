@@ -31,7 +31,7 @@ enum GameCategory {
     'Películas',
     'Clásicos y estrenos',
     Icons.movie,
-    AppColors.magenta,
+    AppColors.teal,
     'PELICULAS',
   ),
   celebrities(
@@ -52,7 +52,7 @@ enum GameCategory {
     'Deportes',
     'A moverse',
     Icons.sports_basketball,
-    AppColors.coral,
+    AppColors.navy,
     'DEPORTES',
   ),
   soccerTeams(

@@ -170,7 +170,11 @@ class _CategoryCard extends StatelessWidget {
                       // que se vean igual en celulares angostos y anchos.
                       builder: (context, box) {
                         final w = box.maxWidth;
+                        // Ocupa todo el ancho de la tarjeta: con nombre y
+                        // descripción cortos ("Deportes") la columna quedaba
+                        // angosta y pegada a la izquierda.
                         return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Expanded(
                               // Si los textos ocupan más (letra grande en el
