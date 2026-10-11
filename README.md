@@ -9,11 +9,18 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Diseño colorido con fondo de gradiente y las fuentes Fredoka y Nunito
   (licencia OFL, en `assets/fonts`). Los colores no cambian con el modo oscuro
   del celular.
+- Inicio: la bienvenida (los pasos del juego y "Listo") se muestra solo la
+  primera vez que se abre la app; al tocar "Listo" queda guardado en el
+  celular y las demás veces la app abre directo en Categorías. Categorías no
+  tiene botón de atrás: el botón "i" de arriba a la derecha vuelve a abrir
+  la bienvenida y "Listo" regresa. "Volver al inicio", salir del turno y
+  "Probar Directus" (que ahora está en Categorías, solo en pruebas) llevan a
+  Categorías.
 - Pantalla de categorías: Libre, Animales, Geografía, Películas,
   Celebridades, Marcas, Deportes y Equipos de fútbol. Libre deja elegir entre
   palabras manuales (las escriben los grupos) y automáticas (frases de la
   categoría LIBRE); las demás muestran su propio "¿Cómo se juega?" (una
-  animación con palabras de la categoría y los pasos) y siguen a la
+  explicación corta y una animación con palabras de la categoría) y siguen a la
   configuración con palabras automáticas de su categoría.
 - Cada categoría puede tener un dibujo animado (GIF de 256 px en
   `assets/img/categorias/`, con el nombre de la categoría) que se ve en su
@@ -112,6 +119,8 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Un solo celular, aciertos con movimiento: inclinar hacia abajo es acierto y
   hacia arriba es pasar.
 - En la configuración, la sección Modo TV va al final, después de Video.
+- Con un TV conectado, la animación de "¿Cómo se juega?" dice "El juez toca
+  ¡Correcto! o Pasar en el celular." en vez de explicar cómo inclinarlo.
 - Modo TV, en todas las categorías: se activa solo cuando el celular duplica
   la pantalla en un TV (AirPlay, Chromecast o HDMI). Mientras está activo, la
   configuración oculta las secciones de aciertos y de video, durante el turno el
@@ -147,7 +156,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   al tiempo), con el turno en pausa y en la tabla de puntajes. Pregunta antes de terminar y lleva a
   los resultados finales con los puntajes de ese momento (si el turno estaba
   en pausa, sus palabras marcadas cuentan). Si todavía no se jugó ningún
-  turno, vuelve al inicio.
+  turno, vuelve a Categorías.
 - Si la app sale a segundo plano durante el turno, el juego se pausa y al
   volver sigue donde quedó. El video se graba por partes y se unen al final.
 
