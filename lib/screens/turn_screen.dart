@@ -44,6 +44,10 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   bool _cameraLoading = true;
   String? _cameraError;
 
+  /// Verdadero si la app pasó a segundo plano (por ejemplo, para ir a los
+  /// ajustes). El diálogo de permisos solo la deja inactiva un momento.
+  bool _wentAway = false;
+
   late final List<Word> _deck;
   final List<TurnEntry> _entries = [];
   int _wordIndex = 0;
@@ -150,9 +154,17 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
           // El sistema le quita la cámara a la app en segundo plano.
           _camera.dispose();
         }
+        if (state != AppLifecycleState.inactive) _wentAway = true;
       case AppLifecycleState.resumed:
+        final wentAway = _wentAway;
+        _wentAway = false;
         final waiting = _phase == _Phase.ready || _phase == _Phase.paused;
-        if (waiting && _records && !_cameraReady && !_cameraLoading) {
+        // Si la cámara falló (por ejemplo, se negó el permiso), solo se
+        // vuelve a intentar al regresar de segundo plano. Cerrar el diálogo
+        // de permisos también "regresa" a la app, y reintentar ahí abre el
+        // diálogo otra vez o falla de nuevo, sin parar.
+        final retry = _cameraError == null || wentAway;
+        if (waiting && _records && !_cameraReady && !_cameraLoading && retry) {
           _initCamera();
         }
       case AppLifecycleState.detached:
