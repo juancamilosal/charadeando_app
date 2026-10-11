@@ -23,6 +23,9 @@ class ArtCycle extends StatefulWidget {
   /// Pausa entre la animación de un dibujo y la del siguiente.
   static const pause = Duration(milliseconds: 500);
 
+  /// Espera al abrir la pantalla, para que primero se vean todas quietas.
+  static const firstDelay = Duration(milliseconds: 1500);
+
   final Widget child;
 
   /// El ciclo que contiene a [context], o null si no hay: entonces el
@@ -49,7 +52,7 @@ class ArtCycleState extends State<ArtCycle> {
   @override
   void initState() {
     super.initState();
-    _schedule();
+    _schedule(ArtCycle.firstDelay);
   }
 
   @override
@@ -58,9 +61,9 @@ class ArtCycleState extends State<ArtCycle> {
     super.dispose();
   }
 
-  void _schedule() {
+  void _schedule([Duration wait = ArtCycle.pause]) {
     _timer?.cancel();
-    _timer = Timer(ArtCycle.pause, _next);
+    _timer = Timer(wait, _next);
   }
 
   Future<void> _next() async {

@@ -20,7 +20,8 @@ class CategoryArt extends StatelessWidget {
   });
 
   /// Categorías que ya tienen su GIF en la carpeta, con el cuadro en el
-  /// que se quedan quietas: el que mejor las muestra.
+  /// que se quedan quietas: el que mejor las muestra. Ese cuadro también
+  /// está como imagen en `reposo/`, para mostrarlo al instante.
   static const restFrames = {
     GameCategory.free: 28, // La hoja con todas sus líneas.
     GameCategory.animals: 0,
@@ -40,6 +41,10 @@ class CategoryArt extends StatelessWidget {
 
   static String asset(GameCategory category) =>
       'assets/img/categorias/${category.code.toLowerCase()}.gif';
+
+  /// El cuadro de reposo de [category], como imagen.
+  static String restAsset(GameCategory category) =>
+      'assets/img/categorias/reposo/${category.code.toLowerCase()}.png';
 
   @override
   Widget build(BuildContext context) {
@@ -82,10 +87,9 @@ class _CycledGifState extends State<_CycledGif> implements CycleMember {
   ArtCycleState? _cycle;
   ui.Codec? _codec;
 
-  /// El cuadro de reposo, y el que se ve mientras se anima.
-  ui.Image? _rest;
+  /// El cuadro que se ve mientras se anima. Quieto se ve la imagen de
+  /// reposo, que no espera a que se prepare el GIF.
   ui.Image? _frame;
-  bool _failed = false;
   bool _disposed = false;
 
   Timer? _wait;
@@ -96,7 +100,7 @@ class _CycledGifState extends State<_CycledGif> implements CycleMember {
 
   @override
   bool get canPlay {
-    if (_codec == null || _rest == null || !mounted) return false;
+    if (_codec == null || !mounted) return false;
     // Una ruta encima (por ejemplo, la bienvenida) apaga TickerMode.
     if (!TickerMode.valuesOf(context).enabled) return false;
     final box = context.findRenderObject();
@@ -130,36 +134,29 @@ class _CycledGifState extends State<_CycledGif> implements CycleMember {
     _wait?.cancel();
     if (_waiting?.isCompleted == false) _waiting!.complete();
     _frame?.dispose();
-    _rest?.dispose();
     _codec?.dispose();
     super.dispose();
   }
 
-  /// Decodifica el GIF y avanza hasta el cuadro de reposo.
+  /// Decodifica el GIF y lo avanza hasta el cuadro de reposo, para que la
+  /// animación empiece desde ahí. Mientras tanto se ve la imagen de reposo.
   Future<void> _load() async {
     try {
       final data = await rootBundle.load(CategoryArt.asset(widget.category));
       final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
       final restIndex =
           CategoryArt.restFrames[widget.category]! % codec.frameCount;
-      ui.Image? rest;
-      for (var i = 0; i <= restIndex; i++) {
-        final frame = await codec.getNextFrame();
-        rest?.dispose();
-        rest = frame.image;
+      for (var i = 0; i <= restIndex && !_disposed; i++) {
+        (await codec.getNextFrame()).image.dispose();
       }
       if (_disposed) {
-        rest?.dispose();
         codec.dispose();
         return;
       }
-      setState(() {
-        _codec = codec;
-        _rest = rest;
-      });
+      _codec = codec;
     } on Exception catch (e) {
+      // Sin GIF se queda quieto en la imagen de reposo.
       debugPrint('[Categorías] No se pudo cargar el GIF: $e');
-      if (!_disposed) setState(() => _failed = true);
     }
   }
 
@@ -180,11 +177,13 @@ class _CycledGifState extends State<_CycledGif> implements CycleMember {
         final old = _frame;
         setState(() => _frame = frame.image);
         old?.dispose();
+        // El último es el de reposo: no hace falta esperarlo.
+        if (i == codec.frameCount - 1) break;
         await _sleep(frame.duration);
         if (_disposed) return;
       }
     } while (watch.elapsed < _minPlay);
-    // El último cuadro es el de reposo: se vuelve a mostrar el guardado.
+    // El último cuadro es el de reposo: se vuelve a la imagen.
     final old = _frame;
     setState(() => _frame = null);
     old?.dispose();
@@ -199,9 +198,18 @@ class _CycledGifState extends State<_CycledGif> implements CycleMember {
 
   @override
   Widget build(BuildContext context) {
-    if (_failed) return widget.fallback;
+    final frame = _frame;
+    if (frame == null) {
+      return Image.asset(
+        CategoryArt.restAsset(widget.category),
+        width: widget.size,
+        height: widget.size,
+        gaplessPlayback: true,
+        errorBuilder: (_, _, _) => widget.fallback,
+      );
+    }
     return RawImage(
-      image: _frame ?? _rest,
+      image: frame,
       width: widget.size,
       height: widget.size,
       // Como Image.asset: se achica para caber, pero no se agranda.

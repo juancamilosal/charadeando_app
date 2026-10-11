@@ -31,7 +31,10 @@ la cámara frontal graba a los participantes para revivir las risas.
   Celebridades, Marcas, Deportes y Equipos de fútbol), con una pausa corta
   entre uno y otro, y el ciclo vuelve a empezar. Los que no se ven en la
   pantalla se saltan. Quietos muestran su mejor cuadro: la hoja con sus
-  líneas, el balón de Deportes en el centro después de rebotar. La ruleta
+  líneas, el balón de Deportes en el centro después de rebotar. Ese cuadro
+  también está como imagen en `assets/img/categorias/reposo/`, así que la
+  tarjeta se ve completa desde el primer instante; el ciclo empieza un
+  momento después de abrir la pantalla. La ruleta
   de castigos sigue moviéndose siempre y en "¿Cómo se juega?" el dibujo se
   mueve sin parar.
 - Dificultad: Mezcladas (viene elegida: trae de todas, 300 palabras por

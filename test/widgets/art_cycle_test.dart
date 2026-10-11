@@ -37,6 +37,10 @@ void main() {
       key.currentState!.add(m);
     }
 
+    // Al abrir la pantalla espera un momento antes del primero.
+    await tester.pump(ArtCycle.firstDelay - ArtCycle.pause);
+    expect(log, isEmpty);
+
     // Cada uno tarda 1 s y hay una pausa de medio segundo entre ellos.
     for (var i = 0; i < 6; i++) {
       await tester.pump(const Duration(milliseconds: 1500));
@@ -73,5 +77,15 @@ void main() {
       }
     }
     expect((top + bottom) / 2, closeTo(image.height / 2, 2));
+  });
+
+  test('cada categoría con GIF tiene su imagen de reposo', () {
+    for (final category in CategoryArt.restFrames.keys) {
+      expect(
+        File(CategoryArt.restAsset(category)).existsSync(),
+        isTrue,
+        reason: category.label,
+      );
+    }
   });
 }

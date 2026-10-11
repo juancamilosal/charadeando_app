@@ -71,6 +71,7 @@ flutter:
   # Animaciones de cada categoría (GIF de 256 px, nombre = categoría).
   assets:
     - assets/img/categorias/
+    - assets/img/categorias/reposo/
 
   fonts:
     - family: Fredoka
