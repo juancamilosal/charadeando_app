@@ -167,7 +167,7 @@ class FreeModeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 4),
                 const Text(
-                  '2 grupos, 2 rondas de 30 s y 10 palabras por grupo.',
+                  '2 grupos, 2 rondas de 60 s y 10 palabras por grupo.',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.white70, fontSize: 13),
                 ),

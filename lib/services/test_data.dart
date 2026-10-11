@@ -12,7 +12,7 @@ abstract final class TestData {
   static const config = GameConfig(
     groups: [Group('Los Tigres'), Group('Las Águilas')],
     rounds: 2,
-    turnDuration: Duration(seconds: 30),
+    turnDuration: Duration(seconds: 60),
     wordsPerGroup: 10,
   );
 
