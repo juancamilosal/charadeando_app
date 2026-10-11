@@ -41,6 +41,13 @@ class GameState {
   List<Group> get groups => config.groups;
   Group get currentGroup => groups[groupIndex];
   List<Word> get currentDeck => decks[groupIndex];
+
+  /// Palabras del turno que va a jugar el grupo actual. Con palabras
+  /// automáticas, cada turno tiene su propio mazo: las primeras
+  /// [GameConfig.wordsPerTurn] del grupo.
+  List<Word> get currentTurnWords => config.perTurnDecks
+      ? currentDeck.take(config.wordsPerTurn).toList()
+      : currentDeck;
   Turn? get lastTurn => turns.isEmpty ? null : turns.last;
 
   List<int> get scores {
@@ -119,10 +126,16 @@ class GameController extends Notifier<GameState> {
   }
 
   /// Registra el turno recién jugado y saca sus palabras del mazo.
+  /// Con palabras automáticas, las palabras del turno que no alcanzaron a
+  /// salir se descartan: el siguiente turno trae palabras nuevas.
   void finishTurn(Turn turn) {
-    final deck = [...state.decks[turn.groupIndex]];
-    for (final entry in turn.entries) {
-      deck.remove(entry.word);
+    var deck = [...state.decks[turn.groupIndex]];
+    if (state.config.perTurnDecks) {
+      deck = deck.skip(state.config.wordsPerTurn).toList();
+    } else {
+      for (final entry in turn.entries) {
+        deck.remove(entry.word);
+      }
     }
     final decks = [...state.decks];
     decks[turn.groupIndex] = deck;
@@ -154,7 +167,7 @@ class GameController extends Notifier<GameState> {
     final limit = from.config.roundLimit;
     var round = from.round;
     var group = from.groupIndex;
-    while (limit == null || round <= limit) {
+    while (round <= limit) {
       if (from.decks[group].isNotEmpty) {
         return from.copyWith(round: round, groupIndex: group, finished: false);
       }

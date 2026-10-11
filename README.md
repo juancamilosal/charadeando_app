@@ -19,15 +19,18 @@ la cámara frontal graba a los participantes para revivir las risas.
   `assets/img/categorias/`, con el nombre de la categoría) que se ve en su
   tarjeta y en su "¿Cómo se juega?". Ya lo tienen Animales, Geografía,
   Películas y Celebridades; las demás muestran su ícono mientras tanto.
-- Dificultad (Fácil, Normal o Difícil): se elige en la configuración de las
-  palabras automáticas, en Libre y en todas las categorías, y solo se traen
-  palabras de esa dificultad. Las palabras manuales no tienen dificultad.
+- Dificultad: Mezcladas (viene elegida: trae de todas, 300 palabras por
+  categoría), Fácil (ideal con niños), Normal o Difícil (100 cada una). Se
+  elige en la configuración de las palabras automáticas, en Libre y en todas
+  las categorías. Las palabras manuales no tienen dificultad. En Directus se
+  conserva la columna `dificultad`.
 - Libre explica con una animación cómo se juega y deja elegir entre palabras
   manuales (con la sugerencia de cuántas escribir) y automáticas.
-- Palabras automáticas: en la configuración se eligen los grupos, cuántas
-  palabras jugar (de 10 a 100, repartidas parejo entre los grupos) y la
-  duración: hasta que se acaben las palabras, o por número de rondas (termina
-  al completar las rondas o antes si se acaban las palabras). Al tocar
+- Palabras automáticas: en la configuración se eligen los grupos, las
+  rondas, el tiempo por turno y las palabras por turno. Cada turno tiene su
+  propio mazo, distinto al de todos los demás: el turno termina al acabarse
+  el tiempo o sus palabras, y las que no alcanzaron a salir se descartan.
+  La partida termina al completar las rondas. Al tocar
   "Continuar" se muestra "Buscando palabras…" mientras se traen al azar de la
   colección de Directus (`POST /juego/palabras`). La app ya no usa Gemini: las
   palabras son una base propia, revisada por el equipo. Durante el juego no
@@ -36,17 +39,22 @@ la cámara frontal graba a los participantes para revivir las risas.
   último lote para jugar sin internet. Ver `server/README.md`.
 - "Llenar automáticamente" (arriba en la configuración): el juego pone los
   nombres de los grupos (por defecto 2; si agregan más, también los nombra)
-  y elige al azar el resto: duración, rondas, tiempo por turno, cantidad de
-  palabras según los grupos (8 a 15 por grupo), dificultad, puntuación y
+  y elige al azar el resto: rondas, tiempo por turno,
+  palabras por turno (las sugeridas), dificultad, puntuación y
   aciertos. Cada toque da una configuración nueva, con otros nombres.
-- Con palabras automáticas, la duración del juego va primero. La cantidad
-  de palabras solo se pregunta al elegir "Hasta que se acaben las
-  palabras". Por número de rondas no se elige la cantidad de palabras: se traen las que alcanzan
-  para todas las rondas (una cada 3 segundos de turno). Si una dificultad
-  se queda sin palabras, se completa con las otras, y si se acaban todas se
-  vuelven a usar las ya jugadas.
-- En el turno se ve cuántas palabras faltan por adivinar en toda la partida
-  ("Faltan 12 palabras"), también antes de empezar y en el Modo TV.
+- Palabras por turno: en la sección "Partida" (rondas y tiempo por turno)
+  se ve en una línea, "12 palabras por turno", y solo con "Cambiar" aparece
+  el selector. El valor sugerido es una cada 5 segundos (60 s → 12, 180 s →
+  36) y sigue al tiempo mientras no lo cambien. El máximo es el menor
+  entre lo que permite el tiempo (una cada 3 segundos) y lo que alcanza la
+  base sin repetir (palabras de la dificultad ÷ turnos de la partida); si
+  la base es la que limita, se avisa ("Máximo 5 por turno para no repetir
+  palabras"). Se piden todas al empezar en una sola petición (palabras por
+  turno × grupos × rondas). Si llegan menos, cada turno tiene menos y se
+  avisa. Si una dificultad se queda sin palabras, el servidor completa con
+  las otras, y si se acaban todas vuelve a usar las ya jugadas.
+- En el turno se ve cuántas palabras faltan: con palabras automáticas, las
+  de ese turno; con las escritas por los grupos, las de toda la partida.
 - Ruleta de castigos: una sección propia (en la pantalla de categorías, debajo
   de las tarjetas, una tarjeta blanca con una ruleta pequeña que gira y el
   nombre "Ruleta de castigos"; no es una categoría de palabras). Se elige la
@@ -75,6 +83,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   (`POST /juego/castigos`), pero todavía no se usa.
 - Un solo celular, aciertos con movimiento: inclinar hacia abajo es acierto y
   hacia arriba es pasar.
+- En la configuración, la sección Modo TV va al final, después de Video.
 - Modo TV, en todas las categorías: se activa solo cuando el celular duplica
   la pantalla en un TV (AirPlay, Chromecast o HDMI). Mientras está activo, la
   configuración oculta las secciones de aciertos y de video, durante el turno el

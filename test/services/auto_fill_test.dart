@@ -28,8 +28,7 @@ void main() {
     expect(second.names.any(first.names.contains), isFalse);
   });
 
-  test('las palabras automáticas alcanzan para los grupos y respetan los '
-      'límites', () {
+  test('las palabras por turno son las sugeridas y respetan los límites', () {
     final random = Random(9);
     for (var i = 0; i < 200; i++) {
       final groups = 2 + i % 5;
@@ -38,13 +37,12 @@ void main() {
         groups: groups,
         random: random,
       );
-      final words = result.config.autoWordCount;
-      expect(words % 5, 0);
+      final config = result.config;
+      expect(config.wordsPerTurn, config.suggestedWordsPerTurn);
       expect(
-        words,
-        inInclusiveRange(GameConfig.minAutoWords, GameConfig.maxAutoWords),
+        config.wordsPerTurn,
+        inInclusiveRange(GameConfig.minWordsPerTurn, config.maxWordsPerTurn),
       );
-      expect(words / groups, inInclusiveRange(5, 16));
       expect(result.config.rounds, inInclusiveRange(2, 4));
       expect(result.config.wordsPerGroup, inInclusiveRange(5, 10));
       expect(
@@ -70,13 +68,13 @@ void main() {
   test('cada vez elige distinto', () {
     final random = Random(5);
     final picks = {
-      for (var i = 0; i < 30; i++)
+      for (var i = 0; i < 40; i++)
         AutoFill.pick(
           const GameConfig(wordSource: WordSource.random),
           groups: 2,
           random: random,
-        ).gameEnd,
+        ).difficulty,
     };
-    expect(picks, hasLength(GameEnd.values.length));
+    expect(picks, hasLength(Difficulty.values.length));
   });
 }

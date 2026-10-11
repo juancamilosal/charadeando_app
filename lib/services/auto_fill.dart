@@ -7,16 +7,14 @@ class AutoFillResult {
   const AutoFillResult({
     required this.config,
     required this.names,
-    required this.gameEnd,
     required this.scoring,
     required this.hitMode,
     required this.difficulty,
   });
 
-  /// Rondas, tiempo y cantidad de palabras; los nombres van en [names].
+  /// Rondas, tiempo y palabras por turno; los nombres van en [names].
   final GameConfig config;
   final List<String> names;
-  final GameEnd gameEnd;
   final ScoringMode scoring;
   final HitMode hitMode;
 
@@ -77,29 +75,26 @@ abstract final class AutoFill {
     pool.shuffle(rnd);
     final names = pool.take(count).toList();
 
-    final automatic = current.wordSource == WordSource.random;
-    // Unas 8 a 15 palabras por grupo, en múltiplos de 5 como el selector.
-    final autoWords = ((count * between(8, 15)) / 5).round() * 5;
-    final config = current.copyWith(
+    final difficulty = any(Difficulty.values);
+    var config = current.copyWith(
       groups: [for (final n in names) Group(n)],
       rounds: between(2, 4),
       turnDuration: Duration(seconds: any(turnSeconds)),
       wordsPerGroup: between(5, 10),
-      autoWordCount: autoWords.clamp(
-        GameConfig.minAutoWords,
-        GameConfig.maxAutoWords,
-      ),
+      difficulty: current.perTurnDecks ? difficulty : null,
     );
+    // Palabras por turno: el valor sugerido para el tiempo del turno, sin
+    // pasar de lo que alcanza la base de palabras.
+    config = config.copyWith(wordsPerTurn: config.suggestedWordsPerTurn);
     return AutoFillResult(
       config: config,
       names: names,
-      gameEnd: automatic ? any(GameEnd.values) : current.gameEnd,
       scoring: any(ScoringMode.values),
       hitMode: any([
         for (final m in HitMode.selectable)
           if (m.available) m,
       ]),
-      difficulty: any(Difficulty.values),
+      difficulty: difficulty,
     );
   }
 }

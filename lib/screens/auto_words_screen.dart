@@ -18,23 +18,16 @@ import '../widgets/play_background.dart';
 class AutoWordsScreen extends ConsumerStatefulWidget {
   const AutoWordsScreen({super.key});
 
-  /// Cuántas palabras pedir para [config]: las mismas para cada grupo.
-  /// No se piden más durante la partida; si se acaban, termina.
-  ///
-  /// Por número de rondas no se elige la cantidad: se piden las que alcanzan
-  /// para todas las rondas, una cada 3 segundos de turno (mínimo 10 por
-  /// turno), sin pasar del tope del servidor.
-  static int countFor(GameConfig config) {
-    if (config.gameEnd == GameEnd.rounds) {
-      final perTurn = max(10, config.turnDuration.inSeconds ~/ 3);
-      final perGroup = min(
-        config.rounds * perTurn,
-        DirectusService.maxCount ~/ config.groupCount,
-      );
-      return perGroup * config.groupCount;
-    }
-    return config.autoWordsPerGroup * config.groupCount;
-  }
+  /// Cuántas palabras pedir para [config]: las de todos los turnos de la
+  /// partida (palabras por turno × grupos × rondas), sin pasar del tope del
+  /// servidor. No se piden más durante la partida.
+  static int countFor(GameConfig config) =>
+      min(config.autoWordsNeeded, DirectusService.maxCount);
+
+  /// Palabras por turno que alcanzan con [words] palabras: las elegidas, o
+  /// menos si llegaron menos (por ejemplo, sin internet).
+  static int wordsPerTurnFor(GameConfig config, int words) =>
+      min(config.wordsPerTurn, words ~/ config.turns);
 
   @override
   ConsumerState<AutoWordsScreen> createState() => _AutoWordsScreenState();
@@ -68,7 +61,7 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
             difficulty: config.difficulty?.code,
           );
       if (!mounted) return;
-      if (batch.words.length < config.groupCount) {
+      if (AutoWordsScreen.wordsPerTurnFor(config, batch.words.length) < 1) {
         setState(() {
           _loading = false;
           _error = 'Todavía no hay suficientes palabras en el servidor.';
@@ -91,7 +84,18 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
   }
 
   void _play(WordBatch batch) {
-    ref.read(gameControllerProvider.notifier).startWithWords(batch.words);
+    final controller = ref.read(gameControllerProvider.notifier);
+    final config = ref.read(gameControllerProvider).config;
+    final perTurn = AutoWordsScreen.wordsPerTurnFor(config, batch.words.length);
+    if (perTurn < config.wordsPerTurn) {
+      controller.configure(config.copyWith(wordsPerTurn: perTurn));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Llegaron menos palabras: cada turno tendrá $perTurn.'),
+        ),
+      );
+    }
+    controller.startWithWords(batch.words);
     context.go(Routes.turn);
   }
 

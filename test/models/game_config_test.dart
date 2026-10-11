@@ -44,31 +44,76 @@ void main() {
     );
   });
 
-  test('por rondas se piden palabras para todas las rondas', () {
+  test('se piden las palabras de todos los turnos de la partida', () {
     const config = GameConfig(
       wordSource: WordSource.random,
-      gameEnd: GameEnd.rounds,
       rounds: 3,
-      turnDuration: Duration(seconds: 60),
+      wordsPerTurn: 12,
     );
-    // 20 por turno (una cada 3 s) por 3 rondas, para cada uno de 2 grupos.
-    expect(AutoWordsScreen.countFor(config), 120);
-    expect(
-      AutoWordsScreen.countFor(
-        config.copyWith(gameEnd: GameEnd.wordsRunOut, autoWordCount: 30),
-      ),
-      30,
-    );
+    // 12 por turno × 2 grupos × 3 rondas.
+    expect(AutoWordsScreen.countFor(config), 72);
     // Nunca más que el tope del servidor.
     expect(
       AutoWordsScreen.countFor(
         config.copyWith(
           rounds: 10,
-          turnDuration: const Duration(seconds: 180),
+          wordsPerTurn: 60,
           groups: List.filled(6, const Group('G')),
         ),
       ),
-      lessThanOrEqualTo(DirectusService.maxCount),
+      DirectusService.maxCount,
     );
+  });
+
+  test('si llegan menos palabras, cada turno tiene menos', () {
+    const config = GameConfig(
+      wordSource: WordSource.random,
+      rounds: 3,
+      wordsPerTurn: 12,
+    );
+    expect(AutoWordsScreen.wordsPerTurnFor(config, 72), 12);
+    expect(AutoWordsScreen.wordsPerTurnFor(config, 50), 8);
+    expect(AutoWordsScreen.wordsPerTurnFor(config, 5), 0);
+  });
+
+  group('palabras por turno', () {
+    test('el tiempo pone el máximo y sugiere una cada 5 segundos', () {
+      const config = GameConfig(
+        wordSource: WordSource.random,
+        difficulty: Difficulty.mixed,
+        rounds: 3,
+      );
+      expect(config.maxWordsPerTurn, 20);
+      expect(config.suggestedWordsPerTurn, 12);
+      expect(config.limitedByStock, isFalse);
+      final long = config.copyWith(turnDuration: const Duration(seconds: 180));
+      // 300 palabras mezcladas / 6 turnos = 50; el tiempo permite 60.
+      expect(long.maxWordsPerTurn, 50);
+      expect(long.limitedByStock, isTrue);
+      expect(long.suggestedWordsPerTurn, 36);
+    });
+
+    test('con muchos grupos y rondas, la base pone el máximo', () {
+      final config = GameConfig(
+        wordSource: WordSource.random,
+        difficulty: Difficulty.mixed,
+        rounds: 10,
+        groups: List.filled(6, const Group('G')),
+      );
+      // 300 palabras / 60 turnos.
+      expect(config.maxWordsPerTurn, 5);
+      expect(config.limitedByStock, isTrue);
+      expect(config.suggestedWordsPerTurn, 5);
+      // Una sola dificultad tiene 100: aun así hay un mínimo por turno.
+      expect(
+        config.copyWith(difficulty: Difficulty.easy).maxWordsPerTurn,
+        GameConfig.minWordsPerTurn,
+      );
+    });
+
+    test('mezcladas trae de todas las dificultades', () {
+      expect(Difficulty.mixed.code, isNull);
+      expect(Difficulty.mixed.stock, 3 * Difficulty.easy.stock);
+    });
   });
 }

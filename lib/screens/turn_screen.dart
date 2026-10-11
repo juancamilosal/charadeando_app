@@ -85,7 +85,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     final game = ref.read(gameControllerProvider);
-    _deck = [...game.currentDeck];
+    _deck = [...game.currentTurnWords];
     _remaining = game.config.turnDuration;
     WakelockPlus.enable();
     _initCamera();
@@ -483,7 +483,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
             ),
             Text(
               '${game.config.roundLabel(game.round)} · '
-              '${WordCard.wordsLeftLabel(_wordsLeft(game))} en total',
+              '${game.config.perTurnDecks ? '${_deck.length} palabras en este turno' : '${WordCard.wordsLeftLabel(_wordsLeft(game))} en total'}',
               style: white,
             ),
             Text(
@@ -648,10 +648,12 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     );
   }
 
-  /// Palabras que faltan por adivinar en toda la partida: las de todos los
-  /// mazos menos las que ya se marcaron en este turno.
-  int _wordsLeft(GameState game) =>
-      game.decks.fold(0, (sum, deck) => sum + deck.length) - _entries.length;
+  /// Palabras que faltan: con palabras automáticas, las de este turno; con
+  /// las escritas por los grupos, las de toda la partida. Se restan las que
+  /// ya se marcaron en este turno.
+  int _wordsLeft(GameState game) => game.config.perTurnDecks
+      ? _deck.length - _entries.length
+      : game.decks.fold(0, (sum, deck) => sum + deck.length) - _entries.length;
 
   /// Lo que se ve en el televisor, con los botones del juez.
   Widget _tvView(GameState game) {

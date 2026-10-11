@@ -117,40 +117,35 @@ void main() {
     expect(find.textContaining('Nombre del grupo'), findsNWidgets(6));
   });
 
-  testWidgets('con palabras automáticas no pide escribirlas', (tester) async {
+  testWidgets('con palabras automáticas se eligen las palabras por turno', (
+    tester,
+  ) async {
     final container = await pumpConfig(
       tester,
       config: const GameConfig(wordSource: WordSource.random),
     );
     expect(find.textContaining('Recuerda: mientras más rondas'), findsNothing);
-    // Mientras no elijan la duración, no se pregunta cuántas palabras.
-    expect(find.text('Palabras de la partida'), findsNothing);
+    expect(find.text('¿Hasta cuándo juegan?'), findsNothing);
+    // 60 s por turno: se sugieren 12, una cada 5 segundos, sin selector.
+    expect(find.text('12 palabras por turno'), findsOneWidget);
+    expect(find.text('Palabras por turno'), findsNothing);
 
-    await tester.tap(find.text('Llenar automáticamente'));
-    await tester.pump();
-
-    final byRounds = find.text('Por número de rondas');
-    await tester.ensureVisible(byRounds);
-    await tester.pumpAndSettle();
-    await tester.tap(byRounds);
-    await tester.pump();
-    expect(find.text('Palabras de la partida'), findsNothing);
-    expect(find.text('Rondas'), findsOneWidget);
-
-    final untilEnd = find.text('Hasta que se acaben las palabras');
-    await tester.ensureVisible(untilEnd);
-    await tester.pumpAndSettle();
-    await tester.tap(untilEnd);
-    await tester.pump();
-    expect(find.text('Rondas'), findsNothing);
-    expect(find.text('Palabras de la partida'), findsOneWidget);
-    expect(
-      find.textContaining('Nosotros ponemos las palabras'),
-      findsOneWidget,
+    // Con más tiempo, el valor sugerido sube solo.
+    final time = find.ancestor(
+      of: find.text('Tiempo por turno'),
+      matching: find.byType(ConfigRow),
     );
+    final longer = find.descendant(of: time, matching: find.byIcon(Icons.add));
+    await tester.ensureVisible(longer);
+    await tester.pumpAndSettle();
+    await tester.tap(longer);
+    await tester.pump();
+    expect(find.text('15 palabras por turno'), findsOneWidget);
 
+    await tester.tap(find.text('Cambiar'));
+    await tester.pump();
     final row = find.ancestor(
-      of: find.text('Palabras de la partida'),
+      of: find.text('Palabras por turno'),
       matching: find.byType(ConfigRow),
     );
     int words() => tester
@@ -158,21 +153,69 @@ void main() {
           find.descendant(of: row, matching: find.byType(NumberStepper)),
         )
         .value;
-    final before = words();
+    expect(words(), 15);
+
+    // Si el usuario lo cambia, se respeta.
     final more = find.descendant(of: row, matching: find.byIcon(Icons.add));
     await tester.ensureVisible(more);
     await tester.pumpAndSettle();
     await tester.tap(more);
     await tester.pump();
-    final chosen = words();
-    expect(chosen, before + 5 > 100 ? 100 : before + 5);
+    expect(words(), 16);
+
+    await tester.scrollUntilVisible(
+      find.text('Llenar automáticamente'),
+      -200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Llenar automáticamente'));
+    await tester.pump();
+    // "Llenar automáticamente" vuelve al valor sugerido de su configuración.
+    final filled = words();
+    expect(filled, greaterThanOrEqualTo(GameConfig.minWordsPerTurn));
 
     await tapContinue(tester);
     expect(find.text('Descargando'), findsOneWidget);
     final config = container.read(gameControllerProvider).config;
     expect(config.wordSource, WordSource.random);
-    expect(config.autoWordCount, chosen);
-    expect(config.gameEnd, GameEnd.wordsRunOut);
+    expect(config.wordsPerTurn, filled);
+  });
+
+  testWidgets('con 6 grupos y 10 rondas avisa que la base pone el máximo', (
+    tester,
+  ) async {
+    await pumpConfig(
+      tester,
+      config: GameConfig(
+        wordSource: WordSource.random,
+        rounds: 10,
+        groups: List.filled(6, const Group('')),
+      ),
+    );
+    final note = find.text('Máximo 5 por turno para no repetir palabras.');
+    await tester.scrollUntilVisible(
+      note,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(note, findsOneWidget);
+  });
+
+  testWidgets('las palabras vienen mezcladas por defecto', (tester) async {
+    await pumpConfig(
+      tester,
+      config: const GameConfig(wordSource: WordSource.random),
+    );
+    final mixed = find.text(
+      'Fáciles, normales y difíciles: el doble de variedad.',
+    );
+    await tester.scrollUntilVisible(
+      mixed,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(mixed, findsOneWidget);
   });
 
   testWidgets('ninguna opción viene elegida, salvo el video', (tester) async {
@@ -187,14 +230,9 @@ void main() {
 
     expect(find.text('Descargando'), findsNothing);
     expect(
-      find.text(
-        'Elijan la dificultad, la duración del juego, la puntuación y cómo '
-        'se marcan los aciertos.',
-      ),
+      find.text('Elijan la puntuación y cómo se marcan los aciertos.'),
       findsOneWidget,
     );
-    expect(find.text('Elijan una opción'), findsWidgets);
-
     final noVideo = find.text('Jugar sin grabar');
     await tester.scrollUntilVisible(
       noVideo,
@@ -221,8 +259,12 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Ningún TV conectado todavía'), findsOneWidget);
-    expect(find.text('Cómo se marcan los aciertos'), findsOneWidget);
+    // El Modo TV va al final, después del video.
     expect(find.text('Resolución'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.text('Modo TV')).dy,
+      greaterThan(tester.getTopLeft(find.text('Resolución')).dy),
+    );
 
     tv.add(true);
     await tester.pumpAndSettle();
@@ -318,9 +360,7 @@ void main() {
     expect(find.text('Dificultad'), findsNothing);
   });
 
-  testWidgets('una categoría muestra su nombre en las palabras', (
-    tester,
-  ) async {
+  testWidgets('una categoría muestra su nombre en la partida', (tester) async {
     await pumpConfig(
       tester,
       config: const GameConfig(
@@ -328,17 +368,6 @@ void main() {
         category: GameCategory.animals,
       ),
     );
-    expect(find.text('Palabras: Animales'), findsNothing);
-    final untilEnd = find.text('Hasta que se acaben las palabras');
-    await tester.ensureVisible(untilEnd);
-    await tester.pumpAndSettle();
-    await tester.tap(untilEnd);
-    await tester.pump();
-    await tester.scrollUntilVisible(
-      find.text('Palabras: Animales'),
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    expect(find.text('Palabras: Animales'), findsOneWidget);
+    expect(find.text('Partida: Animales'), findsOneWidget);
   });
 }
