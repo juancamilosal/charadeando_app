@@ -17,9 +17,14 @@ class PlayModeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onBackdrop = context.onBackdrop;
     Widget option(bool value, String label) {
       final on = value == inGroups;
-      final color = on ? AppColors.purple : Colors.white;
+      final color = !on
+          ? onBackdrop
+          : context.backdrop.light
+          ? Colors.white
+          : AppColors.purple;
       return Expanded(
         child: Semantics(
           inMutuallyExclusiveGroup: true,
@@ -32,9 +37,9 @@ class PlayModeSelector extends StatelessWidget {
               curve: Curves.easeOut,
               padding: const EdgeInsets.symmetric(vertical: 10),
               decoration: BoxDecoration(
-                color: on ? Colors.white : Colors.transparent,
+                color: on ? onBackdrop : Colors.transparent,
                 borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: Colors.white, width: 2),
+                border: Border.all(color: onBackdrop, width: 2),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -84,8 +89,8 @@ class PlayModeSelector extends StatelessWidget {
               ? 'Cada grupo con su nombre y sus puntos.'
               : 'Solo salen las palabras: ustedes se organizan.',
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: onBackdrop,
             fontSize: 13,
             fontWeight: FontWeight.w700,
           ),

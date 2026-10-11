@@ -458,8 +458,8 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
             _Phase.playing =>
               game.config.tvMode ? _tvView(game) : _playingView(context, game),
             _Phase.paused => _pausedView(context),
-            _Phase.saving => const Center(
-              child: CircularProgressIndicator(color: Colors.white),
+            _Phase.saving => Center(
+              child: CircularProgressIndicator(color: context.onBackdrop),
             ),
           },
         ),
@@ -470,8 +470,8 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   Widget _readyView(BuildContext context, GameState game) {
     final controller = _camera.controller;
     final tvMissing = _watchTvMissing();
-    const white = TextStyle(
-      color: Colors.white,
+    final white = TextStyle(
+      color: context.onBackdrop,
       fontSize: 16,
       fontWeight: FontWeight.w700,
     );
@@ -488,18 +488,18 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
             Text(_readyLabel(game), style: white),
             Text(
               game.turnTitle,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: AppFonts.display,
                 fontSize: 34,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: context.onBackdrop,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Expanded(
               child: Center(
                 child: _cameraLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? CircularProgressIndicator(color: context.onBackdrop)
                     : controller != null && controller.value.isInitialized
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(24),
@@ -511,7 +511,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
                           Icon(
                             game.config.tvMode ? Icons.tv : Icons.videocam_off,
                             size: 72,
-                            color: Colors.white70,
+                            color: context.onBackdrop.withValues(alpha: 0.8),
                           ),
                           if (!_records)
                             Text(
@@ -519,7 +519,9 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
                                   ? 'Modo TV: sin video'
                                   : 'Jugando sin grabar',
                               style: TextStyle(
-                                color: Colors.white70,
+                                color: context.onBackdrop.withValues(
+                                  alpha: 0.8,
+                                ),
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -530,7 +532,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
             ),
             const SizedBox(height: 16),
             if (game.config.tvMode) ...[
-              const Text(
+              Text(
                 'El que adivina se pone de espaldas al televisor. Un juez '
                 'del grupo rival toma este celular y marca "Pasar" o '
                 '"¡Correcto!".',
@@ -539,7 +541,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
               const SizedBox(height: 12),
               const TvConnect(light: true),
             ] else
-              const Text(
+              Text(
                 'Al tocar "¡Listo!", la pantalla gira. Pon el celular en tu '
                 'frente con la pantalla hacia tu grupo.\n'
                 'Inclínalo hacia abajo si aciertas y hacia arriba para pasar.',

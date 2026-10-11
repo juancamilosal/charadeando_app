@@ -94,10 +94,10 @@ class CategoryIntroScreen extends ConsumerWidget {
     final custom = config.customCategory;
     // Una categoría propia usa el ejemplo general (Pizza, Jirafa…).
     final guide = custom != null
-        ? const _Guide('la palabra', 'todas las palabras', [])
+        ? _Guide('la palabra', 'todas las palabras', [])
         : _guides[category] ?? _guides[GameCategory.animals]!;
-    const white = TextStyle(
-      color: Colors.white,
+    final white = TextStyle(
+      color: context.onBackdrop,
       fontSize: 16,
       fontWeight: FontWeight.w700,
     );
@@ -111,7 +111,7 @@ class CategoryIntroScreen extends ConsumerWidget {
         body: SafeArea(
           top: false,
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+            padding: EdgeInsets.fromLTRB(20, 0, 20, 24),
             children: [
               Center(
                 child: custom != null
@@ -122,20 +122,20 @@ class CategoryIntroScreen extends ConsumerWidget {
                 Text(
                   custom.description,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white70,
+                  style: TextStyle(
+                    color: context.onBackdrop.withValues(alpha: 0.8),
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-              const Text(
+              Text(
                 '¿Cómo se juega?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: AppFonts.display,
                   fontSize: 32,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: context.onBackdrop,
                 ),
               ),
               const SizedBox(height: 6),

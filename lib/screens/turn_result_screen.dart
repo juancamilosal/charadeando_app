@@ -51,11 +51,11 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
     final game = ref.watch(gameControllerProvider);
     final video = ref.watch(turnVideoProvider);
     final turn = game.lastTurn;
-    if (turn == null) return const Scaffold();
+    if (turn == null) return Scaffold();
     final mode = game.config.scoringMode;
 
-    const white = TextStyle(
-      color: Colors.white,
+    final white = TextStyle(
+      color: context.onBackdrop,
       fontSize: 16,
       fontWeight: FontWeight.w700,
     );
@@ -79,11 +79,11 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
                               ? '${game.groups[turn.groupIndex].name}: '
                                     '+${turn.points(mode)} puntos'
                               : '+${turn.points(mode)} puntos',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: AppFonts.display,
                             fontSize: 30,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            color: context.onBackdrop,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -104,16 +104,16 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
                                   ],
                                 ),
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: 20),
                         Text(
                           game.inGroups
                               ? 'Puntajes'
                               : 'Total: ${game.totalScore} puntos',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: AppFonts.display,
                             fontSize: 24,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            color: context.onBackdrop,
                           ),
                         ),
                         // Sin grupos no hay tabla: solo el total.
@@ -128,16 +128,16 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   if (video.status != TurnVideoStatus.none) ...[
                     _VideoButton(video: video),
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6),
                     Text(
                       video.withWords
                           ? 'El video se borra al continuar. Si lo quieres, guárdalo antes.'
                           : 'No se pudieron escribir las palabras en este video. '
                                 'Se borra al continuar.',
-                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                      style: TextStyle(color: context.onBackdrop, fontSize: 13),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 10),
@@ -194,8 +194,8 @@ class _VideoButton extends StatelessWidget {
   Widget build(BuildContext context) {
     if (video.status == TurnVideoStatus.ready) {
       return OutlinedButton.icon(
-        icon: const Icon(Icons.play_circle_outline),
-        label: const Text('Ver video'),
+        icon: Icon(Icons.play_circle_outline),
+        label: Text('Ver video'),
         onPressed: () => context.push(Routes.video),
       );
     }
@@ -205,14 +205,17 @@ class _VideoButton extends StatelessWidget {
         dimension: 20,
         child: CircularProgressIndicator(
           strokeWidth: 3,
-          color: Colors.white,
+          color: context.onBackdrop,
           value: video.progress > 0 ? video.progress : null,
         ),
       ),
       label: Text('Preparando video… $percent%'),
       style: OutlinedButton.styleFrom(
-        disabledForegroundColor: Colors.white70,
-        side: const BorderSide(color: Colors.white54, width: 2),
+        disabledForegroundColor: context.onBackdrop.withValues(alpha: 0.8),
+        side: BorderSide(
+          color: context.onBackdrop.withValues(alpha: 0.55),
+          width: 2,
+        ),
       ),
       onPressed: null,
     );

@@ -159,13 +159,13 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
     final source = _source;
     final error = _showErrors ? _error : null;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+      padding: EdgeInsets.fromLTRB(20, 0, 20, 24),
       children: [
-        const Text(
+        Text(
           'Una ruleta de colores con castigos para el grupo que pierde. '
           'Al final de la partida la gira el grupo con menos puntos.',
           style: TextStyle(
-            color: Colors.white,
+            color: context.onBackdrop,
             fontSize: 16,
             fontWeight: FontWeight.w700,
           ),
@@ -295,25 +295,27 @@ class _PunishmentSpinScreenState extends ConsumerState<PunishmentSpinScreen> {
         backgroundColor: Colors.transparent,
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
                   '¡Ruleta de castigo para ${widget.groupName}!',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: AppFonts.display,
                     fontSize: 30,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    color: context.onBackdrop,
                   ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 Expanded(
                   child: punishments == null
-                      ? const Center(
-                          child: CircularProgressIndicator(color: Colors.white),
+                      ? Center(
+                          child: CircularProgressIndicator(
+                            color: context.onBackdrop,
+                          ),
                         )
                       : PunishmentRoulette(
                           punishments: punishments,

@@ -6,9 +6,16 @@ la cámara frontal graba a los participantes para revivir las risas.
 
 ## Versión 0.1
 
-- Diseño colorido con fondo de gradiente y las fuentes Fredoka y Nunito
-  (licencia OFL, en `assets/fonts`). Los colores no cambian con el modo oscuro
-  del celular.
+- Diseño colorido con las fuentes Fredoka y Nunito (licencia OFL, en
+  `assets/fonts`). Los colores no cambian con el modo oscuro del celular.
+- Fondos (botón de paleta arriba en Categorías): el usuario elige el fondo de
+  la app, de un solo color: Uva (viene elegido), Noche, Crema, Mostaza,
+  Coral o Turquesa. Cada uno trae su estilo de tarjetas: calcomanía (borde
+  blanco y sombra sólida) en Uva, Noche, Coral y Turquesa; blancas con el
+  borde y el título del color de la categoría en Crema; cómic (borde y
+  sombra oscuros) en Mostaza. En los fondos claros los textos y botones van
+  oscuros. Se guarda en el celular (`fondo.txt`) y se aplica en todas las
+  pantallas desde que abre la app.
 - Inicio: la bienvenida (los pasos del juego y "Listo") se muestra solo la
   primera vez que se abre la app; al tocar "Listo" queda guardado en el
   celular y las demás veces la app abre directo en Categorías. Categorías no

@@ -5,7 +5,8 @@ import '../theme.dart';
 import 'category_art.dart';
 
 /// Tarjeta de una categoría: el dibujo grande arriba, el nombre y una
-/// línea de texto debajo. Sirve para las categorías del juego y para las
+/// línea de texto debajo. Su estilo (calcomanía, blanca o cómic) depende
+/// del fondo elegido. Sirve para las categorías del juego y para las
 /// propias.
 class CategoryCard extends StatelessWidget {
   const CategoryCard({
@@ -96,90 +97,135 @@ class CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final onColor = color == AppColors.yellow ? AppColors.ink : Colors.white;
+    final style = context.backdrop.cards;
+    // En las tarjetas blancas, el dibujo y los textos van del color de la
+    // categoría.
+    final onColor = style == CardStyle.white
+        ? color
+        : color == AppColors.yellow
+        ? AppColors.ink
+        : Colors.white;
     final textScaler = MediaQuery.textScalerOf(context);
 
-    return Material(
-      color: color,
-      borderRadius: BorderRadius.circular(24),
-      child: InkWell(
+    final (border, shadow) = switch (style) {
+      CardStyle.sticker => (
+        Colors.white,
+        BoxShadow(
+          color: context.backdrop.light
+              ? const Color(0x33000000)
+              : const Color(0x66000000),
+          offset: const Offset(0, 6),
+        ),
+      ),
+      CardStyle.comic => (
+        AppColors.ink,
+        const BoxShadow(color: AppColors.ink, offset: Offset(4, 6)),
+      ),
+      CardStyle.white => (
+        color,
+        const BoxShadow(
+          color: Color(0x22000000),
+          blurRadius: 10,
+          offset: Offset(0, 4),
+        ),
+      ),
+    };
+    // Container (no DecoratedBox) para que el borde no quede debajo de la
+    // tarjeta.
+    return Container(
+      decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        onTap: onTap,
-        onLongPress: onLongPress,
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: LayoutBuilder(
-                // El dibujo y los textos crecen con la tarjeta, para que se
-                // vean igual en celulares angostos y anchos.
-                builder: (context, box) {
-                  final w = box.maxWidth;
-                  final titleStyle = TextStyle(
-                    fontFamily: AppFonts.display,
-                    height: 1.1,
-                    fontWeight: FontWeight.w600,
-                    color: onColor,
-                  );
-                  // Nunca se parte una palabra: si no cabe, se achica la
-                  // letra; como último recurso, se corta con "…".
-                  final titleSize = fitTitleSize(
-                    title,
-                    titleStyle,
-                    width: w,
-                    maxSize: w * 0.18,
-                    minSize: w * 0.1,
-                    textScaler: textScaler,
-                  );
-                  // La columna ocupa todo el ancho: con textos cortos
-                  // quedaba angosta y pegada a la izquierda.
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        // Si los textos ocupan más (letra grande en el
-                        // celular), el dibujo se achica para caber.
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: art(w * 0.75, onColor),
+        border: Border.all(color: border, width: 3),
+        boxShadow: [shadow],
+      ),
+      child: Material(
+        color: style == CardStyle.white ? Colors.white : color,
+        borderRadius: BorderRadius.circular(21),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(21),
+          onTap: onTap,
+          onLongPress: onLongPress,
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: LayoutBuilder(
+                  // El dibujo y los textos crecen con la tarjeta, para que se
+                  // vean igual en celulares angostos y anchos.
+                  builder: (context, box) {
+                    final w = box.maxWidth;
+                    // Con el estilo que hereda (por ejemplo, el espacio
+                    // entre letras del tema), para medirlo igual que se
+                    // dibuja.
+                    final titleStyle = DefaultTextStyle.of(context).style.merge(
+                      TextStyle(
+                        fontFamily: AppFonts.display,
+                        height: 1.1,
+                        fontWeight: FontWeight.w600,
+                        color: onColor,
+                      ),
+                    );
+                    // Nunca se parte una palabra: si no cabe, se achica la
+                    // letra; como último recurso, se corta con "…".
+                    final titleSize = fitTitleSize(
+                      title,
+                      titleStyle,
+                      width: w,
+                      maxSize: w * 0.18,
+                      minSize: w * 0.1,
+                      textScaler: textScaler,
+                    );
+                    // La columna ocupa todo el ancho: con textos cortos
+                    // quedaba angosta y pegada a la izquierda.
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          // Si los textos ocupan más (letra grande en el
+                          // celular), el dibujo se achica para caber.
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: art(w * 0.75, onColor),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                        style: titleStyle.copyWith(fontSize: titleSize),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: w * 0.105,
-                          fontWeight: FontWeight.w700,
-                          color: onColor.withValues(alpha: 0.85),
+                        const SizedBox(height: 8),
+                        Text(
+                          title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: titleStyle.copyWith(fontSize: titleSize),
                         ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-            if (onMenu != null)
-              Positioned(
-                top: 4,
-                right: 4,
-                child: IconButton(
-                  icon: Icon(Icons.more_vert, color: onColor),
-                  tooltip: 'Opciones',
-                  onPressed: onMenu,
+                        const SizedBox(height: 4),
+                        Text(
+                          subtitle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: w * 0.105,
+                            fontWeight: FontWeight.w700,
+                            color: onColor.withValues(alpha: 0.85),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
-          ],
+              if (onMenu != null)
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: IconButton(
+                    icon: Icon(Icons.more_vert, color: onColor),
+                    tooltip: 'Opciones',
+                    onPressed: onMenu,
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

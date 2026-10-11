@@ -74,29 +74,29 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
                             Shadow(color: Colors.black26, blurRadius: 12),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         Text(
                           title,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: AppFonts.display,
                             fontSize: 36,
                             fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                            color: context.onBackdrop,
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        SizedBox(height: 24),
                         if (game.inGroups)
                           Scoreboard(groups: game.groups, scores: game.scores)
                         else
                           Text(
                             '${game.totalScore} puntos en total',
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: AppFonts.display,
                               fontSize: 28,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              color: context.onBackdrop,
                             ),
                           ),
                         if (_punished < losers.length) ...[

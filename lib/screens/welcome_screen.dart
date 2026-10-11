@@ -65,19 +65,19 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 ScaleTransition(
                   scale: Tween(begin: 0.96, end: 1.04).animate(
                     CurvedAnimation(parent: _pulse, curve: Curves.easeInOut),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Charadeando',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: AppFonts.display,
                       fontSize: 52,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      color: context.onBackdrop,
                       shadows: [
                         Shadow(
                           color: Colors.black26,
@@ -88,11 +88,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
                     ),
                   ),
                 ),
-                const Text(
+                Text(
                   'El juego de charadas que graba tus risas',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: context.onBackdrop,
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
                   ),

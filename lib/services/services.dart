@@ -17,3 +17,4 @@ export 'custom_category_store.dart';
 export 'welcome_store.dart';
 export 'video_gallery.dart';
 export 'my_videos_store.dart';
+export 'backdrop_store.dart';

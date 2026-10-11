@@ -121,21 +121,23 @@ class MyVideosScreen extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
             children: [
               const _PrivacyNote(),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               ...switch (data) {
                 AsyncData(:final value) => _content(context, ref, value),
                 AsyncError() => [
-                  const _Message(
+                  _Message(
                     icon: Icons.error_outline,
                     title: 'No se pudieron cargar tus videos',
                     text: 'Cierra esta sección y vuelve a abrirla.',
                   ),
                 ],
                 _ => [
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.all(40),
                     child: Center(
-                      child: CircularProgressIndicator(color: Colors.white),
+                      child: CircularProgressIndicator(
+                        color: context.onBackdrop,
+                      ),
                     ),
                   ),
                 ],
@@ -186,7 +188,7 @@ class MyVideosScreen extends ConsumerWidget {
           onTap: () => context.push(Routes.myVideo, extra: video),
           onDelete: () => deleteSavedVideo(context, ref, video),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
       ],
     ];
   }
@@ -197,16 +199,16 @@ class _PrivacyNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    return Row(
       children: [
-        Icon(Icons.lock_outline, color: Colors.white, size: 20),
+        Icon(Icons.lock_outline, color: context.onBackdrop, size: 20),
         SizedBox(width: 8),
         Expanded(
           child: Text(
             'Tus videos se guardan solo en este celular. No los subimos a '
             'ningún lado.',
             style: TextStyle(
-              color: Colors.white,
+              color: context.onBackdrop,
               fontSize: 14,
               fontWeight: FontWeight.w700,
             ),
@@ -227,26 +229,29 @@ class _Message extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 32),
+      padding: EdgeInsets.symmetric(vertical: 32),
       child: Column(
         children: [
-          Icon(icon, size: 72, color: Colors.white),
-          const SizedBox(height: 12),
+          Icon(icon, size: 72, color: context.onBackdrop),
+          SizedBox(height: 12),
           Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppFonts.display,
               fontSize: 24,
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color: context.onBackdrop,
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Text(
             text,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white70, fontSize: 15),
+            style: TextStyle(
+              color: context.onBackdrop.withValues(alpha: 0.8),
+              fontSize: 15,
+            ),
           ),
         ],
       ),

@@ -41,11 +41,11 @@ class _CategoryTickerState extends State<CategoryTicker> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text(
+        Text(
           '¡También puedes jugar por categorías!',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.white,
+            color: context.onBackdrop,
             fontSize: 16,
             fontWeight: FontWeight.w700,
           ),

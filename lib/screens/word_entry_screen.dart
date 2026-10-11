@@ -155,14 +155,14 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
   }) {
     final enough = _words.length >= required;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+      padding: EdgeInsets.fromLTRB(20, 8, 20, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             message,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: context.onBackdrop,
               fontSize: 17,
               fontWeight: FontWeight.w700,
             ),
@@ -280,31 +280,31 @@ class _HandoffView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Spacer(),
-          const Icon(Icons.edit_note, size: 96, color: AppColors.yellow),
-          const SizedBox(height: 12),
+          Spacer(),
+          Icon(Icons.edit_note, size: 96, color: AppColors.yellow),
+          SizedBox(height: 12),
           Text(
             'Le toca escribir a $author',
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppFonts.display,
               fontSize: 32,
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color: context.onBackdrop,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(
             single
                 ? '¡Que $rivals no mire la pantalla!'
                 : '¡Que $rivals no miren la pantalla!',
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: context.onBackdrop,
               fontSize: 18,
               fontWeight: FontWeight.w700,
             ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'models/backdrop.dart';
+
 /// Paleta del juego. La app siempre usa estos colores, aunque el celular
 /// esté en modo oscuro.
 abstract final class AppColors {
@@ -20,9 +22,6 @@ abstract final class AppColors {
   /// Morado oscuro para textos sobre fondos claros.
   static const ink = Color(0xFF2B0A57);
 
-  /// Fondo de las pantallas.
-  static const background = [Color(0xFF7B2FF7), Color(0xFFC21FD6), pink];
-
   /// Fondo de la palabra durante el turno.
   static const word = [blue, turquoise];
 
@@ -38,7 +37,34 @@ abstract final class AppFonts {
   static const body = 'Nunito';
 }
 
-ThemeData buildAppTheme() {
+/// El fondo elegido, para que cualquier pantalla sepa de qué color van los
+/// textos sobre él y cómo se ven las tarjetas.
+class BackdropTheme extends ThemeExtension<BackdropTheme> {
+  const BackdropTheme(this.backdrop);
+
+  final Backdrop backdrop;
+
+  @override
+  BackdropTheme copyWith({Backdrop? backdrop}) =>
+      BackdropTheme(backdrop ?? this.backdrop);
+
+  @override
+  BackdropTheme lerp(BackdropTheme? other, double t) =>
+      t < 0.5 || other == null ? this : other;
+}
+
+extension BackdropContext on BuildContext {
+  /// El fondo elegido. Sin tema (en algunas pruebas), el que viene elegido.
+  Backdrop get backdrop =>
+      Theme.of(this).extension<BackdropTheme>()?.backdrop ?? Backdrop.standard;
+
+  /// Color de los textos y los íconos que van directo sobre el fondo.
+  Color get onBackdrop => backdrop.onColor;
+}
+
+ThemeData buildAppTheme([Backdrop backdrop = Backdrop.standard]) {
+  final on = backdrop.onColor;
+  final light = backdrop.light;
   final scheme = ColorScheme.fromSeed(seedColor: AppColors.purple).copyWith(
     primary: AppColors.purple,
     onPrimary: Colors.white,
@@ -67,27 +93,35 @@ ThemeData buildAppTheme() {
   final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(20));
 
   return base.copyWith(
-    scaffoldBackgroundColor: AppColors.purple,
+    scaffoldBackgroundColor: backdrop.color,
     textTheme: text,
-    appBarTheme: const AppBarTheme(
+    extensions: [BackdropTheme(backdrop)],
+    appBarTheme: AppBarTheme(
       backgroundColor: Colors.transparent,
-      foregroundColor: Colors.white,
+      foregroundColor: on,
       elevation: 0,
       scrolledUnderElevation: 0,
-      systemOverlayStyle: SystemUiOverlayStyle.light,
+      systemOverlayStyle: light
+          ? SystemUiOverlayStyle.dark
+          : SystemUiOverlayStyle.light,
       titleTextStyle: TextStyle(
         fontFamily: AppFonts.display,
         fontSize: 26,
         fontWeight: FontWeight.w600,
-        color: Colors.white,
+        color: on,
       ),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        backgroundColor: AppColors.yellow,
-        foregroundColor: AppColors.ink,
-        disabledBackgroundColor: Colors.white24,
-        disabledForegroundColor: Colors.white70,
+        // Sobre el fondo mostaza el botón amarillo no se vería.
+        backgroundColor: backdrop == Backdrop.mostaza
+            ? AppColors.ink
+            : AppColors.yellow,
+        foregroundColor: backdrop == Backdrop.mostaza
+            ? Colors.white
+            : AppColors.ink,
+        disabledBackgroundColor: light ? Colors.black12 : Colors.white24,
+        disabledForegroundColor: light ? Colors.black38 : Colors.white70,
         minimumSize: const Size.fromHeight(56),
         shape: shape,
         textStyle: const TextStyle(
@@ -99,8 +133,8 @@ ThemeData buildAppTheme() {
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        foregroundColor: Colors.white,
-        side: const BorderSide(color: Colors.white, width: 2),
+        foregroundColor: on,
+        side: BorderSide(color: on, width: 2),
         minimumSize: const Size.fromHeight(52),
         shape: shape,
         textStyle: const TextStyle(
@@ -112,7 +146,7 @@ ThemeData buildAppTheme() {
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        foregroundColor: Colors.white,
+        foregroundColor: on,
         textStyle: const TextStyle(
           fontFamily: AppFonts.body,
           fontSize: 16,

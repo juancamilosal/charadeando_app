@@ -47,6 +47,7 @@ class CategoryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final data = ref.watch(customCategoriesProvider);
     final tab = data.value?.tab ?? CategoryTab.all;
+    final onBackdrop = context.onBackdrop;
     return PlayBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -55,6 +56,11 @@ class CategoryScreen extends ConsumerWidget {
           // Es la primera pantalla: no hay a dónde volver.
           automaticallyImplyLeading: false,
           actions: [
+            IconButton(
+              icon: const Icon(Icons.palette_outlined),
+              tooltip: 'Fondos',
+              onPressed: () => context.push(Routes.backdrops),
+            ),
             IconButton(
               icon: const Icon(Icons.video_library_outlined),
               tooltip: 'Mis videos',
@@ -74,11 +80,11 @@ class CategoryScreen extends ConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
               children: [
-                const Text(
+                Text(
                   '¿Con qué palabras quieren jugar?',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: onBackdrop,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                   ),
@@ -132,12 +138,12 @@ class CategoryScreen extends ConsumerWidget {
           },
         ),
         const SizedBox(height: 24),
-        const Text(
+        Text(
           'Categorías',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: AppFonts.display,
-            color: Colors.white,
+            color: context.onBackdrop,
             fontSize: 38,
             fontWeight: FontWeight.w600,
           ),
@@ -182,9 +188,14 @@ class CategoryTabSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onBackdrop = context.onBackdrop;
     Widget option(CategoryTab tab, String label, IconData? icon) {
       final on = tab == selected;
-      final color = on ? AppColors.purple : Colors.white;
+      final color = !on
+          ? onBackdrop
+          : context.backdrop.light
+          ? Colors.white
+          : AppColors.purple;
       return Expanded(
         child: Semantics(
           button: true,
@@ -197,9 +208,9 @@ class CategoryTabSelector extends StatelessWidget {
               curve: Curves.easeOut,
               padding: const EdgeInsets.symmetric(vertical: 10),
               decoration: BoxDecoration(
-                color: on ? Colors.white : Colors.transparent,
+                color: on ? onBackdrop : Colors.transparent,
                 borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: Colors.white, width: 2),
+                border: Border.all(color: onBackdrop, width: 2),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -365,10 +376,11 @@ class _MyCategories extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final categories = data.value?.categories;
+    final onBackdrop = context.onBackdrop;
     if (categories == null) {
-      return const Padding(
-        padding: EdgeInsets.all(32),
-        child: Center(child: CircularProgressIndicator(color: Colors.white)),
+      return Padding(
+        padding: const EdgeInsets.all(32),
+        child: Center(child: CircularProgressIndicator(color: onBackdrop)),
       );
     }
     if (categories.isEmpty) {
@@ -378,21 +390,24 @@ class _MyCategories extends ConsumerWidget {
           const SizedBox(height: 12),
           const Icon(Icons.auto_awesome, size: 64, color: AppColors.yellow),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Crea una categoría con las palabras de tu familia o tus amigos',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white,
+              color: onBackdrop,
               fontSize: 20,
               fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             '"Mi familia", "La oficina", "Viaje a Cartagena"… Se guarda solo '
             'en este celular y se juega sin internet.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white70, fontSize: 15),
+            style: TextStyle(
+              color: onBackdrop.withValues(alpha: 0.8),
+              fontSize: 15,
+            ),
           ),
           const SizedBox(height: 20),
           FilledButton.icon(
@@ -424,22 +439,23 @@ class _NewCategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onBackdrop = context.onBackdrop;
     return Material(
-      color: Colors.white.withValues(alpha: 0.16),
+      color: onBackdrop.withValues(alpha: 0.12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
-        side: const BorderSide(color: Colors.white, width: 2),
+        side: BorderSide(color: onBackdrop, width: 2),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(24),
         onTap: onTap,
-        child: const Padding(
-          padding: EdgeInsets.all(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.add_circle, size: 64, color: Colors.white),
-              SizedBox(height: 10),
+              Icon(Icons.add_circle, size: 64, color: onBackdrop),
+              const SizedBox(height: 10),
               Text(
                 'Nueva categoría',
                 textAlign: TextAlign.center,
@@ -448,7 +464,7 @@ class _NewCategoryCard extends StatelessWidget {
                   fontSize: 22,
                   height: 1.1,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: onBackdrop,
                 ),
               ),
             ],

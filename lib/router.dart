@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 
 import 'models/models.dart';
 import 'screens/auto_words_screen.dart';
+import 'screens/backdrop_screen.dart';
 import 'screens/category_intro_screen.dart';
 import 'screens/category_screen.dart';
 import 'screens/config_screen.dart';
@@ -39,6 +40,9 @@ abstract final class Routes {
   /// Crear o editar una categoría propia. Para editar recibe la categoría
   /// como `extra`.
   static const customCategory = '/mis-categorias';
+
+  /// Elegir el fondo de la app.
+  static const backdrops = '/fondos';
 
   /// "Mis videos" y ver uno de ellos, que recibe el video como `extra`.
   static const myVideos = '/mis-videos';
@@ -87,6 +91,7 @@ GoRouter createRouter({required bool Function() welcomeSeen}) => GoRouter(
       builder: (_, state) =>
           CustomCategoryScreen(category: state.extra as CustomCategory?),
     ),
+    GoRoute(path: Routes.backdrops, builder: (_, _) => const BackdropScreen()),
     GoRoute(path: Routes.myVideos, builder: (_, _) => const MyVideosScreen()),
     GoRoute(
       path: Routes.myVideo,

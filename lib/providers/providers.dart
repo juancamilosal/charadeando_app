@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/models.dart';
 import '../services/services.dart';
 import 'custom_categories_controller.dart';
 import 'my_videos_controller.dart';
@@ -22,6 +23,30 @@ final punishmentStoreProvider = Provider((ref) => PunishmentStore());
 final configStoreProvider = Provider((ref) => ConfigStore());
 final customCategoryStoreProvider = Provider((ref) => CustomCategoryStore());
 final welcomeStoreProvider = Provider((ref) => WelcomeStore());
+final backdropStoreProvider = Provider((ref) => BackdropStore());
+
+/// El fondo de la app. `main` lo lee del celular antes de abrir la app,
+/// para que se vea el elegido desde la primera pantalla.
+final backdropProvider = NotifierProvider<BackdropController, Backdrop>(
+  BackdropController.new,
+);
+
+class BackdropController extends Notifier<Backdrop> {
+  BackdropController([this._initial = Backdrop.standard]);
+
+  final Backdrop _initial;
+
+  @override
+  Backdrop build() => _initial;
+
+  /// Cambia el fondo de toda la app y lo guarda en el celular.
+  void select(Backdrop backdrop) {
+    if (backdrop == state) return;
+    state = backdrop;
+    ref.read(backdropStoreProvider).save(backdrop).ignore();
+  }
+}
+
 final videoGalleryProvider = Provider((ref) => VideoGallery());
 final myVideosStoreProvider = Provider((ref) => MyVideosStore());
 

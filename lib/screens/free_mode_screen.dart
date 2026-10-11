@@ -41,8 +41,8 @@ class FreeModeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final config = ref.watch(gameControllerProvider).config;
-    const white = TextStyle(
-      color: Colors.white,
+    final white = TextStyle(
+      color: context.onBackdrop,
       fontSize: 16,
       fontWeight: FontWeight.w700,
     );
@@ -56,23 +56,23 @@ class FreeModeScreen extends ConsumerWidget {
         body: SafeArea(
           top: false,
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+            padding: EdgeInsets.fromLTRB(20, 0, 20, 24),
             children: [
-              const Center(
+              Center(
                 child: CategoryArt(category: GameCategory.free, size: 120),
               ),
-              const Text(
+              Text(
                 '¿Cómo se juega?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: AppFonts.display,
                   fontSize: 32,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: context.onBackdrop,
                 ),
               ),
               const SizedBox(height: 6),
-              const Text(
+              Text(
                 'Una persona se pone el celular en la frente y su grupo le '
                 'describe la palabra sin decirla. ¡Adivinen todas las que '
                 'puedan antes de que se acabe el tiempo!',
@@ -96,18 +96,18 @@ class FreeModeScreen extends ConsumerWidget {
                     .read(gameControllerProvider.notifier)
                     .configure(config.copyWith(inGroups: v)),
               ),
-              const SizedBox(height: 24),
-              const Text(
+              SizedBox(height: 24),
+              Text(
                 'Elige el tipo de juego',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: AppFonts.display,
                   fontSize: 28,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: context.onBackdrop,
                 ),
               ),
-              const Text(
+              Text(
                 '¿De dónde saldrán las palabras de la partida?',
                 textAlign: TextAlign.center,
                 style: white,
@@ -133,17 +133,20 @@ class FreeModeScreen extends ConsumerWidget {
                 onTap: () => _choose(context, ref, WordSource.random),
               ),
               if (TestData.enabled) ...[
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 OutlinedButton.icon(
-                  icon: const Icon(Icons.science),
-                  label: const Text('Ingresar valores de prueba'),
+                  icon: Icon(Icons.science),
+                  label: Text('Ingresar valores de prueba'),
                   onPressed: () => _testValues(context, ref),
                 ),
-                const SizedBox(height: 4),
-                const Text(
+                SizedBox(height: 4),
+                Text(
                   '2 grupos, 2 rondas de 60 s y 10 palabras por grupo.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white70, fontSize: 13),
+                  style: TextStyle(
+                    color: context.onBackdrop.withValues(alpha: 0.8),
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ],

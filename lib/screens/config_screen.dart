@@ -6,6 +6,7 @@ import '../models/models.dart';
 import '../providers/providers.dart';
 import '../router.dart';
 import '../services/services.dart';
+import '../theme.dart';
 import '../widgets/config_section.dart';
 import '../widgets/number_stepper.dart';
 import '../widgets/option_selector.dart';
@@ -262,11 +263,11 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
             children: [
               OutlinedButton.icon(
-                icon: const Icon(Icons.auto_awesome),
-                label: const Text('Configuración aleatoria'),
+                icon: Icon(Icons.auto_awesome),
+                label: Text('Configuración aleatoria'),
                 onPressed: _autoFill,
               ),
-              const SizedBox(height: 6),
+              SizedBox(height: 6),
               Text(
                 _inGroups
                     ? 'El juego pone los nombres de los grupos y elige la '
@@ -275,8 +276,8 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                     : 'El juego elige la configuración por ti. Tócalo otra '
                           'vez para cambiarla.',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: context.onBackdrop,
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),

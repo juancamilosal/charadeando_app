@@ -387,24 +387,24 @@ class _WordRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 6, top: 4, bottom: 4),
+      padding: EdgeInsets.only(left: 6, top: 4, bottom: 4),
       child: Row(
         children: [
           Expanded(
             child: Text(
               word,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: AppFonts.display,
                 fontSize: 26,
                 height: 1.15,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: context.onBackdrop,
               ),
             ),
           ),
           IconButton(
             tooltip: 'Borrar "$word"',
-            icon: const Icon(Icons.close, size: 30, color: Colors.white),
+            icon: Icon(Icons.close, size: 30, color: context.onBackdrop),
             onPressed: onDelete,
           ),
         ],

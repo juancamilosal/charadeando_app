@@ -106,7 +106,7 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
         body: SafeArea(
           top: false,
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(24),
             child: Center(child: _content()),
           ),
         ),
@@ -119,16 +119,16 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const CircularProgressIndicator(color: Colors.white),
-          const SizedBox(height: 20),
-          const Text(
+          CircularProgressIndicator(color: context.onBackdrop),
+          SizedBox(height: 20),
+          Text(
             'Buscando palabras…',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: AppFonts.display,
               fontSize: 26,
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color: context.onBackdrop,
             ),
           ),
         ],

@@ -29,7 +29,7 @@ class _CharadeandoAppState extends ConsumerState<CharadeandoApp> {
     return MaterialApp.router(
       title: 'Charadeando',
       debugShowCheckedModeBanner: false,
-      theme: buildAppTheme(),
+      theme: buildAppTheme(ref.watch(backdropProvider)),
       // Los colores del juego no cambian con el modo oscuro del celular.
       themeMode: ThemeMode.light,
       routerConfig: _router,

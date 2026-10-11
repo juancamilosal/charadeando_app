@@ -8,3 +8,4 @@ export 'word.dart';
 export 'punishment.dart';
 export 'custom_category.dart';
 export 'saved_video.dart';
+export 'backdrop.dart';

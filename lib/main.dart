@@ -10,13 +10,15 @@ Future<void> main() async {
   await ScreenOrientation.portrait();
   // Borra videos de partidas que se cerraron a la mitad.
   VideoService().deleteAll().ignore();
-  // Se lee antes de abrir la app para no mostrar la bienvenida ni por un
-  // instante a quien ya la vio.
+  // Se leen antes de abrir la app para no mostrar la bienvenida ni por un
+  // instante a quien ya la vio, ni otro fondo que el elegido.
   final welcomeSeen = await WelcomeStore().seen();
+  final backdrop = await BackdropStore().load();
   runApp(
     ProviderScope(
       overrides: [
         welcomeSeenProvider.overrideWith(() => WelcomeSeen(welcomeSeen)),
+        backdropProvider.overrideWith(() => BackdropController(backdrop)),
       ],
       child: const CharadeandoApp(),
     ),
