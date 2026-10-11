@@ -177,7 +177,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
             onPressed: () => context.go(
               _config.category == GameCategory.free
                   ? Routes.freeMode
-                  : Routes.categories,
+                  : Routes.categoryIntro,
             ),
           ),
         ),

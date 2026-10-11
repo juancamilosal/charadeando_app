@@ -5,11 +5,25 @@ import 'package:flutter/material.dart';
 
 import '../theme.dart';
 
+/// Una palabra del ejemplo: la palabra, tres pistas y el intento de quien
+/// adivina.
+typedef DemoRound = (String word, List<String> clues, String guess);
+
 /// Animación de cómo se juega: una persona tiene el celular en la frente,
 /// su grupo le describe la palabra secreta sin decirla y, cuando acierta,
 /// inclina el celular y sale la siguiente palabra.
 class HowToPlayDemo extends StatefulWidget {
-  const HowToPlayDemo({super.key});
+  const HowToPlayDemo({super.key, this.rounds = defaultRounds});
+
+  /// Palabras del ejemplo de Libre.
+  static const defaultRounds = <DemoRound>[
+    ('PIZZA', ['¡Es redonda!', '¡Tiene queso!', '¡Es italiana!'], '¿Pizza?'),
+    ('GATO', ['¡Dice miau!', '¡Tiene bigotes!', '¡Es mascota!'], '¿Gato?'),
+    ('FÚTBOL', ['¡Hay un balón!', '¡Once jugadores!', '¡Goool!'], '¿Fútbol?'),
+  ];
+
+  /// Palabras que se muestran, una tras otra.
+  final List<DemoRound> rounds;
 
   @override
   State<HowToPlayDemo> createState() => _HowToPlayDemoState();
@@ -17,12 +31,8 @@ class HowToPlayDemo extends StatefulWidget {
 
 class _HowToPlayDemoState extends State<HowToPlayDemo>
     with SingleTickerProviderStateMixin {
-  /// Palabras del ejemplo, con tres pistas y el intento de quien adivina.
-  static const _rounds = [
-    ('PIZZA', ['¡Es redonda!', '¡Tiene queso!', '¡Es italiana!'], '¿Pizza?'),
-    ('GATO', ['¡Dice miau!', '¡Tiene bigotes!', '¡Es mascota!'], '¿Gato?'),
-    ('FÚTBOL', ['¡Hay un balón!', '¡Once jugadores!', '¡Goool!'], '¿Fútbol?'),
-  ];
+  List<DemoRound> get _rounds => widget.rounds;
+
   static const _people = [
     AppColors.purple,
     AppColors.turquoise,

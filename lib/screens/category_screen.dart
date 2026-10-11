@@ -9,8 +9,9 @@ import '../theme.dart';
 import '../widgets/play_background.dart';
 
 /// Elección de la categoría. "Libre" explica el juego y deja elegir entre
-/// palabras manuales y automáticas; las demás van directo a la
-/// configuración con palabras automáticas de su categoría.
+/// palabras manuales y automáticas; las demás explican el juego con
+/// ejemplos de su categoría y siguen a la configuración con palabras
+/// automáticas.
 class CategoryScreen extends ConsumerWidget {
   const CategoryScreen({super.key});
 
@@ -25,7 +26,7 @@ class CategoryScreen extends ConsumerWidget {
     controller.configure(
       config.copyWith(category: category, wordSource: WordSource.random),
     );
-    context.go(Routes.config);
+    context.go(Routes.categoryIntro);
   }
 
   @override

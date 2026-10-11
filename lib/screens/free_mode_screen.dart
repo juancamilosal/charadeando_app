@@ -9,6 +9,7 @@ import '../services/services.dart';
 import '../theme.dart';
 import '../widgets/how_to_play_demo.dart';
 import '../widgets/play_background.dart';
+import '../widgets/step_card.dart';
 
 /// Presentación de la categoría Libre: cómo se juega y de dónde salen las
 /// palabras.
@@ -107,7 +108,7 @@ class FreeModeScreen extends ConsumerWidget {
                 childAspectRatio: 1.1,
                 children: [
                   for (var i = 0; i < _steps.length; i++)
-                    _StepCard(
+                    StepCard(
                       number: i + 1,
                       icon: _steps[i].$1,
                       color: _steps[i].$2,
@@ -175,49 +176,6 @@ class FreeModeScreen extends ConsumerWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _StepCard extends StatelessWidget {
-  const _StepCard({
-    required this.number,
-    required this.icon,
-    required this.color,
-    required this.text,
-  });
-
-  final int number;
-  final IconData icon;
-  final Color color;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return PlayPanel(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: color, size: 30),
-          const SizedBox(height: 6),
-          Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: '$number. ',
-                  style: const TextStyle(fontWeight: FontWeight.w800),
-                ),
-                TextSpan(text: text),
-              ],
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-          ),
-        ],
       ),
     );
   }

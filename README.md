@@ -12,8 +12,9 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Pantalla de categorías: Libre, Animales, Geografía, Películas,
   Celebridades, Marcas, Deportes y Equipos de fútbol. Libre deja elegir entre
   palabras manuales (las escriben los grupos) y automáticas (frases de la
-  categoría LIBRE); las demás van directo a la configuración con palabras
-  automáticas de su categoría.
+  categoría LIBRE); las demás muestran su propio "¿Cómo se juega?" (una
+  animación con palabras de la categoría y los pasos) y siguen a la
+  configuración con palabras automáticas de su categoría.
 - Dificultad (Fácil, Normal o Difícil): se elige en la configuración de las
   palabras automáticas, en Libre y en todas las categorías, y solo se traen
   palabras de esa dificultad. Las palabras manuales no tienen dificultad.
