@@ -18,7 +18,7 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Cada categoría puede tener un dibujo animado (GIF de 256 px en
   `assets/img/categorias/`, con el nombre de la categoría) que se ve en su
   tarjeta y en su "¿Cómo se juega?". Ya lo tienen Animales, Geografía,
-  Películas y Celebridades; las demás muestran su ícono mientras tanto.
+  Películas, Celebridades y Marcas; las demás muestran su ícono mientras tanto.
 - Dificultad: Mezcladas (viene elegida: trae de todas, 300 palabras por
   categoría), Fácil (ideal con niños), Normal o Difícil (100 cada una). Se
   elige en la configuración de las palabras automáticas, en Libre y en todas
