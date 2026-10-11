@@ -283,8 +283,7 @@ class _AccessCard extends StatelessWidget {
   }
 }
 
-/// Un video de la lista: la miniatura grande arriba y, debajo, el grupo y
-/// los puntos, la categoría, la fecha y los puntajes.
+/// Un video de la lista: miniatura, grupo y puntos, categoría y fecha.
 class _VideoCard extends ConsumerWidget {
   const _VideoCard({
     required this.video,
@@ -306,72 +305,73 @@ class _VideoCard extends ConsumerWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  thumbnail != null
-                      ? Image.memory(thumbnail, fit: BoxFit.cover)
-                      : const ColoredBox(color: AppColors.indigo),
-                  const Center(
-                    child: Icon(
-                      Icons.play_circle_fill,
-                      color: Colors.white,
-                      size: 52,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 10, 4, 12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          video.title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: AppFonts.display,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.ink,
-                          ),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: SizedBox(
+                  width: 112,
+                  height: 63,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      thumbnail != null
+                          ? Image.memory(thumbnail, fit: BoxFit.cover)
+                          : const ColoredBox(color: AppColors.indigo),
+                      const Center(
+                        child: Icon(
+                          Icons.play_circle_fill,
+                          color: Colors.white,
+                          size: 30,
                         ),
-                        Text(
-                          '${video.category} · Ronda ${video.round}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.ink,
-                          ),
-                        ),
-                        Text(formatVideoDate(video.savedAt), style: muted),
-                        if (video.scoreLine.isNotEmpty)
-                          Text(video.scoreLine, style: muted),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  IconButton(
-                    tooltip: 'Borrar',
-                    icon: const Icon(
-                      Icons.delete_outline,
-                      color: AppColors.ink,
-                    ),
-                    onPressed: onDelete,
-                  ),
-                ],
+                ),
               ),
-            ),
-          ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      video.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: AppFonts.display,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.ink,
+                      ),
+                    ),
+                    Text(
+                      '${video.category} · Ronda ${video.round}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.ink,
+                      ),
+                    ),
+                    Text(formatVideoDate(video.savedAt), style: muted),
+                    if (video.scoreLine.isNotEmpty)
+                      Text(
+                        video.scoreLine,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: muted,
+                      ),
+                  ],
+                ),
+              ),
+              IconButton(
+                tooltip: 'Borrar',
+                icon: const Icon(Icons.delete_outline, color: AppColors.ink),
+                onPressed: onDelete,
+              ),
+            ],
+          ),
         ),
       ),
     );
