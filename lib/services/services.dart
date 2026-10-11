@@ -13,3 +13,4 @@ export 'punishment_store.dart';
 export 'punishments.dart';
 export 'auto_fill.dart';
 export 'config_store.dart';
+export 'custom_category_store.dart';

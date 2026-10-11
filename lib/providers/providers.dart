@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/services.dart';
+import 'custom_categories_controller.dart';
 import 'game_controller.dart';
 import 'turn_video_controller.dart';
 
+export 'custom_categories_controller.dart';
 export 'game_controller.dart';
 export 'turn_video_controller.dart';
 
@@ -16,6 +18,13 @@ final tiltServiceProvider = Provider((ref) => TiltService());
 final tvServiceProvider = Provider((ref) => TvService());
 final punishmentStoreProvider = Provider((ref) => PunishmentStore());
 final configStoreProvider = Provider((ref) => ConfigStore());
+final customCategoryStoreProvider = Provider((ref) => CustomCategoryStore());
+
+/// "Mis categorías", guardadas en el celular.
+final customCategoriesProvider =
+    AsyncNotifierProvider<CustomCategoriesController, CustomCategoriesData>(
+      CustomCategoriesController.new,
+    );
 
 /// Si hay un televisor conectado al celular, para el Modo TV.
 final tvConnectedProvider = StreamProvider<bool>(
