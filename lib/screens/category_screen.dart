@@ -6,6 +6,7 @@ import '../models/models.dart';
 import '../providers/providers.dart';
 import '../router.dart';
 import '../theme.dart';
+import '../widgets/category_art.dart';
 import '../widgets/play_background.dart';
 
 /// Elección de la categoría. "Libre" explica el juego y deja elegir entre
@@ -74,7 +75,7 @@ class CategoryScreen extends ConsumerWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 mainAxisSpacing: 14,
                 crossAxisSpacing: 14,
-                childAspectRatio: 0.9,
+                childAspectRatio: 0.82,
                 children: [
                   for (final category in GameCategory.themed)
                     _CategoryCard(
@@ -142,7 +143,11 @@ class _CategoryCard extends StatelessWidget {
               child: large
                   ? Row(
                       children: [
-                        Icon(category.icon, size: 56, color: onColor),
+                        CategoryArt(
+                          category: category,
+                          size: 56,
+                          color: onColor,
+                        ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
@@ -157,7 +162,11 @@ class _CategoryCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Icon(category.icon, size: 40, color: onColor),
+                        CategoryArt(
+                          category: category,
+                          size: 56,
+                          color: onColor,
+                        ),
                         const Spacer(),
                         Flexible(flex: 0, child: title),
                         Flexible(flex: 0, child: description),
