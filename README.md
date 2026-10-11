@@ -17,8 +17,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   configuración con palabras automáticas de su categoría.
 - Cada categoría puede tener un dibujo animado (GIF de 256 px en
   `assets/img/categorias/`, con el nombre de la categoría) que se ve en su
-  tarjeta y en su "¿Cómo se juega?". Ya lo tienen todas: Libre (un lápiz
-  que escribe), Animales, Geografía, Películas, Celebridades, Marcas,
+  tarjeta y en su "¿Cómo se juega?". Ya lo tienen todas: Libre (una hoja
+  a la que se le van escribiendo las líneas), Animales, Geografía, Películas, Celebridades, Marcas,
   Deportes y Equipos de fútbol.
 - Dificultad: Mezcladas (viene elegida: trae de todas, 300 palabras por
   categoría), Fácil (ideal con niños), Normal o Difícil (100 cada una). Se
