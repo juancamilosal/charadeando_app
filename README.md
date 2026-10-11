@@ -13,9 +13,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   primera vez que se abre la app; al tocar "Listo" queda guardado en el
   celular y las demás veces la app abre directo en Categorías. Categorías no
   tiene botón de atrás: el botón "i" de arriba a la derecha vuelve a abrir
-  la bienvenida y "Listo" regresa. "Volver al inicio", salir del turno y
-  "Probar Directus" (que ahora está en Categorías, solo en pruebas) llevan a
-  Categorías.
+  la bienvenida y "Listo" regresa. "Volver al inicio" y salir del turno
+  llevan a Categorías.
 - Pantalla de categorías: Libre, Animales, Geografía, Películas,
   Celebridades, Marcas, Deportes y Equipos de fútbol. Libre deja elegir entre
   palabras manuales (las escriben los grupos) y automáticas (frases de la

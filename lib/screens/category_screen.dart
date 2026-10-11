@@ -148,14 +148,6 @@ class CategoryScreen extends ConsumerWidget {
         const SizedBox(height: 28),
         // Sección aparte, no es una categoría de palabras.
         RouletteBanner(onTap: () => context.go(Routes.punishments)),
-        if (TestData.enabled) ...[
-          const SizedBox(height: 20),
-          OutlinedButton.icon(
-            icon: const Icon(Icons.cloud_sync),
-            label: const Text('Probar Directus'),
-            onPressed: () => context.go(Routes.directusTest),
-          ),
-        ],
       ],
     );
   }
