@@ -14,6 +14,7 @@ import '../router.dart';
 import '../services/services.dart';
 import '../theme.dart';
 import '../widgets/countdown_view.dart';
+import '../widgets/end_game_dialog.dart';
 import '../widgets/play_background.dart';
 import '../widgets/tv_connect.dart';
 import '../widgets/tv_turn_view.dart';
@@ -400,6 +401,41 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     if (mounted) context.go(Routes.welcome);
   }
 
+  /// "Finalizar juego": termina la partida y muestra los puntajes. Si el
+  /// turno estaba en pausa, las palabras que ya se marcaron cuentan.
+  Future<void> _endGame() async {
+    await _pause();
+    if (!mounted) return;
+    final game = ref.read(gameControllerProvider);
+    final played = game.turns.isNotEmpty || _entries.isNotEmpty;
+    if (!await confirmEndGame(context, played: played) || !mounted) return;
+    _timer?.cancel();
+    await _tilt?.cancel();
+    _tilt = null;
+    setState(() => _phase = _Phase.saving);
+    await _stopSegment();
+    await _camera.dispose();
+    try {
+      await ref.read(videoServiceProvider).deleteAll();
+    } on Exception catch (e) {
+      // La pantalla final vuelve a intentar borrar los videos temporales.
+      debugPrint('[Turno] No se pudieron borrar los videos: $e');
+    }
+    await ScreenOrientation.portrait();
+    final controller = ref.read(gameControllerProvider.notifier);
+    if (_entries.isNotEmpty) {
+      controller.finishTurn(
+        Turn(
+          round: game.round,
+          groupIndex: game.groupIndex,
+          entries: List.unmodifiable(_entries),
+        ),
+      );
+    }
+    controller.endGame();
+    if (mounted) context.go(played ? Routes.finalResult : Routes.welcome);
+  }
+
   @override
   Widget build(BuildContext context) {
     final game = ref.watch(gameControllerProvider);
@@ -437,10 +473,14 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     );
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Align(
+              alignment: Alignment.centerRight,
+              child: EndGameButton(onPressed: _endGame, compact: true),
+            ),
             Text(
               '${game.config.roundLabel(game.round)} · '
               '${WordCard.wordsLeftLabel(_wordsLeft(game))} en total',
@@ -599,10 +639,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
                       ? null
                       : _startCountdown,
                 ),
-                TextButton(
-                  onPressed: _confirmExit,
-                  child: const Text('Abandonar partida'),
-                ),
+                EndGameButton(onPressed: _endGame),
               ],
             ),
           ),

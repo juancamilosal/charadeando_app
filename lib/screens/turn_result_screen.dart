@@ -6,6 +6,7 @@ import '../models/models.dart';
 import '../providers/providers.dart';
 import '../router.dart';
 import '../theme.dart';
+import '../widgets/end_game_dialog.dart';
 import '../widgets/play_background.dart';
 import '../widgets/scoreboard.dart';
 
@@ -33,6 +34,16 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
           ? Routes.finalResult
           : Routes.turn,
     );
+  }
+
+  /// "Finalizar juego": termina la partida con los puntajes de ahora.
+  Future<void> _endGame() async {
+    if (_leaving) return;
+    if (!await confirmEndGame(context, played: true) || !mounted) return;
+    setState(() => _leaving = true);
+    await ref.read(turnVideoProvider.notifier).discard();
+    ref.read(gameControllerProvider.notifier).endGame();
+    if (mounted) context.go(Routes.finalResult);
   }
 
   @override
@@ -129,6 +140,7 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
                     label: const Text('Continuar'),
                     onPressed: _leaving ? null : _continue,
                   ),
+                  EndGameButton(onPressed: _leaving ? null : _endGame),
                 ],
               ),
             ),

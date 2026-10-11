@@ -100,6 +100,11 @@ la cámara frontal graba a los participantes para revivir las risas.
 - El video final muestra las palabras que se están adivinando, los aciertos y
   los pases. Se arma con FFmpeg (`ffmpeg_kit_flutter_new_video`, licencia
   LGPL) mientras se ven los resultados del turno.
+- "Finalizar juego": antes de cada turno (arriba a la derecha), con el turno
+  en pausa y en la tabla de puntajes. Pregunta antes de terminar y lleva a
+  los resultados finales con los puntajes de ese momento (si el turno estaba
+  en pausa, sus palabras marcadas cuentan). Si todavía no se jugó ningún
+  turno, vuelve al inicio.
 - Si la app sale a segundo plano durante el turno, el juego se pausa y al
   volver sigue donde quedó. El video se graba por partes y se unen al final.
 

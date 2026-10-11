@@ -129,6 +129,12 @@ class GameController extends Notifier<GameState> {
     state = state.copyWith(decks: decks, turns: [...state.turns, turn]);
   }
 
+  /// Termina la partida antes de tiempo ("Finalizar juego"): cuentan los
+  /// turnos jugados hasta ahora.
+  void endGame() {
+    state = state.copyWith(finished: true);
+  }
+
   /// Pasa al siguiente grupo, o a la siguiente ronda cuando ya jugaron todos.
   void advance() {
     final next = state.groupIndex + 1;
