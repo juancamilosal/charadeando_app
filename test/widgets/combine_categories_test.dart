@@ -55,6 +55,7 @@ void main() {
         premiumCategoriesProvider.overrideWithValue({GameCategory.brands}),
         // Fuera de la temporada de Navidad.
         clockProvider.overrideWithValue(() => DateTime(2026, 10, 12)),
+        allSeasonsProvider.overrideWithValue(false),
       ],
     );
     addTearDown(container.dispose);

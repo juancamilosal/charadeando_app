@@ -75,8 +75,10 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Pantalla de categorías (`lib/screens/category_screen.dart`), pestaña
   "Todas": arriba Libre, una tarjeta centrada (del tamaño de las de
   "Mías"), y el botón blanco "Combinar categorías" con el texto morado.
-  Después, las secciones, cada una con su título a la izquierda (Fredoka) y
-  cuántas categorías tiene a la derecha ("8 categorías"), y sus tarjetas en
+  Después, las secciones, bien separadas, cada una con su título grande a
+  la izquierda (Fredoka, amarillo en los fondos oscuros y morado en los
+  claros) y cuántas categorías tiene a la derecha ("8 categorías"), y sus
+  tarjetas en
   una cuadrícula de 3 columnas, todas visibles:
   1. Clásicos: Animales, Comida, Objetos, Profesiones y Acciones.
   2. Entretenimiento: Películas, Series y novelas, Personajes, Superhéroes,
@@ -84,7 +86,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   3. Especiales ("Solo por temporada"): Navidad. Solo aparece cuando hay
      una especial en temporada; Navidad va del 1 de diciembre al 6 de enero
      y fuera de esas fechas no sale en ningún lado (ni en Combinar ni en la
-     bienvenida). Otra especial se agrega con su `Season` (mes y día de
+     bienvenida). TEMPORAL: `allSeasonsProvider` está en `true` para probar
+     Navidad todo el año; volver a `false` antes de publicar. Otra especial se agrega con su `Season` (mes y día de
      inicio y fin; por ejemplo, Halloween del 1 al 31 de octubre).
   4. Cultura general: Geografía, Lugares, Personajes históricos, Dichos y
      refranes y Marcas.

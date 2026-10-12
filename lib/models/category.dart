@@ -322,8 +322,10 @@ enum GameCategory {
   /// Color del dibujo y del texto sobre el color de la categoría.
   Color get onColor => color == AppColors.yellow ? AppColors.ink : Colors.white;
 
-  /// Si se muestra en [date]: las especiales, solo en su temporada.
-  bool shownOn(DateTime date) => season?.contains(date) ?? true;
+  /// Si se muestra en [date]: las especiales, solo en su temporada (o
+  /// siempre, con [allSeasons], para probarlas).
+  bool shownOn(DateTime date, {bool allSeasons = false}) =>
+      allSeasons || (season?.contains(date) ?? true);
 
   static GameCategory? byCode(String? code) {
     for (final c in values) {
@@ -337,18 +339,25 @@ enum GameCategory {
       values.where((c) => c != GameCategory.free).toList();
 
   /// Las categorías de [section] que se ven en [date], en su orden.
-  static List<GameCategory> inSection(CategorySection section, DateTime date) =>
-      [
-        for (final c in values)
-          if (c.section == section && c.shownOn(date)) c,
-      ];
+  static List<GameCategory> inSection(
+    CategorySection section,
+    DateTime date, {
+    bool allSeasons = false,
+  }) => [
+    for (final c in values)
+      if (c.section == section && c.shownOn(date, allSeasons: allSeasons)) c,
+  ];
 
   /// Las secciones que tienen algo que mostrar en [date], cada una con sus
-  /// categorías. Especiales no sale fuera de temporada.
+  /// categorías. Especiales no sale fuera de temporada (salvo con
+  /// [allSeasons]).
   static List<(CategorySection, List<GameCategory>)> sectionsOn(
-    DateTime date,
-  ) => [
+    DateTime date, {
+    bool allSeasons = false,
+  }) => [
     for (final s in CategorySection.values)
-      if (inSection(s, date) case final list when list.isNotEmpty) (s, list),
+      if (inSection(s, date, allSeasons: allSeasons) case final list
+          when list.isNotEmpty)
+        (s, list),
   ];
 }

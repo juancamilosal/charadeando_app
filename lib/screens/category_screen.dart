@@ -140,10 +140,13 @@ class CategoryScreen extends ConsumerWidget {
             }
           },
         ),
-        for (final (section, categories) in GameCategory.sectionsOn(today)) ...[
-          const SizedBox(height: 26),
+        for (final (section, categories) in GameCategory.sectionsOn(
+          today,
+          allSeasons: ref.watch(allSeasonsProvider),
+        )) ...[
+          const SizedBox(height: 36),
           CategorySectionHeader(section: section, count: categories.length),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           GridView.count(
             crossAxisCount: 3,
             shrinkWrap: true,
@@ -179,6 +182,11 @@ class CategorySectionHeader extends StatelessWidget {
   final CategorySection section;
   final int count;
 
+  /// Color de los títulos: amarillo sobre los fondos oscuros y morado
+  /// sobre los claros, para que se distingan de las tarjetas.
+  static Color titleColor(BuildContext context) =>
+      context.backdrop.light ? AppColors.purple : AppColors.yellow;
+
   @override
   Widget build(BuildContext context) {
     final onBackdrop = context.onBackdrop;
@@ -190,20 +198,26 @@ class CategorySectionHeader extends StatelessWidget {
             section.title,
             style: TextStyle(
               fontFamily: AppFonts.display,
-              fontSize: 22,
+              fontSize: 27,
               height: 1.1,
-              fontWeight: FontWeight.w600,
-              color: onBackdrop,
+              fontWeight: FontWeight.w700,
+              color: titleColor(context),
+              shadows: const [
+                Shadow(color: Color(0x40000000), offset: Offset(0, 2)),
+              ],
             ),
           ),
         ),
         const SizedBox(width: 8),
-        Text(
-          section.note ?? '$count ${count == 1 ? 'categoría' : 'categorías'}',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: onBackdrop.withValues(alpha: 0.8),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 3),
+          child: Text(
+            section.note ?? '$count ${count == 1 ? 'categoría' : 'categorías'}',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: onBackdrop.withValues(alpha: 0.8),
+            ),
           ),
         ),
       ],

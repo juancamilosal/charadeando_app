@@ -68,7 +68,10 @@ class _CombineCategoriesSheetState
   bool _canPick(GameCategory c) =>
       c != GameCategory.free &&
       c.available &&
-      c.shownOn(ref.read(clockProvider)()) &&
+      c.shownOn(
+        ref.read(clockProvider)(),
+        allSeasons: ref.read(allSeasonsProvider),
+      ) &&
       !_locked(c);
 
   List<CustomCategory> get _customCategories =>
@@ -184,6 +187,7 @@ class _CombineCategoriesSheetState
                   children: [
                     for (final (section, categories) in GameCategory.sectionsOn(
                       today,
+                      allSeasons: ref.watch(allSeasonsProvider),
                     )) ...[
                       _SectionTitle(section.title),
                       for (final c in categories)

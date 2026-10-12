@@ -149,6 +149,13 @@ final premiumUnlockedProvider = Provider((ref) => true);
 /// temporada (como Navidad) dentro y fuera de sus fechas.
 final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
 
+/// Muestra las categorías especiales (como Navidad) todo el año, fuera de
+/// sus fechas.
+///
+/// TEMPORAL: en true para probar Navidad. Volver a false antes de
+/// publicar.
+final allSeasonsProvider = Provider((ref) => true);
+
 /// Categorías del juego que se desbloquean con premium.
 final premiumCategoriesProvider = Provider<Set<GameCategory>>(
   (ref) => {

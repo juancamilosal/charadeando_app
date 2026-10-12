@@ -127,14 +127,16 @@ void main() {
 
   Future<ProviderContainer> pumpCategories(
     WidgetTester tester,
-    DateTime today,
-  ) async {
+    DateTime today, {
+    bool allSeasons = false,
+  }) async {
     tester.view.physicalSize = const Size(1080, 2400);
     addTearDown(tester.view.reset);
     final container = ProviderContainer(
       overrides: [
         customCategoryStoreProvider.overrideWithValue(MemoryCustomStore()),
         clockProvider.overrideWithValue(() => today),
+        allSeasonsProvider.overrideWithValue(allSeasons),
       ],
     );
     addTearDown(container.dispose);
@@ -173,6 +175,12 @@ void main() {
     expect(find.text('Navidad'), findsNothing);
     // Libre va arriba, aparte, como una tarjeta.
     expect(find.text('Libre'), findsOneWidget);
+
+    // Para probarlas, se pueden ver todo el año.
+    await tester.pumpWidget(const SizedBox());
+    await pumpCategories(tester, DateTime(2026, 10, 12), allSeasons: true);
+    expect(find.text('Especiales'), findsOneWidget);
+    expect(find.text('Navidad'), findsOneWidget);
     expect(find.text('Entretenimiento'), findsOneWidget);
   });
 
