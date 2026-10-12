@@ -6,11 +6,16 @@ import '../models/models.dart';
 import '../providers/providers.dart';
 import '../router.dart';
 import '../theme.dart';
+import '../services/services.dart';
+import '../widgets/backdrop_tile.dart';
 import '../widgets/end_game_dialog.dart';
 import '../widgets/play_background.dart';
-import '../widgets/scoreboard.dart';
+import '../widgets/result_parts.dart';
 
-/// Palabras acertadas y pasadas del turno, más los puntajes de todos.
+/// Resultado de un turno: aciertos o puntos en grande, las palabras
+/// acertadas y pasadas, el marcador y el video. En la partida rápida, que
+/// tiene un solo turno, es el resultado de la partida: sin ganador ni
+/// ruleta, con "Otra rápida", "Personalizada" y "Salir de la categoría".
 class TurnResultScreen extends ConsumerStatefulWidget {
   const TurnResultScreen({super.key});
 
@@ -46,19 +51,66 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
     if (mounted) context.go(Routes.finalResult);
   }
 
+  /// Partida rápida: otra con la misma categoría y palabras nuevas.
+  Future<void> _quickAgain() async {
+    if (_leaving) return;
+    setState(() => _leaving = true);
+    await ref.read(turnVideoProvider.notifier).discard();
+    if (!mounted) return;
+    final config = ref.read(gameControllerProvider).config;
+    ref.read(gameControllerProvider.notifier).configure(config);
+    context.go(
+      config.wordSource == WordSource.random ? Routes.autoWords : Routes.words,
+    );
+  }
+
+  /// Partida rápida: la misma categoría, pero personalizada.
+  Future<void> _custom() async {
+    if (_leaving) return;
+    setState(() => _leaving = true);
+    await ref.read(turnVideoProvider.notifier).discard();
+    if (!mounted) return;
+    final config = ref.read(gameControllerProvider).config;
+    ref
+        .read(gameControllerProvider.notifier)
+        .configure(QuickGame.custom(config));
+    context.go(Routes.config);
+  }
+
+  /// Partida rápida: vuelve a Categorías.
+  Future<void> _exit() async {
+    if (_leaving) return;
+    setState(() => _leaving = true);
+    await ref.read(turnVideoProvider.notifier).discard();
+    if (mounted) context.go(Routes.categories);
+  }
+
   @override
   Widget build(BuildContext context) {
     final game = ref.watch(gameControllerProvider);
     final video = ref.watch(turnVideoProvider);
     final turn = game.lastTurn;
     if (turn == null) return Scaffold();
-    final mode = game.config.scoringMode;
-
-    final white = TextStyle(
-      color: context.onBackdrop,
-      fontSize: 16,
-      fontWeight: FontWeight.w700,
+    final config = game.config;
+    final mode = config.scoringMode;
+    final quick = config.quick;
+    final hits = turn.hits.length;
+    final passes = turn.passed.length;
+    final String subtitle;
+    if (quick) {
+      subtitle = '${config.categoryLabel} · Partida rápida';
+    } else {
+      final round = config.roundLabel(turn.round);
+      subtitle = game.inGroups
+          ? '${game.groups[turn.groupIndex].name} · $round'
+          : round;
+    }
+    final hasVideo = video.status != TurnVideoStatus.none;
+    final muted = TextStyle(
+      color: context.onBackdrop.withValues(alpha: 0.8),
+      fontSize: 13,
     );
+
     return PopScope(
       canPop: false,
       child: PlayBackground(
@@ -66,88 +118,82 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
           backgroundColor: Colors.transparent,
           body: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(
                     child: ListView(
                       children: [
-                        Text(game.config.roundLabel(turn.round), style: white),
-                        Text(
-                          game.inGroups
-                              ? '${game.groups[turn.groupIndex].name}: '
-                                    '+${turn.points(mode)} puntos'
-                              : '+${turn.points(mode)} puntos',
-                          style: TextStyle(
-                            fontFamily: AppFonts.display,
-                            fontSize: 30,
-                            fontWeight: FontWeight.w600,
-                            color: context.onBackdrop,
-                          ),
-                        ),
+                        ResultTitle(title: '¡Tiempo!', subtitle: subtitle),
+                        const SizedBox(height: 8),
+                        // Por frase cada acierto es un punto: se cuentan
+                        // aciertos.
+                        quick || mode == ScoringMode.perPhrase
+                            ? BigScore(value: hits, label: 'aciertos')
+                            : BigScore(
+                                value: turn.points(mode),
+                                label: 'puntos',
+                              ),
                         const SizedBox(height: 12),
-                        PlayPanel(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          child: turn.entries.isEmpty
-                              ? const Padding(
-                                  padding: EdgeInsets.all(12),
-                                  child: Text('No se marcó ninguna palabra.'),
-                                )
-                              : Column(
-                                  children: [
-                                    for (final entry in turn.entries)
-                                      _EntryTile(entry: entry, mode: mode),
-                                  ],
-                                ),
+                        HitPassPills(hits: hits, passes: passes),
+                        const SizedBox(height: 16),
+                        TurnWordsPanel(
+                          entries: turn.entries,
+                          mode: quick ? null : mode,
                         ),
-                        SizedBox(height: 20),
-                        Text(
-                          game.inGroups
-                              ? 'Puntajes'
-                              : 'Total: ${game.totalScore} puntos',
-                          style: TextStyle(
-                            fontFamily: AppFonts.display,
-                            fontSize: 24,
-                            fontWeight: FontWeight.w600,
-                            color: context.onBackdrop,
-                          ),
-                        ),
-                        // Sin grupos no hay tabla: solo el total.
-                        if (game.inGroups) ...[
-                          const SizedBox(height: 8),
-                          Scoreboard(
+                        if (!quick && game.inGroups) ...[
+                          const SizedBox(height: 14),
+                          MiniScoreboard(
                             groups: game.groups,
                             scores: game.scores,
-                            highlight: turn.groupIndex,
                           ),
                         ],
                       ],
                     ),
                   ),
-                  SizedBox(height: 12),
-                  if (video.status != TurnVideoStatus.none) ...[
-                    _VideoButton(video: video),
-                    SizedBox(height: 6),
+                  const SizedBox(height: 12),
+                  if (hasVideo) ...[
+                    VideoButton(video: video),
+                    const SizedBox(height: 4),
                     Text(
-                      video.withWords
-                          ? 'El video se borra al continuar. Si lo quieres, guárdalo antes.'
-                          : 'No se pudieron escribir las palabras en este video. '
-                                'Se borra al continuar.',
-                      style: TextStyle(color: context.onBackdrop, fontSize: 13),
+                      '${video.withWords ? '' : 'No se pudieron escribir las '
+                                'palabras en este video. '}'
+                      'Se borra al ${quick ? 'salir' : 'continuar'}',
+                      style: muted,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 10),
                   ],
-                  FilledButton.icon(
-                    icon: const Icon(Icons.arrow_forward),
-                    label: const Text('Continuar'),
-                    onPressed: _leaving ? null : _continue,
-                  ),
-                  EndGameButton(onPressed: _leaving ? null : _endGame),
+                  if (quick) ...[
+                    PairButtons(
+                      left: PairButton(
+                        color: AppColors.orange,
+                        icon: Icons.bolt,
+                        label: 'Otra rápida',
+                        onPressed: _leaving ? null : _quickAgain,
+                      ),
+                      right: PairButton(
+                        color: AppColors.purple,
+                        icon: Icons.settings,
+                        label: 'Personalizada',
+                        onPressed: _leaving ? null : _custom,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    QuietButton(
+                      icon: Icons.arrow_back,
+                      label: 'Salir de la categoría',
+                      onPressed: _leaving ? null : _exit,
+                    ),
+                  ] else ...[
+                    FilledButton.icon(
+                      icon: const Icon(Icons.arrow_forward),
+                      label: Text(_nextLabel()),
+                      onPressed: _leaving ? null : _continue,
+                    ),
+                    EndGameButton(onPressed: _leaving ? null : _endGame),
+                  ],
                 ],
               ),
             ),
@@ -156,68 +202,13 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
       ),
     );
   }
-}
 
-class _EntryTile extends StatelessWidget {
-  const _EntryTile({required this.entry, required this.mode});
-
-  final TurnEntry entry;
-  final ScoringMode mode;
-
-  @override
-  Widget build(BuildContext context) {
-    final hit = entry.outcome == WordOutcome.hit;
-    return ListTile(
-      dense: true,
-      leading: Icon(
-        hit ? Icons.check_circle : Icons.skip_next,
-        color: hit ? AppColors.green : AppColors.orange,
-      ),
-      title: Text(
-        entry.word.text,
-        style: hit
-            ? null
-            : const TextStyle(decoration: TextDecoration.lineThrough),
-      ),
-      trailing: Text(hit ? '+${mode.pointsFor(entry.word.wordCount)}' : '0'),
-    );
-  }
-}
-
-/// "Ver video", o el avance mientras se escriben las palabras en el video.
-class _VideoButton extends StatelessWidget {
-  const _VideoButton({required this.video});
-
-  final TurnVideoState video;
-
-  @override
-  Widget build(BuildContext context) {
-    if (video.status == TurnVideoStatus.ready) {
-      return OutlinedButton.icon(
-        icon: Icon(Icons.play_circle_outline),
-        label: Text('Ver video'),
-        onPressed: () => context.push(Routes.video),
-      );
-    }
-    final percent = (video.progress * 100).round();
-    return OutlinedButton.icon(
-      icon: SizedBox.square(
-        dimension: 20,
-        child: CircularProgressIndicator(
-          strokeWidth: 3,
-          color: context.onBackdrop,
-          value: video.progress > 0 ? video.progress : null,
-        ),
-      ),
-      label: Text('Preparando video… $percent%'),
-      style: OutlinedButton.styleFrom(
-        disabledForegroundColor: context.onBackdrop.withValues(alpha: 0.8),
-        side: BorderSide(
-          color: context.onBackdrop.withValues(alpha: 0.55),
-          width: 2,
-        ),
-      ),
-      onPressed: null,
-    );
+  /// "Turno de Los Tigres", o "Ver resultados" si fue el último turno.
+  String _nextLabel() {
+    final next = ref.read(gameControllerProvider.notifier).afterAdvance;
+    if (next.finished) return 'Ver resultados';
+    return next.inGroups
+        ? 'Turno de ${next.currentGroup.name}'
+        : 'Siguiente turno';
   }
 }

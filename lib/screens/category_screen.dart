@@ -11,13 +11,14 @@ import '../widgets/art_cycle.dart';
 import '../widgets/category_card.dart';
 import '../widgets/combine_categories_sheet.dart';
 import '../widgets/play_background.dart';
+import '../widgets/play_choice.dart';
 import '../widgets/roulette_banner.dart';
 import '../widgets/settings_sheet.dart';
 
 /// Elección de la categoría. "Todas" muestra Libre, las categorías del
 /// juego y la Ruleta de castigos; "Mías", las categorías que creó el
 /// usuario. Libre deja elegir entre palabras manuales y automáticas; las
-/// demás van directo a la configuración.
+/// demás preguntan si se juega una partida rápida o personalizada.
 class CategoryScreen extends ConsumerWidget {
   const CategoryScreen({super.key});
 
@@ -43,7 +44,7 @@ class CategoryScreen extends ConsumerWidget {
       return;
     }
     controller.configure(config.copyWith(wordSource: WordSource.random));
-    context.go(Routes.config);
+    choosePlay(context, ref);
   }
 
   @override
@@ -132,7 +133,14 @@ class CategoryScreen extends ConsumerWidget {
         ),
         const SizedBox(height: 28),
         // Jugar con palabras de varias categorías a la vez.
-        _CombineButton(onTap: () => showCombineCategories(context)),
+        _CombineButton(
+          onTap: () async {
+            if (await showCombineCategories(context) == true &&
+                context.mounted) {
+              await choosePlay(context, ref);
+            }
+          },
+        ),
         const SizedBox(height: 14),
         _grid([
           for (final category in GameCategory.themed)
@@ -284,7 +292,7 @@ class _MyCategories extends ConsumerWidget {
             inGroups: false,
           ),
         );
-    context.go(Routes.config);
+    choosePlay(context, ref);
   }
 
   Future<void> _options(

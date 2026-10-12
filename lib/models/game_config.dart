@@ -141,6 +141,7 @@ class GameConfig {
     this.scoringMode = ScoringMode.perPhrase,
     this.hitMode = HitMode.tilt,
     this.resolution = VideoResolution.hd,
+    this.quick = false,
   });
 
   static const minGroups = 2;
@@ -154,6 +155,15 @@ class GameConfig {
 
   /// Palabras manuales sin grupos: una sola lista, de al menos estas.
   static const minSoloWords = 10;
+
+  /// Partida rápida: un solo turno de este tiempo, con hasta
+  /// [quickMaxWords] palabras.
+  static const quickTurn = Duration(seconds: 60);
+  static const quickMaxWords = 20;
+
+  /// "Partida rápida": sin grupos, un solo turno de un minuto, sin pasar
+  /// por la configuración. No cambia la última configuración guardada.
+  final bool quick;
   final Duration turnDuration;
   final int rounds;
   final List<Group> groups;
@@ -261,7 +271,9 @@ class GameConfig {
 
   /// Palabras automáticas que se piden al empezar la partida: las que
   /// alcanzaría un grupo rápido en todos los turnos.
-  int get autoWordsNeeded => fastWordsPerTurn * turns;
+  /// En la partida rápida, hasta [quickMaxWords].
+  int get autoWordsNeeded =>
+      quick ? min(quickMaxWords, fastWordsPerTurn) : fastWordsPerTurn * turns;
 
   /// Última ronda de la partida.
   int get roundLimit => rounds;
@@ -287,6 +299,7 @@ class GameConfig {
     ScoringMode? scoringMode,
     HitMode? hitMode,
     VideoResolution? resolution,
+    bool? quick,
   }) {
     return GameConfig(
       turnDuration: turnDuration ?? this.turnDuration,
@@ -305,6 +318,7 @@ class GameConfig {
       scoringMode: scoringMode ?? this.scoringMode,
       hitMode: hitMode ?? this.hitMode,
       resolution: resolution ?? this.resolution,
+      quick: quick ?? this.quick,
     );
   }
 }

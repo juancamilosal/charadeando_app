@@ -52,7 +52,10 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
     if (custom != null) {
       // Las palabras de una categoría propia están en el celular: no se usa
       // internet. Si no alcanzan, durante el juego vuelven las ya jugadas.
-      final words = [for (final w in custom.words) Word(w)]..shuffle();
+      var words = [for (final w in custom.words) Word(w)]..shuffle();
+      if (config.quick) {
+        words = words.take(GameConfig.quickMaxWords).toList();
+      }
       // Se navega después del primer cuadro: _load empieza en initState.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _play(WordBatch(words, offline: false));
@@ -166,7 +169,13 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text('Palabras automáticas'),
-          leading: BackButton(onPressed: () => context.go(Routes.config)),
+          leading: BackButton(
+            onPressed: () => context.go(
+              ref.read(gameControllerProvider).config.quick
+                  ? Routes.categories
+                  : Routes.config,
+            ),
+          ),
         ),
         body: SafeArea(
           top: false,

@@ -88,6 +88,8 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     _deck = [...game.currentDeck];
     _remaining = game.config.turnDuration;
     WakelockPlus.enable();
+    // La pantalla de antes del turno ya va en horizontal, con la cámara.
+    ScreenOrientation.landscape();
     _initCamera();
   }
 
@@ -449,7 +451,16 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
       );
     }
     controller.endGame();
-    if (mounted) context.go(played ? Routes.finalResult : Routes.categories);
+    if (!mounted) return;
+    // La partida rápida no tiene resultado final: muestra el del turno.
+    final quick = game.config.quick;
+    context.go(
+      !played || (quick && _entries.isEmpty)
+          ? Routes.categories
+          : quick
+          ? Routes.turnResult
+          : Routes.finalResult,
+    );
   }
 
   @override
@@ -479,109 +490,178 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     );
   }
 
+  /// Antes del turno, en horizontal: de fondo la cámara frontal en vivo
+  /// (todavía sin grabar) y a la izquierda el grupo, cómo se juega y
+  /// "¡Listo!". Sin video o en Modo TV, sobre el fondo de la app.
   Widget _readyView(BuildContext context, GameState game) {
     final controller = _camera.controller;
     final tvMissing = _watchTvMissing();
-    final white = TextStyle(
-      color: context.onBackdrop,
-      fontSize: 16,
+    final config = game.config;
+    final camera =
+        !_cameraLoading && controller != null && controller.value.isInitialized
+        ? controller
+        : null;
+    // Sobre la cámara, con el degradado oscuro, los textos van en blanco.
+    final on = camera != null ? Colors.white : context.onBackdrop;
+    final small = TextStyle(
+      color: on,
+      fontSize: 15,
       fontWeight: FontWeight.w700,
     );
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    final content = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // En una mezcla, "Mezcla: Animales, Películas y Mi familia".
+        if (config.isMix) Text(config.categoryLabel, style: small),
+        Text(
+          config.quick ? 'Partida rápida' : game.turnTitle,
+          style: TextStyle(
+            fontFamily: AppFonts.display,
+            fontSize: 30,
+            height: 1.1,
+            fontWeight: FontWeight.w600,
+            color: on,
+          ),
+        ),
+        const SizedBox(height: 10),
+        if (config.tvMode) ...[
+          Row(
+            children: [
+              Icon(Icons.tv, size: 44, color: on),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'De espaldas al TV. El juez marca con los botones.',
+                  style: small.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          const TvConnect(light: true),
+        ] else
+          _ForeheadHint(color: on),
+        const SizedBox(height: 10),
+        Text(
+          _readyLabel(game),
+          style: small.copyWith(
+            color: on.withValues(alpha: 0.85),
+            fontSize: 14,
+          ),
+        ),
+        if (_cameraError != null) ...[
+          const SizedBox(height: 6),
+          Text(_cameraError!, style: small.copyWith(color: AppColors.yellow)),
+        ],
+        if (tvMissing) ...[
+          const SizedBox(height: 6),
+          Text(
+            'Conecten el televisor para empezar el turno.',
+            style: small.copyWith(color: AppColors.yellow),
+          ),
+        ],
+        const SizedBox(height: 12),
+        FilledButton.icon(
+          icon: const Icon(Icons.play_arrow),
+          label: const Text('¡Listo!'),
+          onPressed: _cameraLoading || tvMissing ? null : _startCountdown,
+        ),
+      ],
+    );
+    return LayoutBuilder(
+      builder: (context, box) {
+        final wide = box.maxWidth > box.maxHeight;
+        return Stack(
+          fit: StackFit.expand,
           children: [
-            Align(
-              alignment: Alignment.centerRight,
-              child: EndGameButton(onPressed: _endGame, compact: true),
-            ),
-            // En una mezcla, "Mezcla: Animales, Películas y Mi familia".
-            if (game.config.isMix)
-              Text(game.config.categoryLabel, style: white),
-            Text(_readyLabel(game), style: white),
-            Text(
-              game.turnTitle,
-              style: TextStyle(
-                fontFamily: AppFonts.display,
-                fontSize: 34,
-                fontWeight: FontWeight.w600,
-                color: context.onBackdrop,
+            if (camera != null) ...[
+              _CameraBackground(controller: camera),
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Color(0xCC12052B),
+                      Color(0x6612052B),
+                      Color(0x0012052B),
+                    ],
+                    stops: [0, 0.45, 0.75],
+                  ),
+                ),
               ),
-            ),
-            SizedBox(height: 16),
-            Expanded(
-              child: Center(
-                child: _cameraLoading
-                    ? CircularProgressIndicator(color: context.onBackdrop)
-                    : controller != null && controller.value.isInitialized
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(24),
-                        child: CameraPreview(controller),
-                      )
-                    : Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            game.config.tvMode ? Icons.tv : Icons.videocam_off,
-                            size: game.config.tvMode ? 96 : 72,
-                            color: context.onBackdrop.withValues(alpha: 0.8),
-                          ),
-                          if (game.config.tvMode)
-                            Text(
-                              'De espaldas al TV. El juez marca con los '
-                              'botones.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: context.onBackdrop,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            )
-                          else if (!_records)
-                            Text(
-                              'Jugando sin grabar',
-                              style: TextStyle(
-                                color: context.onBackdrop.withValues(
-                                  alpha: 0.8,
-                                ),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                        ],
+            ] else if (wide && (config.tvMode || !_records))
+              // Sin cámara, a la derecha el TV o la cámara tachada.
+              Align(
+                alignment: const Alignment(0.6, 0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      config.tvMode ? Icons.tv : Icons.videocam_off,
+                      size: 96,
+                      color: on.withValues(alpha: 0.35),
+                    ),
+                    if (!config.tvMode)
+                      Text(
+                        'Jugando sin grabar',
+                        style: small.copyWith(color: on.withValues(alpha: 0.6)),
                       ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            if (game.config.tvMode) ...[
-              const TvConnect(light: true),
-            ] else
-              const _ForeheadHint(),
-            if (_cameraError != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                _cameraError!,
-                style: white.copyWith(color: AppColors.yellow),
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                child: Stack(
+                  children: [
+                    if (camera != null)
+                      const Align(
+                        alignment: Alignment.topRight,
+                        child: _CameraTag(),
+                      ),
+                    Align(
+                      alignment: wide
+                          ? Alignment.centerLeft
+                          : Alignment.bottomLeft,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: wide ? box.maxWidth * 0.5 : 420,
+                        ),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TextButtonTheme(
+                                data: TextButtonThemeData(
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: on,
+                                  ),
+                                ),
+                                child: EndGameButton(
+                                  onPressed: _endGame,
+                                  compact: true,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              content,
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ],
-            if (tvMissing) ...[
-              const SizedBox(height: 8),
-              Text(
-                'Conecten el televisor para empezar el turno.',
-                style: white.copyWith(color: AppColors.yellow),
-              ),
-            ],
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              icon: const Icon(Icons.play_arrow),
-              label: const Text('¡Listo!'),
-              onPressed: _cameraLoading || tvMissing ? null : _startCountdown,
             ),
           ],
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -673,6 +753,13 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
 
   /// "Ronda 1 de 3 · hasta que se acabe el tiempo", según las palabras.
   String _readyLabel(GameState game) {
+    if (game.config.quick) {
+      final words = _deck.length < GameConfig.quickMaxWords
+          ? _deck.length
+          : GameConfig.quickMaxWords;
+      return '1 minuto · hasta $words '
+          '${words == 1 ? 'palabra' : 'palabras'}';
+    }
     final round = game.config.roundLabel(game.round);
     final left = _wordsLeft(game);
     if (left == null) return '$round · hasta que se acabe el tiempo';
@@ -722,11 +809,14 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
 /// Antes del turno: celular a la frente, abajo si aciertas y arriba para
 /// pasar.
 class _ForeheadHint extends StatelessWidget {
-  const _ForeheadHint();
+  const _ForeheadHint({required this.color});
+
+  /// Color de los textos y el ícono.
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    final on = context.onBackdrop;
+    final on = color;
     Widget pill(Color color, IconData icon, String label) => Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -793,6 +883,81 @@ class _ForeheadHint extends StatelessWidget {
                 ],
               ),
             ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// La cámara frontal en vivo, a pantalla completa y sin deformarse.
+class _CameraBackground extends StatelessWidget {
+  const _CameraBackground({required this.controller});
+
+  final CameraController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final size = controller.value.previewSize;
+    if (size == null) return const SizedBox.shrink();
+    final long = size.longestSide;
+    final short = size.shortestSide;
+    final landscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
+    return ClipRect(
+      child: FittedBox(
+        fit: BoxFit.cover,
+        child: SizedBox(
+          width: landscape ? long : short,
+          height: landscape ? short : long,
+          child: CameraPreview(controller),
+        ),
+      ),
+    );
+  }
+}
+
+/// Arriba a la derecha sobre la cámara: "Cámara" con un punto verde y
+/// "¡Que todos salgan en cámara!".
+class _CameraTag extends StatelessWidget {
+  const _CameraTag();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: const Color(0x99000000),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.circle, size: 10, color: AppColors.green),
+              SizedBox(width: 6),
+              Text(
+                'Cámara',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 6),
+        const Text(
+          '¡Que todos salgan en cámara!',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+            shadows: [Shadow(color: Color(0xAA000000), blurRadius: 6)],
           ),
         ),
       ],

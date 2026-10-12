@@ -7,7 +7,7 @@ import '../providers/providers.dart';
 import '../router.dart';
 import '../services/services.dart';
 import '../theme.dart';
-import '../widgets/category_art.dart';
+import '../widgets/category_header.dart';
 import '../widgets/config_section.dart';
 import '../widgets/number_stepper.dart';
 import '../widgets/option_selector.dart';
@@ -270,7 +270,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
             children: [
-              _CategoryHeader(config: _config),
+              CategoryHeader(config: _config),
               const SizedBox(height: 16),
               // Lo primero: sin grupos (viene elegido) o en grupos.
               PlayModeSelector(
@@ -546,96 +546,6 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
           ),
         ),
       ],
-    );
-  }
-}
-
-/// Arriba de la configuración: el dibujo animado de la categoría y su
-/// nombre. Una categoría propia muestra su ícono en su color; una mezcla, los
-/// dibujos de las categorías elegidas.
-class _CategoryHeader extends StatelessWidget {
-  const _CategoryHeader({required this.config});
-
-  final GameConfig config;
-
-  @override
-  Widget build(BuildContext context) {
-    final custom = config.customCategory;
-    final Widget art;
-    if (config.isMix) {
-      art = Wrap(
-        alignment: WrapAlignment.center,
-        spacing: 8,
-        runSpacing: 8,
-        children: [
-          for (final c in config.mixCategories)
-            _Badge(
-              color: c.color,
-              child: CategoryArt(category: c, size: 48),
-            ),
-          for (final c in config.mixCustom)
-            _Badge(
-              color: c.color,
-              child: Icon(c.icon, color: Colors.white, size: 36),
-            ),
-        ],
-      );
-    } else if (custom != null) {
-      art = Container(
-        width: 110,
-        height: 110,
-        decoration: BoxDecoration(
-          color: custom.color,
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 4),
-        ),
-        child: Icon(custom.icon, size: 60, color: Colors.white),
-      );
-    } else {
-      art = CategoryArt(
-        category: config.category,
-        size: 120,
-        color: context.onBackdrop,
-      );
-    }
-    return Column(
-      children: [
-        art,
-        const SizedBox(height: 6),
-        Text(
-          config.categoryLabel,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: AppFonts.display,
-            fontSize: config.isMix ? 22 : 30,
-            fontWeight: FontWeight.w600,
-            color: context.onBackdrop,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Dibujo pequeño de una categoría de la mezcla, en un cuadro de su color.
-class _Badge extends StatelessWidget {
-  const _Badge({required this.color, required this.child});
-
-  final Color color;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 60,
-      height: 60,
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white, width: 2),
-      ),
-      child: Center(child: child),
     );
   }
 }

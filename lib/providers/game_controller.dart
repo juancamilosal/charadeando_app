@@ -178,9 +178,13 @@ class GameController extends Notifier<GameState> {
   }
 
   /// Pasa al siguiente grupo, o a la siguiente ronda cuando ya jugaron todos.
-  void advance() {
+  void advance() => state = afterAdvance;
+
+  /// Cómo queda la partida al pasar al siguiente turno, sin pasar todavía:
+  /// para que el botón diga a quién le toca o si ya terminó.
+  GameState get afterAdvance {
     final next = state.groupIndex + 1;
-    state = _firstPlayableFrom(
+    return _firstPlayableFrom(
       next < state.groups.length
           ? state.copyWith(groupIndex: next)
           : state.copyWith(round: state.round + 1, groupIndex: 0),

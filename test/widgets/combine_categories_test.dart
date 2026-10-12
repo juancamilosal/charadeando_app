@@ -119,6 +119,9 @@ void main() {
     await tester.tap(start);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Personalizada'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
     expect(find.text('Config'), findsOneWidget);
     final config = container.read(gameControllerProvider).config;
     expect(config.isMix, isTrue);

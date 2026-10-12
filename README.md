@@ -32,15 +32,40 @@ la cámara frontal graba a los participantes para revivir las risas.
   (`lib/widgets/settings_sheet.dart`), para sumar después sonido,
   vibración, premium o privacidad. Debajo de la barra va directo el
   selector "Todas | Mías", sin texto encima, y la cuadrícula no lleva el
-  título "Categorías". "Volver al inicio" y salir del turno
+  título "Categorías". "Salir de la categoría" y salir del turno
   llevan a Categorías.
 - Pantalla de categorías: Libre, Animales, Geografía, Películas,
   Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos, Comida,
   Profesiones, Acciones y Lugares (las 13 categorías de la colección
   `palabras`; las 5 últimas, por ahora con su ícono en vez de GIF). Libre
   deja elegir entre palabras manuales (las escriben los grupos) y
-  automáticas (frases de la categoría LIBRE); las demás van directo a la
-  configuración con palabras automáticas de su categoría.
+  automáticas (frases de la categoría LIBRE); las demás juegan con palabras
+  automáticas de su categoría.
+- Partida rápida o personalizada: al tocar una categoría del juego, una de
+  Mis categorías, al empezar a jugar en "Combinar categorías" o al elegir
+  cómo salen las palabras en Libre, se abre desde abajo (del color del
+  fondo) el dibujo y el nombre de la categoría con dos tarjetas del mismo
+  tamaño, lado a lado (una debajo de la otra si la pantalla mide menos de
+  340 px): naranja "⚡ Partida rápida" ("1 minuto, sin configurar nada") y
+  morada "⚙️ Personalizada" ("Grupos, rondas, video y ruleta"), con el
+  estilo de las tarjetas del fondo. Personalizada va a la configuración.
+- Partida rápida (`QuickGame`, `lib/services/quick_game.dart`): se salta la
+  configuración. Sin grupos, un solo turno de 1 minuto, con hasta 20
+  palabras (se piden 20 al servidor; de una categoría propia, 20 al azar),
+  dificultad Mezcladas, aciertos con movimiento (o los botones del juez si
+  hay un TV conectado) y el video con la resolución de la última
+  configuración guardada ("sin video" no graba). No cambia la última
+  configuración guardada. Con palabras manuales (Libre, "Las escribimos")
+  va directo a escribirlas en una sola lista de 10 a 20, con el contador
+  "12 de 20", una barra de avance y, desde 10, "Ya pueden jugar" en verde;
+  al llegar a 20 no deja agregar más, y "Continuar" lleva al turno.
+- Resultado de la partida rápida: "¡Tiempo!", "Animales · Partida rápida",
+  los aciertos en grande, las píldoras "✓ 9" y "↑ 3 pases", las palabras
+  con ✅ o ⏭️, "Ver video" (blanco; mientras se arma, "Preparando video…
+  40%", y se puede guardar), "⚡ Otra rápida" (misma categoría, palabras
+  nuevas), "⚙️ Personalizada" (a la configuración con la misma categoría) y
+  "← Salir de la categoría". Sin ganador ni ruleta. Si salen sin guardar el
+  video, se borra.
 - Cada categoría puede tener un dibujo animado (GIF de 256 px en
   `assets/img/categorias/`, con el nombre de la categoría) que se ve en su
   tarjeta y, grande y animado, arriba de la configuración con el nombre de
@@ -204,9 +229,29 @@ la cámara frontal graba a los participantes para revivir las risas.
   desconecta durante el turno, el juego queda en pausa y sigue al volver a
   conectarlo. La conexión se detecta con código nativo (`MainActivity.kt` y
   `AppDelegate.swift`).
-- La configuración y los resultados se ven en vertical. Al tocar "¡Listo!" la
-  pantalla gira a horizontal para la cuenta regresiva y el juego, y al terminar
-  el turno vuelve a vertical.
+- La configuración y los resultados se ven en vertical. La pantalla de antes
+  del turno ya va en horizontal (en la rápida y en la personalizada): de
+  fondo, la cámara frontal en vivo (todavía sin grabar; se graba desde la
+  cuenta regresiva) con un degradado oscuro a la izquierda, arriba a la
+  derecha "● Cámara" y "¡Que todos salgan en cámara!", y a la izquierda el
+  grupo (o "Partida rápida"), "Celular a la frente" con las píldoras
+  "↓ Acierto" y "↑ Pasar", una línea pequeña ("1 minuto · hasta 20
+  palabras" o "Ronda 1 de 3 · …") y "¡Listo!". Sin video o en Modo TV es la
+  misma pantalla sobre el fondo de la app; mientras abre la cámara también
+  se ve el fondo, y sin permiso de cámara se juega sin video. Al terminar el
+  turno vuelve a vertical.
+- Resultado de cada turno: "¡Tiempo!" y "Los Primos · Ronda 2 de 3" (sin
+  grupos, "Ronda 2 de 3"), los puntos en grande ("aciertos" si la
+  puntuación es por frase), las píldoras de aciertos y pases, las palabras
+  con ✅ y sus puntos ("+2") o ⏭️, y con grupos un marcador pequeño con el
+  líder resaltado. Abajo, "Ver video" con "Se borra al continuar", el botón
+  que dice a quién le toca ("Turno de Los Tigres"; en el último turno, "Ver
+  resultados") y "Finalizar juego".
+- Resultado final: "¡Ganó Los Primos!" (o "¡Empate entre…!", o "¡Fin del
+  juego!" sin grupos) con los puntos en grande, la tabla de puntajes con el
+  primero resaltado, la ruleta de castigo ("Girar" o "Sin castigo") y abajo
+  "Jugar otra vez" (misma configuración; pide palabras nuevas o las vuelven
+  a escribir), "⚙️ Cambiar configuración" y "← Salir de la categoría".
 - Palabras escritas por los grupos: las de cada grupo se reparten entre todos
   los demás, así que a nadie le salen las suyas y cada palabra se juega una
   sola vez. El texto se oculta al guardarlo. Funciona sin internet.

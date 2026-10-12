@@ -20,3 +20,4 @@ export 'my_videos_store.dart';
 export 'backdrop_store.dart';
 export 'mix_words.dart';
 export 'mix_store.dart';
+export 'quick_game.dart';

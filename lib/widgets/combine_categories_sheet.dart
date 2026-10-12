@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../models/models.dart';
 import '../providers/providers.dart';
-import '../router.dart';
 import '../services/services.dart';
 import '../theme.dart';
 import 'category_art.dart';
@@ -16,9 +14,10 @@ void showPremiumNotice(BuildContext context, String what) {
     ..showSnackBar(SnackBar(content: Text('Para $what necesitas premium.')));
 }
 
-/// Abre "Combinar categorías" desde abajo.
-Future<void> showCombineCategories(BuildContext context) {
-  return showModalBottomSheet<void>(
+/// Abre "Combinar categorías" desde abajo. Devuelve verdadero si se eligió
+/// una combinación para jugar (queda configurada).
+Future<bool?> showCombineCategories(BuildContext context) {
+  return showModalBottomSheet<bool>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
@@ -118,9 +117,7 @@ class _CombineCategoriesSheetState
             mixCustom: custom,
           ),
     );
-    final router = GoRouter.of(context);
-    Navigator.pop(context);
-    router.go(Routes.config);
+    Navigator.pop(context, true);
   }
 
   @override

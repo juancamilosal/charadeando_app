@@ -9,6 +9,7 @@ import '../services/services.dart';
 import '../theme.dart';
 import '../widgets/category_art.dart';
 import '../widgets/play_background.dart';
+import '../widgets/play_choice.dart';
 
 /// Categoría Libre: se elige de dónde salen las palabras, escritas por los
 /// grupos o automáticas, y se sigue a la configuración.
@@ -21,7 +22,7 @@ class FreeModeScreen extends ConsumerWidget {
         .configure(
           ref.read(gameControllerProvider).config.copyWith(wordSource: source),
         );
-    context.go(Routes.config);
+    choosePlay(context, ref);
   }
 
   /// Llena la partida con valores de prueba y va directo al primer turno.

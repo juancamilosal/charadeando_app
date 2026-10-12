@@ -137,7 +137,8 @@ void main() {
     final container = _game(played: true);
     addTearDown(container.dispose);
     await _show(tester, container, Routes.turnResult);
-    expect(find.text('Continuar'), findsOneWidget);
+    // El botón dice a quién le toca.
+    expect(find.text('Turno de Águilas'), findsOneWidget);
     await _endGame(tester);
     expect(find.text('Final'), findsOneWidget);
     expect(container.read(gameControllerProvider).finished, isTrue);

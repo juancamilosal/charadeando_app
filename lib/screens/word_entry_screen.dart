@@ -40,9 +40,20 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
     super.dispose();
   }
 
+  /// Palabras que caben en la lista, o null si no hay tope. Solo la
+  /// partida rápida tiene tope.
+  int? get _max => ref.read(gameControllerProvider).config.quick
+      ? GameConfig.quickMaxWords
+      : null;
+
+  bool get _full {
+    final max = _max;
+    return max != null && _words.length >= max;
+  }
+
   void _add() {
     final word = Word(_input.text);
-    if (word.text.isEmpty) return;
+    if (word.text.isEmpty || _full) return;
     if (_words.contains(word)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Esa palabra ya está en la lista.')),
@@ -80,6 +91,12 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
     }
   }
 
+  /// Volver: la partida rápida no pasó por la configuración.
+  void _back() {
+    final quick = ref.read(gameControllerProvider).config.quick;
+    context.go(quick ? Routes.freeMode : Routes.config);
+  }
+
   @override
   Widget build(BuildContext context) {
     final game = ref.watch(gameControllerProvider);
@@ -92,7 +109,7 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: Text('Palabras de ${author.name}'),
-          leading: BackButton(onPressed: () => context.go(Routes.config)),
+          leading: BackButton(onPressed: _back),
         ),
         body: SafeArea(
           top: false,
@@ -120,27 +137,34 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
     );
   }
 
-  /// Sin grupos: una sola lista con las palabras de todos.
+  /// Sin grupos: una sola lista con las palabras de todos. En la partida
+  /// rápida, de [GameConfig.minSoloWords] a [GameConfig.quickMaxWords], con
+  /// un contador y una barra de avance.
   Widget _soloView(BuildContext context) {
+    final max = _max;
     return PlayBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text('Palabras'),
-          leading: BackButton(onPressed: () => context.go(Routes.config)),
+          leading: BackButton(onPressed: _back),
         ),
         body: SafeArea(
           top: false,
           child: _entryView(
             context,
             GameConfig.minSoloWords,
-            message:
-                'Escriban las palabras o frases que van a jugar. Mínimo '
-                '${GameConfig.minSoloWords}.',
-            counter:
-                '${_words.length} '
-                '${_words.length == 1 ? 'palabra' : 'palabras'} · mínimo '
-                '${GameConfig.minSoloWords}',
+            message: max != null
+                ? 'Escriban de ${GameConfig.minSoloWords} a $max palabras o '
+                      'frases.'
+                : 'Escriban las palabras o frases que van a jugar. Mínimo '
+                      '${GameConfig.minSoloWords}.',
+            counter: max != null
+                ? '${_words.length} de $max'
+                : '${_words.length} '
+                      '${_words.length == 1 ? 'palabra' : 'palabras'} · '
+                      'mínimo ${GameConfig.minSoloWords}',
+            max: max,
           ),
         ),
       ),
@@ -152,8 +176,10 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
     int required, {
     required String message,
     required String counter,
+    int? max,
   }) {
     final enough = _words.length >= required;
+    final full = _full;
     return Padding(
       padding: EdgeInsets.fromLTRB(20, 8, 20, 20),
       child: Column(
@@ -177,25 +203,34 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
                     controller: _input,
                     focusNode: _focus,
                     autofocus: true,
+                    enabled: !full,
                     maxLength: 40,
                     textCapitalization: TextCapitalization.sentences,
                     onSubmitted: (_) => _add(),
                     decoration: InputDecoration(
-                      labelText: 'Palabra o frase',
+                      labelText: full ? 'Lista completa' : 'Palabra o frase',
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.add_circle),
                         color: AppColors.purple,
-                        onPressed: _add,
+                        onPressed: full ? null : _add,
                       ),
                     ),
                   ),
-                  Text(
-                    counter,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: enough ? AppColors.green : AppColors.ink,
+                  if (max != null)
+                    _QuickCounter(
+                      counter: counter,
+                      count: _words.length,
+                      max: max,
+                      enough: enough,
+                    )
+                  else
+                    Text(
+                      counter,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: enough ? AppColors.green : AppColors.ink,
+                      ),
                     ),
-                  ),
                   const SizedBox(height: 4),
                   Expanded(
                     child: ListView.builder(
@@ -252,8 +287,8 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
             const SizedBox(height: 10),
           ],
           FilledButton.icon(
-            icon: const Icon(Icons.check),
-            label: const Text('Listo'),
+            icon: Icon(max != null ? Icons.arrow_forward : Icons.check),
+            label: Text(max != null ? 'Continuar' : 'Listo'),
             onPressed: enough ? _done : null,
           ),
         ],
@@ -313,6 +348,81 @@ class _HandoffView extends StatelessWidget {
           FilledButton(onPressed: onReady, child: const Text('Empezar')),
         ],
       ),
+    );
+  }
+}
+
+/// Contador de la partida rápida: "12 de 20" con una barra de avance y,
+/// desde el mínimo, "Ya pueden jugar" en verde.
+class _QuickCounter extends StatelessWidget {
+  const _QuickCounter({
+    required this.counter,
+    required this.count,
+    required this.max,
+    required this.enough,
+  });
+
+  final String counter;
+  final int count;
+  final int max;
+  final bool enough;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              counter,
+              style: const TextStyle(
+                fontFamily: AppFonts.display,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: AppColors.ink,
+              ),
+            ),
+            const SizedBox(width: 8),
+            if (enough)
+              const Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        color: AppColors.green,
+                        size: 18,
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        'Ya pueden jugar',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: LinearProgressIndicator(
+            value: count / max,
+            minHeight: 10,
+            color: enough ? AppColors.green : AppColors.orange,
+            backgroundColor: const Color(0xFFEDE6F8),
+          ),
+        ),
+      ],
     );
   }
 }

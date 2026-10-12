@@ -31,8 +31,8 @@ void main() {
     expect(GameCategory.byCode('COMIDA'), GameCategory.food);
   });
 
-  testWidgets('al tocar una categoría va directo a la configuración, sin '
-      'grupos', (tester) async {
+  testWidgets('al tocar una categoría se elige rápida o personalizada; '
+      'personalizada va a la configuración, sin grupos', (tester) async {
     tester.view.physicalSize = const Size(1080, 2400);
     addTearDown(tester.view.reset);
     final container = ProviderContainer(
@@ -70,6 +70,11 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
+    // Pregunta si es una partida rápida o personalizada.
+    expect(find.text('Partida rápida'), findsOneWidget);
+    await tester.tap(find.text('Personalizada'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('Config'), findsOneWidget);
     final config = container.read(gameControllerProvider).config;
     expect(config.category, GameCategory.food);

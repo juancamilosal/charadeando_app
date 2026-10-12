@@ -55,6 +55,9 @@ void main() {
       expect(find.text('¿Cómo quieren las palabras?'), findsOneWidget);
 
       await tapVisible(tester, 'Las escribimos');
+      // Pregunta si es una partida rápida o personalizada.
+      expect(find.text('Partida rápida'), findsOneWidget);
+      await tapVisible(tester, 'Personalizada');
       expect(find.text('Configuración'), findsOneWidget);
 
       final premium = find.text('Full HD (1080p) · Premium');

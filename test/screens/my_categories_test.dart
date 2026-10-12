@@ -163,7 +163,10 @@ void main() {
     await tester.tap(find.text('Mi familia'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
-    // Va directo a la configuración.
+    // Personalizada va a la configuración.
+    await tester.tap(find.text('Personalizada'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('Config'), findsOneWidget);
     final config = container.read(gameControllerProvider).config;
     expect(config.customCategory?.id, saved.id);

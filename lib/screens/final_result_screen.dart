@@ -5,10 +5,14 @@ import 'package:go_router/go_router.dart';
 import '../providers/providers.dart';
 import '../router.dart';
 import '../theme.dart';
+import '../models/models.dart';
+import '../widgets/backdrop_tile.dart';
 import '../widgets/play_background.dart';
+import '../widgets/result_parts.dart';
 import '../widgets/scoreboard.dart';
 
-/// Ganador, o empate, y tabla de puntajes al terminar todas las rondas.
+/// Ganador (o empate) con sus puntos en grande, la tabla de puntajes, la
+/// ruleta de castigo y "Jugar otra vez" o "Cambiar configuración".
 class FinalResultScreen extends ConsumerStatefulWidget {
   const FinalResultScreen({super.key});
 
@@ -33,10 +37,21 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
     ref.read(videoServiceProvider).deleteAll().ignore();
   }
 
+  /// Otra partida con la misma configuración: las palabras se vuelven a
+  /// escribir o a pedir.
   void _playAgain() {
-    final controller = ref.read(gameControllerProvider.notifier);
-    controller.configure(ref.read(gameControllerProvider).config);
-    context.go(Routes.words);
+    final config = ref.read(gameControllerProvider).config;
+    ref.read(gameControllerProvider.notifier).configure(config);
+    context.go(
+      config.wordSource == WordSource.random ? Routes.autoWords : Routes.words,
+    );
+  }
+
+  /// A la configuración, con la de esta partida.
+  void _changeConfig() {
+    final config = ref.read(gameControllerProvider).config;
+    ref.read(gameControllerProvider.notifier).configure(config);
+    context.go(Routes.config);
   }
 
   @override
@@ -51,6 +66,8 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
         ? '¡Empate entre ${_joinNames(leaders)}!'
         : '¡Ganó ${leaders.single}!';
 
+    final scores = game.scores;
+    final best = game.inGroups ? scores[game.leaders.first] : game.totalScore;
     return PopScope(
       canPop: false,
       child: PlayBackground(
@@ -58,49 +75,40 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
           backgroundColor: Colors.transparent,
           body: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(
                     child: ListView(
                       children: [
-                        const SizedBox(height: 24),
-                        const Icon(
+                        Icon(
                           Icons.emoji_events,
-                          size: 110,
-                          color: AppColors.yellow,
-                          shadows: [
+                          size: 72,
+                          color: context.backdrop.light
+                              ? AppColors.orange
+                              : AppColors.yellow,
+                          shadows: const [
                             Shadow(color: Colors.black26, blurRadius: 12),
                           ],
                         ),
-                        SizedBox(height: 8),
-                        Text(
-                          title,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: AppFonts.display,
-                            fontSize: 36,
-                            fontWeight: FontWeight.w700,
-                            color: context.onBackdrop,
-                          ),
+                        ResultTitle(title: title),
+                        const SizedBox(height: 4),
+                        BigScore(
+                          value: best,
+                          label: best == 1 ? 'punto' : 'puntos',
                         ),
-                        SizedBox(height: 24),
-                        if (game.inGroups)
-                          Scoreboard(groups: game.groups, scores: game.scores)
-                        else
-                          Text(
-                            '${game.totalScore} puntos en total',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontFamily: AppFonts.display,
-                              fontSize: 28,
-                              fontWeight: FontWeight.w600,
-                              color: context.onBackdrop,
-                            ),
+                        if (game.inGroups) ...[
+                          const SizedBox(height: 16),
+                          Scoreboard(
+                            groups: game.groups,
+                            scores: scores,
+                            // El primero, resaltado.
+                            highlight: game.isTie ? null : game.leaders.single,
                           ),
+                        ],
                         if (_punished < losers.length) ...[
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 16),
                           _PunishmentCard(
                             group: losers[_punished],
                             tied: losers.length > 1,
@@ -111,15 +119,26 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
                       ],
                     ),
                   ),
-                  FilledButton.icon(
-                    icon: const Icon(Icons.replay),
-                    label: const Text('Jugar otra vez'),
-                    onPressed: _playAgain,
+                  const SizedBox(height: 12),
+                  PairButtons(
+                    left: PairButton(
+                      color: AppColors.orange,
+                      icon: Icons.replay,
+                      label: 'Jugar otra vez',
+                      onPressed: _playAgain,
+                    ),
+                    right: PairButton(
+                      color: AppColors.purple,
+                      icon: Icons.settings,
+                      label: 'Cambiar configuración',
+                      onPressed: _changeConfig,
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  TextButton(
+                  const SizedBox(height: 4),
+                  QuietButton(
+                    icon: Icons.arrow_back,
+                    label: 'Salir de la categoría',
                     onPressed: () => context.go(Routes.categories),
-                    child: const Text('Volver al inicio'),
                   ),
                 ],
               ),
