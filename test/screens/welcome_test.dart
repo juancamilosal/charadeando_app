@@ -59,12 +59,13 @@ void main() {
     expect(_welcome, findsOneWidget);
     expect(_categories, findsNothing);
 
-    // Seis pantallas con "Continuar"; la última, "¡Vamos a jugar!".
+    // Siete pantallas con "Continuar"; la última, "¡Vamos a jugar!".
     for (final title in [
       'Cómo empezar',
       '¿Lo has acertado?',
       '¿No puedes adivinar?',
       'Castiga al equipo que pierda',
+      'Modo TV',
       '¡Listos para divertirse!',
     ]) {
       await tester.tap(find.text('Continuar'));

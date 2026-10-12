@@ -13,7 +13,7 @@ import '../widgets/punishment_roulette.dart';
 /// categorías, la ruleta o una ilustración) y el texto del botón.
 typedef _Page = (String title, String text, Widget art, String button);
 
-/// "Cómo se juega": seis pantallas que se pasan con "Continuar" o
+/// "Cómo se juega": siete pantallas que se pasan con "Continuar" o
 /// deslizando. Se ven la primera vez que se abre la app y desde Ajustes >
 /// Ayuda. "Omitir" las salta.
 class WelcomeScreen extends ConsumerStatefulWidget {
@@ -85,6 +85,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         'Castiga al equipo que pierda',
         'Al final, el equipo con menos puntos gira la ruleta de castigos.',
         const _SampleRoulette(),
+        'Continuar',
+      ),
+      (
+        'Modo TV',
+        'Conecta el celular a un TV. Quien adivina se pone de espaldas y '
+            'un juez marca con los botones.',
+        const _Art('assets/img/inicio/tv.webp'),
         'Continuar',
       ),
       (
