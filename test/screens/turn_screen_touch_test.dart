@@ -98,6 +98,16 @@ void main() {
     expect(find.text('Pasar'), findsOneWidget);
     expect(find.text('Acierto'), findsOneWidget);
     expect(tilt.listens, 0);
+    // La palabra no toca las marcas de los bordes.
+    final word = tester.getRect(find.text('Pizza'));
+    final pass = tester.getRect(
+      find.ancestor(of: find.text('Pasar'), matching: find.byType(Container)),
+    );
+    final hit = tester.getRect(
+      find.ancestor(of: find.text('Acierto'), matching: find.byType(Container)),
+    );
+    expect(word.left, greaterThan(pass.right));
+    expect(word.right, lessThan(hit.left));
 
     final size = tester.getSize(find.byType(TurnScreen));
     await tester.tapAt(Offset(size.width * 0.8, size.height / 2));

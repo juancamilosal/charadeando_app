@@ -747,7 +747,10 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   }
 
   Widget _playingView(BuildContext context, GameState game) {
+    final touch = _touch;
     final card = WordCard(
+      // Con Toque, la palabra no llega a las marcas de los bordes.
+      sideMargin: touch ? _TouchMark.width + 24 : 32,
       word: _deck[_wordIndex],
       remaining: _remaining,
       feedback: _feedback,
@@ -755,7 +758,6 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
       wordsLeft: _wordsLeft(game),
       onEndGame: _endGame,
     );
-    final touch = _touch;
     // En desarrollo también se puede tocar, para probar sin inclinar.
     if (!touch && !kDebugMode) return card;
     return GestureDetector(
@@ -921,6 +923,9 @@ class _CameraTag extends StatelessWidget {
 class _TouchMark extends StatelessWidget {
   const _TouchMark({required this.left});
 
+  /// Ancho de la marca.
+  static const width = 44.0;
+
   final bool left;
 
   @override
@@ -929,7 +934,7 @@ class _TouchMark extends StatelessWidget {
       alignment: left ? Alignment.centerLeft : Alignment.centerRight,
       child: IgnorePointer(
         child: Container(
-          width: 44,
+          width: width,
           height: 180,
           decoration: BoxDecoration(
             color: (left ? AppColors.orange : AppColors.green).withValues(

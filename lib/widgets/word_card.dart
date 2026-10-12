@@ -15,6 +15,7 @@ class WordCard extends StatelessWidget {
     required this.recording,
     this.wordsLeft,
     this.onEndGame,
+    this.sideMargin = 32,
   });
 
   /// "Faltan 12 palabras", o "Falta 1 palabra".
@@ -39,6 +40,10 @@ class WordCard extends StatelessWidget {
   /// esperar a que se acabe el turno.
   final VoidCallback? onEndGame;
 
+  /// Espacio a cada lado de la palabra. Con el controlador Toque es más
+  /// ancho, para que la palabra no toque las marcas de los bordes.
+  final double sideMargin;
+
   @override
   Widget build(BuildContext context) {
     final (colors, text) = switch (feedback) {
@@ -60,7 +65,7 @@ class WordCard extends StatelessWidget {
           children: [
             Center(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
+                padding: EdgeInsets.symmetric(horizontal: sideMargin),
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
