@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 import '../models/models.dart';
@@ -20,7 +18,6 @@ class CategoryCard extends StatelessWidget {
     this.onTap,
     this.onLongPress,
     this.onMenu,
-    this.sameSizeAs = const [],
   });
 
   /// Tarjeta de una categoría del juego, con su GIF.
@@ -31,7 +28,6 @@ class CategoryCard extends StatelessWidget {
         art: (size, onColor) =>
             CategoryArt(category: category, size: size, color: onColor),
         onTap: onTap,
-        sameSizeAs: [for (final c in GameCategory.values) c.label],
       );
 
   /// Tarjeta de una categoría propia: su ícono, su color y cuántas palabras
@@ -63,11 +59,6 @@ class CategoryCard extends StatelessWidget {
 
   /// Botón de tres puntos arriba a la derecha (editar, borrar…).
   final VoidCallback? onMenu;
-
-  /// Otros nombres que deben verse del mismo tamaño que [title]: la letra
-  /// es la más grande con la que caben todos, para que las tarjetas no
-  /// queden disparejas.
-  final List<String> sameSizeAs;
 
   /// Tamaño de letra más grande, hasta [maxSize], con el que [text] cabe en
   /// [maxLines] renglones de [width] sin partir ninguna palabra. Si ni con
@@ -184,18 +175,14 @@ class CategoryCard extends StatelessWidget {
                     );
                     // Nunca se parte una palabra: si no cabe, se achica la
                     // letra; como último recurso, se corta con "…".
-                    final titleSize = [title, ...sameSizeAs]
-                        .map(
-                          (t) => fitTitleSize(
-                            t,
-                            titleStyle,
-                            width: full,
-                            maxSize: w * 0.23,
-                            minSize: w * 0.12,
-                            textScaler: textScaler,
-                          ),
-                        )
-                        .reduce(min);
+                    final titleSize = fitTitleSize(
+                      title,
+                      titleStyle,
+                      width: full,
+                      maxSize: w * 0.25,
+                      minSize: w * 0.12,
+                      textScaler: textScaler,
+                    );
                     // La columna ocupa todo el ancho: con textos cortos
                     // quedaba angosta y pegada a la izquierda.
                     return Column(

@@ -77,9 +77,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   Profesiones, Acciones y Lugares (las 13 categorías de la colección
   `palabras`, todas con su GIF). Cada tarjeta lleva solo el dibujo y el
   nombre, sin descripción (las propias, también cuántas palabras tienen).
-  El nombre usa casi todo el ancho de la tarjeta y todas las categorías del
-  juego lo muestran del mismo tamaño: el más grande con el que caben todas
-  (lo limitan "Celebridades" y "Profesiones").
+  El nombre va grande y usa casi todo el ancho de la tarjeta; solo una
+  palabra muy larga ("Celebridades") se achica, porque nunca se parte.
   Libre deja elegir entre palabras manuales (las escriben los equipos) y
   automáticas (frases de la categoría LIBRE); las demás juegan con palabras
   automáticas de su categoría.
