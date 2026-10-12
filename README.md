@@ -114,8 +114,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   colgadas del aro y vuelven a quedar quietas) y Comida (una botella le
   echa salsa al taco en zigzag; quieto, el taco queda con su salsa) y
   Profesiones (un bombero que parpadea mientras a su lado se prende una
-  sirena que lo alumbra), Acciones (un muñeco que corre: rebota, mueve las
-  piernas y las líneas de velocidad pasan hacia atrás) y Lugares (el mapa
+  sirena que lo alumbra), Acciones (un muñeco que corre: las piernas siguen un
+  ciclo de carrera, mece el brazo, rebota y las líneas de velocidad pasan
+  hacia atrás) y Lugares (el mapa
   solo y el pin cae desde arriba, se aplasta, rebota y queda clavado).
 - En la pantalla de categorías los dibujos no se mueven todos a la vez: se
   animan uno por uno, en orden (Libre, Animales, Geografía, Películas,
