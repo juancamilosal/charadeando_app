@@ -411,4 +411,56 @@ void main() {
       expect(done, isTrue);
     }
   });
+
+  testWidgets('gira hacia donde se mueve el dedo: a la derecha, en el '
+      'sentido del reloj, y a la izquierda, al revés', (tester) async {
+    mockHaptics(tester);
+    tester.view.physicalSize = const Size(1080, 3600);
+    addTearDown(tester.view.reset);
+    RoulettePainter painter() =>
+        tester
+                .widget<CustomPaint>(
+                  find.byWidgetPredicate(
+                    (w) => w is CustomPaint && w.painter is RoulettePainter,
+                  ),
+                )
+                .painter!
+            as RoulettePainter;
+    // Arriba y abajo de la ruleta: siempre hacia donde va el dedo.
+    for (final top in [true, false]) {
+      for (final right in [true, false]) {
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(
+                body: PunishmentRoulette(
+                  key: ValueKey('$top$right'),
+                  punishments: const ['A', 'B', 'C', 'D'],
+                  random: Random(2),
+                  onDone: () {},
+                ),
+              ),
+            ),
+          ),
+        );
+        final box = tester.getRect(
+          find.byWidgetPredicate(
+            (w) => w is CustomPaint && w.painter is RoulettePainter,
+          ),
+        );
+        final before = painter().angle;
+        await tester.flingFrom(
+          Offset(box.center.dx, top ? box.top + 60 : box.bottom - 60),
+          Offset(right ? 200 : -200, 0),
+          2500,
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+        final turned = painter().angle - before;
+        expect(turned, right ? greaterThan(0) : lessThan(0));
+        await wait(tester, const Duration(seconds: 12));
+        await tester.pumpAndSettle();
+      }
+    }
+  });
 }

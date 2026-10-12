@@ -97,9 +97,7 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
   /// dedo, según la fuerza.
   double _stopSeconds = PunishmentRoulette.stopDuration.inMilliseconds / 1000;
 
-  /// Al arrastrarla: el ángulo del dedo respecto al centro, y su última
-  /// posición (para calcular el impulso al soltar).
-  double? _fingerAngle;
+  /// Al arrastrarla: la última posición del dedo.
   Offset? _fingerPos;
   Offset _center = Offset.zero;
   int _chosen = 0;
@@ -200,38 +198,36 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
 
   void _dragStart(DragStartDetails d) {
     if (!_canDrag) return;
-    final r = d.localPosition - _center;
-    _fingerAngle = atan2(r.dy, r.dx);
     _fingerPos = d.localPosition;
+  }
+
+  /// Cuánto gira la ruleta (en radianes, positivo en el sentido del reloj)
+  /// cuando el dedo, puesto en [at], se mueve [move]. Gira hacia donde se
+  /// mueve el dedo: a la derecha, en el sentido del reloj; a la izquierda,
+  /// al revés. Si el dedo va más que todo hacia arriba o hacia abajo, gira
+  /// como si lo arrastrara por ese lado de la ruleta.
+  double _turn(Offset at, Offset move) {
+    final radius = max(_center.dx, 20.0);
+    if (move.dx.abs() >= move.dy.abs()) return move.dx / radius;
+    final side = at.dx >= _center.dx ? 1.0 : -1.0;
+    return side * move.dy / radius;
   }
 
   /// La ruleta sigue al dedo.
   void _dragUpdate(DragUpdateDetails d) {
-    final last = _fingerAngle;
+    final last = _fingerPos;
     if (last == null || !_canDrag) return;
-    final r = d.localPosition - _center;
-    final now = atan2(r.dy, r.dx);
-    var delta = now - last;
-    if (delta > pi) delta -= 2 * pi;
-    if (delta < -pi) delta += 2 * pi;
-    _fingerAngle = now;
     _fingerPos = d.localPosition;
-    _setAngle(_angle + delta);
+    _setAngle(_angle + _turn(last, d.delta));
   }
 
   /// Al soltarla con impulso, gira hacia ese lado y frena sola. El castigo
   /// igual sale al azar: la fuerza solo cambia cuánto tarda.
   void _dragEnd(DragEndDetails d) {
     final pos = _fingerPos;
-    _fingerAngle = null;
     _fingerPos = null;
     if (pos == null || !_canDrag) return;
-    final r = pos - _center;
-    final v = d.velocity.pixelsPerSecond;
-    final r2 = max(r.distanceSquared, 400.0);
-    // Velocidad de giro: la parte de la velocidad del dedo que va
-    // alrededor del centro.
-    final omega = (r.dx * v.dy - r.dy * v.dx) / r2;
+    final omega = _turn(pos, d.velocity.pixelsPerSecond);
     if (omega.abs() < _minFling) return;
     _fling(omega.clamp(-25.0, 25.0));
   }
