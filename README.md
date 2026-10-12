@@ -74,8 +74,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   app. La animación de la bienvenida explica el controlador elegido.
 - Pantalla de categorías (`lib/screens/category_screen.dart`), pestaña
   "Todas": arriba Libre, una tarjeta centrada (del tamaño de las de
-  "Mías"), y el botón naranja "Combinar categorías" con el texto blanco
-  (para que no se confunda con los títulos blancos de las secciones).
+  "Mías"), y el botón "Combinar categorías", discreto: sin borde ni
+  sombra, con un fondo translúcido y el texto del color de los textos del
+  fondo (así no se confunde con los títulos blancos de las secciones).
   Después, las secciones, bien separadas, cada una con su título a la
   izquierda en una píldora (blanca con el texto morado en los fondos
   oscuros, morada con el texto blanco en los claros; Fredoka) y cuántas

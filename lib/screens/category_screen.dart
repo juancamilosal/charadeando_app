@@ -545,8 +545,8 @@ class _NewCategoryCard extends StatelessWidget {
   }
 }
 
-/// Botón "Combinar categorías": naranja, con el texto blanco y una sombra
-/// suave, para que no se confunda con los títulos blancos de las secciones.
+/// Botón "Combinar categorías": discreto, sin borde ni sombra, con un
+/// fondo translúcido y el texto del color de los textos del fondo.
 class _CombineButton extends StatelessWidget {
   const _CombineButton({required this.onTap});
 
@@ -554,21 +554,20 @@ class _CombineButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onBackdrop = context.onBackdrop;
     return Material(
-      color: AppColors.orange,
-      elevation: 4,
-      shadowColor: const Color(0x66000000),
+      color: onBackdrop.withValues(alpha: 0.16),
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
         onTap: onTap,
-        child: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.shuffle, color: Colors.white, size: 26),
-              SizedBox(width: 10),
+              Icon(Icons.shuffle, color: onBackdrop, size: 26),
+              const SizedBox(width: 10),
               Flexible(
                 child: Text(
                   'Combinar categorías',
@@ -577,7 +576,7 @@ class _CombineButton extends StatelessWidget {
                     fontFamily: AppFonts.display,
                     fontSize: 22,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: onBackdrop,
                   ),
                 ),
               ),
