@@ -288,36 +288,23 @@ class _CategoryCarousel extends StatelessWidget {
         builder: (context, box) {
           // Dos filas (cada una con 6 px de sombra) y 18 px entre ellas.
           final height = ((box.maxHeight - 30) / 2).clamp(0.0, 170.0);
-          // Los bordes se desvanecen, para que se note que siguen.
-          return ShaderMask(
-            blendMode: BlendMode.dstIn,
-            shaderCallback: (rect) => const LinearGradient(
-              colors: [
-                Colors.transparent,
-                Colors.white,
-                Colors.white,
-                Colors.transparent,
-              ],
-              stops: [0, 0.12, 0.88, 1],
-            ).createShader(rect),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _MarqueeRow(
-                  categories: rows[0],
-                  height: height,
-                  period: const Duration(seconds: 22),
-                ),
-                const SizedBox(height: 18),
-                _MarqueeRow(
-                  categories: rows[1],
-                  height: height,
-                  period: const Duration(seconds: 28),
-                  // Empieza corrida, para que no queden alineadas.
-                  start: 0.4,
-                ),
-              ],
-            ),
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _MarqueeRow(
+                categories: rows[0],
+                height: height,
+                period: const Duration(seconds: 22),
+              ),
+              const SizedBox(height: 18),
+              _MarqueeRow(
+                categories: rows[1],
+                height: height,
+                period: const Duration(seconds: 28),
+                // Empieza corrida, para que no queden alineadas.
+                start: 0.4,
+              ),
+            ],
           );
         },
       ),
