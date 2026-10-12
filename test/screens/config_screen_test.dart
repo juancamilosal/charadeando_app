@@ -463,7 +463,6 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('¿Cómo van a jugar?'), findsOneWidget);
     // Sin grupos viene marcado.
     expect(
       find.descendant(
@@ -478,7 +477,7 @@ void main() {
     expect(find.text('Grupos'), findsNothing);
     // Va antes que todo lo demás.
     expect(
-      tester.getTopLeft(find.text('¿Cómo van a jugar?')).dy,
+      tester.getTopLeft(find.text('Sin grupos')).dy,
       lessThan(tester.getTopLeft(find.text('Configuración aleatoria')).dy),
     );
 

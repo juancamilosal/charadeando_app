@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme.dart';
 
-/// "¿Cómo van a jugar?": sin grupos o en grupos, como dos botones de
+/// Cómo van a jugar: sin grupos o en grupos, como dos botones de
 /// radio con forma de píldora. La opción elegida va en blanco con el texto
 /// morado; la otra, transparente con borde blanco.
 class PlayModeSelector extends StatelessWidget {

@@ -273,17 +273,6 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
               _CategoryHeader(config: _config),
               const SizedBox(height: 16),
               // Lo primero: sin grupos (viene elegido) o en grupos.
-              Text(
-                '¿Cómo van a jugar?',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: AppFonts.display,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                  color: context.onBackdrop,
-                ),
-              ),
-              const SizedBox(height: 10),
               PlayModeSelector(
                 inGroups: _inGroups,
                 onChanged: (v) => _update(_config.copyWith(inGroups: v)),
