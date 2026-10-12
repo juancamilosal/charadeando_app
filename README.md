@@ -161,7 +161,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   a `CategoryArt.withImage` (`lib/widgets/category_art.dart`); mientras
   tanto muestra su ícono. Ya lo tienen: Libre, Animales, Geografía,
   Películas, Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos,
-  Comida, Profesiones, Acciones y Lugares.
+  Comida, Profesiones, Acciones, Lugares y Series y novelas.
 - Dificultad: Mezcladas (viene elegida: trae de todas, 300 palabras por
   categoría), Fácil (ideal con niños), Normal o Difícil (100 cada una). Se
   elige en la configuración de las palabras automáticas, en Libre y en todas
