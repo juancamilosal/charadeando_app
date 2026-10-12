@@ -97,7 +97,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       (
         '¡Listos para divertirse!',
         'Con sus amigos y su familia.',
-        const _Art('assets/img/inicio/abrazados.webp'),
+        const _Art('assets/img/inicio/final.webp'),
         '¡Vamos a jugar!',
       ),
     ];

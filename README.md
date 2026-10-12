@@ -26,7 +26,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   celular naranja; 5) "Castiga al equipo que pierda" con la ruleta de
   castigos y algunos de ejemplo; 6) "Modo TV" con el celular del juez y
   el TV; 7) "¡Listos para divertirse!" con los
-  amigos abrazados y "¡Vamos a jugar!". Los textos de acertar y pasar
+  cuatro amigos felices y "¡Vamos a jugar!". Los textos de acertar y pasar
   dicen cómo se marca según el controlador de Ajustes. Las ilustraciones
   están en `assets/img/inicio/` (WebP sin fondo). Se ven solo la primera
   vez que se abre la app (queda guardado en el celular); después abre
