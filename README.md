@@ -123,7 +123,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   ciclo de carrera con la pantaloneta, mece los dos brazos, rebota y las líneas de velocidad pasan
   hacia atrás) y Lugares (el mapa
   solo y el pin cae una sola vez desde arriba, se aplasta, rebota y queda
-  clavado).
+  clavado). Fuera de la pantalla de categorías (arriba de la configuración
+  del juego) los GIF se repiten, salvo Lugares: el pin cae una vez y queda
+  clavado.
 - En la pantalla de categorías los dibujos no se mueven todos a la vez: se
   animan uno por uno, en orden (Libre, Animales, Geografía, Películas,
   Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos, Comida,

@@ -88,4 +88,34 @@ void main() {
       );
     }
   });
+
+  testWidgets('fuera del ciclo, el pin de Lugares cae una vez y se queda', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: CategoryArt(category: GameCategory.places, size: 100),
+      ),
+    );
+    // Al principio no se ve el pin clavado.
+    expect(find.byType(Image), findsNothing);
+    var animated = false;
+    for (var i = 0; i < 40 && find.byType(Image).evaluate().isEmpty; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+      if (find.byType(RawImage).evaluate().isNotEmpty) animated = true;
+    }
+    expect(animated, isTrue);
+    // Termina en la imagen de reposo y ya no se repite.
+    expect(find.byType(Image), findsOneWidget);
+    await tester.pump(const Duration(seconds: 5));
+    expect(find.byType(Image), findsOneWidget);
+    expect(
+      (tester.widget<Image>(find.byType(Image)).image as AssetImage).assetName,
+      CategoryArt.restAsset(GameCategory.places),
+    );
+  });
 }

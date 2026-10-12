@@ -38,6 +38,11 @@ class CategoryArt extends StatelessWidget {
     GameCategory.places: 17, // El pin ya clavado en el mapa.
   };
 
+  /// Categorías cuyo GIF, fuera del ciclo (por ejemplo, arriba de la
+  /// configuración), se anima una sola vez y se queda en el cuadro de
+  /// reposo, en vez de repetirse sin parar.
+  static const playOnce = {GameCategory.places};
+
   final GameCategory category;
   final double size;
 
@@ -57,6 +62,9 @@ class CategoryArt extends StatelessWidget {
     if (!restFrames.containsKey(category)) return icon;
     if (ArtCycle.maybeOf(context) != null) {
       return _CycledGif(category: category, size: size, fallback: icon);
+    }
+    if (playOnce.contains(category)) {
+      return _OnceGif(category: category, size: size, fallback: icon);
     }
     return Image.asset(
       asset(category),
@@ -219,6 +227,102 @@ class _CycledGifState extends State<_CycledGif> implements CycleMember {
       height: widget.size,
       // Como Image.asset: se achica para caber, pero no se agranda.
       fit: BoxFit.scaleDown,
+    );
+  }
+}
+
+/// El GIF una sola vez: termina quieto en su cuadro de reposo (el último).
+class _OnceGif extends StatefulWidget {
+  const _OnceGif({
+    required this.category,
+    required this.size,
+    required this.fallback,
+  });
+
+  final GameCategory category;
+  final double size;
+  final Widget fallback;
+
+  @override
+  State<_OnceGif> createState() => _OnceGifState();
+}
+
+class _OnceGifState extends State<_OnceGif> {
+  ui.Image? _frame;
+  bool _done = false;
+  bool _disposed = false;
+  Timer? _wait;
+  Completer<void>? _waiting;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_play());
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    _wait?.cancel();
+    if (_waiting?.isCompleted == false) _waiting!.complete();
+    _frame?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _play() async {
+    ui.Codec? codec;
+    try {
+      final data = await rootBundle.load(CategoryArt.asset(widget.category));
+      codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+      for (var i = 0; i < codec.frameCount - 1; i++) {
+        final frame = await codec.getNextFrame();
+        if (_disposed) {
+          frame.image.dispose();
+          break;
+        }
+        final old = _frame;
+        setState(() => _frame = frame.image);
+        old?.dispose();
+        final waiting = _waiting = Completer<void>();
+        _wait = Timer(frame.duration, waiting.complete);
+        await waiting.future;
+        if (_disposed) break;
+      }
+    } on Exception catch (e) {
+      debugPrint('[Categorías] No se pudo cargar el GIF: $e');
+    } finally {
+      codec?.dispose();
+    }
+    if (_disposed) return;
+    // El último cuadro es el de reposo: se queda la imagen.
+    final old = _frame;
+    setState(() {
+      _frame = null;
+      _done = true;
+    });
+    old?.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final frame = _frame;
+    if (frame != null) {
+      return RawImage(
+        image: frame,
+        width: widget.size,
+        height: widget.size,
+        fit: BoxFit.scaleDown,
+      );
+    }
+    // Mientras se prepara el GIF no se ve nada: si se viera el reposo, el
+    // pin aparecería ya clavado antes de caer.
+    if (!_done) return SizedBox.square(dimension: widget.size);
+    return Image.asset(
+      CategoryArt.restAsset(widget.category),
+      width: widget.size,
+      height: widget.size,
+      gaplessPlayback: true,
+      errorBuilder: (_, _, _) => widget.fallback,
     );
   }
 }
