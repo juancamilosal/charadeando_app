@@ -114,18 +114,20 @@ class CategoryScreen extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Libre, aparte: una tarjeta igual a las de "Mías", centrada.
+        // Libre, aparte: centrada y del mismo tamaño que las de las
+        // secciones.
         LayoutBuilder(
           builder: (context, box) {
-            final width = (box.maxWidth - gridSpacing) / 2;
+            final width = (box.maxWidth - 2 * sectionSpacing) / 3;
             return Center(
               child: SizedBox(
                 width: width,
-                height: width / cardAspect,
+                height: width / sectionAspect,
                 child: CategoryCard.game(
                   GameCategory.free,
-                  // Un color que no se repite abajo, para que destaque.
-                  color: AppColors.yellow,
+                  compact: true,
+                  // Un color que no usa ninguna sección, para que destaque.
+                  color: AppColors.orange,
                   onTap: () => _choose(context, ref, GameCategory.free),
                 ),
               ),
