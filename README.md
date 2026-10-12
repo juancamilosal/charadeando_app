@@ -78,7 +78,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   tarjeta del fondo) y el botón "Combinar categorías" con borde punteado.
   Después, las secciones, cada una con su título a la izquierda (Fredoka) y
   cuántas categorías tiene a la derecha ("8 categorías"), y sus tarjetas en
-  una cuadrícula de 3 columnas, todas visibles:
+  una cuadrícula de 2 columnas, todas visibles:
   1. Clásicos: Animales, Comida, Objetos, Profesiones y Acciones.
   2. Entretenimiento: Películas, Series y novelas, Personajes, Superhéroes,
      Dibujos animados, Videojuegos, Música y canciones y Celebridades.
@@ -100,8 +100,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   Directus, "Pronto" sobre su ícono apagado: al tocarlas avisa "¡Pronto!
   Estamos preparando las palabras de…" y no se juegan ni se combinan. Las
   que todavía no tienen dibujo muestran su ícono. Las tarjetas de las
-  secciones son más pequeñas: el dibujo arriba y el nombre debajo, grande,
-  en dos renglones si es largo ("Personajes históricos") y sin partir
+  secciones llevan el dibujo arriba y el nombre debajo, grande, en dos
+  renglones si es largo ("Personajes históricos") y sin partir
   palabras; solo una palabra muy larga ("Celebridades") se achica. En las
   tarjetas amarillas el texto va oscuro (y en las blancas del fondo Crema,
   naranja). Libre deja elegir entre palabras manuales (las escriben los

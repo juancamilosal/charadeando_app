@@ -70,7 +70,7 @@ class CategoryCard extends StatelessWidget {
   /// Botón de tres puntos arriba a la derecha (editar, borrar…).
   final VoidCallback? onMenu;
 
-  /// Más pequeña, para la cuadrícula de 3 columnas de las secciones.
+  /// Más pequeña, para una cuadrícula de 3 columnas.
   final bool compact;
 
   /// Etiqueta amarilla "Nueva" arriba a la izquierda.
