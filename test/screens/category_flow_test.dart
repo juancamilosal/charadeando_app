@@ -2,6 +2,7 @@ import 'package:charadeando_app/models/models.dart';
 import 'package:charadeando_app/providers/providers.dart';
 import 'package:charadeando_app/router.dart';
 import 'package:charadeando_app/screens/category_screen.dart';
+import 'package:charadeando_app/services/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -129,12 +130,15 @@ void main() {
     WidgetTester tester,
     DateTime today, {
     bool allSeasons = false,
+    MemoryCustomStore? customStore,
   }) async {
     tester.view.physicalSize = const Size(1080, 2400);
     addTearDown(tester.view.reset);
     final container = ProviderContainer(
       overrides: [
-        customCategoryStoreProvider.overrideWithValue(MemoryCustomStore()),
+        customCategoryStoreProvider.overrideWithValue(
+          customStore ?? MemoryCustomStore(),
+        ),
         clockProvider.overrideWithValue(() => today),
         allSeasonsProvider.overrideWithValue(allSeasons),
       ],
@@ -264,5 +268,37 @@ void main() {
     expect(config.category, GameCategory.food);
     expect(config.wordSource, WordSource.random);
     expect(config.inGroups, isFalse);
+  });
+
+  testWidgets('"Todas" termina con la sección "Mis categorías"', (
+    tester,
+  ) async {
+    await pumpCategories(
+      tester,
+      DateTime(2026, 10, 12),
+      customStore: MemoryCustomStore(
+        CustomCategoriesData(
+          categories: [
+            CustomCategory(
+              id: 'f1',
+              name: 'Mi familia',
+              words: [for (var i = 0; i < 12; i++) 'Primo $i'],
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pump();
+    final mine = sectionTitle('Mis categorías');
+    await tester.scrollUntilVisible(
+      mine,
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump();
+    expect(mine, findsOneWidget);
+    expect(find.text('1 categoría'), findsOneWidget);
+    expect(find.text('Mi familia'), findsOneWidget);
+    expect(find.text('Nueva categoría'), findsOneWidget);
   });
 }

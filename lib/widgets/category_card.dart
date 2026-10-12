@@ -47,6 +47,7 @@ class CategoryCard extends StatelessWidget {
     VoidCallback? onTap,
     VoidCallback? onLongPress,
     VoidCallback? onMenu,
+    bool compact = false,
   }) => CategoryCard(
     title: category.name.trim().isEmpty ? 'Mi categoría' : category.name,
     subtitle: category.wordsLabel,
@@ -56,6 +57,7 @@ class CategoryCard extends StatelessWidget {
     onTap: onTap,
     onLongPress: onLongPress,
     onMenu: onMenu,
+    compact: compact,
   );
 
   final String title;
@@ -210,9 +212,11 @@ class CategoryCard extends StatelessWidget {
             const Positioned(top: 6, left: 6, child: CategoryBadge.isNew()),
           if (onMenu != null)
             Positioned(
-              top: 4,
-              right: 4,
+              top: compact ? 0 : 4,
+              right: compact ? 0 : 4,
               child: IconButton(
+                visualDensity: compact ? VisualDensity.compact : null,
+                iconSize: compact ? 20 : null,
                 icon: Icon(Icons.more_vert, color: onColor),
                 tooltip: 'Opciones',
                 onPressed: onMenu,

@@ -75,7 +75,8 @@ void main() {
     );
     await _pump(tester, store);
     expect(find.text('Animales'), findsOneWidget);
-    expect(find.text('La oficina'), findsNothing);
+    // "Todas" también las muestra, al final, en "Mis categorías".
+    expect(find.text('La oficina', skipOffstage: false), findsOneWidget);
 
     await tester.tap(find.text('Mías'));
     for (var i = 0; i < 3; i++) {

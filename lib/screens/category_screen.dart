@@ -145,7 +145,7 @@ class CategoryScreen extends ConsumerWidget {
           allSeasons: ref.watch(allSeasonsProvider),
         )) ...[
           const SizedBox(height: 44),
-          CategorySectionHeader(section: section, count: categories.length),
+          CategorySectionHeader.of(section, categories.length),
           const SizedBox(height: 18),
           GridView.count(
             crossAxisCount: 3,
@@ -164,6 +164,19 @@ class CategoryScreen extends ConsumerWidget {
             ],
           ),
         ],
+        // Al final, las que creó el usuario.
+        const SizedBox(height: 44),
+        CategorySectionHeader(
+          title: 'Mis categorías',
+          trailing: CategorySectionHeader.countLabel(
+            ref.watch(customCategoriesProvider).value?.categories.length ?? 0,
+          ),
+        ),
+        const SizedBox(height: 18),
+        _MyCategories(
+          data: ref.watch(customCategoriesProvider),
+          inSection: true,
+        ),
         const SizedBox(height: 16),
       ],
     );
@@ -175,12 +188,24 @@ class CategoryScreen extends ConsumerWidget {
 class CategorySectionHeader extends StatelessWidget {
   const CategorySectionHeader({
     super.key,
-    required this.section,
-    required this.count,
+    required this.title,
+    required this.trailing,
   });
 
-  final CategorySection section;
-  final int count;
+  /// Una sección del juego: su título y cuántas categorías tiene (o su
+  /// nota, como "Solo por temporada").
+  CategorySectionHeader.of(CategorySection section, int count, {Key? key})
+    : this(
+        key: key,
+        title: section.title,
+        trailing: section.note ?? countLabel(count),
+      );
+
+  static String countLabel(int count) =>
+      '$count ${count == 1 ? 'categoría' : 'categorías'}';
+
+  final String title;
+  final String trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -203,7 +228,7 @@ class CategorySectionHeader extends StatelessWidget {
               ],
             ),
             child: Text(
-              section.title,
+              title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -218,7 +243,7 @@ class CategorySectionHeader extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         Text(
-          section.note ?? '$count ${count == 1 ? 'categoría' : 'categorías'}',
+          trailing,
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
@@ -315,9 +340,13 @@ class CategoryTabSelector extends StatelessWidget {
 
 /// Pestaña "Mías": la tarjeta para crear una categoría y las del usuario.
 class _MyCategories extends ConsumerWidget {
-  const _MyCategories({required this.data});
+  const _MyCategories({required this.data, this.inSection = false});
 
   final AsyncValue<CustomCategoriesData> data;
+
+  /// En la sección "Mis categorías" de "Todas": tarjetas pequeñas de 3
+  /// columnas y, si no hay ninguna, solo la tarjeta para crear una.
+  final bool inSection;
 
   void _create(BuildContext context, WidgetRef ref) {
     if (!ref.read(customCategoriesProvider.notifier).canCreate) {
@@ -450,6 +479,27 @@ class _MyCategories extends ConsumerWidget {
         child: Center(child: CircularProgressIndicator(color: onBackdrop)),
       );
     }
+    if (inSection) {
+      return GridView.count(
+        crossAxisCount: 3,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        mainAxisSpacing: CategoryScreen.sectionSpacing,
+        crossAxisSpacing: CategoryScreen.sectionSpacing,
+        childAspectRatio: CategoryScreen.sectionAspect,
+        children: [
+          _NewCategoryCard(onTap: () => _create(context, ref), compact: true),
+          for (final c in categories)
+            CategoryCard.custom(
+              c,
+              compact: true,
+              onTap: () => _play(context, ref, c),
+              onLongPress: () => _options(context, ref, c),
+              onMenu: () => _options(context, ref, c),
+            ),
+        ],
+      );
+    }
     if (categories.isEmpty) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -503,9 +553,12 @@ class _MyCategories extends ConsumerWidget {
 
 /// Primera tarjeta de "Mías": crear una categoría nueva.
 class _NewCategoryCard extends StatelessWidget {
-  const _NewCategoryCard({required this.onTap});
+  const _NewCategoryCard({required this.onTap, this.compact = false});
 
   final VoidCallback onTap;
+
+  /// Más pequeña, para la cuadrícula de 3 columnas.
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -520,24 +573,32 @@ class _NewCategoryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.add_circle, size: 64, color: onBackdrop),
-              const SizedBox(height: 10),
-              Text(
-                'Nueva categoría',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: AppFonts.display,
-                  fontSize: 22,
-                  height: 1.1,
-                  fontWeight: FontWeight.w600,
+          padding: EdgeInsets.all(compact ? 8 : 16),
+          // Con letra grande en el celular, se achica para caber.
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.add_circle,
+                  size: compact ? 44 : 64,
                   color: onBackdrop,
                 ),
-              ),
-            ],
+                SizedBox(height: compact ? 6 : 10),
+                Text(
+                  'Nueva categoría',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: AppFonts.display,
+                    fontSize: compact ? 17 : 22,
+                    height: 1.1,
+                    fontWeight: FontWeight.w600,
+                    color: onBackdrop,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

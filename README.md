@@ -95,6 +95,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   4. Cultura general: Geografía, Lugares, Personajes históricos, Dichos y
      refranes y Marcas.
   5. Deportes: Deportes y Equipos de fútbol.
+  6. Mis categorías (al final): la tarjeta "Nueva categoría" y las que creó
+     el usuario, en la misma cuadrícula, con cuántas son a la derecha. Se
+     juegan, editan y borran igual que en la pestaña "Mías".
 
   Cada categoría guarda su sección, su temporada, si es nueva (`isNew`) y
   si ya tiene palabras (`available`) en `lib/models/category.dart`; el enum
