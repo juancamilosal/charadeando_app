@@ -60,8 +60,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   "12 de 20", una barra de avance y, desde 10, "Ya pueden jugar" en verde;
   al llegar a 20 no deja agregar más, y "Continuar" lleva al turno.
 - Resultado de la partida rápida: "¡Tiempo!", "Animales · Partida rápida",
-  los aciertos en grande, las píldoras "✓ 9" y "↑ 3 pases", las palabras
-  con ✅ o ⏭️, "Ver video" (blanco; mientras se arma, "Preparando video…
+  los aciertos en grande, las píldoras "✓ 9 correctos" y "↑ 3 pases", las
+  palabras en un panel translúcido, cada una en su fila con ✅ o ⏭️ a la
+  derecha, "🎬 Ver video" (blanco; mientras se arma, "Preparando video…
   40%", y se puede guardar), "⚡ Otra rápida" (misma categoría, palabras
   nuevas), "⚙️ Personalizada" (a la configuración con la misma categoría) y
   "← Salir de la categoría". Sin ganador ni ruleta. Si salen sin guardar el
@@ -244,7 +245,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   grupos, "Ronda 2 de 3"), los puntos en grande ("aciertos" si la
   puntuación es por frase), las píldoras de aciertos y pases, las palabras
   con ✅ y sus puntos ("+2") o ⏭️, y con grupos un marcador pequeño con el
-  líder resaltado. Abajo, "Ver video" con "Se borra al continuar", el botón
+  líder resaltado (la lista y las píldoras, igual que en la rápida). Abajo,
+  "🎬 Ver video" con "Se borra al continuar", el botón
   que dice a quién le toca ("Turno de Los Tigres"; en el último turno, "Ver
   resultados") y "Finalizar juego".
 - Resultado final: "¡Ganó Los Primos!" (o "¡Empate entre…!", o "¡Fin del

@@ -123,13 +123,13 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
                   PairButtons(
                     left: PairButton(
                       color: AppColors.orange,
-                      icon: Icons.replay,
+                      emoji: '🔁',
                       label: 'Jugar otra vez',
                       onPressed: _playAgain,
                     ),
                     right: PairButton(
                       color: AppColors.purple,
-                      icon: Icons.settings,
+                      emoji: '⚙️',
                       label: 'Cambiar configuración',
                       onPressed: _changeConfig,
                     ),

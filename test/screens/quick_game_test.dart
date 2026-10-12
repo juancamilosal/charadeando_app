@@ -249,6 +249,7 @@ void main() {
       expect(find.text('¡Tiempo!'), findsOneWidget);
       expect(find.text('Animales · Partida rápida'), findsOneWidget);
       expect(find.text('aciertos'), findsOneWidget);
+      expect(find.text('2 correctos'), findsOneWidget);
       expect(find.text('1 pase'), findsOneWidget);
       expect(find.text('Otra rápida'), findsOneWidget);
       expect(find.text('Personalizada'), findsOneWidget);

@@ -104,67 +104,69 @@ class PairButtons extends StatelessWidget {
   }
 }
 
-/// Uno de los [PairButtons]: ícono y texto, en un recuadro de color.
+/// Uno de los [PairButtons]: un emoji y el texto, en un botón de color
+/// sólido.
 class PairButton extends StatelessWidget {
   const PairButton({
     super.key,
     required this.color,
-    required this.icon,
+    required this.emoji,
     required this.label,
     required this.onPressed,
   });
 
   final Color color;
-  final IconData icon;
+  final String emoji;
   final String label;
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return Opacity(
-      opacity: onPressed == null ? 0.6 : 1,
-      child: BackdropTile(
-        color: color,
-        radius: 20,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+    return Material(
+      color: onPressed == null ? color.withValues(alpha: 0.6) : color,
+      borderRadius: BorderRadius.circular(24),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
         onTap: onPressed,
-        // Nunca se parte una palabra: si no cabe, se achica la letra.
-        builder: (on) => LayoutBuilder(
-          builder: (context, box) {
-            final style = DefaultTextStyle.of(context).style.merge(
-              TextStyle(
-                fontFamily: AppFonts.display,
-                height: 1.1,
-                fontWeight: FontWeight.w600,
-                color: on,
-              ),
-            );
-            final textWidth = box.maxWidth - 28;
-            final size = CategoryCard.fitTitleSize(
-              label,
-              style,
-              width: textWidth,
-              maxSize: 17,
-              minSize: 12,
-              textScaler: MediaQuery.textScalerOf(context),
-            );
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, color: on, size: 22),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    label,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: style.copyWith(fontSize: size),
-                  ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          // Nunca se parte una palabra: si no cabe, se achica la letra.
+          child: LayoutBuilder(
+            builder: (context, box) {
+              final style = DefaultTextStyle.of(context).style.merge(
+                const TextStyle(
+                  fontFamily: AppFonts.display,
+                  height: 1.1,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
                 ),
-              ],
-            );
-          },
+              );
+              final size = CategoryCard.fitTitleSize(
+                label,
+                style,
+                width: box.maxWidth - 32,
+                maxSize: 19,
+                minSize: 12,
+                textScaler: MediaQuery.textScalerOf(context),
+              );
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(emoji, style: const TextStyle(fontSize: 20)),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: style.copyWith(fontSize: size),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

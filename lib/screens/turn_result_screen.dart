@@ -155,27 +155,30 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
                   const SizedBox(height: 12),
                   if (hasVideo) ...[
                     VideoButton(video: video),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${video.withWords ? '' : 'No se pudieron escribir las '
-                                'palabras en este video. '}'
-                      'Se borra al ${quick ? 'salir' : 'continuar'}',
-                      style: muted,
-                      textAlign: TextAlign.center,
-                    ),
+                    // En la rápida solo se avisa si algo salió mal.
+                    if (!quick || !video.withWords) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        '${video.withWords ? '' : 'No se pudieron escribir las '
+                                  'palabras en este video. '}'
+                        'Se borra al ${quick ? 'salir' : 'continuar'}',
+                        style: muted,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                     const SizedBox(height: 10),
                   ],
                   if (quick) ...[
                     PairButtons(
                       left: PairButton(
                         color: AppColors.orange,
-                        icon: Icons.bolt,
+                        emoji: '⚡',
                         label: 'Otra rápida',
                         onPressed: _leaving ? null : _quickAgain,
                       ),
                       right: PairButton(
                         color: AppColors.purple,
-                        icon: Icons.settings,
+                        emoji: '⚙️',
                         label: 'Personalizada',
                         onPressed: _leaving ? null : _custom,
                       ),

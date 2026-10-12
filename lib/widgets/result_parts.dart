@@ -5,7 +5,6 @@ import '../models/models.dart';
 import '../providers/providers.dart';
 import '../router.dart';
 import '../theme.dart';
-import 'play_background.dart';
 
 /// Partes de las pantallas de resultados (del turno, de la partida rápida y
 /// final), para que se vean iguales.
@@ -122,7 +121,11 @@ class HitPassPills extends StatelessWidget {
       spacing: 10,
       runSpacing: 8,
       children: [
-        pill(AppColors.green, Icons.check, '$hits'),
+        pill(
+          AppColors.green,
+          Icons.check,
+          '$hits ${hits == 1 ? 'correcto' : 'correctos'}',
+        ),
         pill(
           AppColors.orange,
           Icons.arrow_upward,
@@ -146,20 +149,29 @@ class TurnWordsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PlayPanel(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    final on = context.onBackdrop;
+    // Un panel translúcido sobre el fondo, con cada palabra en su fila.
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: on.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(24),
+      ),
       child: entries.isEmpty
-          ? const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8),
+          ? Padding(
+              padding: const EdgeInsets.all(12),
               child: Text(
                 'No se marcó ninguna palabra.',
                 textAlign: TextAlign.center,
+                style: TextStyle(color: on, fontWeight: FontWeight.w700),
               ),
             )
           : Column(
               children: [
-                for (final entry in entries)
-                  _EntryRow(entry: entry, mode: mode),
+                for (var i = 0; i < entries.length; i++) ...[
+                  if (i > 0) const SizedBox(height: 8),
+                  _EntryRow(entry: entries[i], mode: mode),
+                ],
               ],
             ),
     );
@@ -174,34 +186,40 @@ class _EntryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final on = context.onBackdrop;
     final hit = entry.outcome == WordOutcome.hit;
     final mode = this.mode;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: on.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Row(
         children: [
-          Text(hit ? '✅' : '⏭️', style: const TextStyle(fontSize: 18)),
-          const SizedBox(width: 10),
           Expanded(
             child: Text(
               entry.word.text,
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: hit ? FontWeight.w800 : FontWeight.w600,
-                color: hit ? AppColors.ink : const Color(0xFF8A7AA6),
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+                color: on,
               ),
             ),
           ),
-          if (hit && mode != null)
+          if (hit && mode != null) ...[
             Text(
               '+${mode.pointsFor(entry.word.wordCount)}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: AppFonts.display,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: AppColors.green,
+                color: on,
               ),
             ),
+            const SizedBox(width: 10),
+          ],
+          Text(hit ? '✅' : '⏭️', style: const TextStyle(fontSize: 20)),
         ],
       ),
     );
@@ -300,19 +318,26 @@ class VideoButton extends StatelessWidget {
     final ready = video.status == TurnVideoStatus.ready;
     final percent = (video.progress * 100).round();
     final light = context.backdrop.light;
-    return FilledButton.icon(
+    return FilledButton(
       style: FilledButton.styleFrom(
         backgroundColor: Colors.white,
         foregroundColor: AppColors.purple,
         disabledBackgroundColor: Colors.white.withValues(alpha: 0.75),
         disabledForegroundColor: AppColors.purple.withValues(alpha: 0.8),
+        minimumSize: const Size.fromHeight(60),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         side: light
             ? const BorderSide(color: AppColors.purple, width: 2)
             : null,
       ),
-      icon: ready
-          ? const Icon(Icons.play_circle_fill)
-          : SizedBox.square(
+      onPressed: ready ? () => context.push(Routes.video) : null,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (ready)
+            const Text('🎬', style: TextStyle(fontSize: 22))
+          else
+            SizedBox.square(
               dimension: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 3,
@@ -320,8 +345,12 @@ class VideoButton extends StatelessWidget {
                 value: video.progress > 0 ? video.progress : null,
               ),
             ),
-      label: Text(ready ? 'Ver video' : 'Preparando video… $percent%'),
-      onPressed: ready ? () => context.push(Routes.video) : null,
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(ready ? 'Ver video' : 'Preparando video… $percent%'),
+          ),
+        ],
+      ),
     );
   }
 }
