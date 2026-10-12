@@ -118,9 +118,7 @@ la cámara frontal graba a los participantes para revivir las risas.
 - En la pantalla de categorías los dibujos no se mueven todos a la vez: se
   animan uno por uno, en orden (Libre, Animales, Geografía, Películas,
   Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos, Comida y
-  Profesiones), con una
-  pausa corta
-  entre uno y otro, y el ciclo vuelve a empezar. Los que no se ven en la
+  Profesiones), con una pausa corta entre uno y otro, y el ciclo vuelve a empezar. Los que no se ven en la
   pantalla se saltan. Quietos muestran su mejor cuadro: la hoja con sus
   líneas, el balón de Deportes en el centro después de rebotar. Ese cuadro
   también está como imagen en `assets/img/categorias/reposo/`, así que la
