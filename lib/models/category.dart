@@ -146,7 +146,6 @@ enum GameCategory {
     'SERIES_NOVELAS',
     'Serie o novela',
     section: CategorySection.entertainment,
-    isNew: true,
   ),
   characters(
     'Personajes',
@@ -156,7 +155,6 @@ enum GameCategory {
     'PERSONAJES',
     'Personaje',
     section: CategorySection.entertainment,
-    isNew: true,
   ),
   superheroes(
     'Superhéroes',
@@ -166,7 +164,6 @@ enum GameCategory {
     'SUPERHEROES',
     'Superhéroe',
     section: CategorySection.entertainment,
-    isNew: true,
   ),
   cartoons(
     'Dibujos animados',
@@ -176,7 +173,6 @@ enum GameCategory {
     'DIBUJOS_ANIMADOS',
     'Dibujo animado',
     section: CategorySection.entertainment,
-    isNew: true,
   ),
   videogames(
     'Videojuegos',
@@ -186,7 +182,6 @@ enum GameCategory {
     'VIDEOJUEGOS',
     'Videojuego',
     section: CategorySection.entertainment,
-    isNew: true,
   ),
   music(
     'Música y canciones',
@@ -196,7 +191,6 @@ enum GameCategory {
     'MUSICA',
     'Canción o artista',
     section: CategorySection.entertainment,
-    isNew: true,
   ),
   celebrities(
     'Celebridades',
@@ -235,7 +229,6 @@ enum GameCategory {
     'PERSONAJES_HISTORICOS',
     'Personaje histórico',
     section: CategorySection.culture,
-    isNew: true,
   ),
   sayings(
     'Dichos y refranes',
@@ -245,7 +238,6 @@ enum GameCategory {
     'DICHOS_REFRANES',
     'Dicho o refrán',
     section: CategorySection.culture,
-    isNew: true,
   ),
   brands(
     'Marcas',
@@ -278,6 +270,17 @@ enum GameCategory {
   ),
 
   // Especiales: solo se ven en su temporada.
+  halloween(
+    'Halloween',
+    'Disfraces, sustos y dulces',
+    Icons.nightlight_round,
+    AppColors.orange,
+    'HALLOWEEN',
+    'Palabra de Halloween',
+    section: CategorySection.special,
+    season: Season((10, 1), (10, 31)),
+    available: false,
+  ),
   christmas(
     'Navidad',
     'Novenas, regalos y buñuelos',
@@ -287,7 +290,6 @@ enum GameCategory {
     'Palabra navideña',
     section: CategorySection.special,
     season: Season((12, 1), (1, 6)),
-    isNew: true,
     available: false,
   );
 
@@ -300,6 +302,9 @@ enum GameCategory {
     this.singular, {
     this.section,
     this.season,
+    // Por ahora ninguna la usa (en desarrollo), pero se deja para marcar
+    // las nuevas cuando se publique.
+    // ignore: unused_element_parameter
     this.isNew = false,
     this.available = true,
   });

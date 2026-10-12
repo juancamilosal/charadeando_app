@@ -89,12 +89,13 @@ la cámara frontal graba a los participantes para revivir las risas.
   3. Cultura general: Geografía, Lugares, Personajes históricos, Dichos y
      refranes y Marcas.
   4. Deportes: Deportes y Equipos de fútbol.
-  5. Especiales ("Solo por temporada"): Navidad. Solo aparece cuando hay
-     una especial en temporada; Navidad va del 1 de diciembre al 6 de enero
-     y fuera de esas fechas no sale en ningún lado (ni en Combinar ni en la
-     bienvenida). TEMPORAL: `allSeasonsProvider` está en `true` para probar
-     Navidad todo el año; volver a `false` antes de publicar. Otra especial se agrega con su `Season` (mes y día de
-     inicio y fin; por ejemplo, Halloween del 1 al 31 de octubre).
+  5. Especiales ("Solo por temporada"): Halloween (del 1 al 31 de octubre)
+     y Navidad (del 1 de diciembre al 6 de enero). Solo aparece cuando hay
+     una especial en temporada; fuera de sus fechas no salen en ningún lado
+     (ni en Combinar ni en la bienvenida). TEMPORAL: `allSeasonsProvider`
+     está en `true` para probarlas todo el año; volver a `false` antes de
+     publicar. Otra especial se agrega con su `Season` (mes y día de inicio
+     y fin).
   En esta pantalla las tarjetas de una sección van en tonos de un mismo
   color (del más oscuro al más claro, alternados en orden), para que no se
   vea tan cargada y cada tarjeta se distinga de la de al lado: Clásicos
@@ -108,12 +109,11 @@ la cámara frontal graba a los participantes para revivir las risas.
 
   Cada categoría guarda su sección, su temporada, si es nueva (`isNew`) y
   si ya tiene palabras (`available`) en `lib/models/category.dart`; el enum
-  va en el orden de la pantalla. Las nueve nuevas (Navidad, Series y
-  novelas, Personajes, Superhéroes, Dibujos animados, Videojuegos, Música y
-  canciones, Personajes históricos y Dichos y refranes) llevan la etiqueta
-  amarilla "Nueva" arriba a la izquierda. Ya tienen palabras en Directus
-  todas menos Navidad; una categoría sin palabras (hoy solo Navidad) lleva
-  "Pronto" sobre su dibujo apagado: al tocarla avisa "¡Pronto!
+  va en el orden de la pantalla. Una categoría con `isNew` lleva la
+  etiqueta amarilla "Nueva" arriba a la izquierda (por ahora ninguna, en
+  desarrollo). Las que no tienen palabras en Directus (hoy Halloween y
+  Navidad) llevan "Pronto" sobre su dibujo apagado: al tocarlas avisa
+  "¡Pronto!
   Estamos preparando las palabras de…" y no se juegan ni se combinan. Las
   que todavía no tienen dibujo muestran su ícono. Las tarjetas de las
   secciones llevan el dibujo arriba y el nombre debajo, grande, en dos
@@ -164,7 +164,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   Películas, Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos,
   Comida, Profesiones, Acciones, Lugares, Series y novelas, Personajes,
   Superhéroes, Dibujos animados, Videojuegos, Música y canciones,
-  Personajes históricos y Dichos y refranes (falta Navidad).
+  Personajes históricos, Dichos y refranes y Halloween (falta Navidad).
 - Dificultad: Mezcladas (viene elegida: trae de todas, 300 palabras por
   categoría), Fácil (ideal con niños), Normal o Difícil (100 cada una). Se
   elige en la configuración de las palabras automáticas, en Libre y en todas

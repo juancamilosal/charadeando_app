@@ -156,13 +156,14 @@ La colección `palabras` tiene el campo `dificultad` (`FACIL`, `NORMAL`,
 ### Códigos de las categorías
 
 Cada categoría de la app busca sus palabras en `palabras` con su código en
-el campo `categoria`. Todas tienen palabras menos `NAVIDAD`, que en la app
-sale con "Pronto" hasta que se carguen y se cambie `available` a `true` en
+el campo `categoria`. Todas tienen palabras menos `HALLOWEEN` y `NAVIDAD`,
+que en la app salen con "Pronto" hasta que se carguen y se cambie `available` a `true` en
 `lib/models/category.dart`.
 
 | Categoría | Código |
 |---|---|
 | Libre | `LIBRE` |
+| Halloween (del 1 al 31 de octubre) | `HALLOWEEN` |
 | Navidad (del 1 de diciembre al 6 de enero) | `NAVIDAD` |
 | Películas | `PELICULAS` |
 | Series y novelas | `SERIES_NOVELAS` |

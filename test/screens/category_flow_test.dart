@@ -35,6 +35,7 @@ void main() {
         'MARCAS',
         'DEPORTES',
         'EQUIPOS_FUTBOL',
+        'HALLOWEEN',
         'NAVIDAD',
       ],
     );
@@ -58,6 +59,16 @@ void main() {
       ],
     );
     expect(labels(CategorySection.special), ['Navidad']);
+    expect(
+      [
+        for (final c in GameCategory.inSection(
+          CategorySection.special,
+          DateTime(2026, 10, 15),
+        ))
+          c.label,
+      ],
+      ['Halloween'],
+    );
     expect(labels(CategorySection.entertainment), [
       'Películas',
       'Series y novelas',
@@ -90,41 +101,36 @@ void main() {
     }
   });
 
-  test('Navidad solo se ve del 1 de diciembre al 6 de enero', () {
-    for (final (date, shown) in [
-      (DateTime(2026, 11, 30), false),
-      (DateTime(2026, 12, 1), true),
-      (DateTime(2026, 12, 31), true),
-      (DateTime(2027, 1, 6), true),
-      (DateTime(2027, 1, 7), false),
-      (DateTime(2026, 10, 31), false),
+  test('Navidad solo se ve del 1 de diciembre al 6 de enero y Halloween '
+      'en octubre', () {
+    List<GameCategory> specials(DateTime date) => [
+      for (final (s, list) in GameCategory.sectionsOn(date))
+        if (s == CategorySection.special) ...list,
+    ];
+    for (final (date, expected) in [
+      (DateTime(2026, 9, 30), <GameCategory>[]),
+      (DateTime(2026, 10, 1), [GameCategory.halloween]),
+      (DateTime(2026, 10, 31), [GameCategory.halloween]),
+      (DateTime(2026, 11, 1), <GameCategory>[]),
+      (DateTime(2026, 11, 30), <GameCategory>[]),
+      (DateTime(2026, 12, 1), [GameCategory.christmas]),
+      (DateTime(2026, 12, 31), [GameCategory.christmas]),
+      (DateTime(2027, 1, 6), [GameCategory.christmas]),
+      (DateTime(2027, 1, 7), <GameCategory>[]),
     ]) {
-      expect(GameCategory.christmas.shownOn(date), shown, reason: '$date');
-      expect(
-        GameCategory.sectionsOn(date)
-            .any((s) => s.$1 == CategorySection.special),
-        shown,
-        reason: '$date',
-      );
+      expect(specials(date), expected, reason: '$date');
     }
-    // Otra especial se arma igual, por ejemplo Halloween en octubre.
-    const halloween = Season((10, 1), (10, 31));
-    expect(halloween.contains(DateTime(2026, 10, 15)), isTrue);
-    expect(halloween.contains(DateTime(2026, 11, 1)), isFalse);
   });
 
-  test('las nueve nuevas llevan "Nueva"; solo Navidad sigue en "Pronto"', () {
-    final fresh = [
-      for (final c in GameCategory.values)
-        if (c.isNew) c,
-    ];
-    expect(fresh, hasLength(9));
+  test('ninguna lleva "Nueva" por ahora; Halloween y Navidad siguen en '
+      '"Pronto"', () {
+    expect(GameCategory.values.where((c) => c.isNew), isEmpty);
     expect(
       [
         for (final c in GameCategory.values)
           if (!c.available) c,
       ],
-      [GameCategory.christmas],
+      [GameCategory.halloween, GameCategory.christmas],
     );
   });
 
@@ -171,36 +177,43 @@ void main() {
     matching: find.text(title),
   );
 
-  testWidgets('Especiales y Navidad solo aparecen en su temporada', (
-    tester,
-  ) async {
+  testWidgets('Especiales, Halloween y Navidad solo aparecen en su '
+      'temporada', (tester) async {
     await pumpCategories(tester, DateTime(2026, 12, 10));
     expect(sectionTitle('Especiales'), findsOneWidget);
     expect(find.text('Solo por temporada'), findsOneWidget);
     expect(find.text('Navidad'), findsOneWidget);
     expect(find.text('8 categorías'), findsOneWidget);
 
+    expect(find.text('Halloween', skipOffstage: false), findsNothing);
+
+    // En octubre, Halloween.
     await tester.pumpWidget(const SizedBox());
     await pumpCategories(tester, DateTime(2026, 10, 12));
+    expect(sectionTitle('Especiales'), findsOneWidget);
+    expect(find.text('Halloween', skipOffstage: false), findsOneWidget);
+    expect(find.text('Navidad', skipOffstage: false), findsNothing);
+
+    // En noviembre, ninguna.
+    await tester.pumpWidget(const SizedBox());
+    await pumpCategories(tester, DateTime(2026, 11, 10));
     expect(sectionTitle('Especiales'), findsNothing);
-    expect(find.text('Navidad'), findsNothing);
     // Libre va arriba, aparte, como una tarjeta.
     expect(find.text('Libre'), findsOneWidget);
 
     // Para probarlas, se pueden ver todo el año.
     await tester.pumpWidget(const SizedBox());
-    await pumpCategories(tester, DateTime(2026, 10, 12), allSeasons: true);
+    await pumpCategories(tester, DateTime(2026, 11, 10), allSeasons: true);
     expect(sectionTitle('Especiales'), findsOneWidget);
-    expect(find.text('Navidad'), findsOneWidget);
+    expect(find.text('Halloween', skipOffstage: false), findsOneWidget);
+    expect(find.text('Navidad', skipOffstage: false), findsOneWidget);
     expect(sectionTitle('Entretenimiento'), findsOneWidget);
   });
 
-  testWidgets('las nuevas llevan "Nueva" y las de "Pronto" no se juegan', (
-    tester,
-  ) async {
+  testWidgets('las de "Pronto" no se juegan', (tester) async {
     // En diciembre, para que se vea Navidad, que sigue en "Pronto".
     final container = await pumpCategories(tester, DateTime(2026, 12, 10));
-    expect(find.text('Nueva'), findsWidgets);
+    expect(find.text('Nueva'), findsNothing);
     final christmas = find.text('Navidad');
     await tester.scrollUntilVisible(
       christmas,
