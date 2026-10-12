@@ -73,9 +73,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   guardan en el celular (`ajustes.json`) y se aplican desde que abre la
   app. La animación de la bienvenida explica el controlador elegido.
 - Pantalla de categorías (`lib/screens/category_screen.dart`), pestaña
-  "Todas": arriba Libre como una franja ancha (el dibujo a la izquierda,
-  "Libre" y "Sus palabras o las nuestras" a la derecha, con el estilo de
-  tarjeta del fondo) y el botón "Combinar categorías" con borde punteado.
+  "Todas": arriba Libre, una tarjeta centrada (del tamaño de las de
+  "Mías"), y el botón blanco "Combinar categorías" con el texto morado.
   Después, las secciones, cada una con su título a la izquierda (Fredoka) y
   cuántas categorías tiene a la derecha ("8 categorías"), y sus tarjetas en
   una cuadrícula de 3 columnas, todas visibles:

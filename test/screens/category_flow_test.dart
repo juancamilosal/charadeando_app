@@ -171,8 +171,8 @@ void main() {
     await pumpCategories(tester, DateTime(2026, 10, 12));
     expect(find.text('Especiales'), findsNothing);
     expect(find.text('Navidad'), findsNothing);
-    // Libre va arriba como franja, con su frase.
-    expect(find.text('Sus palabras o las nuestras'), findsOneWidget);
+    // Libre va arriba, aparte, como una tarjeta.
+    expect(find.text('Libre'), findsOneWidget);
     expect(find.text('Entretenimiento'), findsOneWidget);
   });
 

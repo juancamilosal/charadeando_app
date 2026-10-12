@@ -303,62 +303,6 @@ class CategoryCardFrame extends StatelessWidget {
   }
 }
 
-/// Franja ancha de una categoría: el dibujo a la izquierda y, a la
-/// derecha, el nombre y su frase. Es la de Libre, arriba de las secciones.
-class CategoryStrip extends StatelessWidget {
-  const CategoryStrip({super.key, required this.category, this.onTap});
-
-  final GameCategory category;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return CategoryCardFrame(
-      color: category.color,
-      onTap: onTap,
-      builder: (onColor) => Padding(
-        padding: const EdgeInsets.fromLTRB(14, 12, 16, 12),
-        child: Row(
-          children: [
-            CategoryArt(category: category, size: 72, color: onColor),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    category.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: AppFonts.display,
-                      fontSize: 28,
-                      height: 1.1,
-                      fontWeight: FontWeight.w600,
-                      color: onColor,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    category.description,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: onColor.withValues(alpha: 0.85),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 /// Etiqueta pequeña de una tarjeta: "Nueva" (amarilla) o "Pronto" (oscura).
 class CategoryBadge extends StatelessWidget {
   const CategoryBadge.isNew({super.key})

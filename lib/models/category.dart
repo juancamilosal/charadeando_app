@@ -289,7 +289,7 @@ enum GameCategory {
 
   final String label;
 
-  /// Frase corta. Hoy solo la muestra la franja de Libre.
+  /// Frase corta. Por ahora las tarjetas no la muestran.
   final String description;
   final IconData icon;
   final Color color;
