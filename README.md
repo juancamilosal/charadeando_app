@@ -73,7 +73,7 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Pantalla de categorías: Libre, Animales, Geografía, Películas,
   Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos, Comida,
   Profesiones, Acciones y Lugares (las 13 categorías de la colección
-  `palabras`; las 2 últimas, por ahora con su ícono en vez de GIF). Libre
+  `palabras`, todas con su GIF). Libre
   deja elegir entre palabras manuales (las escriben los equipos) y
   automáticas (frases de la categoría LIBRE); las demás juegan con palabras
   automáticas de su categoría.
@@ -114,11 +114,14 @@ la cámara frontal graba a los participantes para revivir las risas.
   colgadas del aro y vuelven a quedar quietas) y Comida (una botella le
   echa salsa al taco en zigzag; quieto, el taco queda con su salsa) y
   Profesiones (un bombero que parpadea mientras a su lado se prende una
-  sirena que lo alumbra).
+  sirena que lo alumbra), Acciones (un muñeco que corre: rebota, mueve las
+  piernas y las líneas de velocidad pasan hacia atrás) y Lugares (el mapa
+  solo y el pin cae desde arriba, se aplasta, rebota y queda clavado).
 - En la pantalla de categorías los dibujos no se mueven todos a la vez: se
   animan uno por uno, en orden (Libre, Animales, Geografía, Películas,
-  Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos, Comida y
-  Profesiones), con una pausa corta entre uno y otro, y el ciclo vuelve a empezar. Los que no se ven en la
+  Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos, Comida,
+  Profesiones, Acciones y Lugares), con una pausa corta entre uno y otro,
+  y el ciclo vuelve a empezar. Los que no se ven en la
   pantalla se saltan. Quietos muestran su mejor cuadro: la hoja con sus
   líneas, el balón de Deportes en el centro después de rebotar. Ese cuadro
   también está como imagen en `assets/img/categorias/reposo/`, así que la
