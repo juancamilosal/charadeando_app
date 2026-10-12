@@ -152,11 +152,7 @@ class CategoryScreen extends ConsumerWidget {
         ),
         const SizedBox(height: 12),
         // Jugar con palabras de varias categorías a la vez.
-        OutlinedButton.icon(
-          icon: const Icon(Icons.shuffle),
-          label: const Text('Combinar categorías'),
-          onPressed: () => showCombineCategories(context),
-        ),
+        _CombineButton(onTap: () => showCombineCategories(context)),
         const SizedBox(height: 14),
         _grid([
           for (final category in GameCategory.themed)
@@ -475,6 +471,50 @@ class _NewCategoryCard extends StatelessWidget {
                   height: 1.1,
                   fontWeight: FontWeight.w600,
                   color: onBackdrop,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Botón "Combinar categorías": blanco, con el texto morado y una sombra
+/// suave, para que se distinga de las tarjetas.
+class _CombineButton extends StatelessWidget {
+  const _CombineButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      elevation: 4,
+      shadowColor: const Color(0x66000000),
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onTap,
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.shuffle, color: AppColors.purple, size: 26),
+              SizedBox(width: 10),
+              Flexible(
+                child: Text(
+                  'Combinar categorías',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: AppFonts.display,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.purple,
+                  ),
                 ),
               ),
             ],
