@@ -593,7 +593,8 @@ class _NewCategoryCard extends StatelessWidget {
                 ),
                 SizedBox(height: compact ? 6 : 10),
                 Text(
-                  'Nueva categoría',
+                  // En la pequeña, en dos renglones para que no se achique.
+                  compact ? 'Nueva\ncategoría' : 'Nueva categoría',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: AppFonts.display,

@@ -299,6 +299,6 @@ void main() {
     expect(mine, findsOneWidget);
     expect(find.text('1 categoría'), findsOneWidget);
     expect(find.text('Mi familia'), findsOneWidget);
-    expect(find.text('Nueva categoría'), findsOneWidget);
+    expect(find.text('Nueva\ncategoría'), findsOneWidget);
   });
 }

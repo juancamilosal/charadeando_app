@@ -32,7 +32,7 @@ void main() {
     expect(await store.load(), Backdrop.mostaza);
     expect(Backdrop.byName('no existe'), Backdrop.clasico);
     expect(Backdrop.clasico.gradient, isNotNull);
-    expect(Backdrop.clasico.cards, CardStyle.flat);
+    expect(Backdrop.clasico.cards, CardStyle.sticker);
   });
 
   test('en los fondos claros los textos van oscuros', () {

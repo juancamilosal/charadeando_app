@@ -21,7 +21,7 @@ enum Backdrop {
   clasico(
     'Clásico',
     Color(0xFFC21FD6),
-    CardStyle.flat,
+    CardStyle.sticker,
     gradient: [Color(0xFF7B2FF7), Color(0xFFC21FD6), Color(0xFFFF4F8B)],
   ),
   uva('Uva', Color(0xFF6A1BE0), CardStyle.sticker),
