@@ -117,7 +117,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
   /// castigos (en "Jugadores y app", la app llena los vacíos), la guarda para
   /// el final de la partida y la gira a pantalla completa. Aquí la ruleta
   /// no gira: solo muestra lo que se va configurando.
-  bool _beforeSpin() {
+  bool _beforeSpin(RouletteSpin spin) {
     final error = _error;
     if (error != null) {
       setState(() => _showErrors = true);
@@ -142,7 +142,9 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
       },
     );
     ref.read(punishmentStoreProvider).save(setup).ignore();
-    context.push(Routes.punishmentSpin, extra: setup.punishments);
+    // La de pantalla completa sigue el mismo giro: desde donde quedó y,
+    // si fue con el dedo, hacia el mismo lado.
+    context.push(Routes.punishmentSpin, extra: (setup.punishments, spin));
     return false;
   }
 
@@ -282,6 +284,7 @@ class PunishmentSpinScreen extends ConsumerStatefulWidget {
     this.groupName = '',
     this.punishments,
     this.random,
+    this.startWith,
   });
 
   static const defaultFields = 8;
@@ -293,6 +296,9 @@ class PunishmentSpinScreen extends ConsumerStatefulWidget {
   /// Los castigos con que se gira; si es null, los de la ruleta guardada.
   final List<String>? punishments;
   final Random? random;
+
+  /// El giro que empezó en la sección Ruleta, para seguirlo igual.
+  final RouletteSpin? startWith;
 
   @override
   ConsumerState<PunishmentSpinScreen> createState() =>
@@ -360,6 +366,7 @@ class _PunishmentSpinScreenState extends ConsumerState<PunishmentSpinScreen> {
                           punishments: punishments,
                           random: _random,
                           autoStart: true,
+                          startWith: widget.startWith,
                           onDone: () => context.pop(true),
                         ),
                 ),

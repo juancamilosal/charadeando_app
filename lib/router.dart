@@ -20,6 +20,7 @@ import 'screens/video_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/word_entry_screen.dart';
 import 'widgets/app_nav_bar.dart';
+import 'widgets/punishment_roulette.dart';
 
 abstract final class Routes {
   /// Solo se ve la primera vez que se abre la app, o con el botón "i" de
@@ -153,8 +154,10 @@ final List<RouteBase> appRoutes = [
   GoRoute(
     path: Routes.punishmentSpin,
     // Al final de la partida recibe el nombre del equipo; desde la sección
-    // Ruleta, los castigos con que se gira.
+    // Ruleta, los castigos con que se gira y cómo arrancó el giro.
     builder: (_, state) => switch (state.extra) {
+      (final List<String> punishments, final RouletteSpin spin) =>
+        PunishmentSpinScreen(punishments: punishments, startWith: spin),
       final List<String> punishments => PunishmentSpinScreen(
         punishments: punishments,
       ),

@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/scheduler.dart';
@@ -10,6 +11,18 @@ import '../providers/providers.dart';
 import '../theme.dart';
 
 enum _Spin { idle, spinning, stopping, result }
+
+/// Cómo arrancó un giro: desde qué ángulo y, si fue con el dedo, a qué
+/// velocidad (radianes por segundo; positiva en el sentido del reloj).
+/// Sirve para seguir el mismo giro en otra pantalla.
+class RouletteSpin {
+  const RouletteSpin({required this.angle, this.omega});
+
+  final double angle;
+
+  /// Null si se giró con el botón "Girar".
+  final double? omega;
+}
 
 /// Ruleta de castigos con su botón. "Girar" la pone a toda velocidad hasta
 /// que tocan "¡Parar!" (o pasan 30 segundos); entonces se elige el castigo
@@ -26,6 +39,7 @@ class PunishmentRoulette extends ConsumerStatefulWidget {
     this.random,
     this.onBeforeSpin,
     this.onResult,
+    this.startWith,
   });
 
   /// Un castigo por campo, en el sentido del reloj desde arriba.
@@ -43,7 +57,11 @@ class PunishmentRoulette extends ConsumerStatefulWidget {
 
   /// Se llama antes de girar; si devuelve falso, no gira (por ejemplo,
   /// porque faltan castigos).
-  final bool Function()? onBeforeSpin;
+  final bool Function(RouletteSpin spin)? onBeforeSpin;
+
+  /// Un giro que empezó en otra pantalla: la ruleta arranca en ese ángulo y,
+  /// con [autoStart], gira igual (con el dedo, hacia el mismo lado).
+  final RouletteSpin? startWith;
 
   /// Avisa si se está mostrando el castigo que salió (verdadero) o la
   /// ruleta vuelve a girar (falso).
@@ -108,8 +126,13 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
   @override
   void initState() {
     super.initState();
+    final start = widget.startWith;
+    if (start != null) _angle = start.angle;
     _lastField = Roulette.fieldAt(_angle, _fields);
-    if (widget.autoStart) _start();
+    if (widget.autoStart) {
+      final omega = start?.omega;
+      omega == null ? _start() : _fling(omega);
+    }
   }
 
   @override
@@ -120,7 +143,9 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
   }
 
   void _start() {
-    if (widget.onBeforeSpin?.call() == false) return;
+    if (widget.onBeforeSpin?.call(RouletteSpin(angle: _angle)) == false) {
+      return;
+    }
     if (_spin == _Spin.result) widget.onResult?.call(false);
     _ticker.stop();
     _reveal.reset();
@@ -233,7 +258,8 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
   }
 
   void _fling(double omega) {
-    if (widget.onBeforeSpin?.call() == false) return;
+    final spin = RouletteSpin(angle: _angle, omega: omega);
+    if (widget.onBeforeSpin?.call(spin) == false) return;
     if (_spin == _Spin.result) widget.onResult?.call(false);
     _ticker.stop();
     _reveal.reset();
@@ -270,11 +296,21 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
               child: LayoutBuilder(
                 builder: (context, box) {
                   _center = Offset(box.maxWidth / 2, box.maxHeight / 2);
-                  return GestureDetector(
+                  // Toma el dedo apenas toca la ruleta, por cualquier
+                  // lado: si no, la pantalla se quedaba con los arrastres
+                  // hacia arriba o abajo y solo giraba tomándola de arriba.
+                  return RawGestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    onPanStart: _dragStart,
-                    onPanUpdate: _dragUpdate,
-                    onPanEnd: _dragEnd,
+                    gestures: {
+                      _EagerPan:
+                          GestureRecognizerFactoryWithHandlers<_EagerPan>(
+                            _EagerPan.new,
+                            (pan) => pan
+                              ..onStart = _dragStart
+                              ..onUpdate = _dragUpdate
+                              ..onEnd = _dragEnd,
+                          ),
+                    },
                     child: CustomPaint(
                       size: Size.infinite,
                       painter: RoulettePainter(
@@ -564,4 +600,14 @@ class RoulettePainter extends CustomPainter {
   @override
   bool shouldRepaint(RoulettePainter old) =>
       old.angle != angle || old.punishments != punishments;
+}
+
+/// Arrastre que gana apenas el dedo toca, para que la lista de la pantalla
+/// no se quede con él.
+class _EagerPan extends PanGestureRecognizer {
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    super.addAllowedPointer(event);
+    resolve(GestureDisposition.accepted);
+  }
 }

@@ -251,7 +251,11 @@ la cámara frontal graba a los participantes para revivir las risas.
   la barra de abajo: solo la ruleta girando y "¡Parar!". La ruleta también
   se gira con el dedo: sigue al dedo y, si se suelta con impulso, gira
   hacia donde iba el dedo (a la derecha, en el sentido del reloj; a la
-  izquierda, al revés; hacia arriba o abajo, según el lado) y frena sola; la
+  izquierda, al revés; hacia arriba o abajo, según el lado) y frena sola; se
+  toma de cualquier lado (arriba, abajo o a los costados: la ruleta se queda
+  con el dedo apenas la toca, y la pantalla se desplaza tocando fuera de
+  ella). Si se empuja en la sección, la de pantalla completa arranca donde
+  quedó y gira hacia el mismo lado; la
   fuerza solo cambia cuánto tarda, el castigo sale igual al azar.
   "Listo" la deja quieta otra vez para seguir cambiándola. Se elige la
   cantidad de campos (de 2 a 10, la ruleta se divide en partes iguales) y de

@@ -38,10 +38,15 @@ Widget _section(Widget screen) => MaterialApp.router(
       GoRoute(path: '/', builder: (_, _) => screen),
       GoRoute(
         path: Routes.punishmentSpin,
-        builder: (_, state) => PunishmentSpinScreen(
-          punishments: state.extra! as List<String>,
-          random: Random(5),
-        ),
+        builder: (_, state) {
+          final (punishments, spin) =
+              state.extra! as (List<String>, RouletteSpin);
+          return PunishmentSpinScreen(
+            punishments: punishments,
+            startWith: spin,
+            random: Random(5),
+          );
+        },
       ),
     ],
   ),
@@ -276,6 +281,87 @@ void main() {
     await tester.tap(find.text('Otros castigos'));
     await tester.pump();
     expect(wheel(tester), isNot(first));
+  });
+
+  testWidgets('en la sección se gira desde cualquier lado, también hacia '
+      'arriba o abajo, y la grande sigue hacia el mismo lado', (tester) async {
+    mockHaptics(tester);
+    // Más baja: la sección se puede desplazar y aun así la ruleta toma el
+    // dedo.
+    tester.view.physicalSize = const Size(1080, 2400);
+    addTearDown(tester.view.reset);
+    final container = ProviderContainer(
+      overrides: [punishmentStoreProvider.overrideWithValue(MemoryStore())],
+    );
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: _section(RouletteScreen(random: Random(3))),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final painters = find.byWidgetPredicate(
+      (w) => w is CustomPaint && w.painter is RoulettePainter,
+    );
+    double angle() =>
+        (tester.widget<CustomPaint>(painters.last).painter! as RoulettePainter)
+            .angle;
+    final box = tester.getRect(painters.first);
+
+    // Por el lado derecho, hacia abajo: gira en el sentido del reloj (y la
+    // pantalla no se desplaza).
+    final scroll = tester.getTopLeft(painters.first);
+    final gesture = await tester.startGesture(
+      Offset(box.right - 20, box.center.dy),
+    );
+    for (var i = 0; i < 6; i++) {
+      await gesture.moveBy(const Offset(0, 15));
+      await tester.pump(const Duration(milliseconds: 20));
+    }
+    await tester.pump(const Duration(milliseconds: 300));
+    await gesture.up();
+    await tester.pump();
+    expect(angle(), greaterThan(0.3));
+    expect(tester.getTopLeft(painters.first), scroll);
+
+    // Por abajo, hacia la izquierda: sigue al dedo al revés del reloj.
+    final before = angle();
+    final g2 = await tester.startGesture(
+      Offset(box.center.dx, box.bottom - 20),
+    );
+    for (var i = 0; i < 6; i++) {
+      await g2.moveBy(const Offset(-15, 0));
+      await tester.pump(const Duration(milliseconds: 20));
+    }
+    await tester.pump(const Duration(milliseconds: 300));
+    await g2.up();
+    await tester.pump();
+    expect(angle(), lessThan(before - 0.3));
+
+    // La pantalla se desplaza tocando fuera de la ruleta. Con los castigos
+    // listos, un empujón a la izquierda abre la grande y gira hacia la
+    // izquierda, desde donde quedó.
+    await tester.dragFrom(const Offset(180, 760), const Offset(0, -400));
+    await tester.pumpAndSettle();
+    expect(find.text('Los pone la app').hitTestable(), findsOneWidget);
+    await tester.tap(find.text('Los pone la app'));
+    await tester.pumpAndSettle();
+    await tester.dragFrom(const Offset(180, 760), const Offset(0, 3000));
+    await tester.pumpAndSettle();
+    final left = angle();
+    await tester.flingFrom(
+      Offset(box.center.dx, box.bottom - 30),
+      const Offset(-200, 0),
+      2500,
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Frenando…'), findsOneWidget);
+    expect(angle(), lessThan(left - 0.5));
+    await wait(tester, const Duration(seconds: 12));
+    await tester.pumpAndSettle();
+    expect(find.text('¡Castigo!'), findsOneWidget);
   });
 
   Future<ProviderContainer> finalScreen(
