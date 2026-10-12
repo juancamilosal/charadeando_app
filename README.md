@@ -117,7 +117,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   sirena que lo alumbra), Acciones (un muñeco que corre: las piernas siguen un
   ciclo de carrera, mece el brazo, rebota y las líneas de velocidad pasan
   hacia atrás) y Lugares (el mapa
-  solo y el pin cae desde arriba, se aplasta, rebota y queda clavado).
+  solo y el pin cae una sola vez desde arriba, se aplasta, rebota y queda
+  clavado).
 - En la pantalla de categorías los dibujos no se mueven todos a la vez: se
   animan uno por uno, en orden (Libre, Animales, Geografía, Películas,
   Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos, Comida,

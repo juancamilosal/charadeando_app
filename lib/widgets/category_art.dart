@@ -35,7 +35,7 @@ class CategoryArt extends StatelessWidget {
     GameCategory.food: 33, // El taco ya con su salsa.
     GameCategory.professions: 0, // El bombero, sin la sirena.
     GameCategory.actions: 0, // El muñeco a media zancada.
-    GameCategory.places: 14, // El pin ya clavado en el mapa.
+    GameCategory.places: 17, // El pin ya clavado en el mapa.
   };
 
   final GameCategory category;
