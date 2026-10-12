@@ -248,12 +248,12 @@ void main() {
       await _pump(tester, Routes.turnResult, config: quick, setUp: played);
       expect(find.text('¡Tiempo!'), findsOneWidget);
       expect(find.text('Animales · Partida rápida'), findsOneWidget);
-      expect(find.text('aciertos'), findsOneWidget);
-      expect(find.text('2 correctos'), findsOneWidget);
+      expect(find.text('Aciertos'), findsOneWidget);
+      expect(find.text('2 Correctos'), findsOneWidget);
       // Los puntos de cada palabra, según la puntuación (por frase).
       expect(find.text('+1'), findsNWidgets(2));
       expect(find.text('0'), findsOneWidget);
-      expect(find.text('1 pase'), findsOneWidget);
+      expect(find.text('1 Pase'), findsOneWidget);
       expect(find.text('Otra rápida'), findsOneWidget);
       expect(find.text('Personalizada'), findsOneWidget);
       expect(find.text('Salir de la categoría'), findsOneWidget);

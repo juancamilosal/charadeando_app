@@ -96,7 +96,7 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
                         const SizedBox(height: 4),
                         BigScore(
                           value: best,
-                          label: best == 1 ? 'punto' : 'puntos',
+                          label: best == 1 ? 'Punto' : 'Puntos',
                         ),
                         if (game.inGroups) ...[
                           const SizedBox(height: 16),

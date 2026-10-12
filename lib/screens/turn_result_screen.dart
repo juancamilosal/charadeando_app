@@ -130,10 +130,10 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
                         // Por frase cada acierto es un punto: se cuentan
                         // aciertos.
                         quick || mode == ScoringMode.perPhrase
-                            ? BigScore(value: hits, label: 'aciertos')
+                            ? BigScore(value: hits, label: 'Aciertos')
                             : BigScore(
                                 value: turn.points(mode),
-                                label: 'puntos',
+                                label: 'Puntos',
                               ),
                         const SizedBox(height: 12),
                         HitPassPills(hits: hits, passes: passes),

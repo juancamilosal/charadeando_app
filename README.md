@@ -60,7 +60,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   "12 de 20", una barra de avance y, desde 10, "Ya pueden jugar" en verde;
   al llegar a 20 no deja agregar más, y "Continuar" lleva al turno.
 - Resultado de la partida rápida: "¡Tiempo!", "Animales · Partida rápida",
-  los aciertos en grande, las píldoras "✓ 9 correctos" y "↑ 3 pases", las
+  los aciertos en grande, las píldoras "✓ 9 Correctos" y "↑ 3 Pases", las
   palabras en un panel blanco, cada una en su fila con sus puntos
   según la puntuación (por frase, "+1"; por palabra, uno por cada palabra;
   las pasadas, "0") y ✅ o ⏭️ a la derecha, "🎬 Ver video" (blanco; mientras se arma, "Preparando video…
@@ -243,7 +243,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   se ve el fondo, y sin permiso de cámara se juega sin video. Al terminar el
   turno vuelve a vertical.
 - Resultado de cada turno: "¡Tiempo!" y "Los Primos · Ronda 2 de 3" (sin
-  grupos, "Ronda 2 de 3"), los puntos en grande ("aciertos" si la
+  grupos, "Ronda 2 de 3"), los puntos en grande ("Aciertos" si la
   puntuación es por frase), las píldoras de aciertos y pases, las palabras
   con ✅ y sus puntos ("+2") o ⏭️, y con grupos un marcador pequeño con el
   líder resaltado (la lista y las píldoras, igual que en la rápida). Abajo,

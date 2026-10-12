@@ -124,12 +124,12 @@ class HitPassPills extends StatelessWidget {
         pill(
           AppColors.green,
           Icons.check,
-          '$hits ${hits == 1 ? 'correcto' : 'correctos'}',
+          '$hits ${hits == 1 ? 'Correcto' : 'Correctos'}',
         ),
         pill(
           AppColors.orange,
           Icons.arrow_upward,
-          '$passes ${passes == 1 ? 'pase' : 'pases'}',
+          '$passes ${passes == 1 ? 'Pase' : 'Pases'}',
         ),
       ],
     );
