@@ -525,29 +525,15 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
           ),
         ),
         const SizedBox(height: 10),
-        if (config.tvMode) ...[
-          Row(
-            children: [
-              Icon(Icons.tv, size: 44, color: on),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'De espaldas al TV. El juez marca con los botones.',
-                  style: small.copyWith(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ],
-          ),
+        _HowToHint(color: on, tv: config.tvMode),
+        // Sin televisor no se puede empezar: se ve cómo conectarlo.
+        if (tvMissing) ...[
           const SizedBox(height: 8),
           const TvConnect(light: true),
-        ] else
-          _ForeheadHint(color: on),
+        ],
         const SizedBox(height: 10),
         Text(
-          _readyLabel(game),
+          _readyShortLabel(game),
           style: small.copyWith(
             color: on.withValues(alpha: 0.85),
             fontSize: 14,
@@ -643,9 +629,39 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
                                     foregroundColor: on,
                                   ),
                                 ),
-                                child: EndGameButton(
-                                  onPressed: _endGame,
-                                  compact: true,
+                                child: Wrap(
+                                  children: [
+                                    EndGameButton(
+                                      onPressed: _endGame,
+                                      compact: true,
+                                    ),
+                                    // Con el TV conectado, desconectarlo es
+                                    // un botón pequeño, junto a "Finalizar".
+                                    if (config.tvMode && !tvMissing)
+                                      TextButton.icon(
+                                        icon: const Icon(
+                                          Icons.cancel_presentation,
+                                          size: 18,
+                                        ),
+                                        label: const Text('Desconectar TV'),
+                                        style: TextButton.styleFrom(
+                                          minimumSize: const Size(0, 32),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                          ),
+                                          tapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
+                                          visualDensity: VisualDensity.compact,
+                                          textStyle: const TextStyle(
+                                            fontFamily: AppFonts.body,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                        onPressed: () =>
+                                            disconnectTv(context, ref),
+                                      ),
+                                  ],
                                 ),
                               ),
                               const SizedBox(height: 4),
@@ -752,6 +768,12 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   }
 
   /// "Ronda 1 de 3 · hasta que se acabe el tiempo", según las palabras.
+  /// La línea pequeña de antes del turno: "1 minuto · hasta 20 palabras"
+  /// o "Ronda 1 de 3".
+  String _readyShortLabel(GameState game) => game.config.quick
+      ? _readyLabel(game)
+      : game.config.roundLabel(game.round);
+
   String _readyLabel(GameState game) {
     if (game.config.quick) {
       final words = _deck.length < GameConfig.quickMaxWords
@@ -806,13 +828,15 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   }
 }
 
-/// Antes del turno: celular a la frente, abajo si aciertas y arriba para
-/// pasar.
-class _ForeheadHint extends StatelessWidget {
-  const _ForeheadHint({required this.color});
+/// Antes del turno, cómo se juega con un ícono, un título y dos
+/// píldoras: "Celular a la frente" (abajo si aciertas, arriba para pasar)
+/// o, en el Modo TV, "De espaldas al TV" (el juez marca con los botones).
+class _HowToHint extends StatelessWidget {
+  const _HowToHint({required this.color, required this.tv});
 
   /// Color de los textos y el ícono.
   final Color color;
+  final bool tv;
 
   @override
   Widget build(BuildContext context) {
@@ -841,23 +865,25 @@ class _ForeheadHint extends StatelessWidget {
     );
     return Row(
       children: [
-        // Una cara con el celular encima, en la frente.
         SizedBox(
           width: 60,
           height: 64,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              Icon(Icons.face, size: 52, color: on),
-              Positioned(
-                top: 0,
-                child: Transform.rotate(
-                  angle: 1.5708,
-                  child: Icon(Icons.smartphone, size: 30, color: on),
+          child: tv
+              ? Icon(Icons.tv, size: 52, color: on)
+              // Una cara con el celular encima, en la frente.
+              : Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: [
+                    Icon(Icons.face, size: 52, color: on),
+                    Positioned(
+                      top: 0,
+                      child: Transform.rotate(
+                        angle: 1.5708,
+                        child: Icon(Icons.smartphone, size: 30, color: on),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -865,7 +891,7 @@ class _ForeheadHint extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Celular a la frente',
+                tv ? 'De espaldas al TV' : 'Celular a la frente',
                 style: TextStyle(
                   fontFamily: AppFonts.display,
                   fontSize: 22,
@@ -877,10 +903,15 @@ class _ForeheadHint extends StatelessWidget {
               Wrap(
                 spacing: 8,
                 runSpacing: 6,
-                children: [
-                  pill(AppColors.green, Icons.arrow_downward, 'Acierto'),
-                  pill(AppColors.orange, Icons.arrow_upward, 'Pasar'),
-                ],
+                children: tv
+                    ? [
+                        pill(AppColors.green, Icons.check, 'Correcto'),
+                        pill(AppColors.orange, Icons.skip_next, 'Pasar'),
+                      ]
+                    : [
+                        pill(AppColors.green, Icons.arrow_downward, 'Acierto'),
+                        pill(AppColors.orange, Icons.arrow_upward, 'Pasar'),
+                      ],
               ),
             ],
           ),
