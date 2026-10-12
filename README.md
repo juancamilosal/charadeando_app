@@ -225,8 +225,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   con tres pasos numerados (Android o iPhone) y "Entendido"; con el TV
   conectado, "Modo TV activado · Sin video". El botón "Desconectar TV"
   detiene la transmisión (en Android) o muestra los pasos para hacerlo, y
-  todo vuelve a lo normal. Antes del turno, en el Modo TV, se ve el ícono
-  del TV con las píldoras "✓ Correcto" y "⏭ Pasar" (los botones del juez)
+  todo vuelve a lo normal. Antes del turno, en el Modo TV, se ven las
+  píldoras "✓ Correcto" y "⏭ Pasar" (los botones del juez)
   y, arriba junto a "Finalizar juego", un ícono para desconectar el TV; si
   el TV no está conectado, "¿Cómo conectar un TV?". Si el televisor se
   desconecta durante el turno, el juego queda en pausa y sigue al volver a
@@ -236,8 +236,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   del turno ya va en horizontal (en la rápida y en la personalizada) y es
   muy simple: de fondo, la cámara frontal en vivo (todavía sin grabar; se
   graba desde la cuenta regresiva) con un degradado oscuro a la izquierda y
-  arriba a la derecha "● Cámara"; a la izquierda, "Finalizar juego", el
-  grupo (o "Partida rápida"), el celular en la frente con las píldoras
+  arriba a la derecha "● Cámara"; a la izquierda, "Finalizar juego", a
+  quién le toca (solo con grupos: "Turno de Los Primos"), las píldoras
   "↓ Acierto" y "↑ Pasar", y "¡Listo!". Sin video o en Modo TV es la misma
   pantalla sobre el fondo de la app; mientras abre la cámara también se ve
   el fondo, y sin permiso de cámara se juega sin video. La vista de la

@@ -512,20 +512,21 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // En una mezcla, "Mezcla: Animales, Películas y Mi familia".
-        if (config.isMix) Text(config.categoryLabel, style: small),
-        Text(
-          config.quick ? 'Partida rápida' : game.turnTitle,
-          style: TextStyle(
-            fontFamily: AppFonts.display,
-            fontSize: 30,
-            height: 1.1,
-            fontWeight: FontWeight.w600,
-            color: on,
+        // Solo con grupos se dice a quién le toca.
+        if (game.inGroups && !config.quick) ...[
+          Text(
+            game.turnTitle,
+            style: TextStyle(
+              fontFamily: AppFonts.display,
+              fontSize: 30,
+              height: 1.1,
+              fontWeight: FontWeight.w600,
+              color: on,
+            ),
           ),
-        ),
-        const SizedBox(height: 10),
-        _HowToHint(color: on, tv: config.tvMode),
+          const SizedBox(height: 10),
+        ],
+        _HowToHint(tv: config.tvMode),
         // Sin televisor no se puede empezar: se ve cómo conectarlo.
         if (tvMissing) ...[
           const SizedBox(height: 8),
@@ -768,21 +769,18 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   }
 }
 
-/// Antes del turno, cómo se juega con un ícono y dos píldoras: el
-/// celular en la frente (abajo si aciertas, arriba para pasar) o, en el
-/// Modo TV, el televisor (el juez marca "Correcto" o "Pasar").
+/// Antes del turno, cómo se juega con dos píldoras: abajo si aciertas y
+/// arriba para pasar o, en el Modo TV, "Correcto" y "Pasar" (los botones
+/// del juez).
 class _HowToHint extends StatelessWidget {
-  const _HowToHint({required this.color, required this.tv});
+  const _HowToHint({required this.tv});
 
-  /// Color de los textos y el ícono.
-  final Color color;
   final bool tv;
 
   @override
   Widget build(BuildContext context) {
-    final on = color;
     Widget pill(Color color, IconData icon, String label) => Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(20),
@@ -790,58 +788,31 @@ class _HowToHint extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 18, color: Colors.white),
+          Icon(icon, size: 22, color: Colors.white),
           const SizedBox(width: 4),
           Text(
             label,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 15,
+              fontSize: 18,
               fontWeight: FontWeight.w800,
             ),
           ),
         ],
       ),
     );
-    return Row(
-      children: [
-        SizedBox(
-          width: 60,
-          height: 64,
-          child: tv
-              ? Icon(Icons.tv, size: 52, color: on)
-              // Una cara con el celular encima, en la frente.
-              : Stack(
-                  alignment: Alignment.bottomCenter,
-                  children: [
-                    Icon(Icons.face, size: 52, color: on),
-                    Positioned(
-                      top: 0,
-                      child: Transform.rotate(
-                        angle: 1.5708,
-                        child: Icon(Icons.smartphone, size: 30, color: on),
-                      ),
-                    ),
-                  ],
-                ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 6,
-            children: tv
-                ? [
-                    pill(AppColors.green, Icons.check, 'Correcto'),
-                    pill(AppColors.orange, Icons.skip_next, 'Pasar'),
-                  ]
-                : [
-                    pill(AppColors.green, Icons.arrow_downward, 'Acierto'),
-                    pill(AppColors.orange, Icons.arrow_upward, 'Pasar'),
-                  ],
-          ),
-        ),
-      ],
+    return Wrap(
+      spacing: 10,
+      runSpacing: 8,
+      children: tv
+          ? [
+              pill(AppColors.green, Icons.check, 'Correcto'),
+              pill(AppColors.orange, Icons.skip_next, 'Pasar'),
+            ]
+          : [
+              pill(AppColors.green, Icons.arrow_downward, 'Acierto'),
+              pill(AppColors.orange, Icons.arrow_upward, 'Pasar'),
+            ],
     );
   }
 }
