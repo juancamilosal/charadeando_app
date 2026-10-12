@@ -421,12 +421,14 @@ void main() {
     expect(find.text('Elige tu televisor'), findsOneWidget);
     expect(find.text('También sirve un cable HDMI'), findsOneWidget);
     // Avisa que si el TV ya duplica la pantalla, la app lo detecta sola…
-    expect(find.textContaining('ya está duplicando'), findsOneWidget);
-    expect(find.textContaining('"Modo TV activado"'), findsOneWidget);
+    expect(
+      find.text('¿Ya duplicas la pantalla? Se conecta solo.'),
+      findsOneWidget,
+    );
     // …y si se conecta con la ventana abierta, lo muestra ahí mismo.
     tv.add(true);
     await tester.pumpAndSettle();
-    expect(find.textContaining('El televisor está conectado'), findsOneWidget);
+    expect(find.text('¡TV conectado!'), findsOneWidget);
     await tester.tap(find.text('Entendido'));
     await tester.pumpAndSettle();
     expect(find.text('Conectar a un televisor'), findsNothing);

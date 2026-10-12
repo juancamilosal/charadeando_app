@@ -196,11 +196,8 @@ class _TvInfo extends StatelessWidget {
           Expanded(
             child: Text(
               connected
-                  ? '¡Listo! El televisor está conectado y el juego se ve '
-                        'en la pantalla grande.'
-                  : '¿Tu TV ya está duplicando la pantalla del celular? No '
-                        'tienes que hacer nada: la app lo detecta sola y aquí '
-                        'verás "Modo TV activado".',
+                  ? '¡TV conectado!'
+                  : '¿Ya duplicas la pantalla? Se conecta solo.',
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,

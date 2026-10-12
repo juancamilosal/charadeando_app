@@ -292,10 +292,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   celular. En la configuración, sin TV se ve "Jugar en un TV" y el enlace
   "¿Cómo conectar un TV?", que abre desde abajo "Conectar a un televisor"
   con tres pasos numerados (Android o iPhone) y "Entendido". Arriba de los
-  pasos, un recuadro avisa que si el TV ya está duplicando la pantalla no
-  hay que hacer nada: la app lo detecta sola y muestra "Modo TV activado";
-  si se conecta con la ventana abierta, el recuadro se pone verde con
-  "¡Listo! El televisor está conectado". Con el TV
+  pasos, un recuadro corto: "¿Ya duplicas la pantalla? Se conecta solo."
+  (la app lo detecta sola); si se conecta con la ventana abierta, se pone
+  verde con "¡TV conectado!". Con el TV
   conectado, "Modo TV activado · Sin video". El botón "Desconectar TV"
   detiene la transmisión (en Android) o muestra los pasos para hacerlo, y
   todo vuelve a lo normal. Antes del turno, en el Modo TV, se ven las
