@@ -149,13 +149,19 @@ class TurnWordsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final on = context.onBackdrop;
-    // Un panel translúcido sobre el fondo, con cada palabra en su fila.
+    // Un panel blanco, con cada palabra en su fila.
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: on.withValues(alpha: 0.08),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(24),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x22000000),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       child: entries.isEmpty
           ? Padding(
@@ -163,7 +169,10 @@ class TurnWordsPanel extends StatelessWidget {
               child: Text(
                 'No se marcó ninguna palabra.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: on, fontWeight: FontWeight.w700),
+                style: TextStyle(
+                  color: AppColors.ink,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             )
           : Column(
@@ -186,13 +195,13 @@ class _EntryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final on = context.onBackdrop;
+    const on = AppColors.ink;
     final hit = entry.outcome == WordOutcome.hit;
     final mode = this.mode;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: on.withValues(alpha: 0.10),
+        color: const Color(0xFFF4EEFD),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -200,7 +209,7 @@ class _EntryRow extends StatelessWidget {
           Expanded(
             child: Text(
               entry.word.text,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w800,
                 color: on,
