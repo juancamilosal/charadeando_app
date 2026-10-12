@@ -232,7 +232,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   debajo su configuración; la ruleta se va armando con lo que se elige: la
   cantidad de campos, lo que se escribe en cada castigo (los vacíos con
   "?") o los castigos del juego ("Otros castigos" los cambia). Al girar se
-  revisa que esté completa y, en "Mezclados", el juego llena los vacíos;
+  revisa que esté completa y, en "Jugadores y app", la app llena los vacíos;
   entonces la ruleta se abre a pantalla completa, sin la configuración ni
   la barra de abajo: solo la ruleta girando y "¡Parar!". La ruleta también
   se gira con el dedo: sigue al dedo y, si se suelta con impulso, gira
@@ -241,10 +241,10 @@ la cámara frontal graba a los participantes para revivir las risas.
   fuerza solo cambia cuánto tarda, el castigo sale igual al azar.
   "Listo" la deja quieta otra vez para seguir cambiándola. Se elige la
   cantidad de campos (de 2 a 10, la ruleta se divide en partes iguales) y de
-  dónde salen los castigos: "Los escribimos nosotros", "Que los ponga el
-  juego" (unos 30 castigos para todo público, en `services/punishments.dart`)
-  o "Mezclados" (el equipo escribe algunos y el juego completa los vacíos sin
-  repetir). Al girar, la ruleta queda guardada en el celular.
+  dónde salen los castigos, una opción por línea con lo que significa
+  debajo: "Los escriben los jugadores", "Los pone la app" (unos 30 castigos
+  para todo público, en `services/punishments.dart`) o "Jugadores y app" (el
+  equipo escribe algunos y la app completa los vacíos sin repetir). Al girar, la ruleta queda guardada en el celular.
 - Cómo gira: "Girar" la pone a toda velocidad y sigue sola hasta que tocan
   "¡Parar!" (o pasan 30 segundos). Entonces se elige el castigo al azar (el
   momento del toque no influye) y la ruleta frena durante 10 segundos con una

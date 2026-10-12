@@ -1,12 +1,24 @@
 /// De dónde salen los castigos de la ruleta.
 enum PunishmentSource {
-  own('Los escribimos nosotros'),
-  system('Que los ponga el juego'),
-  mixed('Mezclados');
+  own(
+    'Los escriben los jugadores',
+    'Ustedes escriben un castigo en cada campo.',
+  ),
+  system(
+    'Los pone la app',
+    'La app elige castigos divertidos para todo público.',
+  ),
+  mixed(
+    'Jugadores y app',
+    'Escriban los que quieran; la app completa los vacíos.',
+  );
 
-  const PunishmentSource(this.label);
+  const PunishmentSource(this.label, this.hint);
 
   final String label;
+
+  /// Qué pasa con esta opción, debajo del nombre.
+  final String hint;
 
   /// Si el grupo escribe castigos con este origen.
   bool get written => this != PunishmentSource.system;

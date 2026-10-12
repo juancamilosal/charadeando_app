@@ -111,7 +111,7 @@ abstract final class Roulette {
     return options.take(count).toList();
   }
 
-  /// Castigos de la ruleta en modo "Mezclados": los que escribió el grupo
+  /// Castigos de la ruleta en modo "Jugadores y app": los que escribió el equipo
   /// quedan en su campo y los vacíos los completa el juego, sin repetir.
   static List<String> completeMixed(
     List<String> written,

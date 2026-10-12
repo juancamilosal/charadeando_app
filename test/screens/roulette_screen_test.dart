@@ -159,7 +159,7 @@ void main() {
 
   testWidgets('la ruleta va arriba y muestra lo que se configura; al girar '
       'pide el origen y guarda la ruleta', (tester) async {
-    tester.view.physicalSize = const Size(1080, 3600);
+    tester.view.physicalSize = const Size(1080, 4800);
     addTearDown(tester.view.reset);
     final store = MemoryStore();
     final container = ProviderContainer(
@@ -192,7 +192,7 @@ void main() {
     expect(find.text('¡Parar!'), findsNothing);
     expect(store.saved, isNull);
 
-    await tester.tap(find.text('Mezclados'));
+    await tester.tap(find.text('Jugadores y app'));
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsNWidgets(3));
     await tester.enterText(find.byType(TextField).at(1), 'Cantar el himno');
@@ -215,10 +215,10 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('"Los escribimos nosotros" exige todos los castigos', (
+  testWidgets('"Los escriben los jugadores" exige todos los castigos', (
     tester,
   ) async {
-    tester.view.physicalSize = const Size(1080, 3600);
+    tester.view.physicalSize = const Size(1080, 4800);
     addTearDown(tester.view.reset);
     final store = MemoryStore();
     final container = ProviderContainer(
@@ -236,7 +236,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.remove));
       await tester.pump();
     }
-    await tester.tap(find.text('Los escribimos nosotros'));
+    await tester.tap(find.text('Los escriben los jugadores'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).first, 'Bailar');
     await tester.pump();
@@ -252,10 +252,10 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('"Que los ponga el juego" muestra sus castigos en la ruleta', (
+  testWidgets('"Los pone la app" muestra sus castigos en la ruleta', (
     tester,
   ) async {
-    tester.view.physicalSize = const Size(1080, 3600);
+    tester.view.physicalSize = const Size(1080, 4800);
     addTearDown(tester.view.reset);
     final container = ProviderContainer(
       overrides: [punishmentStoreProvider.overrideWithValue(MemoryStore())],
@@ -268,7 +268,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Que los ponga el juego'));
+    await tester.tap(find.text('Los pone la app'));
     await tester.pumpAndSettle();
     final first = wheel(tester);
     expect(first, hasLength(6));
@@ -351,7 +351,6 @@ void main() {
       find.text('Empataron con menos puntos: cada equipo gira su ruleta.'),
       findsOneWidget,
     );
-    await tester.ensureVisible(find.text('Girar'));
     await tester.tap(find.text('Girar'));
     await tester.pumpAndSettle();
     expect(find.text('Ruleta de Águilas'), findsOneWidget);
@@ -359,7 +358,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('¡Ruleta de castigo para Leones!'), findsOneWidget);
-    await tester.ensureVisible(find.text('Sin castigo'));
     await tester.tap(find.text('Sin castigo'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Ruleta de castigo'), findsNothing);

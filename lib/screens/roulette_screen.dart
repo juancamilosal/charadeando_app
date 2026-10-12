@@ -11,7 +11,6 @@ import '../router.dart';
 import '../theme.dart';
 import '../widgets/config_section.dart';
 import '../widgets/number_stepper.dart';
-import '../widgets/option_selector.dart';
 import '../widgets/play_background.dart';
 import '../widgets/punishment_roulette.dart';
 
@@ -104,7 +103,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
 
   String? get _error {
     final source = _source;
-    if (source == null) return '¿De dónde salen los castigos?';
+    if (source == null) return 'Elijan de dónde salen los castigos';
     if (source == PunishmentSource.own && _written.any((p) => p.isEmpty)) {
       return 'Escriban los $_fields castigos.';
     }
@@ -115,7 +114,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
   void _changed(VoidCallback change) => setState(change);
 
   /// "Girar" (o soltarla con impulso): revisa que esté completa, fija los
-  /// castigos (en "Mezclados", el juego llena los vacíos), la guarda para
+  /// castigos (en "Jugadores y app", la app llena los vacíos), la guarda para
   /// el final de la partida y la gira a pantalla completa. Aquí la ruleta
   /// no gira: solo muestra lo que se va configurando.
   bool _beforeSpin() {
@@ -211,22 +210,31 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
         icon: Icons.gavel,
         title: 'Castigos',
         children: [
-          OptionSelector<PunishmentSource>(
-            label: '¿De dónde salen los castigos?',
-            options: PunishmentSource.values,
-            selected: source,
-            labelOf: (s) => s.label,
-            description: switch (source) {
-              PunishmentSource.own => 'Escriban un castigo en cada campo.',
-              PunishmentSource.system =>
-                'El juego elige castigos divertidos para todo público.',
-              PunishmentSource.mixed =>
-                'Escriban los que quieran; el juego completa los vacíos.',
-              null => null,
-            },
-            errorText: source == null ? error : null,
-            onSelected: (s) => _changed(() => _source = s),
+          // Una opción por línea, con lo que significa debajo.
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 8,
+            children: [
+              Text(
+                '¿De dónde salen los castigos?',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+              for (final s in PunishmentSource.values)
+                _SourceOption(
+                  source: s,
+                  selected: s == source,
+                  onTap: () => _changed(() => _source = s),
+                ),
+            ],
           ),
+          if (source == null && error != null)
+            Text(
+              error,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.error,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           if (source == PunishmentSource.system)
             TextButton.icon(
               style: TextButton.styleFrom(foregroundColor: AppColors.purple),
@@ -357,6 +365,91 @@ class _PunishmentSpinScreenState extends ConsumerState<PunishmentSpinScreen> {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Una forma de elegir los castigos, en su propia línea: ícono, nombre y
+/// qué significa.
+class _SourceOption extends StatelessWidget {
+  const _SourceOption({
+    required this.source,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final PunishmentSource source;
+  final bool selected;
+  final VoidCallback onTap;
+
+  IconData get _icon => switch (source) {
+    PunishmentSource.own => Icons.edit_rounded,
+    PunishmentSource.system => Icons.auto_awesome_rounded,
+    PunishmentSource.mixed => Icons.join_inner_rounded,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final color = selected ? AppColors.purple : AppColors.ink;
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+          decoration: BoxDecoration(
+            color: selected
+                ? AppColors.purple.withValues(alpha: 0.08)
+                : const Color(0xFFF7F4FD),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: selected ? AppColors.purple : const Color(0xFFE4DCF5),
+              width: 2,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(_icon, color: color, size: 28),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      source.label,
+                      style: TextStyle(
+                        fontFamily: AppFonts.display,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: color,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      source.hint,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.ink.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                selected
+                    ? Icons.radio_button_checked_rounded
+                    : Icons.radio_button_unchecked_rounded,
+                color: selected ? AppColors.purple : const Color(0xFFB4B1E6),
+              ),
+            ],
           ),
         ),
       ),
