@@ -20,8 +20,10 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Inicio, "Cómo se juega" (`lib/screens/welcome_screen.dart`): siete
   pantallas sobre un degradado azul a violeta, que se pasan con el botón
   verde "Continuar" o deslizando, con puntos que dicen en cuál se está y
-  "Omitir" arriba a la derecha: 1) "Elige una categoría" con seis
-  categorías de ejemplo; 2) "Cómo empezar" con los amigos jugando; 3) "¿Lo
+  "Omitir" arriba a la derecha: 1) "Muchas categorías para jugar"
+  ("Animales, películas, deportes… y puedes crear las tuyas.") con las
+  categorías pasando en dos filas de derecha a izquierda, como una
+  vitrina: es solo informativa y no se pueden tocar; 2) "Cómo empezar" con los amigos jugando; 3) "¿Lo
   has acertado?" con el celular verde; 4) "¿No puedes adivinar?" con el
   celular naranja; 5) "Castiga al equipo que pierda" con la ruleta de
   castigos y algunos de ejemplo; 6) "Modo TV" con el celular del juez y

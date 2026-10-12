@@ -44,7 +44,7 @@ Future<void> _settle(WidgetTester tester) async {
   await tester.pump(const Duration(seconds: 1));
 }
 
-final _welcome = find.text('Elige una categoría');
+final _welcome = find.text('Muchas categorías para jugar');
 final _categories = find.text('Selección de categoría');
 
 void main() {

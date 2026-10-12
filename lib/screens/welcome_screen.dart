@@ -22,15 +22,12 @@ class WelcomeScreen extends ConsumerStatefulWidget {
   /// Fondo de las pantallas, el de las ilustraciones.
   static const gradient = [Color(0xFF2B3BF0), Color(0xFF5A12F0)];
 
-  /// Categorías de ejemplo de la primera pantalla.
-  static const sampleCategories = [
-    GameCategory.animals,
-    GameCategory.movies,
-    GameCategory.geography,
-    GameCategory.celebrities,
-    GameCategory.brands,
-    GameCategory.free,
-  ];
+  /// Categorías de la primera pantalla, en dos filas que se mueven.
+  static List<List<GameCategory>> get carouselRows {
+    final all = [...GameCategory.themed, GameCategory.free];
+    final half = (all.length / 2).ceil();
+    return [all.sublist(0, half), all.sublist(half)];
+  }
 
   @override
   ConsumerState<WelcomeScreen> createState() => _WelcomeScreenState();
@@ -51,9 +48,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     final touch = controller == PlayController.touch;
     return [
       (
-        'Elige una categoría',
-        'Selecciona la categoría que deseas jugar.',
-        const _CategoryGrid(),
+        'Muchas categorías para jugar',
+        'Animales, películas, deportes… y puedes crear las tuyas.',
+        const _CategoryCarousel(),
         'Continuar',
       ),
       (
@@ -198,12 +195,13 @@ class _PageView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (title, text, art, _) = page;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
+    const side = EdgeInsets.symmetric(horizontal: 24);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: side,
+          child: Text(
             title,
             textAlign: TextAlign.center,
             style: const TextStyle(
@@ -214,8 +212,11 @@ class _PageView extends StatelessWidget {
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 12),
-          Text(
+        ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: side,
+          child: Text(
             text,
             textAlign: TextAlign.center,
             style: const TextStyle(
@@ -225,10 +226,15 @@ class _PageView extends StatelessWidget {
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 16),
-          Expanded(child: art),
-        ],
-      ),
+        ),
+        const SizedBox(height: 16),
+        // El carrusel va de borde a borde; lo demás, con margen.
+        Expanded(
+          child: art is _CategoryCarousel
+              ? art
+              : Padding(padding: side, child: art),
+        ),
+      ],
     );
   }
 }
@@ -269,28 +275,131 @@ class _SampleRoulette extends StatelessWidget {
   }
 }
 
-/// Primera pantalla: algunas categorías que se pueden jugar.
-class _CategoryGrid extends StatelessWidget {
-  const _CategoryGrid();
+/// Primera pantalla: las categorías pasan en dos filas, de derecha a
+/// izquierda, como una vitrina. Es solo informativa: no se pueden tocar.
+class _CategoryCarousel extends StatelessWidget {
+  const _CategoryCarousel();
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, box) {
-        // Tres filas de dos, del tamaño que quepa.
-        final width = (box.maxWidth - 14) / 2;
-        final height = (box.maxHeight - 28) / 3;
-        return GridView.count(
-          crossAxisCount: 2,
-          mainAxisSpacing: 14,
-          crossAxisSpacing: 14,
-          childAspectRatio: width / height,
-          physics: const NeverScrollableScrollPhysics(),
-          children: [
-            for (final c in WelcomeScreen.sampleCategories) _CategoryTile(c),
-          ],
-        );
-      },
+    final rows = WelcomeScreen.carouselRows;
+    return IgnorePointer(
+      child: LayoutBuilder(
+        builder: (context, box) {
+          // Dos filas (cada una con 6 px de sombra) y 18 px entre ellas.
+          final height = ((box.maxHeight - 30) / 2).clamp(0.0, 170.0);
+          // Los bordes se desvanecen, para que se note que siguen.
+          return ShaderMask(
+            blendMode: BlendMode.dstIn,
+            shaderCallback: (rect) => const LinearGradient(
+              colors: [
+                Colors.transparent,
+                Colors.white,
+                Colors.white,
+                Colors.transparent,
+              ],
+              stops: [0, 0.12, 0.88, 1],
+            ).createShader(rect),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _MarqueeRow(
+                  categories: rows[0],
+                  height: height,
+                  period: const Duration(seconds: 22),
+                ),
+                const SizedBox(height: 18),
+                _MarqueeRow(
+                  categories: rows[1],
+                  height: height,
+                  period: const Duration(seconds: 28),
+                  // Empieza corrida, para que no queden alineadas.
+                  start: 0.4,
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Una fila de tarjetas que se mueve sin parar hacia la izquierda.
+class _MarqueeRow extends StatefulWidget {
+  const _MarqueeRow({
+    required this.categories,
+    required this.height,
+    required this.period,
+    this.start = 0,
+  });
+
+  final List<GameCategory> categories;
+  final double height;
+
+  /// Lo que tarda en pasar la fila completa.
+  final Duration period;
+
+  /// Dónde empieza, de 0 a 1.
+  final double start;
+
+  @override
+  State<_MarqueeRow> createState() => _MarqueeRowState();
+}
+
+class _MarqueeRowState extends State<_MarqueeRow>
+    with SingleTickerProviderStateMixin {
+  static const _gap = 14.0;
+
+  late final AnimationController _move = AnimationController(
+    vsync: this,
+    duration: widget.period,
+    value: widget.start,
+  )..repeat();
+
+  @override
+  void dispose() {
+    _move.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cardWidth = widget.height * 0.82;
+    final strip = widget.categories.length * (cardWidth + _gap);
+    final cards = [
+      for (final c in widget.categories)
+        Padding(
+          padding: const EdgeInsets.only(right: _gap),
+          child: SizedBox(
+            width: cardWidth,
+            height: widget.height,
+            child: _CategoryTile(c),
+          ),
+        ),
+    ];
+    return SizedBox(
+      height: widget.height + 6,
+      child: ClipRect(
+        child: OverflowBox(
+          alignment: Alignment.centerLeft,
+          minWidth: 0,
+          maxWidth: double.infinity,
+          child: AnimatedBuilder(
+            animation: _move,
+            builder: (context, child) => Transform.translate(
+              offset: Offset(-_move.value * strip, 0),
+              child: child,
+            ),
+            // Dos veces la fila: cuando la primera sale, la segunda ya
+            // ocupa su lugar.
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [...cards, ...cards],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

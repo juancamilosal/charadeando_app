@@ -43,7 +43,7 @@ void main() {
         ),
       );
       // "Cómo se juega" empieza por las categorías.
-      expect(find.text('Elige una categoría'), findsOneWidget);
+      expect(find.text('Muchas categorías para jugar'), findsOneWidget);
 
       await tester.tap(find.text('Omitir'));
       await settle(tester);
