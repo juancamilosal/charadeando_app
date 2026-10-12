@@ -9,11 +9,11 @@ typedef NavItem = (IconData icon, String label);
 /// Las pestañas, en el orden de las ramas del router. Categorías va en el
 /// centro y es la que se abre al iniciar.
 const navItems = <NavItem>[
-  (Icons.casino, 'Ruleta'),
-  (Icons.groups, 'Equipos'),
-  (Icons.grid_view, 'Categorías'),
-  (Icons.video_library, 'Videos'),
-  (Icons.settings, 'Ajustes'),
+  (Icons.casino_rounded, 'Ruleta'),
+  (Icons.groups_rounded, 'Equipos'),
+  (Icons.grid_view_rounded, 'Categorías'),
+  (Icons.videocam_rounded, 'Videos'),
+  (Icons.settings_rounded, 'Ajustes'),
 ];
 
 /// Las cinco pestañas con la barra de navegación abajo. Cada pestaña
@@ -37,53 +37,43 @@ class AppNavShell extends StatelessWidget {
   }
 }
 
-/// Barra de abajo del color del fondo elegido: la pestaña activa en el
-/// color de la app (amarillo sobre los fondos oscuros, morado sobre los
-/// claros) y las demás, más suaves.
+/// Barra de abajo blanca, con el borde de arriba curvo y una sombra
+/// suave. La pestaña activa va en morado y las demás, en lila claro; así se
+/// ve igual con todos los fondos.
 class AppNavBar extends StatelessWidget {
   const AppNavBar({super.key, required this.index, required this.onTap});
+
+  /// Cuánto sube el centro del borde curvo.
+  static const curve = 12.0;
+
+  static const active = AppColors.purple;
+  static const inactive = Color(0xFFB4B1E6);
 
   final int index;
   final ValueChanged<int> onTap;
 
   @override
   Widget build(BuildContext context) {
-    final backdrop = context.backdrop;
-    final light = backdrop.light;
-    final active = light ? AppColors.purple : AppColors.yellow;
-    final inactive = backdrop.onColor.withValues(alpha: light ? 0.55 : 0.65);
-    // En el Clásico, el color del medio del degradado.
-    final gradient = backdrop.gradient;
-    final color = gradient == null
-        ? backdrop.color
-        : Color.lerp(gradient.first, gradient.last, 0.5)!;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: Color.alphaBlend(
-          Colors.black.withValues(alpha: light ? 0.04 : 0.18),
-          color,
-        ),
-        border: Border(
-          top: BorderSide(color: backdrop.onColor.withValues(alpha: 0.12)),
-        ),
-      ),
+    return CustomPaint(
+      painter: const _CurvedBarPainter(),
       child: SafeArea(
         top: false,
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            children: [
-              for (var i = 0; i < navItems.length; i++)
-                Expanded(
-                  child: _NavButton(
-                    item: navItems[i],
-                    selected: i == index,
-                    activeColor: active,
-                    inactiveColor: inactive,
-                    onTap: () => onTap(i),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: SizedBox(
+            height: 70,
+            child: Row(
+              children: [
+                for (var i = 0; i < navItems.length; i++)
+                  Expanded(
+                    child: _NavButton(
+                      item: navItems[i],
+                      selected: i == index,
+                      onTap: () => onTap(i),
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -91,45 +81,58 @@ class AppNavBar extends StatelessWidget {
   }
 }
 
+/// El fondo blanco de la barra: el borde de arriba es un arco que sube en
+/// el centro.
+class _CurvedBarPainter extends CustomPainter {
+  const _CurvedBarPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const c = AppNavBar.curve;
+    // El arco sube por encima de la barra, sobre la pantalla.
+    final path = Path()
+      ..moveTo(0, 0)
+      ..quadraticBezierTo(size.width / 2, -2 * c, size.width, 0)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+    canvas.drawShadow(path, const Color(0x552B0A57), 8, false);
+    canvas.drawPath(path, Paint()..color = Colors.white);
+  }
+
+  @override
+  bool shouldRepaint(_CurvedBarPainter oldDelegate) => false;
+}
+
 class _NavButton extends StatelessWidget {
   const _NavButton({
     required this.item,
     required this.selected,
-    required this.activeColor,
-    required this.inactiveColor,
     required this.onTap,
   });
 
   final NavItem item;
   final bool selected;
-  final Color activeColor;
-  final Color inactiveColor;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? activeColor : inactiveColor;
+    final color = selected ? AppNavBar.active : AppNavBar.inactive;
     return Semantics(
       button: true,
       selected: selected,
       child: InkResponse(
         onTap: onTap,
-        radius: 36,
+        radius: 40,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AnimatedContainer(
+            AnimatedScale(
+              scale: selected ? 1.1 : 1,
               duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 3),
-              decoration: BoxDecoration(
-                color: selected
-                    ? activeColor.withValues(alpha: 0.18)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(item.$1, color: color, size: 24),
+              child: Icon(item.$1, color: color, size: 32),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 4),
             // En celulares angostos o con letra grande, se achica.
             FittedBox(
               fit: BoxFit.scaleDown,
@@ -137,8 +140,9 @@ class _NavButton extends StatelessWidget {
                 item.$2,
                 maxLines: 1,
                 style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: selected ? FontWeight.w800 : FontWeight.w700,
+                  fontFamily: AppFonts.display,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                   color: color,
                 ),
               ),

@@ -127,9 +127,21 @@ void main() {
     expect(find.text('Girar otra vez'), findsOneWidget);
   });
 
-  testWidgets('la sección pide elegir el origen y guarda la ruleta', (
-    tester,
-  ) async {
+  /// Los castigos que muestra la ruleta de la sección.
+  List<String> wheel(WidgetTester tester) => tester
+      .widget<PunishmentRoulette>(find.byType(PunishmentRoulette))
+      .punishments;
+
+  Future<void> spin(WidgetTester tester) async {
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, 3000));
+    await tester.pump();
+    await tester.tap(find.text('Girar'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+
+  testWidgets('la ruleta va arriba y muestra lo que se configura; al girar '
+      'pide el origen y guarda la ruleta', (tester) async {
     tester.view.physicalSize = const Size(1080, 3600);
     addTearDown(tester.view.reset);
     final store = MemoryStore();
@@ -144,42 +156,44 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    // La ruleta va arriba de la configuración.
+    expect(
+      tester.getTopLeft(find.byType(PunishmentRoulette)).dy,
+      lessThan(tester.getTopLeft(find.text('Campos de la ruleta')).dy),
+    );
+    expect(wheel(tester), hasLength(6));
 
-    // Seis campos por defecto; se bajan a tres.
+    // Seis campos por defecto; se bajan a tres y la ruleta cambia.
     for (var i = 0; i < 3; i++) {
       await tester.tap(find.byIcon(Icons.remove));
       await tester.pump();
     }
     expect(find.text('3'), findsOneWidget);
+    expect(wheel(tester), hasLength(3));
 
-    Future<void> next() async {
-      await tester.scrollUntilVisible(
-        find.text('Ir a la ruleta'),
-        300,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.ensureVisible(find.text('Ir a la ruleta'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Ir a la ruleta'));
-      await tester.pumpAndSettle();
-    }
-
-    await next();
-    expect(find.text('¿De dónde salen los castigos?'), findsOneWidget);
+    await spin(tester);
+    expect(find.text('¡Parar!'), findsNothing);
+    expect(store.saved, isNull);
 
     await tester.tap(find.text('Mezclados'));
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsNWidgets(3));
     await tester.enterText(find.byType(TextField).at(1), 'Cantar el himno');
-    await next();
+    await tester.pump();
+    // Lo escrito se ve en la ruleta; los vacíos, con "?".
+    expect(wheel(tester), ['?', 'Cantar el himno', '?']);
 
+    await spin(tester);
+    expect(find.text('¡Parar!'), findsOneWidget);
     final saved = store.saved!;
     expect(saved.source, PunishmentSource.mixed);
     expect(saved.fields, 3);
     expect(saved.punishments[1], 'Cantar el himno');
     expect(systemPunishments, contains(saved.punishments[0]));
     expect(systemPunishments, contains(saved.punishments[2]));
-    expect(find.text('Girar'), findsOneWidget);
+    // Gira con los castigos completos.
+    expect(wheel(tester), saved.punishments);
+    await tester.pumpWidget(const SizedBox());
   });
 
   testWidgets('"Los escribimos nosotros" exige todos los castigos', (
@@ -206,29 +220,43 @@ void main() {
     await tester.tap(find.text('Los escribimos nosotros'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).first, 'Bailar');
-    await tester.scrollUntilVisible(
-      find.text('Ir a la ruleta'),
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.ensureVisible(find.text('Ir a la ruleta'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Ir a la ruleta'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    expect(wheel(tester), ['Bailar', '?']);
+    await spin(tester);
     expect(find.text('Escriban los 2 castigos.'), findsOneWidget);
     expect(store.saved, isNull);
 
     await tester.enterText(find.byType(TextField).last, 'Saltar');
-    await tester.scrollUntilVisible(
-      find.text('Ir a la ruleta'),
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.ensureVisible(find.text('Ir a la ruleta'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Ir a la ruleta'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await spin(tester);
     expect(store.saved!.punishments, ['Bailar', 'Saltar']);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('"Que los ponga el juego" muestra sus castigos en la ruleta', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 3600);
+    addTearDown(tester.view.reset);
+    final container = ProviderContainer(
+      overrides: [punishmentStoreProvider.overrideWithValue(MemoryStore())],
+    );
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(home: RouletteScreen(random: Random(3))),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Que los ponga el juego'));
+    await tester.pumpAndSettle();
+    final first = wheel(tester);
+    expect(first, hasLength(6));
+    expect(first.every(systemPunishments.contains), isTrue);
+    await tester.tap(find.text('Otros castigos'));
+    await tester.pump();
+    expect(wheel(tester), isNot(first));
   });
 
   Future<ProviderContainer> finalScreen(

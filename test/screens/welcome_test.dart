@@ -83,6 +83,13 @@ void main() {
     // Desde Ajustes, en la barra de abajo.
     await tester.tap(find.text('Ajustes'));
     await _settle(tester);
+    await tester.scrollUntilVisible(
+      find.text('Cómo se juega'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(find.text('Cómo se juega'));
+    await _settle(tester);
     await tester.tap(find.text('Cómo se juega'));
     await _settle(tester);
     expect(_welcome, findsOneWidget);

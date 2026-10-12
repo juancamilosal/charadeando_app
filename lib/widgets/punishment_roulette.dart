@@ -22,6 +22,8 @@ class PunishmentRoulette extends ConsumerStatefulWidget {
     this.onSkip,
     this.autoStart = false,
     this.random,
+    this.onBeforeSpin,
+    this.onResult,
   });
 
   /// Un castigo por campo, en el sentido del reloj desde arriba.
@@ -36,6 +38,14 @@ class PunishmentRoulette extends ConsumerStatefulWidget {
   /// Empieza a girar apenas aparece.
   final bool autoStart;
   final Random? random;
+
+  /// Se llama antes de girar; si devuelve falso, no gira (por ejemplo,
+  /// porque faltan castigos).
+  final bool Function()? onBeforeSpin;
+
+  /// Avisa si se está mostrando el castigo que salió (verdadero) o la
+  /// ruleta vuelve a girar (falso).
+  final ValueChanged<bool>? onResult;
 
   /// Vueltas por segundo a toda velocidad.
   static const turnsPerSecond = 2.0;
@@ -100,6 +110,8 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
   }
 
   void _start() {
+    if (widget.onBeforeSpin?.call() == false) return;
+    if (_spin == _Spin.result) widget.onResult?.call(false);
     _ticker.stop();
     _reveal.reset();
     setState(() {
@@ -166,6 +178,7 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
       _spin = _Spin.result;
     });
     _reveal.forward();
+    widget.onResult?.call(true);
   }
 
   @override

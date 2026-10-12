@@ -25,10 +25,10 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Barra de navegación abajo (`StatefulShellRoute` de go_router, en
   `lib/widgets/app_nav_bar.dart`): "Ruleta", "Equipos", "Categorías" (en el
   centro; es la que abre al iniciar), "Videos" y "Ajustes", cada una con su
-  ícono y su nombre. Cada pestaña conserva su estado. La activa va en el
-  color de la app (amarillo sobre los fondos oscuros, morado sobre los
-  claros) y las demás, más suaves; la barra toma el color del fondo
-  elegido. Solo se ve en esas cinco pantallas: la bienvenida, la
+  ícono grande y su nombre. Cada pestaña conserva su estado. La barra es
+  blanca, con el borde de arriba curvo (sube un poco en el centro) y una
+  sombra suave; la activa va en morado y las demás, en lila claro, así se
+  ve igual con todos los fondos. Solo se ve en esas cinco pantallas: la bienvenida, la
   configuración, las palabras, el turno, los resultados, el video, Fondos y
   los editores se abren encima, sin la barra.
 - Categorías: arriba solo el título "Selección de categoría" (se achica si
@@ -216,12 +216,17 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Los nombres de las tarjetas nunca se parten a la mitad de una palabra: si
   no caben, se achica la letra y, como último recurso, se cortan con "…".
 - Ruleta de castigos: una sección propia ("Ruleta" en la barra de abajo; no
-  es una categoría de palabras). Se elige la
+  es una categoría de palabras). Arriba se ve la ruleta con "Girar" y
+  debajo su configuración; la ruleta se va armando con lo que se elige: la
+  cantidad de campos, lo que se escribe en cada castigo (los vacíos con
+  "?") o los castigos del juego ("Otros castigos" los cambia). Al girar se
+  revisa que esté completa y, en "Mezclados", el juego llena los vacíos.
+  "Listo" la deja quieta otra vez para seguir cambiándola. Se elige la
   cantidad de campos (de 2 a 10, la ruleta se divide en partes iguales) y de
   dónde salen los castigos: "Los escribimos nosotros", "Que los ponga el
   juego" (unos 30 castigos para todo público, en `services/punishments.dart`)
   o "Mezclados" (el equipo escribe algunos y el juego completa los vacíos sin
-  repetir). La ruleta queda guardada en el celular.
+  repetir). Al girar, la ruleta queda guardada en el celular.
 - Cómo gira: "Girar" la pone a toda velocidad y sigue sola hasta que tocan
   "¡Parar!" (o pasan 30 segundos). Entonces se elige el castigo al azar (el
   momento del toque no influye) y la ruleta frena durante 10 segundos con una
