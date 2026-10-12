@@ -22,9 +22,16 @@ class WelcomeScreen extends ConsumerStatefulWidget {
   /// Fondo de las pantallas, el de las ilustraciones.
   static const gradient = [Color(0xFF2B3BF0), Color(0xFF5A12F0)];
 
-  /// Categorías de la primera pantalla, en dos filas que se mueven.
+  /// Categorías de la primera pantalla, en dos filas que se mueven: las
+  /// que ya se pueden jugar (sin las de "Pronto" ni las especiales fuera
+  /// de temporada).
   static List<List<GameCategory>> get carouselRows {
-    final all = [...GameCategory.themed, GameCategory.free];
+    final today = DateTime.now();
+    final all = [
+      for (final c in GameCategory.themed)
+        if (c.available && c.shownOn(today)) c,
+      GameCategory.free,
+    ];
     final half = (all.length / 2).ceil();
     return [all.sublist(0, half), all.sublist(half)];
   }

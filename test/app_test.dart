@@ -47,7 +47,6 @@ void main() {
 
       await tester.tap(find.text('Omitir'));
       await settle(tester);
-      expect(find.text('Pronto'), findsNothing);
 
       await tester.tap(find.text('Libre'));
       await settle(tester);

@@ -145,6 +145,10 @@ final videoRendererProvider = Provider((ref) => VideoRenderer());
 /// antes de publicar.
 final premiumUnlockedProvider = Provider((ref) => true);
 
+/// La fecha de hoy. Las pruebas la cambian para ver las categorías de
+/// temporada (como Navidad) dentro y fuera de sus fechas.
+final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
+
 /// Categorías del juego que se desbloquean con premium.
 final premiumCategoriesProvider = Provider<Set<GameCategory>>(
   (ref) => {

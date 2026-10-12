@@ -152,3 +152,48 @@ validador y la instrucción de la rutina que crea tandas nuevas.
 
 La colección `palabras` tiene el campo `dificultad` (`FACIL`, `NORMAL`,
 `DIFICIL`) además de `frase` y `categoria`.
+
+### Códigos de las categorías
+
+Cada categoría de la app busca sus palabras en `palabras` con su código en
+el campo `categoria`. Las nueve nuevas todavía no tienen palabras: en la app
+salen con "Pronto" hasta que se carguen y se cambie `available` a `true` en
+`lib/models/category.dart`.
+
+| Categoría | Código |
+|---|---|
+| Libre | `LIBRE` |
+| Navidad (del 1 de diciembre al 6 de enero) | `NAVIDAD` |
+| Películas | `PELICULAS` |
+| Series y novelas | `SERIES_NOVELAS` |
+| Personajes | `PERSONAJES` |
+| Superhéroes | `SUPERHEROES` |
+| Dibujos animados | `DIBUJOS_ANIMADOS` |
+| Videojuegos | `VIDEOJUEGOS` |
+| Música y canciones | `MUSICA` |
+| Celebridades | `CELEBRIDADES` |
+| Geografía | `GEOGRAFIA` |
+| Lugares | `LUGARES` |
+| Personajes históricos | `PERSONAJES_HISTORICOS` |
+| Dichos y refranes | `DICHOS_REFRANES` |
+| Marcas | `MARCAS` |
+| Deportes | `DEPORTES` |
+| Equipos de fútbol | `EQUIPOS_FUTBOL` |
+| Animales | `ANIMALES` |
+| Comida | `COMIDA` |
+| Objetos | `OBJETOS` |
+| Profesiones | `PROFESIONES` |
+| Acciones | `ACCIONES` |
+
+### Una persona o personaje va en una sola categoría
+
+Para que la misma palabra no salga dos veces en una partida con categorías
+combinadas, cada persona o personaje se carga en una sola categoría:
+
+- Superhéroes (Spider-Man, Batman): solo en `SUPERHEROES`.
+- Dibujos animados (Bob Esponja, Peppa Pig): solo en `DIBUJOS_ANIMADOS`.
+- `PERSONAJES` queda para los de películas, libros y videojuegos (Harry
+  Potter, Shrek, Mario Bros).
+- Personas reales que hicieron historia (Simón Bolívar, Einstein): solo en
+  `PERSONAJES_HISTORICOS`. Los artistas actuales van en `CELEBRIDADES` o, si
+  son de la música, en `MUSICA`.

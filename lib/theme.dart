@@ -21,6 +21,7 @@ abstract final class AppColors {
   static const tomato = Color(0xFFE4572E);
   static const brown = Color(0xFFB5651D);
   static const forest = Color(0xFF2E8B57);
+  static const red = Color(0xFFD62839);
 
   /// Morado oscuro para textos sobre fondos claros.
   static const ink = Color(0xFF2B0A57);

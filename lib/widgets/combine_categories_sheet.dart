@@ -6,6 +6,7 @@ import '../providers/providers.dart';
 import '../services/services.dart';
 import '../theme.dart';
 import 'category_art.dart';
+import 'category_card.dart';
 
 /// Aviso de que algo se desbloquea con premium.
 void showPremiumNotice(BuildContext context, String what) {
@@ -32,7 +33,9 @@ Future<bool?> showCombineCategories(BuildContext context) {
 
 /// "Combinar categorías": se marcan dos o más categorías (del juego y
 /// propias) y se juega una partida con palabras de todas. Libre no está:
-/// sus frases son de cualquier tema. La última combinación se recuerda.
+/// sus frases son de cualquier tema. Las del juego van por secciones, como
+/// en la pantalla de categorías; las que están en "Pronto" no se pueden
+/// marcar. La última combinación se recuerda.
 class CombineCategoriesSheet extends ConsumerStatefulWidget {
   const CombineCategoriesSheet({super.key});
 
@@ -60,6 +63,14 @@ class _CombineCategoriesSheetState
   bool _locked(GameCategory c) =>
       !_premium && ref.read(premiumCategoriesProvider).contains(c);
 
+  /// Se puede marcar: tiene palabras, está en temporada y no está
+  /// bloqueada.
+  bool _canPick(GameCategory c) =>
+      c != GameCategory.free &&
+      c.available &&
+      c.shownOn(ref.read(clockProvider)()) &&
+      !_locked(c);
+
   List<CustomCategory> get _customCategories =>
       ref.read(customCategoriesProvider).value?.categories ?? const [];
 
@@ -76,7 +87,7 @@ class _CombineCategoriesSheetState
     setState(() {
       for (final code in saved.categories) {
         final c = GameCategory.byCode(code);
-        if (c != null && c != GameCategory.free && !_locked(c)) _games.add(c);
+        if (c != null && _canPick(c)) _games.add(c);
       }
       _custom.addAll(saved.custom.where(custom.contains));
     });
@@ -123,6 +134,7 @@ class _CombineCategoriesSheetState
   @override
   Widget build(BuildContext context) {
     ref.watch(customCategoriesProvider);
+    final today = ref.watch(clockProvider)();
     final custom = _customCategories;
     final count = _count;
     final ready = count >= CombineCategoriesSheet.minCategories;
@@ -170,21 +182,27 @@ class _CombineCategoriesSheetState
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(8, 8, 8, 16),
                   children: [
-                    const _SectionTitle('Categorías del juego'),
-                    for (final c in GameCategory.themed)
-                      _PickRow(
-                        leading: _GameArt(category: c),
-                        title: c.label,
-                        checked: _games.contains(c),
-                        locked: _locked(c),
-                        onTap: () => _locked(c)
-                            ? showPremiumNotice(context, 'jugar ${c.label}')
-                            : setState(
-                                () => _games.contains(c)
-                                    ? _games.remove(c)
-                                    : _games.add(c),
-                              ),
-                      ),
+                    for (final (section, categories) in GameCategory.sectionsOn(
+                      today,
+                    )) ...[
+                      _SectionTitle(section.title),
+                      for (final c in categories)
+                        _PickRow(
+                          leading: _GameArt(category: c),
+                          title: c.label,
+                          checked: _games.contains(c),
+                          enabled: c.available,
+                          soon: !c.available,
+                          locked: _locked(c),
+                          onTap: () => _locked(c)
+                              ? showPremiumNotice(context, 'jugar ${c.label}')
+                              : setState(
+                                  () => _games.contains(c)
+                                      ? _games.remove(c)
+                                      : _games.add(c),
+                                ),
+                        ),
+                    ],
                     if (custom.isNotEmpty) ...[
                       const SizedBox(height: 8),
                       const _SectionTitle('Mis categorías'),
@@ -280,6 +298,7 @@ class _PickRow extends StatelessWidget {
     this.subtitle,
     this.enabled = true,
     this.locked = false,
+    this.soon = false,
   });
 
   final Widget leading;
@@ -293,6 +312,9 @@ class _PickRow extends StatelessWidget {
 
   /// Premium sin desbloquear: lleva candado y al tocarla se avisa.
   final bool locked;
+
+  /// Todavía no tiene palabras: lleva "Pronto" en vez de la casilla.
+  final bool soon;
 
   @override
   Widget build(BuildContext context) {
@@ -332,7 +354,12 @@ class _PickRow extends StatelessWidget {
                   ],
                 ),
               ),
-              if (locked)
+              if (soon)
+                const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: CategoryBadge.soon(),
+                )
+              else if (locked)
                 const Padding(
                   padding: EdgeInsets.all(12),
                   child: Icon(Icons.lock, color: AppColors.ink),
@@ -372,9 +399,9 @@ class _GameArt extends StatelessWidget {
           ? Image.asset(
               CategoryArt.restAsset(category),
               errorBuilder: (_, _, _) =>
-                  Icon(category.icon, color: Colors.white),
+                  Icon(category.icon, color: category.onColor),
             )
-          : Icon(category.icon, color: Colors.white),
+          : Icon(category.icon, color: category.onColor),
     );
   }
 }

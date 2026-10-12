@@ -5,9 +5,9 @@ import '../theme.dart';
 import 'category_art.dart';
 
 /// Tarjeta de una categoría: el dibujo grande arriba y el nombre debajo
-/// (las propias, también cuántas palabras tienen). Su estilo (calcomanía, blanca o cómic) depende
-/// del fondo elegido. Sirve para las categorías del juego y para las
-/// propias.
+/// (las propias, también cuántas palabras tienen). Su estilo (calcomanía,
+/// blanca o cómic) depende del fondo elegido. Sirve para las categorías del
+/// juego y para las propias.
 class CategoryCard extends StatelessWidget {
   const CategoryCard({
     super.key,
@@ -18,17 +18,27 @@ class CategoryCard extends StatelessWidget {
     this.onTap,
     this.onLongPress,
     this.onMenu,
+    this.compact = false,
+    this.isNew = false,
+    this.soon = false,
   });
 
-  /// Tarjeta de una categoría del juego, con su GIF.
-  factory CategoryCard.game(GameCategory category, {VoidCallback? onTap}) =>
-      CategoryCard(
-        title: category.label,
-        color: category.color,
-        art: (size, onColor) =>
-            CategoryArt(category: category, size: size, color: onColor),
-        onTap: onTap,
-      );
+  /// Tarjeta de una categoría del juego, con su GIF (o su ícono, si todavía
+  /// no tiene), y sus etiquetas "Nueva" y "Pronto".
+  factory CategoryCard.game(
+    GameCategory category, {
+    VoidCallback? onTap,
+    bool compact = false,
+  }) => CategoryCard(
+    title: category.label,
+    color: category.color,
+    art: (size, onColor) =>
+        CategoryArt(category: category, size: size, color: onColor),
+    onTap: onTap,
+    compact: compact,
+    isNew: category.isNew,
+    soon: !category.available,
+  );
 
   /// Tarjeta de una categoría propia: su ícono, su color y cuántas palabras
   /// tiene.
@@ -59,6 +69,15 @@ class CategoryCard extends StatelessWidget {
 
   /// Botón de tres puntos arriba a la derecha (editar, borrar…).
   final VoidCallback? onMenu;
+
+  /// Más pequeña, para la cuadrícula de 3 columnas de las secciones.
+  final bool compact;
+
+  /// Etiqueta amarilla "Nueva" arriba a la izquierda.
+  final bool isNew;
+
+  /// Todavía no tiene palabras: el dibujo se ve apagado, con "Pronto".
+  final bool soon;
 
   /// Tamaño de letra más grande, hasta [maxSize], con el que [text] cabe en
   /// [maxLines] renglones de [width] sin partir ninguna palabra. Si ni con
@@ -98,15 +117,142 @@ class CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textScaler = MediaQuery.textScalerOf(context);
+    return CategoryCardFrame(
+      color: color,
+      onTap: onTap,
+      onLongPress: onLongPress,
+      builder: (onColor) => Stack(
+        children: [
+          Padding(
+            padding: compact
+                ? const EdgeInsets.fromLTRB(6, 10, 6, 10)
+                : const EdgeInsets.fromLTRB(8, 16, 8, 16),
+            child: LayoutBuilder(
+              // El dibujo y los textos crecen con la tarjeta, para que se
+              // vean igual en celulares angostos y anchos.
+              builder: (context, box) {
+                // El nombre usa todo el ancho; en las grandes, el dibujo y
+                // los tamaños se miden como si hubiera 16 de margen a cada
+                // lado.
+                final full = box.maxWidth;
+                final w = compact ? full : full - 16;
+                // Con el estilo que hereda (por ejemplo, el espacio entre
+                // letras del tema), para medirlo igual que se dibuja.
+                final titleStyle = DefaultTextStyle.of(context).style.merge(
+                  TextStyle(
+                    fontFamily: AppFonts.display,
+                    height: 1.1,
+                    fontWeight: FontWeight.w600,
+                    color: onColor,
+                  ),
+                );
+                // Nunca se parte una palabra: si no cabe, se achica la
+                // letra; como último recurso, se corta con "…".
+                final titleSize = fitTitleSize(
+                  title,
+                  titleStyle,
+                  width: full,
+                  maxSize: w * (compact ? 0.2 : 0.25),
+                  minSize: w * 0.12,
+                  textScaler: textScaler,
+                );
+                final picture = FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: art(w * (compact ? 0.68 : 0.75), onColor),
+                );
+                // La columna ocupa todo el ancho: con textos cortos
+                // quedaba angosta y pegada a la izquierda.
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      // Si los textos ocupan más (letra grande en el
+                      // celular), el dibujo se achica para caber.
+                      child: soon
+                          ? Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Opacity(opacity: 0.4, child: picture),
+                                const CategoryBadge.soon(),
+                              ],
+                            )
+                          : picture,
+                    ),
+                    SizedBox(height: compact ? 6 : 8),
+                    Text(
+                      title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: titleStyle.copyWith(fontSize: titleSize),
+                    ),
+                    if (subtitle case final subtitle?) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: w * 0.105,
+                          fontWeight: FontWeight.w700,
+                          color: onColor.withValues(alpha: 0.85),
+                        ),
+                      ),
+                    ],
+                  ],
+                );
+              },
+            ),
+          ),
+          if (isNew)
+            const Positioned(top: 6, left: 6, child: CategoryBadge.isNew()),
+          if (onMenu != null)
+            Positioned(
+              top: 4,
+              right: 4,
+              child: IconButton(
+                icon: Icon(Icons.more_vert, color: onColor),
+                tooltip: 'Opciones',
+                onPressed: onMenu,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// El marco de una tarjeta de categoría, con el estilo del fondo:
+/// calcomanía (borde blanco), blanca (borde del color), cómic (borde y
+/// sombra oscuros) o lisa. [builder] recibe el color del dibujo y los
+/// textos.
+class CategoryCardFrame extends StatelessWidget {
+  const CategoryCardFrame({
+    super.key,
+    required this.color,
+    required this.builder,
+    this.onTap,
+    this.onLongPress,
+  });
+
+  final Color color;
+  final Widget Function(Color onColor) builder;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+
+  @override
+  Widget build(BuildContext context) {
     final style = context.backdrop.cards;
     // En las tarjetas blancas, el dibujo y los textos van del color de la
-    // categoría.
+    // categoría (el amarillo, en naranja: sobre blanco no se lee); sobre el
+    // amarillo, oscuros.
     final onColor = style == CardStyle.white
-        ? color
+        ? (color == AppColors.yellow ? AppColors.orange : color)
         : color == AppColors.yellow
         ? AppColors.ink
         : Colors.white;
-    final textScaler = MediaQuery.textScalerOf(context);
 
     // Las de borde quedan un poco más adentro.
     final radius = style == CardStyle.flat ? 24.0 : 21.0;
@@ -150,91 +296,106 @@ class CategoryCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(radius),
           onTap: onTap,
           onLongPress: onLongPress,
-          child: Stack(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 16, 8, 16),
-                child: LayoutBuilder(
-                  // El dibujo y los textos crecen con la tarjeta, para que se
-                  // vean igual en celulares angostos y anchos.
-                  builder: (context, box) {
-                    // El nombre usa todo el ancho; el dibujo y los tamaños
-                    // se miden como si hubiera 16 de margen a cada lado.
-                    final full = box.maxWidth;
-                    final w = full - 16;
-                    // Con el estilo que hereda (por ejemplo, el espacio
-                    // entre letras del tema), para medirlo igual que se
-                    // dibuja.
-                    final titleStyle = DefaultTextStyle.of(context).style.merge(
-                      TextStyle(
-                        fontFamily: AppFonts.display,
-                        height: 1.1,
-                        fontWeight: FontWeight.w600,
-                        color: onColor,
-                      ),
-                    );
-                    // Nunca se parte una palabra: si no cabe, se achica la
-                    // letra; como último recurso, se corta con "…".
-                    final titleSize = fitTitleSize(
-                      title,
-                      titleStyle,
-                      width: full,
-                      maxSize: w * 0.25,
-                      minSize: w * 0.12,
-                      textScaler: textScaler,
-                    );
-                    // La columna ocupa todo el ancho: con textos cortos
-                    // quedaba angosta y pegada a la izquierda.
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          // Si los textos ocupan más (letra grande en el
-                          // celular), el dibujo se achica para caber.
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: art(w * 0.75, onColor),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: titleStyle.copyWith(fontSize: titleSize),
-                        ),
-                        if (subtitle case final subtitle?) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            subtitle,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: w * 0.105,
-                              fontWeight: FontWeight.w700,
-                              color: onColor.withValues(alpha: 0.85),
-                            ),
-                          ),
-                        ],
-                      ],
-                    );
-                  },
-                ),
-              ),
-              if (onMenu != null)
-                Positioned(
-                  top: 4,
-                  right: 4,
-                  child: IconButton(
-                    icon: Icon(Icons.more_vert, color: onColor),
-                    tooltip: 'Opciones',
-                    onPressed: onMenu,
+          child: builder(onColor),
+        ),
+      ),
+    );
+  }
+}
+
+/// Franja ancha de una categoría: el dibujo a la izquierda y, a la
+/// derecha, el nombre y su frase. Es la de Libre, arriba de las secciones.
+class CategoryStrip extends StatelessWidget {
+  const CategoryStrip({super.key, required this.category, this.onTap});
+
+  final GameCategory category;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return CategoryCardFrame(
+      color: category.color,
+      onTap: onTap,
+      builder: (onColor) => Padding(
+        padding: const EdgeInsets.fromLTRB(14, 12, 16, 12),
+        child: Row(
+          children: [
+            CategoryArt(category: category, size: 72, color: onColor),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    category.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: AppFonts.display,
+                      fontSize: 28,
+                      height: 1.1,
+                      fontWeight: FontWeight.w600,
+                      color: onColor,
+                    ),
                   ),
-                ),
-            ],
-          ),
+                  const SizedBox(height: 2),
+                  Text(
+                    category.description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: onColor.withValues(alpha: 0.85),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Etiqueta pequeña de una tarjeta: "Nueva" (amarilla) o "Pronto" (oscura).
+class CategoryBadge extends StatelessWidget {
+  const CategoryBadge.isNew({super.key})
+    : text = 'Nueva',
+      background = AppColors.yellow,
+      foreground = AppColors.ink;
+
+  const CategoryBadge.soon({super.key})
+    : text = 'Pronto',
+      background = AppColors.ink,
+      foreground = Colors.white;
+
+  final String text;
+  final Color background;
+  final Color foreground;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: const [
+          BoxShadow(color: Color(0x33000000), offset: Offset(0, 1)),
+        ],
+      ),
+      child: Text(
+        text,
+        // Siempre del mismo tamaño: es una etiqueta, no un texto para leer
+        // con letra grande.
+        textScaler: TextScaler.noScaling,
+        style: TextStyle(
+          fontFamily: AppFonts.display,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: foreground,
         ),
       ),
     );

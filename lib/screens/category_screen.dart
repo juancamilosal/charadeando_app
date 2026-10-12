@@ -13,18 +13,36 @@ import '../widgets/combine_categories_sheet.dart';
 import '../widgets/play_background.dart';
 import '../widgets/play_choice.dart';
 
-/// Elección de la categoría. "Todas" muestra Libre, las categorías del
-/// juego y la Ruleta de castigos; "Mías", las categorías que creó el
-/// usuario. Libre deja elegir entre palabras manuales y automáticas; las
-/// demás preguntan si se juega una partida rápida o personalizada.
+/// Elección de la categoría. "Todas" muestra Libre como una franja, el
+/// botón "Combinar categorías" y las categorías del juego por secciones
+/// (Especiales, Entretenimiento, Cultura general, Deportes y Clásicos);
+/// "Mías", las categorías que creó el usuario. Libre deja elegir entre
+/// palabras manuales y automáticas; las demás preguntan si se juega una
+/// partida rápida o personalizada.
 class CategoryScreen extends ConsumerWidget {
   const CategoryScreen({super.key});
 
-  /// Espacio entre tarjetas y proporción (ancho / alto) de cada una.
+  /// Espacio entre tarjetas y proporción (ancho / alto) de cada una, en
+  /// "Mías" (2 columnas) y en las secciones (3 columnas).
   static const gridSpacing = 14.0;
   static const cardAspect = 0.7;
+  static const sectionSpacing = 10.0;
+  static const sectionAspect = 0.74;
 
   void _choose(BuildContext context, WidgetRef ref, GameCategory category) {
+    if (!category.available) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              '¡Pronto! Estamos preparando las palabras de '
+              '${category.label}.',
+            ),
+          ),
+        );
+      return;
+    }
     final controller = ref.read(gameControllerProvider.notifier);
     final config = ref
         .read(gameControllerProvider)
@@ -96,27 +114,16 @@ class CategoryScreen extends ConsumerWidget {
   }
 
   Widget _allCategories(BuildContext context, WidgetRef ref) {
+    final today = ref.watch(clockProvider)();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Libre es una tarjeta igual a las demás, centrada y del tamaño de
-        // las de la cuadrícula.
-        LayoutBuilder(
-          builder: (context, box) {
-            final width = (box.maxWidth - gridSpacing) / 2;
-            return Center(
-              child: SizedBox(
-                width: width,
-                height: width / cardAspect,
-                child: CategoryCard.game(
-                  GameCategory.free,
-                  onTap: () => _choose(context, ref, GameCategory.free),
-                ),
-              ),
-            );
-          },
+        // Libre, aparte: una franja ancha.
+        CategoryStrip(
+          category: GameCategory.free,
+          onTap: () => _choose(context, ref, GameCategory.free),
         ),
-        const SizedBox(height: 28),
+        const SizedBox(height: 14),
         // Jugar con palabras de varias categorías a la vez.
         _CombineButton(
           onTap: () async {
@@ -126,15 +133,72 @@ class CategoryScreen extends ConsumerWidget {
             }
           },
         ),
-        const SizedBox(height: 14),
-        _grid([
-          for (final category in GameCategory.themed)
-            CategoryCard.game(
-              category,
-              onTap: () => _choose(context, ref, category),
-            ),
-        ]),
+        for (final (section, categories) in GameCategory.sectionsOn(today)) ...[
+          const SizedBox(height: 26),
+          CategorySectionHeader(section: section, count: categories.length),
+          const SizedBox(height: 10),
+          GridView.count(
+            crossAxisCount: 3,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: sectionSpacing,
+            crossAxisSpacing: sectionSpacing,
+            childAspectRatio: sectionAspect,
+            children: [
+              for (final category in categories)
+                CategoryCard.game(
+                  category,
+                  compact: true,
+                  onTap: () => _choose(context, ref, category),
+                ),
+            ],
+          ),
+        ],
         const SizedBox(height: 16),
+      ],
+    );
+  }
+}
+
+/// Título de una sección a la izquierda y, a la derecha, cuántas
+/// categorías tiene (o su nota, como "Solo por temporada").
+class CategorySectionHeader extends StatelessWidget {
+  const CategorySectionHeader({
+    super.key,
+    required this.section,
+    required this.count,
+  });
+
+  final CategorySection section;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final onBackdrop = context.onBackdrop;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Expanded(
+          child: Text(
+            section.title,
+            style: TextStyle(
+              fontFamily: AppFonts.display,
+              fontSize: 22,
+              height: 1.1,
+              fontWeight: FontWeight.w600,
+              color: onBackdrop,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          section.note ?? '$count ${count == 1 ? 'categoría' : 'categorías'}',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: onBackdrop.withValues(alpha: 0.8),
+          ),
+        ),
       ],
     );
   }
@@ -455,8 +519,9 @@ class _NewCategoryCard extends StatelessWidget {
   }
 }
 
-/// Botón "Combinar categorías": blanco, con el texto morado y una sombra
-/// suave, para que se distinga de las tarjetas.
+/// Botón "Combinar categorías": con borde punteado y un fondo apenas
+/// marcado, en el color de los textos del fondo, para que se distinga de
+/// las tarjetas.
 class _CombineButton extends StatelessWidget {
   const _CombineButton({required this.onTap});
 
@@ -464,37 +529,72 @@ class _CombineButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      elevation: 4,
-      shadowColor: const Color(0x66000000),
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
+    final onBackdrop = context.onBackdrop;
+    return CustomPaint(
+      foregroundPainter: _DashedBorder(color: onBackdrop, radius: 20),
+      child: Material(
+        color: onBackdrop.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
-        onTap: onTap,
-        child: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.shuffle, color: AppColors.purple, size: 26),
-              SizedBox(width: 10),
-              Flexible(
-                child: Text(
-                  'Combinar categorías',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: AppFonts.display,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.purple,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.shuffle, color: onBackdrop, size: 26),
+                const SizedBox(width: 10),
+                Flexible(
+                  child: Text(
+                    'Combinar categorías',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: AppFonts.display,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                      color: onBackdrop,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+/// Borde punteado redondeado.
+class _DashedBorder extends CustomPainter {
+  const _DashedBorder({required this.color, required this.radius});
+
+  final Color color;
+  final double radius;
+
+  static const _dash = 8.0;
+  static const _gap = 6.0;
+  static const _width = 2.5;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = (Offset.zero & size).deflate(_width / 2);
+    final path = Path()
+      ..addRRect(RRect.fromRectAndRadius(rect, Radius.circular(radius)));
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _width
+      ..strokeCap = StrokeCap.round;
+    for (final metric in path.computeMetrics()) {
+      for (var d = 0.0; d < metric.length; d += _dash + _gap) {
+        canvas.drawPath(metric.extractPath(d, d + _dash), paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashedBorder oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.radius != radius;
 }

@@ -72,16 +72,43 @@ la cámara frontal graba a los participantes para revivir las risas.
   con sus botones). "Apariencia": "Fondos". "Ayuda": "Cómo se juega". Se
   guardan en el celular (`ajustes.json`) y se aplican desde que abre la
   app. La animación de la bienvenida explica el controlador elegido.
-- Pantalla de categorías: Libre, Animales, Geografía, Películas,
-  Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos, Comida,
-  Profesiones, Acciones y Lugares (las 13 categorías de la colección
-  `palabras`, todas con su GIF). Cada tarjeta lleva solo el dibujo y el
-  nombre, sin descripción (las propias, también cuántas palabras tienen).
-  El nombre va grande y usa casi todo el ancho de la tarjeta; solo una
-  palabra muy larga ("Celebridades") se achica, porque nunca se parte.
-  Libre deja elegir entre palabras manuales (las escriben los equipos) y
-  automáticas (frases de la categoría LIBRE); las demás juegan con palabras
-  automáticas de su categoría.
+- Pantalla de categorías (`lib/screens/category_screen.dart`), pestaña
+  "Todas": arriba Libre como una franja ancha (el dibujo a la izquierda,
+  "Libre" y "Sus palabras o las nuestras" a la derecha, con el estilo de
+  tarjeta del fondo) y el botón "Combinar categorías" con borde punteado.
+  Después, las secciones, cada una con su título a la izquierda (Fredoka) y
+  cuántas categorías tiene a la derecha ("8 categorías"), y sus tarjetas en
+  una cuadrícula de 3 columnas, todas visibles:
+  1. Especiales ("Solo por temporada"): Navidad. Solo aparece cuando hay
+     una especial en temporada; Navidad va del 1 de diciembre al 6 de enero
+     y fuera de esas fechas no sale en ningún lado (ni en Combinar ni en la
+     bienvenida). Otra especial se agrega con su `Season` (mes y día de
+     inicio y fin; por ejemplo, Halloween del 1 al 31 de octubre).
+  2. Entretenimiento: Películas, Series y novelas, Personajes, Superhéroes,
+     Dibujos animados, Videojuegos, Música y canciones y Celebridades.
+  3. Cultura general: Geografía, Lugares, Personajes históricos, Dichos y
+     refranes y Marcas.
+  4. Deportes: Deportes y Equipos de fútbol.
+  5. Clásicos: Animales, Comida, Objetos, Profesiones y Acciones.
+
+  Cada categoría guarda su sección, su temporada, si es nueva (`isNew`) y
+  si ya tiene palabras (`available`) en `lib/models/category.dart`; el enum
+  va en el orden de la pantalla. Las nueve nuevas (Navidad, Series y
+  novelas, Personajes, Superhéroes, Dibujos animados, Videojuegos, Música y
+  canciones, Personajes históricos y Dichos y refranes) llevan la etiqueta
+  amarilla "Nueva" arriba a la izquierda y, mientras no tengan palabras en
+  Directus, "Pronto" sobre su ícono apagado: al tocarlas avisa "¡Pronto!
+  Estamos preparando las palabras de…" y no se juegan ni se combinan. Las
+  que todavía no tienen GIF muestran su ícono. Las tarjetas de las
+  secciones son más pequeñas: el dibujo arriba y el nombre debajo, grande,
+  en dos renglones si es largo ("Personajes históricos") y sin partir
+  palabras; solo una palabra muy larga ("Celebridades") se achica. En las
+  tarjetas amarillas el texto va oscuro (y en las blancas del fondo Crema,
+  naranja). Libre deja elegir entre palabras manuales (las escriben los
+  equipos) y automáticas (frases de la categoría LIBRE); las demás juegan
+  con palabras automáticas de su categoría. La pestaña "Mías" sigue igual.
+  Los códigos de Directus y la regla de en qué categoría va cada persona o
+  personaje están en `server/README.md`.
 - Partida rápida o personalizada: al tocar una categoría del juego, una de
   Mis categorías, al empezar a jugar en "Combinar categorías" o al elegir
   cómo salen las palabras en Libre, se abre desde abajo (del color del
@@ -127,10 +154,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   del juego) los GIF se repiten, salvo Lugares: el pin cae una vez y queda
   clavado.
 - En la pantalla de categorías los dibujos no se mueven todos a la vez: se
-  animan uno por uno, en orden (Libre, Animales, Geografía, Películas,
-  Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos, Comida,
-  Profesiones, Acciones y Lugares), con una pausa corta entre uno y otro,
-  y el ciclo vuelve a empezar. Los que no se ven en la
+  animan uno por uno, en orden de arriba a abajo (Libre y después sección
+  por sección), con una pausa corta entre uno y otro, y el ciclo vuelve a
+  empezar. Los que no se ven en la
   pantalla se saltan. Quietos muestran su mejor cuadro: la hoja con sus
   líneas, el balón de Deportes en el centro después de rebotar. Ese cuadro
   también está como imagen en `assets/img/categorias/reposo/`, así que la
@@ -194,12 +220,13 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Con las palabras escritas por los equipos, en el turno se ve cuántas
   faltan de toda la partida. Con las automáticas no se muestra, porque el
   turno dura hasta que se acabe el tiempo.
-- Combinar categorías: arriba de la cuadrícula de categorías, el botón
-  "Combinar categorías" abre desde abajo una ventana con las categorías del
-  juego (sin Libre) y "Mis categorías" (si hay alguna), cada una con su
-  dibujo o ícono y una casilla; se marca o desmarca tocando la fila. Las
-  premium bloqueadas llevan candado y avisan que necesitan premium; las
-  propias con menos de 10 palabras dicen "Faltan palabras" y no se marcan.
+- Combinar categorías: debajo de Libre, el botón "Combinar categorías"
+  abre desde abajo una ventana con las categorías del juego (sin Libre) con
+  los mismos títulos de sección y en el mismo orden que la pantalla, y al
+  final "Mis categorías" (si hay alguna), cada una con su dibujo o ícono y
+  una casilla; se marca o desmarca tocando la fila. Las de "Pronto" llevan
+  esa etiqueta en vez de la casilla y no se marcan. Las premium bloqueadas
+  llevan candado y avisan que necesitan premium; las propias con menos de 10 palabras dicen "Faltan palabras" y no se marcan.
   El botón de abajo, "Empezar a jugar · 3 categorías", se activa con 2 o
   más. La app recuerda la última combinación (`combinacion.json`). Al
   empezar va a la configuración de siempre, donde la partida se llama
