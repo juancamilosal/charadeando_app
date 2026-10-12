@@ -1,7 +1,6 @@
 import 'package:charadeando_app/models/models.dart';
 import 'package:charadeando_app/providers/providers.dart';
 import 'package:charadeando_app/router.dart';
-import 'package:charadeando_app/screens/category_intro_screen.dart';
 import 'package:charadeando_app/screens/category_screen.dart';
 import 'package:charadeando_app/screens/custom_category_screen.dart';
 import 'package:charadeando_app/services/services.dart';
@@ -54,10 +53,7 @@ Future<ProviderContainer> _pump(
         builder: (_, state) =>
             CustomCategoryScreen(category: state.extra as CustomCategory?),
       ),
-      GoRoute(
-        path: Routes.categoryIntro,
-        builder: (_, _) => const CategoryIntroScreen(),
-      ),
+      GoRoute(path: Routes.config, builder: (_, _) => const Text('Config')),
     ],
   );
   await tester.pumpWidget(
@@ -169,7 +165,8 @@ void main() {
     await tester.tap(find.text('Mi familia'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
-    expect(find.text('Jugar Mi familia'), findsOneWidget);
+    // Va directo a la configuración.
+    expect(find.text('Config'), findsOneWidget);
     final config = container.read(gameControllerProvider).config;
     expect(config.customCategory?.id, saved.id);
     expect(config.wordSource, WordSource.random);

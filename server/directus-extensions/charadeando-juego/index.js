@@ -57,6 +57,12 @@ const MAX_CREATE = 100;
 /// DirectusService.maxCount.
 const MAX_COUNT = 450;
 
+/// Idioma de las palabras que entrega el juego (campo `idioma` de la
+/// colección). En Directus es `ESPAÑOL`; también se acepta `ESPANOL`, sin ñ,
+/// como lo escriben los archivos de las tandas. Las que no tienen idioma son
+/// de las primeras tandas, todas en español.
+const IDIOMAS = ['ESPAÑOL', 'ESPANOL'];
+
 /// Valores del campo `dificultad` de la colección.
 const DIFICULTADES = ['FACIL', 'NORMAL', 'DIFICIL'];
 
@@ -404,7 +410,10 @@ export default {
 
       try {
         const query = (cats, conDificultad) => {
-          const q = database(COLLECTION).select('id', 'frase', 'categoria').orderByRaw('random()');
+          const q = database(COLLECTION)
+            .select('id', 'frase', 'categoria')
+            .where((w) => w.whereIn('idioma', IDIOMAS).orWhereNull('idioma'))
+            .orderByRaw('random()');
           if (cats) q.whereIn('categoria', cats);
           if (conDificultad && dificultad) q.where('dificultad', dificultad);
           return q;

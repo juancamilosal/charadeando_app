@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'models/models.dart';
 import 'screens/auto_words_screen.dart';
 import 'screens/backdrop_screen.dart';
-import 'screens/category_intro_screen.dart';
 import 'screens/category_screen.dart';
 import 'screens/config_screen.dart';
 import 'screens/custom_category_screen.dart';
@@ -23,7 +22,6 @@ abstract final class Routes {
   /// Categorías.
   static const welcome = '/bienvenida';
   static const categories = '/';
-  static const categoryIntro = '/categoria';
   static const freeMode = '/libre';
   static const config = '/config';
   static const words = '/words';
@@ -64,10 +62,6 @@ GoRouter createRouter({required bool Function() welcomeSeen}) => GoRouter(
   routes: [
     GoRoute(path: Routes.welcome, builder: (_, _) => const WelcomeScreen()),
     GoRoute(path: Routes.categories, builder: (_, _) => const CategoryScreen()),
-    GoRoute(
-      path: Routes.categoryIntro,
-      builder: (_, _) => const CategoryIntroScreen(),
-    ),
     GoRoute(path: Routes.freeMode, builder: (_, _) => const FreeModeScreen()),
     GoRoute(path: Routes.config, builder: (_, _) => const ConfigScreen()),
     GoRoute(path: Routes.words, builder: (_, _) => const WordEntryScreen()),

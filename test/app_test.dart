@@ -43,6 +43,8 @@ void main() {
         ),
       );
       expect(find.text('Charadeando'), findsOneWidget);
+      // La animación de cómo se juega está en la bienvenida.
+      expect(find.text('PALABRA SECRETA'), findsOneWidget);
 
       await tester.tap(find.text('Listo'));
       await settle(tester);
@@ -50,8 +52,7 @@ void main() {
 
       await tester.tap(find.text('Libre'));
       await settle(tester);
-      expect(find.text('¿Cómo se juega?'), findsOneWidget);
-      expect(find.text('PALABRA SECRETA'), findsOneWidget);
+      expect(find.text('Elige el tipo de juego'), findsOneWidget);
 
       await tapVisible(tester, 'Palabras manuales');
       expect(find.text('Configuración'), findsOneWidget);

@@ -10,6 +10,7 @@ import '../theme.dart';
 import '../widgets/config_section.dart';
 import '../widgets/number_stepper.dart';
 import '../widgets/option_selector.dart';
+import '../widgets/play_mode_selector.dart';
 import '../widgets/play_background.dart';
 import '../widgets/tv_connect.dart';
 import '../widgets/words_reminder.dart';
@@ -255,11 +256,11 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
           title: const Text('Configuración'),
           leading: BackButton(
             onPressed: () => context.go(
-              _config.isMix
-                  ? Routes.categories
-                  : _config.category == GameCategory.free && !_custom
+              _config.category == GameCategory.free &&
+                      !_custom &&
+                      !_config.isMix
                   ? Routes.freeMode
-                  : Routes.categoryIntro,
+                  : Routes.categories,
             ),
           ),
         ),
@@ -268,9 +269,26 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
             children: [
+              // Lo primero: sin grupos (viene elegido) o en grupos.
+              Text(
+                '¿Cómo van a jugar?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: AppFonts.display,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  color: context.onBackdrop,
+                ),
+              ),
+              const SizedBox(height: 10),
+              PlayModeSelector(
+                inGroups: _inGroups,
+                onChanged: (v) => _update(_config.copyWith(inGroups: v)),
+              ),
+              const SizedBox(height: 20),
               OutlinedButton.icon(
-                icon: Icon(Icons.auto_awesome),
-                label: Text('Configuración aleatoria'),
+                icon: const Icon(Icons.auto_awesome),
+                label: const Text('Configuración aleatoria'),
                 onPressed: _autoFill,
               ),
               SizedBox(height: 6),

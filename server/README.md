@@ -26,7 +26,10 @@ Directus 11 con PostgreSQL y Redis, desplegado con Coolify en el VPS.
     excluye hasta 500 ids que la app ya jugó. Si no alcanzan, completa con
     palabras no jugadas de las otras dificultades, luego con ya jugadas de
     la misma dificultad y por último con ya jugadas de cualquier
-    dificultad, siempre de la misma categoría. Con `categorias` (una lista
+    dificultad, siempre de la misma categoría. Solo entrega palabras en
+    español: `idioma` igual a `ESPAÑOL` (también `ESPANOL`, sin ñ) o sin
+    idioma (las primeras tandas).
+    Con `categorias` (una lista
     de hasta 20) reparte las `n` palabras en partes iguales entre ellas (el
     sobrante, de a una entre las primeras), con la misma lógica de
     dificultad y `excluir` para cada una; si alguna no alcanza, completa con

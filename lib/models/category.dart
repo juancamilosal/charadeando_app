@@ -28,7 +28,7 @@ enum GameCategory {
     Icons.public,
     AppColors.indigo,
     'GEOGRAFIA',
-    'Lugar',
+    'Geografía',
   ),
   movies(
     'Películas',
@@ -69,6 +69,46 @@ enum GameCategory {
     AppColors.purple,
     'EQUIPOS_FUTBOL',
     'Equipo de fútbol',
+  ),
+  objects(
+    'Objetos',
+    'Cosas de todos los días',
+    Icons.key,
+    AppColors.coral,
+    'OBJETOS',
+    'Objeto',
+  ),
+  food(
+    'Comida',
+    'Para chuparse los dedos',
+    Icons.lunch_dining,
+    AppColors.tomato,
+    'COMIDA',
+    'Comida',
+  ),
+  professions(
+    'Profesiones',
+    '¿A qué te dedicas?',
+    Icons.work,
+    AppColors.brown,
+    'PROFESIONES',
+    'Profesión',
+  ),
+  actions(
+    'Acciones',
+    '¡A actuar!',
+    Icons.directions_run,
+    AppColors.magenta,
+    'ACCIONES',
+    'Acción',
+  ),
+  places(
+    'Lugares',
+    'De la casa al fin del mundo',
+    Icons.place,
+    AppColors.forest,
+    'LUGARES',
+    'Lugar',
   );
 
   const GameCategory(

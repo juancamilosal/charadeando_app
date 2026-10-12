@@ -15,8 +15,8 @@ import '../widgets/roulette_banner.dart';
 
 /// Elección de la categoría. "Todas" muestra Libre, las categorías del
 /// juego y la Ruleta de castigos; "Mías", las categorías que creó el
-/// usuario. Libre explica el juego y deja elegir entre palabras manuales y
-/// automáticas; las demás explican el juego y siguen a la configuración.
+/// usuario. Libre deja elegir entre palabras manuales y automáticas; las
+/// demás van directo a la configuración.
 class CategoryScreen extends ConsumerWidget {
   const CategoryScreen({super.key});
 
@@ -29,7 +29,7 @@ class CategoryScreen extends ConsumerWidget {
     final config = ref
         .read(gameControllerProvider)
         .config
-        // Por defecto se juega sin grupos; se cambia en "¿Cómo se juega?".
+        // Por defecto se juega sin grupos; se cambia en la configuración.
         .copyWith(
           category: category,
           clearCustomCategory: true,
@@ -42,7 +42,7 @@ class CategoryScreen extends ConsumerWidget {
       return;
     }
     controller.configure(config.copyWith(wordSource: WordSource.random));
-    context.go(Routes.categoryIntro);
+    context.go(Routes.config);
   }
 
   @override
@@ -304,7 +304,7 @@ class _MyCategories extends ConsumerWidget {
             inGroups: false,
           ),
         );
-    context.go(Routes.categoryIntro);
+    context.go(Routes.config);
   }
 
   Future<void> _options(

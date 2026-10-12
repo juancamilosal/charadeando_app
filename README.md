@@ -17,21 +17,23 @@ la cámara frontal graba a los participantes para revivir las risas.
   sombra oscuros) en Mostaza. En los fondos claros los textos y botones van
   oscuros. Se guarda en el celular (`fondo.txt`) y se aplica en todas las
   pantallas desde que abre la app.
-- Inicio: la bienvenida (los pasos del juego y "Listo") se muestra solo la
+- Inicio: la bienvenida (la animación de cómo se juega, los pasos y
+  "Listo") se muestra solo la
   primera vez que se abre la app; al tocar "Listo" queda guardado en el
   celular y las demás veces la app abre directo en Categorías. Categorías no
   tiene botón de atrás: el botón "i" de arriba a la derecha vuelve a abrir
   la bienvenida y "Listo" regresa. "Volver al inicio" y salir del turno
   llevan a Categorías.
 - Pantalla de categorías: Libre, Animales, Geografía, Películas,
-  Celebridades, Marcas, Deportes y Equipos de fútbol. Libre deja elegir entre
-  palabras manuales (las escriben los grupos) y automáticas (frases de la
-  categoría LIBRE); las demás muestran su propio "¿Cómo se juega?" (una
-  explicación corta y una animación con palabras de la categoría) y siguen a la
+  Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos, Comida,
+  Profesiones, Acciones y Lugares (las 13 categorías de la colección
+  `palabras`; las 5 últimas, por ahora con su ícono en vez de GIF). Libre
+  deja elegir entre palabras manuales (las escriben los grupos) y
+  automáticas (frases de la categoría LIBRE); las demás van directo a la
   configuración con palabras automáticas de su categoría.
 - Cada categoría puede tener un dibujo animado (GIF de 256 px en
   `assets/img/categorias/`, con el nombre de la categoría) que se ve en su
-  tarjeta y en su "¿Cómo se juega?". Ya lo tienen todas: Libre (una hoja
+  tarjeta. Ya lo tienen: Libre (una hoja
   a la que se le van escribiendo las líneas), Animales, Geografía, Películas, Celebridades, Marcas,
   Deportes y Equipos de fútbol.
 - En la pantalla de categorías los dibujos no se mueven todos a la vez: se
@@ -50,17 +52,19 @@ la cámara frontal graba a los participantes para revivir las risas.
   elige en la configuración de las palabras automáticas, en Libre y en todas
   las categorías. Las palabras manuales no tienen dificultad. En Directus se
   conserva la columna `dificultad`.
-- "Sin grupos" o "En grupos": en "¿Cómo se juega?" de todas las categorías
-  (también Libre y las propias) se elige cómo van a jugar, con "Sin grupos"
-  marcado por defecto. Sin grupos solo salen las palabras y los jugadores
+- "Sin grupos" o "En grupos": es lo primero de la configuración ("¿Cómo
+  van a jugar?"), en todas las categorías, con "Sin grupos" marcado por
+  defecto. Sin grupos solo salen las palabras y los jugadores
   se organizan como quieran: la configuración no muestra Grupos ni Palabras
   por grupo, con palabras manuales se escribe una sola lista (mínimo 10) y
   el turno, los resultados y el final muestran solo los puntos en total,
   sin ganador ni ruleta de castigo.
 - Límites: de 2 a 4 grupos, de 1 a 10 rondas y de 30 segundos a 1:30 por
   turno.
-- Libre explica con una animación cómo se juega y deja elegir entre palabras
-  manuales y automáticas.
+- Libre deja elegir entre palabras manuales y automáticas y sigue a la
+  configuración.
+- Solo se juega con palabras en español: el servidor entrega las de
+  `idioma` `ESPAÑOL` (o `ESPANOL`) y las que no tienen idioma.
 - Palabras automáticas: en la configuración se eligen los grupos, las
   rondas (hasta 10) y el tiempo por turno. Cada turno dura hasta que se
   acabe el tiempo, sin límite de palabras: se piden las que alcanzaría un
@@ -166,7 +170,7 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Un solo celular, aciertos con movimiento: inclinar hacia abajo es acierto y
   hacia arriba es pasar.
 - En la configuración, la sección Modo TV va al final, después de Video.
-- Con un TV conectado, la animación de "¿Cómo se juega?" dice "El juez toca
+- Con un TV conectado, la animación de la bienvenida dice "El juez toca
   ¡Correcto! o Pasar en el celular." en vez de explicar cómo inclinarlo.
 - Modo TV, en todas las categorías: se activa solo cuando el celular duplica
   la pantalla en un TV (AirPlay, Chromecast o HDMI). Mientras está activo, la

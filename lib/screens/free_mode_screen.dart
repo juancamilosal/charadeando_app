@@ -8,12 +8,10 @@ import '../router.dart';
 import '../services/services.dart';
 import '../theme.dart';
 import '../widgets/category_art.dart';
-import '../widgets/how_to_play_demo.dart';
 import '../widgets/play_background.dart';
-import '../widgets/play_mode_selector.dart';
 
-/// Presentación de la categoría Libre: cómo se juega y de dónde salen las
-/// palabras.
+/// Categoría Libre: se elige de dónde salen las palabras, escritas por los
+/// grupos o automáticas, y se sigue a la configuración.
 class FreeModeScreen extends ConsumerWidget {
   const FreeModeScreen({super.key});
 
@@ -40,7 +38,6 @@ class FreeModeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final config = ref.watch(gameControllerProvider).config;
     final white = TextStyle(
       color: context.onBackdrop,
       fontSize: 16,
@@ -61,42 +58,7 @@ class FreeModeScreen extends ConsumerWidget {
               Center(
                 child: CategoryArt(category: GameCategory.free, size: 120),
               ),
-              Text(
-                '¿Cómo se juega?',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: AppFonts.display,
-                  fontSize: 32,
-                  fontWeight: FontWeight.w600,
-                  color: context.onBackdrop,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                'Una persona se pone el celular en la frente y su grupo le '
-                'describe la palabra sin decirla. ¡Adivinen todas las que '
-                'puedan antes de que se acabe el tiempo!',
-                textAlign: TextAlign.center,
-                style: white,
-              ),
-              const SizedBox(height: 16),
-              PlayPanel(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 20,
-                ),
-                child: HowToPlayDemo(
-                  tvMode: ref.watch(tvConnectedProvider).value ?? false,
-                ),
-              ),
-              const SizedBox(height: 16),
-              PlayModeSelector(
-                inGroups: config.inGroups,
-                onChanged: (v) => ref
-                    .read(gameControllerProvider.notifier)
-                    .configure(config.copyWith(inGroups: v)),
-              ),
-              SizedBox(height: 24),
+              const SizedBox(height: 8),
               Text(
                 'Elige el tipo de juego',
                 textAlign: TextAlign.center,

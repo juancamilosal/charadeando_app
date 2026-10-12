@@ -6,6 +6,7 @@ import '../providers/providers.dart';
 import '../router.dart';
 import '../theme.dart';
 import '../widgets/category_ticker.dart';
+import '../widgets/how_to_play_demo.dart';
 import '../widgets/play_background.dart';
 
 /// Bienvenida: se ve la primera vez que se abre la app y cuando se toca el
@@ -100,26 +101,43 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
                 const SizedBox(height: 24),
                 Expanded(
                   child: SingleChildScrollView(
-                    child: PlayPanel(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Column(
-                        children: [
-                          for (final (icon, color, text) in _steps)
-                            ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: color,
-                                foregroundColor: Colors.white,
-                                child: Icon(icon),
-                              ),
-                              title: Text(
-                                text,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // La animación de cómo se juega.
+                        PlayPanel(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 20,
+                          ),
+                          child: HowToPlayDemo(
+                            tvMode:
+                                ref.watch(tvConnectedProvider).value ?? false,
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        PlayPanel(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Column(
+                            children: [
+                              for (final (icon, color, text) in _steps)
+                                ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundColor: color,
+                                    foregroundColor: Colors.white,
+                                    child: Icon(icon),
+                                  ),
+                                  title: Text(
+                                    text,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                        ],
-                      ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

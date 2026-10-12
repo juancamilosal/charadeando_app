@@ -450,4 +450,31 @@ void main() {
     expect(config.inGroups, isFalse);
     expect(config.groupCount, 1);
   });
+
+  testWidgets('lo primero es elegir sin grupos o en grupos', (tester) async {
+    await pumpConfig(
+      tester,
+      config: const GameConfig(
+        category: GameCategory.animals,
+        wordSource: WordSource.random,
+        inGroups: false,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('¿Cómo van a jugar?'), findsOneWidget);
+    expect(
+      find.text('Solo salen las palabras: ustedes se organizan.'),
+      findsOneWidget,
+    );
+    expect(find.text('Grupos'), findsNothing);
+    // Va antes que todo lo demás.
+    expect(
+      tester.getTopLeft(find.text('¿Cómo van a jugar?')).dy,
+      lessThan(tester.getTopLeft(find.text('Configuración aleatoria')).dy),
+    );
+
+    await tester.tap(find.text('En grupos'));
+    await tester.pumpAndSettle();
+    expect(find.text('Grupos'), findsOneWidget);
+  });
 }
