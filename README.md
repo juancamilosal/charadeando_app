@@ -86,20 +86,20 @@ la cámara frontal graba a los participantes para revivir las risas.
   1. Clásicos: Animales, Comida, Objetos, Profesiones y Acciones.
   2. Entretenimiento: Películas, Series y novelas, Personajes, Superhéroes,
      Dibujos animados, Videojuegos, Música y canciones y Celebridades.
-  3. Especiales ("Solo por temporada"): Navidad. Solo aparece cuando hay
+  3. Cultura general: Geografía, Lugares, Personajes históricos, Dichos y
+     refranes y Marcas.
+  4. Deportes: Deportes y Equipos de fútbol.
+  5. Especiales ("Solo por temporada"): Navidad. Solo aparece cuando hay
      una especial en temporada; Navidad va del 1 de diciembre al 6 de enero
      y fuera de esas fechas no sale en ningún lado (ni en Combinar ni en la
      bienvenida). TEMPORAL: `allSeasonsProvider` está en `true` para probar
      Navidad todo el año; volver a `false` antes de publicar. Otra especial se agrega con su `Season` (mes y día de
      inicio y fin; por ejemplo, Halloween del 1 al 31 de octubre).
-  4. Cultura general: Geografía, Lugares, Personajes históricos, Dichos y
-     refranes y Marcas.
-  5. Deportes: Deportes y Equipos de fútbol.
   En esta pantalla las tarjetas de una sección van en tonos de un mismo
   color (del más oscuro al más claro, alternados en orden), para que no se
   vea tan cargada y cada tarjeta se distinga de la de al lado: Clásicos
-  verdes, Entretenimiento azules, Especiales rojos, Cultura general verdes
-  azulados y Deportes azules oscuros (`CategorySection.shades`). Libre va
+  verdes, Entretenimiento azules, Cultura general verdes azulados,
+  Deportes azules oscuros y Especiales rojos (`CategorySection.shades`). Libre va
   en amarillo, un color que no se repite abajo. En el resto de la app cada
   categoría conserva su color propio.
   6. Mis categorías (al final): la tarjeta "Nueva categoría" y las que creó

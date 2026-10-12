@@ -28,7 +28,6 @@ void main() {
         'VIDEOJUEGOS',
         'MUSICA',
         'CELEBRIDADES',
-        'NAVIDAD',
         'GEOGRAFIA',
         'LUGARES',
         'PERSONAJES_HISTORICOS',
@@ -36,6 +35,7 @@ void main() {
         'MARCAS',
         'DEPORTES',
         'EQUIPOS_FUTBOL',
+        'NAVIDAD',
       ],
     );
     expect(GameCategory.byCode('COMIDA'), GameCategory.food);
@@ -52,9 +52,9 @@ void main() {
       [
         'Clásicos',
         'Entretenimiento',
-        'Especiales',
         'Cultura general',
         'Deportes',
+        'Especiales',
       ],
     );
     expect(labels(CategorySection.special), ['Navidad']);

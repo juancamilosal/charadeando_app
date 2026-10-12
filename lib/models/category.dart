@@ -14,17 +14,17 @@ enum CategorySection {
     Color(0xFF2F80FF),
     Color(0xFF3A9BF0),
   ]),
-  special('Especiales', [
-    Color(0xFFB81D2E),
-    AppColors.red,
-    Color(0xFFE84855),
-  ], note: 'Solo por temporada'),
   culture('Cultura general', [
     Color(0xFF0B6E77),
     Color(0xFF0E8C96),
     Color(0xFF14A3A8),
   ]),
-  sports('Deportes', [Color(0xFF1B2F73), Color(0xFF1E3A8A), Color(0xFF2B4BA8)]);
+  sports('Deportes', [Color(0xFF1B2F73), Color(0xFF1E3A8A), Color(0xFF2B4BA8)]),
+  special('Especiales', [
+    Color(0xFFB81D2E),
+    AppColors.red,
+    Color(0xFFE84855),
+  ], note: 'Solo por temporada');
 
   const CategorySection(this.title, this.shades, {this.note});
 
@@ -69,8 +69,8 @@ class Season {
 /// Categorías de palabras. En "Libre" los grupos escriben las palabras o
 /// se descargan frases de la categoría LIBRE; las demás descargan palabras
 /// de su categoría en Directus. Van en el orden de la pantalla: Libre y
-/// después cada sección (Clásicos, Entretenimiento, Especiales, Cultura
-/// general y Deportes).
+/// después cada sección (Clásicos, Entretenimiento, Cultura general,
+/// Deportes y Especiales).
 enum GameCategory {
   free(
     'Libre',
@@ -214,20 +214,6 @@ enum GameCategory {
     section: CategorySection.entertainment,
   ),
 
-  // Especiales: solo se ven en su temporada.
-  christmas(
-    'Navidad',
-    'Novenas, regalos y buñuelos',
-    Icons.park,
-    AppColors.red,
-    'NAVIDAD',
-    'Palabra navideña',
-    section: CategorySection.special,
-    season: Season((12, 1), (1, 6)),
-    isNew: true,
-    available: false,
-  ),
-
   // Cultura general.
   geography(
     'Geografía',
@@ -297,6 +283,20 @@ enum GameCategory {
     'EQUIPOS_FUTBOL',
     'Equipo de fútbol',
     section: CategorySection.sports,
+  ),
+
+  // Especiales: solo se ven en su temporada.
+  christmas(
+    'Navidad',
+    'Novenas, regalos y buñuelos',
+    Icons.park,
+    AppColors.red,
+    'NAVIDAD',
+    'Palabra navideña',
+    section: CategorySection.special,
+    season: Season((12, 1), (1, 6)),
+    isNew: true,
+    available: false,
   );
 
   const GameCategory(
