@@ -4,15 +4,20 @@ import '../theme.dart';
 
 /// Secciones de la pantalla de categorías, en el orden en que se ven.
 enum CategorySection {
-  classics('Clásicos'),
-  entertainment('Entretenimiento'),
-  special('Especiales', note: 'Solo por temporada'),
-  culture('Cultura general'),
-  sports('Deportes');
+  classics('Clásicos', AppColors.green),
+  entertainment('Entretenimiento', AppColors.blue),
+  special('Especiales', AppColors.red, note: 'Solo por temporada'),
+  culture('Cultura general', AppColors.teal),
+  sports('Deportes', AppColors.navy);
 
-  const CategorySection(this.title, {this.note});
+  const CategorySection(this.title, this.color, {this.note});
 
   final String title;
+
+  /// Color de las tarjetas de la sección en la pantalla de categorías: un
+  /// color por sección, para que no se vea tan cargada. En el resto de la
+  /// app cada categoría usa su propio color.
+  final Color color;
 
   /// Texto a la derecha del título en vez de cuántas categorías tiene.
   final String? note;

@@ -24,14 +24,16 @@ class CategoryCard extends StatelessWidget {
   });
 
   /// Tarjeta de una categoría del juego, con su imagen (o su ícono, si todavía
-  /// no tiene), y sus etiquetas "Nueva" y "Pronto".
+  /// no tiene), y sus etiquetas "Nueva" y "Pronto". [color] cambia el de la
+  /// categoría (por ejemplo, por el de su sección).
   factory CategoryCard.game(
     GameCategory category, {
     VoidCallback? onTap,
     bool compact = false,
+    Color? color,
   }) => CategoryCard(
     title: category.label,
-    color: category.color,
+    color: color ?? category.color,
     art: (size, onColor) =>
         CategoryArt(category: category, size: size, color: onColor),
     onTap: onTap,

@@ -159,6 +159,8 @@ class CategoryScreen extends ConsumerWidget {
                 CategoryCard.game(
                   category,
                   compact: true,
+                  // Todas las de la sección, del mismo color.
+                  color: section.color,
                   onTap: () => _choose(context, ref, category),
                 ),
             ],
