@@ -31,6 +31,7 @@ class CategoryArt extends StatelessWidget {
     GameCategory.brands: 28,
     GameCategory.sports: 22, // El balón rebota y queda en el centro.
     GameCategory.soccerTeams: 0,
+    GameCategory.objects: 0, // Las llaves quietas, colgando del aro.
   };
 
   final GameCategory category;

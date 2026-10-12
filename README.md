@@ -73,7 +73,7 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Pantalla de categorías: Libre, Animales, Geografía, Películas,
   Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos, Comida,
   Profesiones, Acciones y Lugares (las 13 categorías de la colección
-  `palabras`; las 5 últimas, por ahora con su ícono en vez de GIF). Libre
+  `palabras`; las 4 últimas, por ahora con su ícono en vez de GIF). Libre
   deja elegir entre palabras manuales (las escriben los equipos) y
   automáticas (frases de la categoría LIBRE); las demás juegan con palabras
   automáticas de su categoría.
@@ -110,10 +110,12 @@ la cámara frontal graba a los participantes para revivir las risas.
   la categoría (una propia muestra su ícono en su color; una mezcla, los
   dibujos de las elegidas). Ya lo tienen: Libre (una hoja
   a la que se le van escribiendo las líneas), Animales, Geografía, Películas, Celebridades, Marcas,
-  Deportes y Equipos de fútbol.
+  Deportes, Equipos de fútbol y Objetos (unas llaves que se balancean
+  colgadas del aro y vuelven a quedar quietas).
 - En la pantalla de categorías los dibujos no se mueven todos a la vez: se
   animan uno por uno, en orden (Libre, Animales, Geografía, Películas,
-  Celebridades, Marcas, Deportes y Equipos de fútbol), con una pausa corta
+  Celebridades, Marcas, Deportes, Equipos de fútbol y Objetos), con una
+  pausa corta
   entre uno y otro, y el ciclo vuelve a empezar. Los que no se ven en la
   pantalla se saltan. Quietos muestran su mejor cuadro: la hoja con sus
   líneas, el balón de Deportes en el centro después de rebotar. Ese cuadro
