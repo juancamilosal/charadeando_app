@@ -12,6 +12,7 @@ import '../widgets/category_card.dart';
 import '../widgets/combine_categories_sheet.dart';
 import '../widgets/play_background.dart';
 import '../widgets/roulette_banner.dart';
+import '../widgets/settings_sheet.dart';
 
 /// Elección de la categoría. "Todas" muestra Libre, las categorías del
 /// juego y la Ruleta de castigos; "Mías", las categorías que creó el
@@ -49,30 +50,30 @@ class CategoryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final data = ref.watch(customCategoriesProvider);
     final tab = data.value?.tab ?? CategoryTab.all;
-    final onBackdrop = context.onBackdrop;
     return PlayBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text('Selección de categoría'),
+          // En celulares angostos se achica para caber con los íconos.
+          title: const FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text('Selección de categoría'),
+          ),
+          titleSpacing: 20,
           // Es la primera pantalla: no hay a dónde volver.
           automaticallyImplyLeading: false,
           actions: [
-            IconButton(
-              icon: const Icon(Icons.palette_outlined),
-              tooltip: 'Fondos',
-              onPressed: () => context.push(Routes.backdrops),
-            ),
             IconButton(
               icon: const Icon(Icons.video_library_outlined),
               tooltip: 'Mis videos',
               onPressed: () => context.push(Routes.myVideos),
             ),
             IconButton(
-              icon: const Icon(Icons.info_outline),
-              tooltip: 'Cómo se juega',
-              onPressed: () => context.push(Routes.welcome),
+              icon: const Icon(Icons.settings),
+              tooltip: 'Configuración',
+              onPressed: () => showSettingsMenu(context),
             ),
+            const SizedBox(width: 4),
           ],
         ),
         // Los dibujos de las categorías se animan uno por uno.
@@ -80,24 +81,14 @@ class CategoryScreen extends ConsumerWidget {
           child: SafeArea(
             top: false,
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
               children: [
-                Text(
-                  '¿Con qué palabras quieren jugar?',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: onBackdrop,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 14),
                 CategoryTabSelector(
                   selected: tab,
                   onChanged: (t) =>
                       ref.read(customCategoriesProvider.notifier).setTab(t),
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 20),
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 250),
                   child: tab == CategoryTab.all
@@ -139,18 +130,7 @@ class CategoryScreen extends ConsumerWidget {
             );
           },
         ),
-        const SizedBox(height: 24),
-        Text(
-          'Categorías',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: AppFonts.display,
-            color: context.onBackdrop,
-            fontSize: 38,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 28),
         // Jugar con palabras de varias categorías a la vez.
         _CombineButton(onTap: () => showCombineCategories(context)),
         const SizedBox(height: 14),

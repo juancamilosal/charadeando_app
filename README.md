@@ -8,7 +8,7 @@ la cámara frontal graba a los participantes para revivir las risas.
 
 - Diseño colorido con las fuentes Fredoka y Nunito (licencia OFL, en
   `assets/fonts`). Los colores no cambian con el modo oscuro del celular.
-- Fondos (botón de paleta arriba en Categorías): el usuario elige el fondo de
+- Fondos (en el menú de Configuración de Categorías): el usuario elige el fondo de
   la app: Clásico (el degradado de siempre, con las tarjetas de color sin
   borde; viene elegido) o uno de un solo color: Uva, Noche, Crema, Mostaza,
   Coral o Turquesa. Cada uno trae su estilo de tarjetas: calcomanía (borde
@@ -21,8 +21,18 @@ la cámara frontal graba a los participantes para revivir las risas.
   "Listo") se muestra solo la
   primera vez que se abre la app; al tocar "Listo" queda guardado en el
   celular y las demás veces la app abre directo en Categorías. Categorías no
-  tiene botón de atrás: el botón "i" de arriba a la derecha vuelve a abrir
-  la bienvenida y "Listo" regresa. "Volver al inicio" y salir del turno
+  tiene botón de atrás: "Cómo se juega", en el menú de Configuración, vuelve
+  a abrir la bienvenida y "Listo" regresa.
+- Barra de Categorías: el título "Selección de categoría" (se achica si no
+  cabe en un celular angosto) y solo dos íconos: Mis videos y Configuración.
+  Configuración abre un menú desde abajo, blanco para verse igual con
+  cualquier fondo, con "Fondos" ("Cambia el color de la app") y "Cómo se
+  juega" ("Ver la explicación otra vez"), cada una con su ícono en un cuadro
+  de color y una flecha. Las opciones están en `settingsOptions`
+  (`lib/widgets/settings_sheet.dart`), para sumar después sonido,
+  vibración, premium o privacidad. Debajo de la barra va directo el
+  selector "Todas | Mías", sin texto encima, y la cuadrícula no lleva el
+  título "Categorías". "Volver al inicio" y salir del turno
   llevan a Categorías.
 - Pantalla de categorías: Libre, Animales, Geografía, Películas,
   Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos, Comida,
@@ -210,7 +220,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   los resultados finales con los puntajes de ese momento (si el turno estaba
   en pausa, sus palabras marcadas cuentan). Si todavía no se jugó ningún
   turno, vuelve a Categorías.
-- Mis videos (botón de video arriba en Categorías): al tocar "Guardar" en
+- Mis videos (ícono de video en la barra de Categorías): al tocar "Guardar" en
   el video de un turno, se guarda en la galería (en Android, en
   `Movies/Charadeando`) y aparece en Mis videos, del más nuevo al más
   viejo, con su miniatura, el grupo y los puntos del turno, la categoría,

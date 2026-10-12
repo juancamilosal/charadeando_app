@@ -68,7 +68,7 @@ void main() {
     expect(_welcome, findsNothing);
   });
 
-  testWidgets('el botón "i" abre la bienvenida y "Listo" vuelve', (
+  testWidgets('"Cómo se juega" abre la bienvenida y "Listo" vuelve', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1080, 2400);
@@ -80,7 +80,10 @@ void main() {
     // Es la primera pantalla: no tiene botón de atrás.
     expect(find.byType(BackButton), findsNothing);
 
-    await tester.tap(find.byTooltip('Cómo se juega'));
+    // Desde el menú de configuración.
+    await tester.tap(find.byTooltip('Configuración'));
+    await _settle(tester);
+    await tester.tap(find.text('Cómo se juega'));
     await _settle(tester);
     expect(_welcome, findsOneWidget);
 
