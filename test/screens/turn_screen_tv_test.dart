@@ -75,7 +75,7 @@ void main() {
 
     tv.add(true);
     await tester.pumpAndSettle();
-    expect(find.text('Desconectar TV'), findsOneWidget);
+    expect(find.byTooltip('Desconectar TV'), findsOneWidget);
 
     await tester.tap(find.text('¡Listo!'));
     await countdown(tester);

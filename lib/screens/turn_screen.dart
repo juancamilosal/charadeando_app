@@ -531,14 +531,6 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
           const SizedBox(height: 8),
           const TvConnect(light: true),
         ],
-        const SizedBox(height: 10),
-        Text(
-          _readyShortLabel(game),
-          style: small.copyWith(
-            color: on.withValues(alpha: 0.85),
-            fontSize: 14,
-          ),
-        ),
         if (_cameraError != null) ...[
           const SizedBox(height: 6),
           Text(_cameraError!, style: small.copyWith(color: AppColors.yellow)),
@@ -580,26 +572,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
                   ),
                 ),
               ),
-            ] else if (wide && (config.tvMode || !_records))
-              // Sin cámara, a la derecha el TV o la cámara tachada.
-              Align(
-                alignment: const Alignment(0.6, 0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      config.tvMode ? Icons.tv : Icons.videocam_off,
-                      size: 96,
-                      color: on.withValues(alpha: 0.35),
-                    ),
-                    if (!config.tvMode)
-                      Text(
-                        'Jugando sin grabar',
-                        style: small.copyWith(color: on.withValues(alpha: 0.6)),
-                      ),
-                  ],
-                ),
-              ),
+            ],
             SafeArea(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
@@ -638,26 +611,13 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
                                     // Con el TV conectado, desconectarlo es
                                     // un botón pequeño, junto a "Finalizar".
                                     if (config.tvMode && !tvMissing)
-                                      TextButton.icon(
+                                      IconButton(
                                         icon: const Icon(
                                           Icons.cancel_presentation,
-                                          size: 18,
                                         ),
-                                        label: const Text('Desconectar TV'),
-                                        style: TextButton.styleFrom(
-                                          minimumSize: const Size(0, 32),
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 10,
-                                          ),
-                                          tapTargetSize:
-                                              MaterialTapTargetSize.shrinkWrap,
-                                          visualDensity: VisualDensity.compact,
-                                          textStyle: const TextStyle(
-                                            fontFamily: AppFonts.body,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
+                                        color: on,
+                                        tooltip: 'Desconectar TV',
+                                        visualDensity: VisualDensity.compact,
                                         onPressed: () =>
                                             disconnectTv(context, ref),
                                       ),
@@ -768,26 +728,6 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   }
 
   /// "Ronda 1 de 3 · hasta que se acabe el tiempo", según las palabras.
-  /// La línea pequeña de antes del turno: "1 minuto · hasta 20 palabras"
-  /// o "Ronda 1 de 3".
-  String _readyShortLabel(GameState game) => game.config.quick
-      ? _readyLabel(game)
-      : game.config.roundLabel(game.round);
-
-  String _readyLabel(GameState game) {
-    if (game.config.quick) {
-      final words = _deck.length < GameConfig.quickMaxWords
-          ? _deck.length
-          : GameConfig.quickMaxWords;
-      return '1 minuto · hasta $words '
-          '${words == 1 ? 'palabra' : 'palabras'}';
-    }
-    final round = game.config.roundLabel(game.round);
-    final left = _wordsLeft(game);
-    if (left == null) return '$round · hasta que se acabe el tiempo';
-    return '$round · ${WordCard.wordsLeftLabel(left)} en total';
-  }
-
   /// Lo que se ve en el televisor, con los botones del juez.
   Widget _tvView(GameState game) {
     return TvTurnView(
@@ -828,9 +768,9 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   }
 }
 
-/// Antes del turno, cómo se juega con un ícono, un título y dos
-/// píldoras: "Celular a la frente" (abajo si aciertas, arriba para pasar)
-/// o, en el Modo TV, "De espaldas al TV" (el juez marca con los botones).
+/// Antes del turno, cómo se juega con un ícono y dos píldoras: el
+/// celular en la frente (abajo si aciertas, arriba para pasar) o, en el
+/// Modo TV, el televisor (el juez marca "Correcto" o "Pasar").
 class _HowToHint extends StatelessWidget {
   const _HowToHint({required this.color, required this.tv});
 
@@ -887,33 +827,18 @@ class _HowToHint extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                tv ? 'De espaldas al TV' : 'Celular a la frente',
-                style: TextStyle(
-                  fontFamily: AppFonts.display,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                  color: on,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Wrap(
-                spacing: 8,
-                runSpacing: 6,
-                children: tv
-                    ? [
-                        pill(AppColors.green, Icons.check, 'Correcto'),
-                        pill(AppColors.orange, Icons.skip_next, 'Pasar'),
-                      ]
-                    : [
-                        pill(AppColors.green, Icons.arrow_downward, 'Acierto'),
-                        pill(AppColors.orange, Icons.arrow_upward, 'Pasar'),
-                      ],
-              ),
-            ],
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: tv
+                ? [
+                    pill(AppColors.green, Icons.check, 'Correcto'),
+                    pill(AppColors.orange, Icons.skip_next, 'Pasar'),
+                  ]
+                : [
+                    pill(AppColors.green, Icons.arrow_downward, 'Acierto'),
+                    pill(AppColors.orange, Icons.arrow_upward, 'Pasar'),
+                  ],
           ),
         ),
       ],
@@ -952,8 +877,7 @@ class _CameraBackground extends StatelessWidget {
   }
 }
 
-/// Arriba a la derecha sobre la cámara: "Cámara" con un punto verde y
-/// "¡Que todos salgan en cámara!".
+/// Arriba a la derecha sobre la cámara: "Cámara" con un punto verde.
 class _CameraTag extends StatelessWidget {
   const _CameraTag();
 
@@ -983,16 +907,6 @@ class _CameraTag extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-        ),
-        const SizedBox(height: 6),
-        const Text(
-          '¡Que todos salgan en cámara!',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w800,
-            shadows: [Shadow(color: Color(0xAA000000), blurRadius: 6)],
           ),
         ),
       ],

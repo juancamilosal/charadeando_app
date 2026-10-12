@@ -225,24 +225,23 @@ la cámara frontal graba a los participantes para revivir las risas.
   con tres pasos numerados (Android o iPhone) y "Entendido"; con el TV
   conectado, "Modo TV activado · Sin video". El botón "Desconectar TV"
   detiene la transmisión (en Android) o muestra los pasos para hacerlo, y
-  todo vuelve a lo normal. Antes del turno, en el Modo TV, se ve "De
-  espaldas al TV" con las píldoras "✓ Correcto" y "⏭ Pasar" (los botones
-  del juez) y, arriba junto a "Finalizar juego", un botón pequeño
-  "Desconectar TV"; si el TV no está conectado, "¿Cómo conectar un TV?". Si el televisor se
+  todo vuelve a lo normal. Antes del turno, en el Modo TV, se ve el ícono
+  del TV con las píldoras "✓ Correcto" y "⏭ Pasar" (los botones del juez)
+  y, arriba junto a "Finalizar juego", un ícono para desconectar el TV; si
+  el TV no está conectado, "¿Cómo conectar un TV?". Si el televisor se
   desconecta durante el turno, el juego queda en pausa y sigue al volver a
   conectarlo. La conexión se detecta con código nativo (`MainActivity.kt` y
   `AppDelegate.swift`).
 - La configuración y los resultados se ven en vertical. La pantalla de antes
-  del turno ya va en horizontal (en la rápida y en la personalizada): de
-  fondo, la cámara frontal en vivo (todavía sin grabar; se graba desde la
-  cuenta regresiva) con un degradado oscuro a la izquierda, arriba a la
-  derecha "● Cámara" y "¡Que todos salgan en cámara!", y a la izquierda el
-  grupo (o "Partida rápida"), "Celular a la frente" con las píldoras
-  "↓ Acierto" y "↑ Pasar", una línea pequeña ("1 minuto · hasta 20
-  palabras" o "Ronda 1 de 3") y "¡Listo!". Sin video o en Modo TV es la
-  misma pantalla sobre el fondo de la app; mientras abre la cámara también
-  se ve el fondo, y sin permiso de cámara se juega sin video. Al terminar el
-  turno vuelve a vertical.
+  del turno ya va en horizontal (en la rápida y en la personalizada) y es
+  muy simple: de fondo, la cámara frontal en vivo (todavía sin grabar; se
+  graba desde la cuenta regresiva) con un degradado oscuro a la izquierda y
+  arriba a la derecha "● Cámara"; a la izquierda, "Finalizar juego", el
+  grupo (o "Partida rápida"), el celular en la frente con las píldoras
+  "↓ Acierto" y "↑ Pasar", y "¡Listo!". Sin video o en Modo TV es la misma
+  pantalla sobre el fondo de la app; mientras abre la cámara también se ve
+  el fondo, y sin permiso de cámara se juega sin video. La vista de la
+  cámara se fija en horizontal. Al terminar el turno vuelve a vertical.
 - Resultado de cada turno: "¡Tiempo!" y "Los Primos · Ronda 2 de 3" (sin
   grupos, "Ronda 2 de 3"), los puntos en grande ("Aciertos" si la
   puntuación es por frase), las píldoras de aciertos y pases, las palabras
