@@ -250,6 +250,9 @@ void main() {
       expect(find.text('Animales · Partida rápida'), findsOneWidget);
       expect(find.text('aciertos'), findsOneWidget);
       expect(find.text('2 correctos'), findsOneWidget);
+      // Los puntos de cada palabra, según la puntuación (por frase).
+      expect(find.text('+1'), findsNWidgets(2));
+      expect(find.text('0'), findsOneWidget);
       expect(find.text('1 pase'), findsOneWidget);
       expect(find.text('Otra rápida'), findsOneWidget);
       expect(find.text('Personalizada'), findsOneWidget);
@@ -338,5 +341,37 @@ void main() {
       ),
     );
     expect(game.afterAdvance.finished, isTrue);
+  });
+
+  testWidgets('con puntuación por palabra, cada palabra muestra sus puntos', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      Routes.turnResult,
+      config: const GameConfig(
+        groups: [Group('Los Primos'), Group('Los Tigres')],
+        scoringMode: ScoringMode.perWord,
+      ),
+      setUp: (container) {
+        final game = container.read(gameControllerProvider.notifier);
+        game.startWithDecks([
+          [Word('Pizza con piña'), Word('Gato')],
+          [Word('Titanic')],
+        ]);
+        game.finishTurn(
+          Turn(
+            round: 1,
+            groupIndex: 0,
+            entries: [
+              TurnEntry(Word('Pizza con piña'), WordOutcome.hit),
+              TurnEntry(Word('Gato'), WordOutcome.pass),
+            ],
+          ),
+        );
+      },
+    );
+    expect(find.text('+3'), findsOneWidget);
+    expect(find.text('0'), findsWidgets);
   });
 }

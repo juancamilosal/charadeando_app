@@ -61,8 +61,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   al llegar a 20 no deja agregar más, y "Continuar" lleva al turno.
 - Resultado de la partida rápida: "¡Tiempo!", "Animales · Partida rápida",
   los aciertos en grande, las píldoras "✓ 9 correctos" y "↑ 3 pases", las
-  palabras en un panel translúcido, cada una en su fila con ✅ o ⏭️ a la
-  derecha, "🎬 Ver video" (blanco; mientras se arma, "Preparando video…
+  palabras en un panel translúcido, cada una en su fila con sus puntos
+  según la puntuación (por frase, "+1"; por palabra, uno por cada palabra;
+  las pasadas, "0") y ✅ o ⏭️ a la derecha, "🎬 Ver video" (blanco; mientras se arma, "Preparando video…
   40%", y se puede guardar), "⚡ Otra rápida" (misma categoría, palabras
   nuevas), "⚙️ Personalizada" (a la configuración con la misma categoría) y
   "← Salir de la categoría". Sin ganador ni ruleta. Si salen sin guardar el

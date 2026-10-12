@@ -138,10 +138,7 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
                         const SizedBox(height: 12),
                         HitPassPills(hits: hits, passes: passes),
                         const SizedBox(height: 16),
-                        TurnWordsPanel(
-                          entries: turn.entries,
-                          mode: quick ? null : mode,
-                        ),
+                        TurnWordsPanel(entries: turn.entries, mode: mode),
                         if (!quick && game.inGroups) ...[
                           const SizedBox(height: 14),
                           MiniScoreboard(

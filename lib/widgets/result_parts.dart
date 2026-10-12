@@ -136,8 +136,8 @@ class HitPassPills extends StatelessWidget {
   }
 }
 
-/// Las palabras del turno en un panel: ✅ si se acertó (con sus puntos si
-/// [mode] no es null) o ⏭️ si se pasó.
+/// Las palabras del turno en un panel: ✅ si se acertó o ⏭️ si se pasó,
+/// con los puntos de cada una si [mode] no es null.
 class TurnWordsPanel extends StatelessWidget {
   const TurnWordsPanel({super.key, required this.entries, this.mode});
 
@@ -207,14 +207,23 @@ class _EntryRow extends StatelessWidget {
               ),
             ),
           ),
-          if (hit && mode != null) ...[
-            Text(
-              '+${mode.pointsFor(entry.word.wordCount)}',
-              style: TextStyle(
-                fontFamily: AppFonts.display,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: on,
+          // Los puntos de la palabra según la puntuación elegida: por
+          // frase, +1; por palabra, uno por cada palabra. Las pasadas, 0.
+          if (mode != null) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+              decoration: BoxDecoration(
+                color: hit ? AppColors.green : on.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                hit ? '+${mode.pointsFor(entry.word.wordCount)}' : '0',
+                style: TextStyle(
+                  fontFamily: AppFonts.display,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: hit ? Colors.white : on.withValues(alpha: 0.7),
+                ),
               ),
             ),
             const SizedBox(width: 10),
