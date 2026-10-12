@@ -25,8 +25,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   a abrir la bienvenida y "Listo" regresa.
 - Barra de Categorías: el título "Selección de categoría" (se achica si no
   cabe en un celular angosto) y solo dos íconos: Mis videos y Configuración.
-  Configuración abre un menú desde abajo, blanco para verse igual con
-  cualquier fondo, con "Fondos" ("Cambia el color de la app") y "Cómo se
+  Configuración abre un menú desde abajo, del mismo color del fondo elegido
+  (en Clásico, el degradado; en Crema y Mostaza, con textos oscuros), con "Fondos" ("Cambia el color de la app") y "Cómo se
   juega" ("Ver la explicación otra vez"), cada una con su ícono en un cuadro
   de color y una flecha. Las opciones están en `settingsOptions`
   (`lib/widgets/settings_sheet.dart`), para sumar después sonido,

@@ -44,16 +44,12 @@ const settingsOptions = [
   ),
 ];
 
-/// Abre el menú de configuración desde abajo. Es blanco, para verse igual
-/// con cualquier fondo.
+/// Abre el menú de configuración desde abajo, del color del fondo elegido.
 Future<void> showSettingsMenu(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
     useSafeArea: true,
-    backgroundColor: Colors.white,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-    ),
+    backgroundColor: Colors.transparent,
     builder: (_) => const SettingsSheet(),
   );
 }
@@ -63,46 +59,62 @@ class SettingsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 10, 12, 16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 44,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE3D7F7),
-                  borderRadius: BorderRadius.circular(3),
+    final backdrop = context.backdrop;
+    final on = backdrop.onColor;
+    final gradient = backdrop.gradient;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: backdrop.color,
+        gradient: gradient == null
+            ? null
+            : LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: gradient,
+              ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 44,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: on.withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
                 ),
               ),
-            ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(8, 14, 8, 8),
-              child: Text(
-                'Configuración',
-                style: TextStyle(
-                  fontFamily: AppFonts.display,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.ink,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 14, 8, 8),
+                child: Text(
+                  'Configuración',
+                  style: TextStyle(
+                    fontFamily: AppFonts.display,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w600,
+                    color: on,
+                  ),
                 ),
               ),
-            ),
-            for (final option in settingsOptions)
-              _OptionRow(
-                option: option,
-                onTap: () {
-                  final router = GoRouter.of(context);
-                  Navigator.pop(context);
-                  router.push(option.route);
-                },
-              ),
-          ],
+              for (final option in settingsOptions)
+                _OptionRow(
+                  option: option,
+                  onTap: () {
+                    final router = GoRouter.of(context);
+                    Navigator.pop(context);
+                    router.push(option.route);
+                  },
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -119,6 +131,7 @@ class _OptionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final on = context.onBackdrop;
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: onTap,
@@ -142,23 +155,23 @@ class _OptionRow extends StatelessWidget {
                 children: [
                   Text(
                     option.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.ink,
+                      color: on,
                     ),
                   ),
                   Text(
                     option.description,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
-                      color: Color(0xFF6B5A86),
+                      color: on.withValues(alpha: 0.8),
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: AppColors.ink),
+            Icon(Icons.chevron_right, color: on),
           ],
         ),
       ),
