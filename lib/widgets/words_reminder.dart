@@ -9,23 +9,23 @@ class WordsReminder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: const Color(0xFFFFF6D6),
         borderRadius: BorderRadius.circular(16),
       ),
       child: const Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(Icons.lightbulb, color: AppColors.orange),
           SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Recuerda: mientras más rondas o más tiempo por turno, es '
-              'recomendable escribir más palabras para que no se acaben '
-              'antes de tiempo. El juego termina cuando se completan todas '
-              'las rondas o cuando se acaban las palabras.',
-              style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+              'Más rondas = más palabras',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: AppColors.ink,
+              ),
             ),
           ),
         ],

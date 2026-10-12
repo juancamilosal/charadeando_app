@@ -52,9 +52,9 @@ void main() {
 
       await tester.tap(find.text('Libre'));
       await settle(tester);
-      expect(find.text('Elige el tipo de juego'), findsOneWidget);
+      expect(find.text('¿Cómo quieren las palabras?'), findsOneWidget);
 
-      await tapVisible(tester, 'Palabras manuales');
+      await tapVisible(tester, 'Las escribimos');
       expect(find.text('Configuración'), findsOneWidget);
 
       final premium = find.text('Full HD (1080p) · Premium');

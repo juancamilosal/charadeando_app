@@ -525,14 +525,23 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
                         children: [
                           Icon(
                             game.config.tvMode ? Icons.tv : Icons.videocam_off,
-                            size: 72,
+                            size: game.config.tvMode ? 96 : 72,
                             color: context.onBackdrop.withValues(alpha: 0.8),
                           ),
-                          if (!_records)
+                          if (game.config.tvMode)
                             Text(
-                              game.config.tvMode
-                                  ? 'Modo TV: sin video'
-                                  : 'Jugando sin grabar',
+                              'De espaldas al TV. El juez marca con los '
+                              'botones.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: context.onBackdrop,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            )
+                          else if (!_records)
+                            Text(
+                              'Jugando sin grabar',
                               style: TextStyle(
                                 color: context.onBackdrop.withValues(
                                   alpha: 0.8,
@@ -547,21 +556,9 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
             ),
             const SizedBox(height: 16),
             if (game.config.tvMode) ...[
-              Text(
-                'El que adivina se pone de espaldas al televisor. Un juez '
-                'del grupo rival toma este celular y marca "Pasar" o '
-                '"¡Correcto!".',
-                style: white,
-              ),
-              const SizedBox(height: 12),
               const TvConnect(light: true),
             ] else
-              Text(
-                'Al tocar "¡Listo!", la pantalla gira. Pon el celular en tu '
-                'frente con la pantalla hacia tu grupo.\n'
-                'Inclínalo hacia abajo si aciertas y hacia arriba para pasar.',
-                style: white,
-              ),
+              const _ForeheadHint(),
             if (_cameraError != null) ...[
               const SizedBox(height: 8),
               Text(
@@ -718,6 +715,87 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
         );
       },
       child: card,
+    );
+  }
+}
+
+/// Antes del turno: celular a la frente, abajo si aciertas y arriba para
+/// pasar.
+class _ForeheadHint extends StatelessWidget {
+  const _ForeheadHint();
+
+  @override
+  Widget build(BuildContext context) {
+    final on = context.onBackdrop;
+    Widget pill(Color color, IconData icon, String label) => Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: Colors.white),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+    return Row(
+      children: [
+        // Una cara con el celular encima, en la frente.
+        SizedBox(
+          width: 60,
+          height: 64,
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              Icon(Icons.face, size: 52, color: on),
+              Positioned(
+                top: 0,
+                child: Transform.rotate(
+                  angle: 1.5708,
+                  child: Icon(Icons.smartphone, size: 30, color: on),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Celular a la frente',
+                style: TextStyle(
+                  fontFamily: AppFonts.display,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  color: on,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                children: [
+                  pill(AppColors.green, Icons.arrow_downward, 'Acierto'),
+                  pill(AppColors.orange, Icons.arrow_upward, 'Pasar'),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

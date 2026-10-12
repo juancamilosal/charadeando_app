@@ -38,11 +38,6 @@ class FreeModeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final white = TextStyle(
-      color: context.onBackdrop,
-      fontSize: 16,
-      fontWeight: FontWeight.w700,
-    );
     return PlayBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -60,7 +55,7 @@ class FreeModeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Elige el tipo de juego',
+                '¿Cómo quieren las palabras?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: AppFonts.display,
@@ -69,29 +64,20 @@ class FreeModeScreen extends ConsumerWidget {
                   color: context.onBackdrop,
                 ),
               ),
-              Text(
-                '¿De dónde saldrán las palabras de la partida?',
-                textAlign: TextAlign.center,
-                style: white,
-              ),
               const SizedBox(height: 14),
               _ModeCard(
-                icon: Icons.edit_note,
+                icon: Icons.edit,
                 color: AppColors.purple,
-                title: 'Palabras manuales',
-                description:
-                    'Ustedes escriben sus propias palabras antes de empezar. '
-                    '¡Perfecto para bromas internas y palabras de la familia!',
+                title: 'Las escribimos',
+                description: 'Antes de empezar',
                 onTap: () => _choose(context, ref, WordSource.groups),
               ),
               const SizedBox(height: 12),
               _ModeCard(
-                icon: Icons.auto_awesome,
+                icon: Icons.casino,
                 color: AppColors.turquoise,
-                title: 'Palabras automáticas',
-                description:
-                    'Nosotros ponemos las palabras por ustedes. Solo denle '
-                    'comenzar y a jugar sin pensar en nada más.',
+                title: 'Al azar',
+                description: 'El juego las pone, listas para jugar',
                 onTap: () => _choose(context, ref, WordSource.random),
               ),
               if (TestData.enabled) ...[

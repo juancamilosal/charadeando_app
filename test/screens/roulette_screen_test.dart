@@ -161,7 +161,7 @@ void main() {
     }
 
     await next();
-    expect(find.text('Elijan de dónde salen los castigos.'), findsOneWidget);
+    expect(find.text('¿De dónde salen los castigos?'), findsOneWidget);
 
     await tester.tap(find.text('Mezclados'));
     await tester.pumpAndSettle();

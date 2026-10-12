@@ -374,10 +374,14 @@ class _MyCategories extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 12),
-          const Icon(Icons.auto_awesome, size: 64, color: AppColors.yellow),
+          Icon(
+            Icons.auto_awesome,
+            size: 64,
+            color: context.backdrop.light ? AppColors.orange : AppColors.yellow,
+          ),
           const SizedBox(height: 12),
           Text(
-            'Crea una categoría con las palabras de tu familia o tus amigos',
+            'Crea una categoría con tus propias palabras',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: onBackdrop,
@@ -387,12 +391,11 @@ class _MyCategories extends ConsumerWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            '"Mi familia", "La oficina", "Viaje a Cartagena"… Se guarda solo '
-            'en este celular y se juega sin internet.',
+            '"Mi familia", "La oficina"…',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: onBackdrop.withValues(alpha: 0.8),
-              fontSize: 15,
+              fontSize: 14,
             ),
           ),
           const SizedBox(height: 20),

@@ -117,14 +117,11 @@ void main() {
   testWidgets('recuerda escribir más palabras, sin cálculos', (tester) async {
     await pumpConfig(tester);
     await tester.scrollUntilVisible(
-      find.textContaining('Recuerda: mientras más rondas'),
+      find.textContaining('Más rondas = más palabras'),
       200,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(
-      find.textContaining('Recuerda: mientras más rondas'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('Más rondas = más palabras'), findsOneWidget);
   });
 
   testWidgets('no deja pasar de 4 grupos', (tester) async {
@@ -143,7 +140,7 @@ void main() {
       tester,
       config: const GameConfig(wordSource: WordSource.random),
     );
-    expect(find.textContaining('Recuerda: mientras más rondas'), findsNothing);
+    expect(find.textContaining('Más rondas = más palabras'), findsNothing);
     expect(find.text('Duración del juego'), findsNothing);
     for (var i = 0; i < 2; i++) {
       await tester.enterText(find.byType(TextField).at(i), 'G$i');
@@ -280,14 +277,14 @@ void main() {
     await tester.tap(find.text('Configuración aleatoria'));
     await tester.pump();
 
-    final connect = find.text('Conectar las palabras a un televisor');
+    final connect = find.text('¿Cómo conectar un TV?');
     await tester.scrollUntilVisible(
       connect,
       200,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
-    expect(find.text('Ningún TV conectado todavía'), findsOneWidget);
+    expect(find.text('Jugar en un TV'), findsOneWidget);
     // El Modo TV va al final, después del video.
     expect(find.text('Resolución'), findsOneWidget);
     expect(
@@ -308,6 +305,31 @@ void main() {
     await tapContinue(tester);
     expect(find.text('Palabras'), findsOneWidget);
     expect(container.read(gameControllerProvider).config.tvMode, isTrue);
+  });
+
+  testWidgets('"¿Cómo conectar un TV?" muestra los pasos numerados', (
+    tester,
+  ) async {
+    final tv = StreamController<bool>();
+    addTearDown(tv.close);
+    await pumpConfig(tester, tv: tv.stream);
+    tv.add(false);
+    final connect = find.text('¿Cómo conectar un TV?');
+    await tester.scrollUntilVisible(
+      connect,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(connect);
+    await tester.pumpAndSettle();
+    expect(find.text('Conectar a un televisor'), findsOneWidget);
+    expect(find.text('Baja los ajustes rápidos'), findsOneWidget);
+    expect(find.text('Elige tu televisor'), findsOneWidget);
+    expect(find.text('También sirve un cable HDMI'), findsOneWidget);
+    await tester.tap(find.text('Entendido'));
+    await tester.pumpAndSettle();
+    expect(find.text('Conectar a un televisor'), findsNothing);
   });
 
   testWidgets('al desconectar el TV vuelven los aciertos y el video', (

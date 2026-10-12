@@ -75,7 +75,7 @@ void main() {
 
     tv.add(true);
     await tester.pumpAndSettle();
-    expect(find.text('El TV ya está conectado a este celular'), findsOneWidget);
+    expect(find.text('Modo TV activado'), findsOneWidget);
 
     await tester.tap(find.text('¡Listo!'));
     await countdown(tester);

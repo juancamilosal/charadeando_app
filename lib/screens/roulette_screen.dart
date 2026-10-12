@@ -79,7 +79,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
 
   String? get _error {
     final source = _source;
-    if (source == null) return 'Elijan de dónde salen los castigos.';
+    if (source == null) return '¿De dónde salen los castigos?';
     if (source == PunishmentSource.own && _written.any((p) => p.isEmpty)) {
       return 'Escriban los $_fields castigos.';
     }
@@ -162,12 +162,13 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
       padding: EdgeInsets.fromLTRB(20, 0, 20, 24),
       children: [
         Text(
-          'Una ruleta de colores con castigos para el grupo que pierde. '
-          'Al final de la partida la gira el grupo con menos puntos.',
+          'El que pierde, gira',
+          textAlign: TextAlign.center,
           style: TextStyle(
+            fontFamily: AppFonts.display,
+            fontSize: 28,
+            fontWeight: FontWeight.w600,
             color: context.onBackdrop,
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
           ),
         ),
         const SizedBox(height: 16),

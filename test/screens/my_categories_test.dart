@@ -103,9 +103,7 @@ void main() {
       MemoryCustomStore(const CustomCategoriesData(tab: CategoryTab.mine)),
     );
     expect(
-      find.text(
-        'Crea una categoría con las palabras de tu familia o tus amigos',
-      ),
+      find.text('Crea una categoría con tus propias palabras'),
       findsOneWidget,
     );
     expect(find.text('Crear mi primera categoría'), findsOneWidget);

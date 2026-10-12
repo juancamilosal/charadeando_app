@@ -73,8 +73,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   sin ganador ni ruleta de castigo.
 - Límites: de 2 a 4 grupos, de 1 a 10 rondas y de 30 segundos a 1:30 por
   turno.
-- Libre deja elegir entre palabras manuales y automáticas y sigue a la
-  configuración.
+- Libre pregunta "¿Cómo quieren las palabras?": "Las escribimos" (palabras
+  manuales, antes de empezar) o "Al azar" (automáticas, el juego las pone) y
+  sigue a la configuración.
 - Solo se juega con palabras en español: el servidor entrega las de
   `idioma` `ESPAÑOL` (o `ESPANOL`) y las que no tienen idioma.
 - Palabras automáticas: en la configuración se eligen los grupos, las
@@ -132,8 +133,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   "Todas" es lo de siempre; "Mías" muestra las categorías que creó el
   usuario ("Mi familia", "La oficina", "Viaje a Cartagena"), con la misma
   tarjeta que las demás: su nombre, ícono, color y cuántas palabras tiene.
-  La primera tarjeta es "Nueva categoría"; si no hay ninguna, se explica la
-  idea con el botón "Crear mi primera categoría". Mantener presionada una
+  La primera tarjeta es "Nueva categoría"; si no hay ninguna, dice "Crea
+  una categoría con tus propias palabras" con el botón "Crear mi primera
+  categoría". Mantener presionada una
   tarjeta, o su botón de tres puntos, abre "Editar" y "Borrar" (pide
   confirmación).
 - Crear o editar una categoría propia: nombre (obligatorio, hasta 24
@@ -191,8 +193,14 @@ la cámara frontal graba a los participantes para revivir las risas.
   palabra y los botones (sin marcador, para no confundir), y después los
   resultados del turno, y un
   juez del grupo rival marca "Pasar" y "¡Correcto!" con botones en el
-  celular. El botón "Desconectar TV" detiene la transmisión (en Android) o
-  explica cómo hacerlo, y todo vuelve a lo normal. Si el televisor se
+  celular. En la configuración, sin TV se ve "Jugar en un TV" y el enlace
+  "¿Cómo conectar un TV?", que abre desde abajo "Conectar a un televisor"
+  con tres pasos numerados (Android o iPhone) y "Entendido"; con el TV
+  conectado, "Modo TV activado · Sin video". El botón "Desconectar TV"
+  detiene la transmisión (en Android) o muestra los pasos para hacerlo, y
+  todo vuelve a lo normal. Antes del turno se ve el TV grande con "De
+  espaldas al TV. El juez marca con los botones."; sin TV, "Celular a la
+  frente" con las píldoras "↓ Acierto" y "↑ Pasar". Si el televisor se
   desconecta durante el turno, el juego queda en pausa y sigue al volver a
   conectarlo. La conexión se detecta con código nativo (`MainActivity.kt` y
   `AppDelegate.swift`).
@@ -235,6 +243,12 @@ la cámara frontal graba a los participantes para revivir las risas.
   que ella misma guardó.
 - Si la app sale a segundo plano durante el turno, el juego se pausa y al
   volver sigue donde quedó. El video se graba por partes y se unen al final.
+
+- Textos cortos: máximo 10 a 12 palabras por mensaje y, donde se puede,
+  íconos en vez de explicaciones ("Más rondas = más palabras", "¿Cuántas
+  palabras escribe cada grupo?" con "20 en total", "El que pierde, gira" en
+  la ruleta, "Guarda un video al final del turno y aparece aquí." y "Da
+  permiso a la galería para ver tus videos" en Mis videos).
 
 Pendiente para siguientes versiones: categorías con palabras de Directus,
 Firebase App Check, modo celular juez con Realtime Database, compras, anuncios y marca de

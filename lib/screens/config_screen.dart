@@ -313,9 +313,8 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                     title: 'Palabras por grupo',
                     children: [
                       const Text(
-                        'Antes de empezar, cada grupo escribirá sus propias '
-                        'palabras o frases secretas para los demás grupos. '
-                        '¿Cuántas pondrá cada grupo?',
+                        '¿Cuántas palabras escribe cada grupo?',
+                        style: TextStyle(fontWeight: FontWeight.w800),
                       ),
                       ConfigRow(
                         label: 'Palabras o frases por grupo',
@@ -328,8 +327,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                         ),
                       ),
                       Text(
-                        'En total se jugará con ${_config.totalWords} palabras '
-                        'o frases.',
+                        '${_config.totalWords} en total',
                         style: const TextStyle(
                           fontSize: 13,
                           color: Color(0xFF6B5A86),
@@ -441,17 +439,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
     return ConfigSection(
       icon: Icons.tv,
       title: 'Modo TV',
-      children: [
-        Text(
-          _tvMode
-              ? 'Modo TV activado: la palabra, el tiempo y el marcador se ven '
-                    'en el TV y un juez marca "Pasar" y "¡Correcto!" con '
-                    'botones. No se graba video.'
-              : 'Duplica la pantalla de tu celular en cualquier TV para jugar '
-                    'en Modo TV: un juez marca con botones y no se graba video.',
-        ),
-        const TvConnect(),
-      ],
+      children: [const TvConnect()],
     );
   }
 

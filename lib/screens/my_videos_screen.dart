@@ -168,9 +168,7 @@ class MyVideosScreen extends ConsumerWidget {
         ),
       if (data.access == GalleryAccess.denied)
         _AccessCard(
-          text:
-              'Charadeando no tiene permiso para ver tu galería. Dalo en los '
-              'ajustes del celular para ver tus videos.',
+          text: 'Da permiso a la galería para ver tus videos',
           button: 'Abrir ajustes',
           onPressed: () => ref.read(videoGalleryProvider).openSettings(),
         ),
@@ -178,9 +176,7 @@ class MyVideosScreen extends ConsumerWidget {
         const _Message(
           icon: Icons.video_library_outlined,
           title: 'Todavía no hay videos',
-          text:
-              'Al terminar un turno toca "Ver video" y luego "Guardar": el '
-              'video queda en tu galería y aparece aquí.',
+          text: 'Guarda un video al final del turno y aparece aquí.',
         ),
       for (final video in data.videos) ...[
         _VideoCard(
@@ -280,7 +276,14 @@ class _AccessCard extends StatelessWidget {
           children: [
             Text(text, style: const TextStyle(fontWeight: FontWeight.w700)),
             const SizedBox(height: 10),
-            OutlinedButton(onPressed: onPressed, child: Text(button)),
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.purple,
+                side: const BorderSide(color: AppColors.purple, width: 2),
+              ),
+              onPressed: onPressed,
+              child: Text(button),
+            ),
           ],
         ),
       ),
