@@ -76,8 +76,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   "Todas": arriba Libre, una tarjeta centrada (del tamaño de las de
   "Mías"), y el botón blanco "Combinar categorías" con el texto morado.
   Después, las secciones, bien separadas, cada una con su título grande a
-  la izquierda (Fredoka, amarillo con un borde blanco alrededor de las
-  letras; en los fondos claros, morado) y cuántas categorías tiene a la
+  la izquierda (Fredoka, morado con un borde blanco alrededor de las
+  letras) y cuántas categorías tiene a la
   derecha ("8 categorías"), y sus tarjetas en
   una cuadrícula de 3 columnas, todas visibles:
   1. Clásicos: Animales, Comida, Objetos, Profesiones y Acciones.

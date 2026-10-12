@@ -160,18 +160,24 @@ void main() {
     return container;
   }
 
+  // Los títulos de sección se dibujan dos veces: el borde y la letra.
+  Finder sectionTitle(String title) => find.descendant(
+    of: find.byType(CategorySectionHeader),
+    matching: find.text(title),
+  );
+
   testWidgets('Especiales y Navidad solo aparecen en su temporada', (
     tester,
   ) async {
     await pumpCategories(tester, DateTime(2026, 12, 10));
-    expect(find.text('Especiales'), findsOneWidget);
+    expect(sectionTitle('Especiales'), findsNWidgets(2));
     expect(find.text('Solo por temporada'), findsOneWidget);
     expect(find.text('Navidad'), findsOneWidget);
     expect(find.text('8 categorías'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox());
     await pumpCategories(tester, DateTime(2026, 10, 12));
-    expect(find.text('Especiales'), findsNothing);
+    expect(sectionTitle('Especiales'), findsNothing);
     expect(find.text('Navidad'), findsNothing);
     // Libre va arriba, aparte, como una tarjeta.
     expect(find.text('Libre'), findsOneWidget);
@@ -179,9 +185,9 @@ void main() {
     // Para probarlas, se pueden ver todo el año.
     await tester.pumpWidget(const SizedBox());
     await pumpCategories(tester, DateTime(2026, 10, 12), allSeasons: true);
-    expect(find.text('Especiales'), findsOneWidget);
+    expect(sectionTitle('Especiales'), findsNWidgets(2));
     expect(find.text('Navidad'), findsOneWidget);
-    expect(find.text('Entretenimiento'), findsOneWidget);
+    expect(sectionTitle('Entretenimiento'), findsNWidgets(2));
   });
 
   testWidgets('las nuevas llevan "Nueva" y las de "Pronto" no se juegan', (

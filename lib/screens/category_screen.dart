@@ -185,10 +185,7 @@ class CategorySectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final onBackdrop = context.onBackdrop;
-    // El título va en amarillo con un borde blanco alrededor de las
-    // letras; sobre los fondos claros, donde el amarillo no se lee, en
-    // morado.
-    final light = context.backdrop.light;
+    // El título va en morado con un borde blanco alrededor de las letras.
     const style = TextStyle(
       fontFamily: AppFonts.display,
       fontSize: 27,
@@ -202,23 +199,24 @@ class CategorySectionHeader extends StatelessWidget {
         Flexible(
           child: Stack(
             children: [
-              Text(
-                section.title,
-                maxLines: 1,
-                style: style.copyWith(
-                  foreground: Paint()
-                    ..style = PaintingStyle.stroke
-                    ..strokeWidth = 4
-                    ..strokeJoin = StrokeJoin.round
-                    ..color = Colors.white,
+              // El borde blanco, debajo de la letra.
+              ExcludeSemantics(
+                child: Text(
+                  section.title,
+                  maxLines: 1,
+                  style: style.copyWith(
+                    foreground: Paint()
+                      ..style = PaintingStyle.stroke
+                      ..strokeWidth = 4
+                      ..strokeJoin = StrokeJoin.round
+                      ..color = Colors.white,
+                  ),
                 ),
               ),
               Text(
                 section.title,
                 maxLines: 1,
-                style: style.copyWith(
-                  color: light ? AppColors.purple : AppColors.yellow,
-                ),
+                style: style.copyWith(color: AppColors.purple),
               ),
             ],
           ),
