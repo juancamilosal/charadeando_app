@@ -290,7 +290,6 @@ enum GameCategory {
     'Palabra navideña',
     section: CategorySection.special,
     season: Season((12, 1), (1, 6)),
-    available: false,
   );
 
   const GameCategory(

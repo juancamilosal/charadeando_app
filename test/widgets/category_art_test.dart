@@ -23,18 +23,15 @@ void main() {
     );
   });
 
-  testWidgets('muestra la imagen quieta, o el ícono si no tiene', (
-    tester,
-  ) async {
+  test('todas las categorías tienen su dibujo', () {
+    expect(CategoryArt.withImage, containsAll(GameCategory.values));
+  });
+
+  testWidgets('muestra la imagen quieta', (tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Row(
-          children: [
-            CategoryArt(category: GameCategory.places, size: 80),
-            CategoryArt(category: GameCategory.christmas, size: 80),
-          ],
-        ),
+        child: CategoryArt(category: GameCategory.places, size: 80),
       ),
     );
     final image = tester.widget<Image>(find.byType(Image));
@@ -42,6 +39,5 @@ void main() {
       (image.image as AssetImage).assetName,
       'assets/img/categorias/lugares.png',
     );
-    expect(find.byIcon(Icons.park), findsOneWidget);
   });
 }

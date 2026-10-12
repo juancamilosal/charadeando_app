@@ -39,6 +39,7 @@ class CategoryArt extends StatelessWidget {
     GameCategory.historicalFigures,
     GameCategory.sayings,
     GameCategory.halloween,
+    GameCategory.christmas,
   };
 
   final GameCategory category;

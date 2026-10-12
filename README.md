@@ -111,8 +111,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   si ya tiene palabras (`available`) en `lib/models/category.dart`; el enum
   va en el orden de la pantalla. Una categoría con `isNew` lleva la
   etiqueta amarilla "Nueva" arriba a la izquierda (por ahora ninguna, en
-  desarrollo). Las que no tienen palabras en Directus (hoy Halloween y
-  Navidad) llevan "Pronto" sobre su dibujo apagado: al tocarlas avisa
+  desarrollo). Las que no tienen palabras en Directus (hoy solo
+  Halloween) llevan "Pronto" sobre su dibujo apagado: al tocarlas avisa
   "¡Pronto!
   Estamos preparando las palabras de…" y no se juegan ni se combinan. Las
   que todavía no tienen dibujo muestran su ícono. Las tarjetas de las
@@ -164,7 +164,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   Películas, Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos,
   Comida, Profesiones, Acciones, Lugares, Series y novelas, Personajes,
   Superhéroes, Dibujos animados, Videojuegos, Música y canciones,
-  Personajes históricos, Dichos y refranes y Halloween (falta Navidad).
+  Personajes históricos, Dichos y refranes, Halloween y Navidad: todas.
 - Dificultad: Mezcladas (viene elegida: trae de todas, 300 palabras por
   categoría), Fácil (ideal con niños), Normal o Difícil (100 cada una). Se
   elige en la configuración de las palabras automáticas, en Libre y en todas
