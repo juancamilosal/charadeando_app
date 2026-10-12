@@ -185,40 +185,35 @@ class CategorySectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final onBackdrop = context.onBackdrop;
-    // El título va en morado con un borde blanco alrededor de las letras.
-    const style = TextStyle(
-      fontFamily: AppFonts.display,
-      fontSize: 27,
-      height: 1.1,
-      fontWeight: FontWeight.w700,
-      letterSpacing: 0.6,
-    );
+    // El título va en una píldora: blanca con el texto morado sobre los
+    // fondos oscuros y morada con el texto blanco sobre los claros, para que
+    // se distinga de las tarjetas.
+    final light = context.backdrop.light;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Flexible(
-          child: Stack(
-            children: [
-              // El borde blanco, debajo de la letra.
-              ExcludeSemantics(
-                child: Text(
-                  section.title,
-                  maxLines: 1,
-                  style: style.copyWith(
-                    foreground: Paint()
-                      ..style = PaintingStyle.stroke
-                      ..strokeWidth = 4
-                      ..strokeJoin = StrokeJoin.round
-                      ..color = Colors.white,
-                  ),
-                ),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(14, 5, 14, 6),
+            decoration: BoxDecoration(
+              color: light ? AppColors.purple : Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: const [
+                BoxShadow(color: Color(0x33000000), offset: Offset(0, 3)),
+              ],
+            ),
+            child: Text(
+              section.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: AppFonts.display,
+                fontSize: 23,
+                height: 1.1,
+                fontWeight: FontWeight.w700,
+                color: light ? Colors.white : AppColors.purple,
               ),
-              Text(
-                section.title,
-                maxLines: 1,
-                style: style.copyWith(color: AppColors.purple),
-              ),
-            ],
+            ),
           ),
         ),
         const SizedBox(width: 8),
