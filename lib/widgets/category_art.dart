@@ -33,6 +33,7 @@ class CategoryArt extends StatelessWidget {
     GameCategory.soccerTeams: 0,
     GameCategory.objects: 0, // Las llaves quietas, colgando del aro.
     GameCategory.food: 33, // El taco ya con su salsa.
+    GameCategory.professions: 0, // El bombero, sin la sirena.
   };
 
   final GameCategory category;
