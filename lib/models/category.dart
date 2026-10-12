@@ -279,7 +279,6 @@ enum GameCategory {
     'Palabra de Halloween',
     section: CategorySection.special,
     season: Season((10, 1), (10, 31)),
-    available: false,
   ),
   christmas(
     'Navidad',
@@ -301,10 +300,12 @@ enum GameCategory {
     this.singular, {
     this.section,
     this.season,
-    // Por ahora ninguna la usa (en desarrollo), pero se deja para marcar
-    // las nuevas cuando se publique.
+    // Por ahora ninguna categoría los usa (todas tienen palabras y, en
+    // desarrollo, ninguna se marca como nueva), pero se dejan para las que
+    // vengan.
     // ignore: unused_element_parameter
     this.isNew = false,
+    // ignore: unused_element_parameter
     this.available = true,
   });
 

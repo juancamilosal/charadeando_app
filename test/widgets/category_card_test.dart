@@ -46,4 +46,30 @@ void main() {
     );
     expect(size, 5);
   });
+
+  testWidgets('una categoría sin palabras se ve con "Pronto" y una nueva con '
+      '"Nueva"', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Row(
+          children: [
+            for (final (isNew, soon) in [(true, false), (false, true)])
+              SizedBox(
+                width: 120,
+                height: 170,
+                child: CategoryCard(
+                  title: 'Prueba',
+                  color: Colors.blue,
+                  art: (size, color) => Icon(Icons.star, size: size),
+                  isNew: isNew,
+                  soon: soon,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+    expect(find.text('Nueva'), findsOneWidget);
+    expect(find.text('Pronto'), findsOneWidget);
+  });
 }

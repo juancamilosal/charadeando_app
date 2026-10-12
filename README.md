@@ -111,10 +111,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   si ya tiene palabras (`available`) en `lib/models/category.dart`; el enum
   va en el orden de la pantalla. Una categoría con `isNew` lleva la
   etiqueta amarilla "Nueva" arriba a la izquierda (por ahora ninguna, en
-  desarrollo). Las que no tienen palabras en Directus (hoy solo
-  Halloween) llevan "Pronto" sobre su dibujo apagado: al tocarlas avisa
-  "¡Pronto!
-  Estamos preparando las palabras de…" y no se juegan ni se combinan. Las
+  desarrollo). Una categoría sin palabras en Directus (`available`
+  en falso; hoy todas tienen) lleva "Pronto" sobre su dibujo apagado: al
+  tocarla avisa "¡Pronto! Estamos preparando las palabras de…" y no se juegan ni se combinan. Las
   que todavía no tienen dibujo muestran su ícono. Las tarjetas de las
   secciones llevan el dibujo arriba y el nombre debajo, grande, en dos
   renglones si es largo ("Personajes históricos") y sin partir

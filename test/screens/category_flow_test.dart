@@ -122,16 +122,9 @@ void main() {
     }
   });
 
-  test('ninguna lleva "Nueva" por ahora; solo Halloween sigue en '
-      '"Pronto"', () {
+  test('ninguna lleva "Nueva" por ahora y todas tienen palabras', () {
     expect(GameCategory.values.where((c) => c.isNew), isEmpty);
-    expect(
-      [
-        for (final c in GameCategory.values)
-          if (!c.available) c,
-      ],
-      [GameCategory.halloween],
-    );
+    expect(GameCategory.values.where((c) => !c.available), isEmpty);
   });
 
   Future<ProviderContainer> pumpCategories(
@@ -208,31 +201,6 @@ void main() {
     expect(find.text('Halloween', skipOffstage: false), findsOneWidget);
     expect(find.text('Navidad', skipOffstage: false), findsOneWidget);
     expect(sectionTitle('Entretenimiento'), findsOneWidget);
-  });
-
-  testWidgets('las de "Pronto" no se juegan', (tester) async {
-    // En octubre, para que se vea Halloween, que sigue en "Pronto".
-    final container = await pumpCategories(tester, DateTime(2026, 10, 12));
-    expect(find.text('Nueva'), findsNothing);
-    final halloween = find.text('Halloween');
-    await tester.scrollUntilVisible(
-      halloween,
-      400,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pump();
-    expect(find.text('Pronto'), findsOneWidget);
-    await tester.tap(halloween);
-    await tester.pump();
-    expect(
-      find.text('¡Pronto! Estamos preparando las palabras de Halloween.'),
-      findsOneWidget,
-    );
-    expect(find.text('Partida rápida'), findsNothing);
-    expect(
-      container.read(gameControllerProvider).config.category,
-      isNot(GameCategory.halloween),
-    );
   });
 
   testWidgets('al tocar una categoría se elige rápida o personalizada; '

@@ -53,7 +53,6 @@ void main() {
         mixStoreProvider.overrideWithValue(mixStore),
         premiumUnlockedProvider.overrideWithValue(false),
         premiumCategoriesProvider.overrideWithValue({GameCategory.brands}),
-        // En octubre, para que se vea Halloween, que sigue en "Pronto".
         clockProvider.overrideWithValue(() => DateTime(2026, 10, 12)),
         allSeasonsProvider.overrideWithValue(false),
       ],
@@ -101,13 +100,6 @@ void main() {
 
     // Clásicos va primero.
     expect(_inSheet(find.text('Clásicos')), findsOneWidget);
-    // Las de "Pronto" (Halloween) se ven con su etiqueta y no se marcan.
-    await showInSheet('Halloween');
-    expect(_inSheet(find.text('Pronto')), findsOneWidget);
-    // (Si se hubiera marcado, con Animales ya serían 2.)
-    await tester.tap(_inSheet(find.text('Halloween')));
-    await tester.pump();
-    expect(find.text('Elige al menos 2 categorías'), findsOneWidget);
 
     await showInSheet('Animales', up: true);
     await tester.tap(_inSheet(find.text('Animales')));
