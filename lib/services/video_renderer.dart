@@ -226,9 +226,14 @@ class VideoRenderer {
         CaptionStyle.hit => 'Hit',
         CaptionStyle.pass => 'Pass',
       };
+      // En una mezcla, la categoría va arriba de la palabra, más pequeña.
+      final label = caption.label;
+      final text = label == null
+          ? _escape(caption.text)
+          : '{\\fs44}${_escape(label)}\\N{\\r}${_escape(caption.text)}';
       buffer.writeln(
         'Dialogue: 0,${_time(caption.start)},${_time(caption.end)},$style,,'
-        '0,0,0,,${_escape(caption.text)}',
+        '0,0,0,,$text',
       );
     }
     return buffer.toString();

@@ -13,6 +13,7 @@ class WordCard extends StatelessWidget {
     required this.remaining,
     required this.feedback,
     required this.recording,
+    this.category,
     this.wordsLeft,
     this.onEndGame,
   });
@@ -25,6 +26,10 @@ class WordCard extends StatelessWidget {
   static const _passColors = [AppColors.orange, AppColors.coral];
 
   final Word word;
+
+  /// En una partida con varias categorías, la de esta palabra
+  /// ("Película"), que se ve arriba.
+  final String? category;
   final Duration remaining;
   final WordOutcome? feedback;
   final bool recording;
@@ -82,6 +87,8 @@ class WordCard extends StatelessWidget {
                 ),
               ),
             ),
+            if (category != null && feedback == null)
+              Positioned(top: 12, left: 16, child: CategoryTag(category!)),
             Positioned(
               top: 12,
               right: 16,
@@ -144,6 +151,33 @@ class WordCard extends StatelessWidget {
                 child: Icon(Icons.fiber_manual_record, color: Colors.red),
               ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// La categoría de la palabra en una partida con varias ("Película").
+class CategoryTag extends StatelessWidget {
+  const CategoryTag(this.text, {super.key});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.22),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontFamily: AppFonts.display,
+          fontSize: 22,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
         ),
       ),
     );

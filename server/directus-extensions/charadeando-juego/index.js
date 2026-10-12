@@ -3,7 +3,8 @@
 //   POST /juego/crear     Le pide palabras nuevas a Gemini (por el flujo de
 //                         Directus), las guarda en la colección con la
 //                         categoría LIBRE y las devuelve.
-//   POST /juego/palabras  Entrega palabras al azar de la colección.
+//   POST /juego/palabras  Entrega palabras al azar de la colección, de una
+//                         categoría o de varias en partes iguales.
 //
 // El rol Public de Directus no tiene permisos sobre la colección, así que
 // estas rutas son la única forma de leer o crear palabras sin iniciar
@@ -61,6 +62,10 @@ const DIFICULTADES = ['FACIL', 'NORMAL', 'DIFICIL'];
 
 /// Ids que la app puede pedir excluir (las últimas palabras que jugó).
 const MAX_EXCLUDE = 500;
+
+/// Categorías que se pueden pedir juntas ("Combinar categorías"). Debe
+/// coincidir con DirectusService.maxCategories.
+const MAX_CATEGORIES = 20;
 
 const RATE_WINDOW_MS = 60 * 1000;
 
@@ -155,6 +160,27 @@ export class SimilarWords {
     }
     return false;
   }
+}
+
+/// Lista de "categorias" válida: de 1 a MAX_CATEGORIES textos de hasta 50
+/// caracteres. Devuelve la lista sin repetidas, o null si no es válida.
+export function parseCategorias(value) {
+  if (!Array.isArray(value) || value.length === 0 || value.length > MAX_CATEGORIES) {
+    return null;
+  }
+  if (!value.every((c) => typeof c === 'string' && c.length > 0 && c.length <= 50)) {
+    return null;
+  }
+  return [...new Set(value)];
+}
+
+/// Cuántas palabras le tocan a cada una de [parts] categorías para juntar
+/// [n], en partes iguales. El sobrante se reparte de a una entre las
+/// primeras: 46 en 3 son 16, 15 y 15.
+export function quotas(n, parts) {
+  const base = Math.floor(n / parts);
+  const extra = n % parts;
+  return Array.from({ length: parts }, (_, i) => base + (i < extra ? 1 : 0));
 }
 
 /// [count] elementos distintos de [items], al azar.
@@ -348,6 +374,20 @@ export default {
         return error(res, 400, '"categoria" no es válida.');
       }
 
+      // Varias categorías a la vez ("Combinar categorías"). Si llega,
+      // manda sobre "categoria".
+      let categorias = null;
+      if (body.categorias !== undefined && body.categorias !== null) {
+        categorias = parseCategorias(body.categorias);
+        if (categorias === null) {
+          return error(
+            res,
+            400,
+            `"categorias" debe ser una lista de 1 a ${MAX_CATEGORIES} textos de hasta 50 caracteres.`,
+          );
+        }
+      }
+
       const dificultad = body.dificultad ?? null;
       if (dificultad !== null && !DIFICULTADES.includes(dificultad)) {
         return error(res, 400, `"dificultad" debe ser ${DIFICULTADES.join(', ')}.`);
@@ -363,30 +403,47 @@ export default {
       }
 
       try {
-        const query = (conDificultad) => {
+        const query = (cats, conDificultad) => {
           const q = database(COLLECTION).select('id', 'frase', 'categoria').orderByRaw('random()');
-          if (categoria) q.where('categoria', categoria);
+          if (cats) q.whereIn('categoria', cats);
           if (conDificultad && dificultad) q.where('dificultad', dificultad);
           return q;
         };
 
-        // Para que la partida no quede corta, se completa en este orden:
+        // Agrega a [data] hasta [count] palabras de [cats] (null es de
+        // todas). Para que la partida no quede corta, se completa en este
+        // orden:
         // 1. palabras que la app no ha jugado, de la dificultad elegida;
         // 2. palabras no jugadas de las otras dificultades;
         // 3. palabras ya jugadas de la dificultad elegida;
         // 4. palabras ya jugadas de cualquier dificultad.
-        const pasos = [
-          () => query(true).whereNotIn('id', excluir),
-          () => query(false).whereNotIn('id', excluir),
-          () => query(true),
-          () => query(false),
-        ];
+        const fill = async (data, cats, count) => {
+          const goal = data.length + count;
+          const pasos = [
+            () => query(cats, true).whereNotIn('id', excluir),
+            () => query(cats, false).whereNotIn('id', excluir),
+            () => query(cats, true),
+            () => query(cats, false),
+          ];
+          for (const paso of pasos) {
+            if (data.length >= goal) break;
+            const tomadas = data.map((w) => w.id);
+            data.push(...(await paso().whereNotIn('id', tomadas).limit(goal - data.length)));
+          }
+        };
+
         const data = [];
-        for (const paso of pasos) {
-          if (data.length >= n) break;
-          const tomadas = data.map((w) => w.id);
-          data.push(...(await paso().whereNotIn('id', tomadas).limit(n - data.length)));
+        if (categorias) {
+          // En partes iguales entre las categorías; si alguna no alcanza,
+          // se completa con las otras de la lista.
+          const cuotas = quotas(n, categorias.length);
+          for (let i = 0; i < categorias.length; i++) {
+            await fill(data, [categorias[i]], cuotas[i]);
+          }
+          if (data.length < n) await fill(data, categorias, n - data.length);
+          return res.json({ data: sample(data, data.length) });
         }
+        await fill(data, categoria ? [categoria] : null, n);
         return res.json({ data });
       } catch (e) {
         logger.error(e, '[juego] No se pudieron leer las palabras');

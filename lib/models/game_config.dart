@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'category.dart';
 import 'custom_category.dart';
 import 'group.dart';
+import 'word.dart';
 
 /// Cómo se suman los puntos de una palabra acertada.
 enum ScoringMode {
@@ -132,6 +133,8 @@ class GameConfig {
     this.inGroups = true,
     this.category = GameCategory.free,
     this.customCategory,
+    this.mixCategories = const [],
+    this.mixCustom = const [],
     this.wordSource = WordSource.groups,
     this.difficulty,
     this.wordsPerGroup = 10,
@@ -168,8 +171,55 @@ class GameConfig {
   /// celular, no de Directus, y no tienen dificultad.
   final CustomCategory? customCategory;
 
-  /// Nombre de la categoría que se juega, propia o del juego.
-  String get categoryLabel => customCategory?.name ?? category.label;
+  /// "Combinar categorías": las categorías del juego y las propias de una
+  /// partida con varias. Vacías en una partida de una sola categoría.
+  final List<GameCategory> mixCategories;
+  final List<CustomCategory> mixCustom;
+
+  /// Prefijo de [Word.category] en las palabras de una categoría propia
+  /// dentro de una mezcla, seguido de su id.
+  static const customWordPrefix = 'mia:';
+
+  /// Partida con palabras de varias categorías.
+  bool get isMix => mixCategories.length + mixCustom.length >= 2;
+
+  /// Si se elige la dificultad: solo con palabras automáticas que vienen de
+  /// Directus. Las categorías propias no tienen dificultad.
+  bool get usesDifficulty =>
+      wordSource == WordSource.random &&
+      (isMix ? mixCategories.isNotEmpty : customCategory == null);
+
+  /// Nombre de la categoría que se juega, propia o del juego. En una mezcla,
+  /// "Mezcla: Animales, Películas y Mi familia", o "Mezcla de 5 categorías"
+  /// si son más de 3.
+  String get categoryLabel {
+    if (!isMix) return customCategory?.name ?? category.label;
+    final names = [
+      for (final c in mixCategories) c.label,
+      for (final c in mixCustom) c.name,
+    ];
+    if (names.length > 3) return 'Mezcla de ${names.length} categorías';
+    return 'Mezcla: ${names.sublist(0, names.length - 1).join(', ')} y '
+        '${names.last}';
+  }
+
+  /// En una mezcla, la categoría de [word] para mostrarla arriba de la
+  /// palabra ("Película", o el nombre de la categoría propia). Null en una
+  /// partida de una sola categoría.
+  String? wordCategoryLabel(Word word) {
+    if (!isMix) return null;
+    final code = word.category;
+    if (code == null) return null;
+    if (code.startsWith(customWordPrefix)) {
+      final id = code.substring(customWordPrefix.length);
+      for (final c in mixCustom) {
+        if (c.id == id) return c.name;
+      }
+      return null;
+    }
+    return GameCategory.byCode(code)?.singular;
+  }
+
   final WordSource wordSource;
 
   /// Dificultad de las palabras automáticas, o null si no aplica (palabras
@@ -227,6 +277,9 @@ class GameConfig {
     GameCategory? category,
     CustomCategory? customCategory,
     bool clearCustomCategory = false,
+    List<GameCategory>? mixCategories,
+    List<CustomCategory>? mixCustom,
+    bool clearMix = false,
     bool clearDifficulty = false,
     WordSource? wordSource,
     Difficulty? difficulty,
@@ -244,6 +297,8 @@ class GameConfig {
       customCategory: clearCustomCategory
           ? null
           : customCategory ?? this.customCategory,
+      mixCategories: clearMix ? const [] : mixCategories ?? this.mixCategories,
+      mixCustom: clearMix ? const [] : mixCustom ?? this.mixCustom,
       wordSource: wordSource ?? this.wordSource,
       difficulty: clearDifficulty ? null : difficulty ?? this.difficulty,
       wordsPerGroup: wordsPerGroup ?? this.wordsPerGroup,

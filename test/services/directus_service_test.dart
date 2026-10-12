@@ -32,6 +32,25 @@ void main() {
     });
   });
 
+  test('pide varias categorías en un solo pedido', () async {
+    late Map<String, dynamic> body;
+    final service = DirectusService(
+      baseUrl: 'https://directus.test',
+      client: MockClient((request) async {
+        body = jsonDecode(request.body) as Map<String, dynamic>;
+        return http.Response('{"data":[]}', 200);
+      }),
+    );
+    await service.fetchWords(
+      count: 45,
+      categories: ['ANIMALES', 'PELICULAS', 'DEPORTES'],
+      difficulty: 'FACIL',
+    );
+    expect(body['categorias'], ['ANIMALES', 'PELICULAS', 'DEPORTES']);
+    expect(body.containsKey('categoria'), isFalse);
+    expect(body['dificultad'], 'FACIL');
+  });
+
   test('respeta los topes de la extensión', () async {
     late Map<String, dynamic> body;
     final service = DirectusService(

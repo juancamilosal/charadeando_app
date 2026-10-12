@@ -25,6 +25,19 @@ void main() {
       expect(ass, contains('Style: Word,Fredoka,'));
     });
 
+    test('en una mezcla, la categoría va arriba de la palabra', () {
+      final ass = VideoRenderer.buildSubtitles([
+        Caption(
+          'El Rey León',
+          CaptionStyle.word,
+          ms(0),
+          ms(1000),
+          label: 'Película',
+        ),
+      ]);
+      expect(ass, contains(r',,{\fs44}Película\N{\r}El Rey León'));
+    });
+
     test('ignora textos sin duración y quita los comandos de ASS', () {
       final ass = VideoRenderer.buildSubtitles([
         Caption('Vacío', CaptionStyle.word, ms(500), ms(500)),

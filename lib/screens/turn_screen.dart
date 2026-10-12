@@ -76,7 +76,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   final _segmentClock = Stopwatch();
   Duration _recorded = Duration.zero;
   bool _recording = false;
-  (String, CaptionStyle, Duration)? _openCaption;
+  (String, CaptionStyle, Duration, String?)? _openCaption;
 
   Duration get _now => _recorded + _segmentClock.elapsed;
 
@@ -219,15 +219,27 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     _segmentClock.reset();
   }
 
-  void _showCaption(String text, CaptionStyle style) {
+  void _showCaption(String text, CaptionStyle style, {String? label}) {
     _closeCaption();
-    _openCaption = (text, style, _now);
+    _openCaption = (text, style, _now, label);
   }
+
+  /// La palabra que se está adivinando, con su categoría en una mezcla.
+  void _showWordCaption() {
+    final word = _deck[_wordIndex];
+    _showCaption(
+      word.text,
+      CaptionStyle.word,
+      label: _config.wordCategoryLabel(word),
+    );
+  }
+
+  GameConfig get _config => ref.read(gameControllerProvider).config;
 
   void _closeCaption() {
     final open = _openCaption;
     if (open == null) return;
-    _captions.add(Caption(open.$1, open.$2, open.$3, _now));
+    _captions.add(Caption(open.$1, open.$2, open.$3, _now, label: open.$4));
     _openCaption = null;
   }
 
@@ -272,7 +284,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
       _nextWord();
       if (_phase != _Phase.playing) return;
     } else {
-      _showCaption(_deck[_wordIndex].text, CaptionStyle.word);
+      _showWordCaption();
     }
     // En el Modo TV el juez marca con los botones.
     if (!_tvMode) {
@@ -320,7 +332,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
       _feedback = null;
       _wordIndex++;
     });
-    _showCaption(_deck[_wordIndex].text, CaptionStyle.word);
+    _showWordCaption();
   }
 
   /// Detiene el reloj, los sensores y la grabación. Lo que se lleva del
@@ -485,6 +497,9 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
               alignment: Alignment.centerRight,
               child: EndGameButton(onPressed: _endGame, compact: true),
             ),
+            // En una mezcla, "Mezcla: Animales, Películas y Mi familia".
+            if (game.config.isMix)
+              Text(game.config.categoryLabel, style: white),
             Text(_readyLabel(game), style: white),
             Text(
               game.turnTitle,
@@ -673,6 +688,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
       word: _deck[_wordIndex],
       remaining: _remaining,
       feedback: _feedback,
+      category: game.config.wordCategoryLabel(_deck[_wordIndex]),
       title: game.turnTitle,
       onPass: () => _mark(WordOutcome.pass),
       onHit: () => _mark(WordOutcome.hit),
@@ -685,6 +701,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
       word: _deck[_wordIndex],
       remaining: _remaining,
       feedback: _feedback,
+      category: game.config.wordCategoryLabel(_deck[_wordIndex]),
       recording: _camera.isRecording,
       wordsLeft: _wordsLeft(game),
       onEndGame: _endGame,

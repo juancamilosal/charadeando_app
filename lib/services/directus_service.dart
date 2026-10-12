@@ -28,6 +28,10 @@ class DirectusService {
   /// `MAX_EXCLUDE` de la extensión.
   static const maxExclude = 500;
 
+  /// Máximo de categorías en una sola petición. Debe coincidir con
+  /// `MAX_CATEGORIES` de la extensión.
+  static const maxCategories = 20;
+
   static const _timeout = Duration(seconds: 15);
 
   final http.Client _client;
@@ -36,11 +40,14 @@ class DirectusService {
   Uri get wordsUri => Uri.parse('$baseUrl/juego/palabras');
 
   /// Trae [count] palabras al azar, de [category] y [difficulty] si se
-  /// indican (códigos de Directus, como `ANIMALES` y `FACIL`). Las de
-  /// [exclude] (ids ya jugados) solo se repiten si no alcanzan las demás.
+  /// indican (códigos de Directus, como `ANIMALES` y `FACIL`). Con
+  /// [categories] (varias, para "Combinar categorías") el servidor reparte
+  /// las [count] en partes iguales entre ellas. Las de [exclude] (ids ya
+  /// jugados) solo se repiten si no alcanzan las demás.
   Future<List<RemoteWord>> fetchWords({
     required int count,
     String? category,
+    List<String>? categories,
     String? difficulty,
     Iterable<String> exclude = const [],
   }) async {
@@ -48,6 +55,7 @@ class DirectusService {
     return _post(wordsUri, {
       'n': count.clamp(1, maxCount),
       'categoria': ?category,
+      'categorias': ?categories?.take(maxCategories).toList(),
       'dificultad': ?difficulty,
       'excluir': excluded.sublist(
         excluded.length > maxExclude ? excluded.length - maxExclude : 0,

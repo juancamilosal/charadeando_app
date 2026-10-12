@@ -16,9 +16,13 @@ enum CaptionStyle {
 /// Un texto que aparece en el video entre [start] y [end], medidos desde el
 /// inicio del video del turno.
 class Caption {
-  const Caption(this.text, this.style, this.start, this.end);
+  const Caption(this.text, this.style, this.start, this.end, {this.label});
 
   final String text;
+
+  /// En una partida con varias categorías, la categoría de la palabra
+  /// ("Película"), que va arriba de ella.
+  final String? label;
   final CaptionStyle style;
   final Duration start;
   final Duration end;

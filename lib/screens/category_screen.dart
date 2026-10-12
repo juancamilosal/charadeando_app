@@ -9,6 +9,7 @@ import '../services/services.dart';
 import '../theme.dart';
 import '../widgets/art_cycle.dart';
 import '../widgets/category_card.dart';
+import '../widgets/combine_categories_sheet.dart';
 import '../widgets/play_background.dart';
 import '../widgets/roulette_banner.dart';
 
@@ -32,6 +33,7 @@ class CategoryScreen extends ConsumerWidget {
         .copyWith(
           category: category,
           clearCustomCategory: true,
+          clearMix: true,
           inGroups: false,
         );
     if (category == GameCategory.free) {
@@ -149,6 +151,13 @@ class CategoryScreen extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 12),
+        // Jugar con palabras de varias categorías a la vez.
+        OutlinedButton.icon(
+          icon: const Icon(Icons.shuffle),
+          label: const Text('Combinar categorías'),
+          onPressed: () => showCombineCategories(context),
+        ),
+        const SizedBox(height: 14),
         _grid([
           for (final category in GameCategory.themed)
             CategoryCard.game(
@@ -294,6 +303,7 @@ class _MyCategories extends ConsumerWidget {
           config.copyWith(
             category: GameCategory.free,
             customCategory: category,
+            clearMix: true,
             wordSource: WordSource.random,
             inGroups: false,
           ),

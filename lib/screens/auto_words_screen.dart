@@ -47,6 +47,7 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
       _error = null;
     });
     final config = ref.read(gameControllerProvider).config;
+    if (config.isMix) return _loadMix(config);
     final custom = config.customCategory;
     if (custom != null) {
       // Las palabras de una categoría propia están en el celular: no se usa
@@ -87,6 +88,70 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
         _error = e;
       });
     }
+  }
+
+  /// "Combinar categorías": las palabras de las categorías del juego vienen
+  /// de Directus en un solo pedido y las propias, del celular. Se reparten
+  /// en partes iguales, se completan entre ellas y se barajan juntas.
+  Future<void> _loadMix(GameConfig config) async {
+    final total = AutoWordsScreen.countFor(config);
+    final customSources = [
+      for (final c in config.mixCustom) MixWords.customWords(c),
+    ];
+    final gameSources = [for (final _ in config.mixCategories) <Word>[]];
+    final remote = MixWords.remoteCount(
+      total,
+      gameCategories: config.mixCategories.length,
+      customSizes: [for (final s in customSources) s.length],
+    );
+    var offline = false;
+    try {
+      if (remote > 0) {
+        final batch = await ref
+            .read(wordBankProvider)
+            .load(
+              min(remote, DirectusService.maxCount),
+              categories: [for (final c in config.mixCategories) c.code],
+              difficulty: config.difficulty?.code,
+            );
+        offline = batch.offline;
+        for (final word in batch.words) {
+          final i = config.mixCategories.indexWhere(
+            (c) => c.code == word.category,
+          );
+          gameSources[i < 0 ? 0 : i].add(word);
+        }
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = e;
+      });
+      return;
+    }
+    final words = MixWords.combine([
+      ...gameSources,
+      ...customSources,
+    ], total: total);
+    final batch = WordBatch(words, offline: offline);
+    // Se navega después del primer cuadro: _load empieza en initState.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (words.length < config.groupCount) {
+        setState(() {
+          _loading = false;
+          _error = 'Todavía no hay suficientes palabras en el servidor.';
+        });
+      } else if (offline) {
+        setState(() {
+          _loading = false;
+          _offline = batch;
+        });
+      } else {
+        _play(batch);
+      }
+    });
   }
 
   void _play(WordBatch batch) {

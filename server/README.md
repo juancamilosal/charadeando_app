@@ -26,8 +26,12 @@ Directus 11 con PostgreSQL y Redis, desplegado con Coolify en el VPS.
     excluye hasta 500 ids que la app ya jugó. Si no alcanzan, completa con
     palabras no jugadas de las otras dificultades, luego con ya jugadas de
     la misma dificultad y por último con ya jugadas de cualquier
-    dificultad, siempre de la misma categoría. 10 peticiones por minuto
-    por IP.
+    dificultad, siempre de la misma categoría. Con `categorias` (una lista
+    de hasta 20) reparte las `n` palabras en partes iguales entre ellas (el
+    sobrante, de a una entre las primeras), con la misma lógica de
+    dificultad y `excluir` para cada una; si alguna no alcanza, completa con
+    las otras categorías de la lista. Es para "Combinar categorías" en la
+    app. 10 peticiones por minuto por IP.
 - El flujo de Gemini se cambia con la variable de entorno
   `CHARADEANDO_GEMINI_FLOW` (id del flujo); por defecto
   `2d91a34a-b82c-4f97-9e2f-12154ba86323`.
@@ -38,12 +42,25 @@ Cuerpo de `/juego/palabras` (todo opcional salvo `n`):
 { "n": 45, "categoria": "ANIMALES", "dificultad": "FACIL", "excluir": ["id1", "id2"] }
 ```
 
+Para varias categorías a la vez, `categorias` en lugar de `categoria` (si
+llegan las dos, manda `categorias`). Debe ser una lista de 1 a 20 textos de
+hasta 50 caracteres; si no, responde 400:
+
+```json
+{ "n": 45, "categorias": ["ANIMALES", "PELICULAS", "DEPORTES"], "dificultad": "FACIL" }
+```
+
+Con 45 y tres categorías son 15 de cada una.
+
 Respuesta de las dos rutas:
 `{ "data": [{ "id": "...", "frase": "...", "categoria": "..." }] }`.
 
-Los topes `MAX_CREATE`, `MAX_COUNT` y `MAX_EXCLUDE` de `index.js` deben
-coincidir con `DirectusService.maxCreate`, `maxCount` y `maxExclude` en la
-app.
+Los topes `MAX_CREATE`, `MAX_COUNT`, `MAX_EXCLUDE` y `MAX_CATEGORIES` de
+`index.js` deben coincidir con `DirectusService.maxCreate`, `maxCount`,
+`maxExclude` y `maxCategories` en la app.
+
+Pruebas del reparto y de la validación de `categorias`:
+`node --test server/tests/juego.test.mjs`.
 
 ## Instalar o actualizar la extensión
 

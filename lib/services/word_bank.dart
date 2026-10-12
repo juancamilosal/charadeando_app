@@ -42,21 +42,27 @@ class WordBank {
   final Future<Directory> Function() _directory;
   final Random _random;
 
-  /// Trae [count] palabras nuevas de [category] y [difficulty] (códigos de
-  /// Directus). Sin internet usa el último lote guardado de esa misma
-  /// categoría y dificultad; si no hay, lanza el error de Directus.
+  /// Trae [count] palabras nuevas de [category] (o de varias
+  /// [categories], repartidas en partes iguales) y [difficulty] (códigos de
+  /// Directus). Sin internet usa el último lote guardado de esas mismas
+  /// categorías y dificultad; si no hay, lanza el error de Directus.
   Future<WordBatch> load(
     int count, {
     String? category,
+    List<String>? categories,
     String? difficulty,
   }) async {
     final stored = await _read();
-    final cacheKey = '${category ?? ''}/${difficulty ?? ''}';
+    final which = categories != null
+        ? ([...categories]..sort()).join('+')
+        : category ?? '';
+    final cacheKey = '$which/${difficulty ?? ''}';
     final List<RemoteWord> fetched;
     try {
       fetched = await _directus.fetchWords(
         count: count,
         category: category,
+        categories: categories,
         difficulty: difficulty,
         exclude: stored.history,
       );
@@ -152,7 +158,8 @@ class _Stored {
 
   final List<RemoteWord> cache;
 
-  /// Categoría y dificultad del último lote ("ANIMALES/FACIL"), para no
-  /// jugar sin internet con palabras de otra categoría.
+  /// Categoría y dificultad del último lote ("ANIMALES/FACIL", o
+  /// "ANIMALES+PELICULAS/FACIL" en una mezcla), para no jugar sin internet
+  /// con palabras de otras categorías.
   final String cacheKey;
 }

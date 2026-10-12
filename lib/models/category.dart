@@ -12,6 +12,7 @@ enum GameCategory {
     Icons.edit_note,
     AppColors.blue,
     'LIBRE',
+    'Palabra',
   ),
   animals(
     'Animales',
@@ -19,6 +20,7 @@ enum GameCategory {
     Icons.pets,
     AppColors.green,
     'ANIMALES',
+    'Animal',
   ),
   geography(
     'Geografía',
@@ -26,6 +28,7 @@ enum GameCategory {
     Icons.public,
     AppColors.indigo,
     'GEOGRAFIA',
+    'Lugar',
   ),
   movies(
     'Películas',
@@ -33,6 +36,7 @@ enum GameCategory {
     Icons.movie,
     AppColors.teal,
     'PELICULAS',
+    'Película',
   ),
   celebrities(
     'Celebridades',
@@ -40,6 +44,7 @@ enum GameCategory {
     Icons.star,
     AppColors.orange,
     'CELEBRIDADES',
+    'Famoso',
   ),
   brands(
     'Marcas',
@@ -47,6 +52,7 @@ enum GameCategory {
     Icons.local_offer,
     AppColors.turquoise,
     'MARCAS',
+    'Marca',
   ),
   sports(
     'Deportes',
@@ -54,6 +60,7 @@ enum GameCategory {
     Icons.sports_basketball,
     AppColors.navy,
     'DEPORTES',
+    'Deporte',
   ),
   soccerTeams(
     'Equipos de fútbol',
@@ -61,6 +68,7 @@ enum GameCategory {
     Icons.sports_soccer,
     AppColors.purple,
     'EQUIPOS_FUTBOL',
+    'Equipo de fútbol',
   );
 
   const GameCategory(
@@ -69,6 +77,7 @@ enum GameCategory {
     this.icon,
     this.color,
     this.code,
+    this.singular,
   );
 
   final String label;
@@ -78,6 +87,21 @@ enum GameCategory {
 
   /// Valor del campo `categoria` en Directus.
   final String code;
+
+  /// Nombre de una sola palabra de la categoría ("Película"), para mostrar
+  /// arriba de la palabra en una partida con varias categorías.
+  final String singular;
+
+  /// Se desbloquea con premium. Por ahora ninguna lo es; cuando se definan
+  /// las de pago, se marcan aquí.
+  bool get premium => false;
+
+  static GameCategory? byCode(String? code) {
+    for (final c in values) {
+      if (c.code == code) return c;
+    }
+    return null;
+  }
 
   /// Categorías con palabras del backend, sin contar "Libre".
   static List<GameCategory> get themed =>

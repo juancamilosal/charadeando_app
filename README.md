@@ -89,6 +89,25 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Con las palabras escritas por los grupos, en el turno se ve cuántas
   faltan de toda la partida. Con las automáticas no se muestra, porque el
   turno dura hasta que se acabe el tiempo.
+- Combinar categorías: arriba de la cuadrícula de categorías, el botón
+  "Combinar categorías" abre desde abajo una ventana con las categorías del
+  juego (sin Libre) y "Mis categorías" (si hay alguna), cada una con su
+  dibujo o ícono y una casilla; se marca o desmarca tocando la fila. Las
+  premium bloqueadas llevan candado y avisan que necesitan premium; las
+  propias con menos de 10 palabras dicen "Faltan palabras" y no se marcan.
+  El botón de abajo, "Empezar a jugar · 3 categorías", se activa con 2 o
+  más. La app recuerda la última combinación (`combinacion.json`). Al
+  empezar va a la configuración de siempre, donde la partida se llama
+  "Mezcla: Animales, Películas y Mi familia" (o "Mezcla de 5 categorías"
+  si son más de 3), igual que en la pantalla antes de cada turno. Las
+  palabras se reparten en partes iguales entre las categorías elegidas (45
+  con 3 son 15 de cada una; el sobrante, de a una), se completan con las
+  otras si alguna no alcanza y se barajan juntas. Las del juego llegan de
+  Directus en un solo pedido (`categorias`) con la dificultad elegida y sin
+  repetir las ya jugadas; las propias salen del celular y no tienen
+  dificultad (si solo hay propias, no se usa internet ni se muestra la
+  dificultad). Cada palabra conserva su categoría: la tarjeta del turno, el
+  Modo TV y el video la muestran arriba ("Película").
 - Mis categorías: en la pantalla de categorías hay un selector en forma de
   píldora, "Todas | ✨ Mías" (animado, y la app recuerda la última pestaña).
   "Todas" es lo de siempre; "Mías" muestra las categorías que creó el

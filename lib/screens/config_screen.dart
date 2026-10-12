@@ -29,7 +29,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   void initState() {
     super.initState();
     _config = ref.read(gameControllerProvider).config;
-    if (_automatic && !_custom) {
+    if (_automatic && !_noDifficulty) {
       // Las palabras vienen mezcladas.
       _difficulty = Difficulty.mixed;
       _config = _config.copyWith(difficulty: _difficulty);
@@ -75,7 +75,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
       );
       _scoring = saved.scoringMode;
       _hitMode = saved.hitMode;
-      if (_automatic && !_custom && saved.difficulty != null) {
+      if (_automatic && !_noDifficulty && saved.difficulty != null) {
         _difficulty = saved.difficulty;
         _config = _config.copyWith(difficulty: _difficulty);
       }
@@ -96,7 +96,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
             scoringMode: _scoring ?? ScoringMode.perPhrase,
             hitMode: _hitMode ?? HitMode.tilt,
             resolution: config.resolution,
-            difficulty: _automatic && !_custom ? _difficulty : null,
+            difficulty: _automatic && !_noDifficulty ? _difficulty : null,
           ),
         )
         .ignore();
@@ -130,6 +130,10 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   /// Se juega una categoría propia: sus palabras no tienen dificultad.
   bool get _custom => _config.customCategory != null;
 
+  /// Sin dificultad: las palabras son de categorías propias (en una mezcla,
+  /// solo si no hay ninguna del juego).
+  bool get _noDifficulty => !_config.usesDifficulty;
+
   /// Modo TV: el celular está duplicando la pantalla en un televisor. El
   /// juez marca con botones y no se graba, así que las secciones de
   /// aciertos y de video no se muestran.
@@ -137,7 +141,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
 
   /// Lo que falta elegir, para el aviso al tocar "Continuar".
   List<String> get _missingChoices => [
-    if (_automatic && !_custom && _difficulty == null) 'la dificultad',
+    if (_automatic && !_noDifficulty && _difficulty == null) 'la dificultad',
     if (_scoring == null) 'la puntuación',
     if (!_tvMode && _hitMode == null) 'cómo se marcan los aciertos',
   ];
@@ -204,8 +208,8 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
             groups: groups,
             scoringMode: _scoring,
             hitMode: _tvMode ? HitMode.tv : _hitMode,
-            difficulty: _automatic && !_custom ? _difficulty : null,
-            clearDifficulty: _custom,
+            difficulty: _automatic && !_noDifficulty ? _difficulty : null,
+            clearDifficulty: _noDifficulty,
           ),
         );
     context.go(
@@ -251,7 +255,9 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
           title: const Text('Configuración'),
           leading: BackButton(
             onPressed: () => context.go(
-              _config.category == GameCategory.free && !_custom
+              _config.isMix
+                  ? Routes.categories
+                  : _config.category == GameCategory.free && !_custom
                   ? Routes.freeMode
                   : Routes.categoryIntro,
             ),
@@ -307,7 +313,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                 _autoGameSection(),
                 gap,
                 // Las palabras propias no tienen dificultad.
-                if (!_custom) ...[_difficultySection(), gap],
+                if (!_noDifficulty) ...[_difficultySection(), gap],
               ] else ...[
                 // Sin grupos, las palabras se escriben en una sola lista.
                 if (_inGroups) ...[
@@ -491,8 +497,12 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   /// dura hasta que se acabe el tiempo, sin límite de palabras.
   Widget _autoGameSection() {
     return ConfigSection(
-      icon: _config.customCategory?.icon ?? _config.category.icon,
-      title: _config.category == GameCategory.free && !_custom
+      icon: _config.isMix
+          ? Icons.shuffle
+          : _config.customCategory?.icon ?? _config.category.icon,
+      title: _config.isMix
+          ? _config.categoryLabel
+          : _config.category == GameCategory.free && !_custom
           ? 'Partida'
           : 'Partida: ${_config.categoryLabel}',
       children: [

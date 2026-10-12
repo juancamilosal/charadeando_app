@@ -24,6 +24,7 @@ final configStoreProvider = Provider((ref) => ConfigStore());
 final customCategoryStoreProvider = Provider((ref) => CustomCategoryStore());
 final welcomeStoreProvider = Provider((ref) => WelcomeStore());
 final backdropStoreProvider = Provider((ref) => BackdropStore());
+final mixStoreProvider = Provider((ref) => MixStore());
 
 /// El fondo de la app. `main` lo lee del celular antes de abrir la app,
 /// para que se vea el elegido desde la primera pantalla.
@@ -97,6 +98,14 @@ final videoRendererProvider = Provider((ref) => VideoRenderer());
 /// TEMPORAL: en true para probar las funciones premium. Volver a false
 /// antes de publicar.
 final premiumUnlockedProvider = Provider((ref) => true);
+
+/// Categorías del juego que se desbloquean con premium.
+final premiumCategoriesProvider = Provider<Set<GameCategory>>(
+  (ref) => {
+    for (final c in GameCategory.values)
+      if (c.premium) c,
+  },
+);
 
 final gameControllerProvider = NotifierProvider<GameController, GameState>(
   GameController.new,
