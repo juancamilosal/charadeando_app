@@ -23,17 +23,10 @@ void main() {
     );
   });
 
-  testWidgets('las que todavía no tienen dibujo muestran su ícono', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: CategoryArt(category: GameCategory.vacations, size: 80),
-      ),
-    );
-    expect(find.byIcon(Icons.beach_access), findsOneWidget);
+  test('todas las categorías tienen su dibujo', () {
+    expect(CategoryArt.withImage, containsAll(GameCategory.values));
   });
+
 
   testWidgets('muestra la imagen quieta', (tester) async {
     await tester.pumpWidget(
