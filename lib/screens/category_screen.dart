@@ -7,7 +7,6 @@ import '../providers/providers.dart';
 import '../router.dart';
 import '../services/services.dart';
 import '../theme.dart';
-import '../widgets/art_cycle.dart';
 import '../widgets/category_card.dart';
 import '../widgets/combine_categories_sheet.dart';
 import '../widgets/play_background.dart';
@@ -80,33 +79,30 @@ class CategoryScreen extends ConsumerWidget {
           // Es la primera pantalla: no hay a dónde volver.
           automaticallyImplyLeading: false,
         ),
-        // Los dibujos de las categorías se animan uno por uno.
-        body: ArtCycle(
-          child: SafeArea(
-            top: false,
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-              children: [
-                CategoryTabSelector(
-                  selected: tab,
-                  onChanged: (t) =>
-                      ref.read(customCategoriesProvider.notifier).setTab(t),
-                ),
-                const SizedBox(height: 20),
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 250),
-                  child: tab == CategoryTab.all
-                      ? KeyedSubtree(
-                          key: const ValueKey('todas'),
-                          child: _allCategories(context, ref),
-                        )
-                      : KeyedSubtree(
-                          key: const ValueKey('mias'),
-                          child: _MyCategories(data: data),
-                        ),
-                ),
-              ],
-            ),
+        body: SafeArea(
+          top: false,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            children: [
+              CategoryTabSelector(
+                selected: tab,
+                onChanged: (t) =>
+                    ref.read(customCategoriesProvider.notifier).setTab(t),
+              ),
+              const SizedBox(height: 20),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                child: tab == CategoryTab.all
+                    ? KeyedSubtree(
+                        key: const ValueKey('todas'),
+                        child: _allCategories(context, ref),
+                      )
+                    : KeyedSubtree(
+                        key: const ValueKey('mias'),
+                        child: _MyCategories(data: data),
+                      ),
+              ),
+            ],
           ),
         ),
       ),

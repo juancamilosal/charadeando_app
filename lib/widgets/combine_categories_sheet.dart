@@ -386,7 +386,7 @@ class _GameArt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasArt = CategoryArt.restFrames.containsKey(category);
+    final hasArt = CategoryArt.withImage.contains(category);
     return Container(
       width: 52,
       height: 52,
@@ -397,7 +397,7 @@ class _GameArt extends StatelessWidget {
       ),
       child: hasArt
           ? Image.asset(
-              CategoryArt.restAsset(category),
+              CategoryArt.asset(category),
               errorBuilder: (_, _, _) =>
                   Icon(category.icon, color: category.onColor),
             )

@@ -44,8 +44,7 @@ class Season {
 /// Categorías de palabras. En "Libre" los grupos escriben las palabras o
 /// se descargan frases de la categoría LIBRE; las demás descargan palabras
 /// de su categoría en Directus. Van en el orden de la pantalla: Libre,
-/// las especiales y después cada sección; así los dibujos se animan de
-/// arriba a abajo.
+/// las especiales y después cada sección.
 enum GameCategory {
   free(
     'Libre',

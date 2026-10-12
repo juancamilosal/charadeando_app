@@ -421,9 +421,9 @@ class _CategoryTile extends StatelessWidget {
       child: Column(
         children: [
           Expanded(
-            child: CategoryArt.restFrames.containsKey(category)
+            child: CategoryArt.withImage.contains(category)
                 ? Image.asset(
-                    CategoryArt.restAsset(category),
+                    CategoryArt.asset(category),
                     errorBuilder: (_, _, _) =>
                         Icon(category.icon, color: onColor, size: 48),
                   )

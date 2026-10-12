@@ -99,7 +99,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   amarilla "Nueva" arriba a la izquierda y, mientras no tengan palabras en
   Directus, "Pronto" sobre su ícono apagado: al tocarlas avisa "¡Pronto!
   Estamos preparando las palabras de…" y no se juegan ni se combinan. Las
-  que todavía no tienen GIF muestran su ícono. Las tarjetas de las
+  que todavía no tienen dibujo muestran su ícono. Las tarjetas de las
   secciones son más pequeñas: el dibujo arriba y el nombre debajo, grande,
   en dos renglones si es largo ("Personajes históricos") y sin partir
   palabras; solo una palabra muy larga ("Celebridades") se achica. En las
@@ -136,34 +136,17 @@ la cámara frontal graba a los participantes para revivir las risas.
   nuevas), "⚙️ Personalizada" (a la configuración con la misma categoría) y
   "← Salir de la categoría". Sin ganador ni ruleta. Si salen sin guardar el
   video, se borra.
-- Cada categoría puede tener un dibujo animado (GIF de 256 px en
-  `assets/img/categorias/`, con el nombre de la categoría) que se ve en su
-  tarjeta y, grande y animado, arriba de la configuración con el nombre de
-  la categoría (una propia muestra su ícono en su color; una mezcla, los
-  dibujos de las elegidas). Ya lo tienen: Libre (una hoja
-  a la que se le van escribiendo las líneas), Animales, Geografía, Películas, Celebridades, Marcas,
-  Deportes, Equipos de fútbol y Objetos (unas llaves que se balancean
-  colgadas del aro y vuelven a quedar quietas) y Comida (una botella le
-  echa salsa al taco en zigzag; quieto, el taco queda con su salsa) y
-  Profesiones (un bombero que parpadea mientras a su lado se prende una
-  sirena que lo alumbra), Acciones (un muñeco que corre: las piernas siguen un
-  ciclo de carrera con la pantaloneta, mece los dos brazos, rebota y las líneas de velocidad pasan
-  hacia atrás) y Lugares (el mapa
-  solo y el pin cae una sola vez desde arriba, se aplasta, rebota y queda
-  clavado). Fuera de la pantalla de categorías (arriba de la configuración
-  del juego) los GIF se repiten, salvo Lugares: el pin cae una vez y queda
-  clavado.
-- En la pantalla de categorías los dibujos no se mueven todos a la vez: se
-  animan uno por uno, en orden de arriba a abajo (Libre y después sección
-  por sección), con una pausa corta entre uno y otro, y el ciclo vuelve a
-  empezar. Los que no se ven en la
-  pantalla se saltan. Quietos muestran su mejor cuadro: la hoja con sus
-  líneas, el balón de Deportes en el centro después de rebotar. Ese cuadro
-  también está como imagen en `assets/img/categorias/reposo/`, así que la
-  tarjeta se ve completa desde el primer instante; el ciclo empieza un
-  momento después de abrir la pantalla. La ruleta
-  de castigos sigue moviéndose siempre y en "¿Cómo se juega?" el dibujo se
-  mueve sin parar.
+- Cada categoría puede tener un dibujo: una imagen quieta (PNG de 256 px
+  en `assets/img/categorias/`, con el código de la categoría en
+  minúsculas, por ejemplo `lugares.png`) que se ve en su tarjeta, en
+  Combinar categorías y, grande, arriba de la configuración con el nombre
+  de la categoría (una propia muestra su ícono en su color; una mezcla, los
+  dibujos de las elegidas). Ya no hay GIF: eran difíciles de mantener. Para
+  agregar el dibujo de una categoría se pone su PNG en la carpeta y se suma
+  a `CategoryArt.withImage` (`lib/widgets/category_art.dart`); mientras
+  tanto muestra su ícono. Ya lo tienen: Libre, Animales, Geografía,
+  Películas, Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos,
+  Comida, Profesiones, Acciones y Lugares.
 - Dificultad: Mezcladas (viene elegida: trae de todas, 300 palabras por
   categoría), Fácil (ideal con niños), Normal o Difícil (100 cada una). Se
   elige en la configuración de las palabras automáticas, en Libre y en todas

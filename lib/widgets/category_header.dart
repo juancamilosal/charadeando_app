@@ -4,7 +4,7 @@ import '../models/models.dart';
 import '../theme.dart';
 import 'category_art.dart';
 
-/// Arriba de la configuración: el dibujo animado de la categoría y su
+/// Arriba de la configuración: el dibujo de la categoría y su
 /// nombre. Una categoría propia muestra su ícono en su color; una mezcla, los
 /// dibujos de las categorías elegidas.
 class CategoryHeader extends StatelessWidget {

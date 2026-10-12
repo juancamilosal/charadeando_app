@@ -23,7 +23,7 @@ class CategoryCard extends StatelessWidget {
     this.soon = false,
   });
 
-  /// Tarjeta de una categoría del juego, con su GIF (o su ícono, si todavía
+  /// Tarjeta de una categoría del juego, con su imagen (o su ícono, si todavía
   /// no tiene), y sus etiquetas "Nueva" y "Pronto".
   factory CategoryCard.game(
     GameCategory category, {
