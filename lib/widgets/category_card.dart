@@ -4,15 +4,15 @@ import '../models/models.dart';
 import '../theme.dart';
 import 'category_art.dart';
 
-/// Tarjeta de una categoría: el dibujo grande arriba, el nombre y una
-/// línea de texto debajo. Su estilo (calcomanía, blanca o cómic) depende
+/// Tarjeta de una categoría: el dibujo grande arriba y el nombre debajo
+/// (las propias, también cuántas palabras tienen). Su estilo (calcomanía, blanca o cómic) depende
 /// del fondo elegido. Sirve para las categorías del juego y para las
 /// propias.
 class CategoryCard extends StatelessWidget {
   const CategoryCard({
     super.key,
     required this.title,
-    required this.subtitle,
+    this.subtitle,
     required this.color,
     required this.art,
     this.onTap,
@@ -24,7 +24,6 @@ class CategoryCard extends StatelessWidget {
   factory CategoryCard.game(GameCategory category, {VoidCallback? onTap}) =>
       CategoryCard(
         title: category.label,
-        subtitle: category.description,
         color: category.color,
         art: (size, onColor) =>
             CategoryArt(category: category, size: size, color: onColor),
@@ -50,7 +49,9 @@ class CategoryCard extends StatelessWidget {
   );
 
   final String title;
-  final String subtitle;
+
+  /// Línea debajo del nombre, o null si no lleva.
+  final String? subtitle;
   final Color color;
   final Widget Function(double size, Color onColor) art;
   final VoidCallback? onTap;
@@ -200,18 +201,20 @@ class CategoryCard extends StatelessWidget {
                           textAlign: TextAlign.center,
                           style: titleStyle.copyWith(fontSize: titleSize),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          subtitle,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: w * 0.105,
-                            fontWeight: FontWeight.w700,
-                            color: onColor.withValues(alpha: 0.85),
+                        if (subtitle case final subtitle?) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            subtitle,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: w * 0.105,
+                              fontWeight: FontWeight.w700,
+                              color: onColor.withValues(alpha: 0.85),
+                            ),
                           ),
-                        ),
+                        ],
                       ],
                     );
                   },

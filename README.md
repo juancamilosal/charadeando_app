@@ -75,8 +75,9 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Pantalla de categorías: Libre, Animales, Geografía, Películas,
   Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos, Comida,
   Profesiones, Acciones y Lugares (las 13 categorías de la colección
-  `palabras`, todas con su GIF). Libre
-  deja elegir entre palabras manuales (las escriben los equipos) y
+  `palabras`, todas con su GIF). Cada tarjeta lleva solo el dibujo y el
+  nombre, sin descripción (las propias, también cuántas palabras tienen).
+  Libre deja elegir entre palabras manuales (las escriben los equipos) y
   automáticas (frases de la categoría LIBRE); las demás juegan con palabras
   automáticas de su categoría.
 - Partida rápida o personalizada: al tocar una categoría del juego, una de

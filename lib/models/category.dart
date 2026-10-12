@@ -6,57 +6,26 @@ import '../theme.dart';
 /// se descargan frases de la categoría LIBRE; las demás descargan palabras
 /// de su categoría en Directus.
 enum GameCategory {
-  free(
-    'Libre',
-    'Sus palabras o las nuestras',
-    Icons.edit_note,
-    AppColors.blue,
-    'LIBRE',
-    'Palabra',
-  ),
-  animals(
-    'Animales',
-    'Del perro a la jirafa',
-    Icons.pets,
-    AppColors.green,
-    'ANIMALES',
-    'Animal',
-  ),
+  free('Libre', Icons.edit_note, AppColors.blue, 'LIBRE', 'Palabra'),
+  animals('Animales', Icons.pets, AppColors.green, 'ANIMALES', 'Animal'),
   geography(
     'Geografía',
-    'Países, ciudades, ríos y más',
     Icons.public,
     AppColors.indigo,
     'GEOGRAFIA',
     'Geografía',
   ),
-  movies(
-    'Películas',
-    'Clásicos y estrenos',
-    Icons.movie,
-    AppColors.teal,
-    'PELICULAS',
-    'Película',
-  ),
+  movies('Películas', Icons.movie, AppColors.teal, 'PELICULAS', 'Película'),
   celebrities(
     'Celebridades',
-    'Famosos de todo tipo',
     Icons.star,
     AppColors.orange,
     'CELEBRIDADES',
     'Famoso',
   ),
-  brands(
-    'Marcas',
-    'Las que todos conocen',
-    Icons.local_offer,
-    AppColors.turquoise,
-    'MARCAS',
-    'Marca',
-  ),
+  brands('Marcas', Icons.local_offer, AppColors.turquoise, 'MARCAS', 'Marca'),
   sports(
     'Deportes',
-    'A moverse',
     Icons.sports_basketball,
     AppColors.navy,
     'DEPORTES',
@@ -64,31 +33,15 @@ enum GameCategory {
   ),
   soccerTeams(
     'Equipos de fútbol',
-    'Para los futboleros',
     Icons.sports_soccer,
     AppColors.purple,
     'EQUIPOS_FUTBOL',
     'Equipo de fútbol',
   ),
-  objects(
-    'Objetos',
-    'Cosas de todos los días',
-    Icons.key,
-    AppColors.coral,
-    'OBJETOS',
-    'Objeto',
-  ),
-  food(
-    'Comida',
-    'Para chuparse los dedos',
-    Icons.lunch_dining,
-    AppColors.tomato,
-    'COMIDA',
-    'Comida',
-  ),
+  objects('Objetos', Icons.key, AppColors.coral, 'OBJETOS', 'Objeto'),
+  food('Comida', Icons.lunch_dining, AppColors.tomato, 'COMIDA', 'Comida'),
   professions(
     'Profesiones',
-    '¿A qué te dedicas?',
     Icons.work,
     AppColors.brown,
     'PROFESIONES',
@@ -96,24 +49,15 @@ enum GameCategory {
   ),
   actions(
     'Acciones',
-    '¡A actuar!',
     Icons.directions_run,
     AppColors.magenta,
     'ACCIONES',
     'Acción',
   ),
-  places(
-    'Lugares',
-    'De la casa al fin del mundo',
-    Icons.place,
-    AppColors.forest,
-    'LUGARES',
-    'Lugar',
-  );
+  places('Lugares', Icons.place, AppColors.forest, 'LUGARES', 'Lugar');
 
   const GameCategory(
     this.label,
-    this.description,
     this.icon,
     this.color,
     this.code,
@@ -121,7 +65,6 @@ enum GameCategory {
   );
 
   final String label;
-  final String description;
   final IconData icon;
   final Color color;
 
