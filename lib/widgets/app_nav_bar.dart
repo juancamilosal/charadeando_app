@@ -185,7 +185,7 @@ class _RouletteIconPainter extends CustomPainter {
 
   final Color color;
 
-  static const _fields = 6;
+  static const _fields = 8;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -211,8 +211,8 @@ class _RouletteIconPainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = s * 0.07,
     );
-    canvas.drawCircle(center, s * 0.1, Paint()..color = Colors.white);
-    canvas.drawCircle(center, s * 0.05, Paint()..color = color);
+    canvas.drawCircle(center, s * 0.08, Paint()..color = Colors.white);
+    canvas.drawCircle(center, s * 0.04, Paint()..color = color);
     // El indicador, arriba, apuntando a la rueda.
     final top = center.dy - radius;
     final pointer = Path()
