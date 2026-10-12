@@ -78,7 +78,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   tarjeta del fondo) y el botón "Combinar categorías" con borde punteado.
   Después, las secciones, cada una con su título a la izquierda (Fredoka) y
   cuántas categorías tiene a la derecha ("8 categorías"), y sus tarjetas en
-  una cuadrícula de 2 columnas, todas visibles:
+  una cuadrícula de 3 columnas, todas visibles:
   1. Clásicos: Animales, Comida, Objetos, Profesiones y Acciones.
   2. Entretenimiento: Películas, Series y novelas, Personajes, Superhéroes,
      Dibujos animados, Videojuegos, Música y canciones y Celebridades.

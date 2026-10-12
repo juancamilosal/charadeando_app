@@ -70,7 +70,7 @@ class CategoryCard extends StatelessWidget {
   /// Botón de tres puntos arriba a la derecha (editar, borrar…).
   final VoidCallback? onMenu;
 
-  /// Más pequeña, para una cuadrícula de 3 columnas.
+  /// Más pequeña, para la cuadrícula de 3 columnas de las secciones.
   final bool compact;
 
   /// Etiqueta amarilla "Nueva" arriba a la izquierda.
@@ -126,7 +126,7 @@ class CategoryCard extends StatelessWidget {
         children: [
           Padding(
             padding: compact
-                ? const EdgeInsets.fromLTRB(6, 10, 6, 10)
+                ? const EdgeInsets.fromLTRB(5, 8, 5, 10)
                 : const EdgeInsets.fromLTRB(8, 16, 8, 16),
             child: LayoutBuilder(
               // El dibujo y los textos crecen con la tarjeta, para que se
@@ -153,13 +153,13 @@ class CategoryCard extends StatelessWidget {
                   title,
                   titleStyle,
                   width: full,
-                  maxSize: w * (compact ? 0.2 : 0.25),
+                  maxSize: w * (compact ? 0.23 : 0.25),
                   minSize: w * 0.12,
                   textScaler: textScaler,
                 );
                 final picture = FittedBox(
                   fit: BoxFit.scaleDown,
-                  child: art(w * (compact ? 0.68 : 0.75), onColor),
+                  child: art(w * (compact ? 0.76 : 0.75), onColor),
                 );
                 // La columna ocupa todo el ancho: con textos cortos
                 // quedaba angosta y pegada a la izquierda.

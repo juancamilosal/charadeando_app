@@ -22,9 +22,11 @@ class CategoryScreen extends ConsumerWidget {
   const CategoryScreen({super.key});
 
   /// Espacio entre tarjetas y proporción (ancho / alto) de cada una, en
-  /// "Mías" y en las secciones (2 columnas).
+  /// "Mías" (2 columnas) y en las secciones (3 columnas).
   static const gridSpacing = 14.0;
   static const cardAspect = 0.7;
+  static const sectionSpacing = 10.0;
+  static const sectionAspect = 0.72;
 
   void _choose(BuildContext context, WidgetRef ref, GameCategory category) {
     if (!category.available) {
@@ -132,16 +134,17 @@ class CategoryScreen extends ConsumerWidget {
           CategorySectionHeader(section: section, count: categories.length),
           const SizedBox(height: 10),
           GridView.count(
-            crossAxisCount: 2,
+            crossAxisCount: 3,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: gridSpacing,
-            crossAxisSpacing: gridSpacing,
-            childAspectRatio: cardAspect,
+            mainAxisSpacing: sectionSpacing,
+            crossAxisSpacing: sectionSpacing,
+            childAspectRatio: sectionAspect,
             children: [
               for (final category in categories)
                 CategoryCard.game(
                   category,
+                  compact: true,
                   onTap: () => _choose(context, ref, category),
                 ),
             ],
