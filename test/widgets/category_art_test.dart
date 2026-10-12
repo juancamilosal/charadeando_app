@@ -32,7 +32,7 @@ void main() {
         child: Row(
           children: [
             CategoryArt(category: GameCategory.places, size: 80),
-            CategoryArt(category: GameCategory.music, size: 80),
+            CategoryArt(category: GameCategory.historicalFigures, size: 80),
           ],
         ),
       ),
@@ -42,6 +42,6 @@ void main() {
       (image.image as AssetImage).assetName,
       'assets/img/categorias/lugares.png',
     );
-    expect(find.byIcon(Icons.mic), findsOneWidget);
+    expect(find.byIcon(Icons.account_balance), findsOneWidget);
   });
 }
