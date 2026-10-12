@@ -4,20 +4,40 @@ import '../theme.dart';
 
 /// Secciones de la pantalla de categorías, en el orden en que se ven.
 enum CategorySection {
-  classics('Clásicos', AppColors.green),
-  entertainment('Entretenimiento', AppColors.blue),
-  special('Especiales', AppColors.red, note: 'Solo por temporada'),
-  culture('Cultura general', AppColors.teal),
-  sports('Deportes', AppColors.navy);
+  classics('Clásicos', [
+    Color(0xFF127A45),
+    Color(0xFF18A85C),
+    Color(0xFF2BC273),
+  ]),
+  entertainment('Entretenimiento', [
+    Color(0xFF1F4FD1),
+    Color(0xFF2F80FF),
+    Color(0xFF3A9BF0),
+  ]),
+  special('Especiales', [
+    Color(0xFFB81D2E),
+    AppColors.red,
+    Color(0xFFE84855),
+  ], note: 'Solo por temporada'),
+  culture('Cultura general', [
+    Color(0xFF0B6E77),
+    Color(0xFF0E8C96),
+    Color(0xFF14A3A8),
+  ]),
+  sports('Deportes', [Color(0xFF1B2F73), Color(0xFF1E3A8A), Color(0xFF2B4BA8)]);
 
-  const CategorySection(this.title, this.color, {this.note});
+  const CategorySection(this.title, this.shades, {this.note});
 
   final String title;
 
-  /// Color de las tarjetas de la sección en la pantalla de categorías: un
-  /// color por sección, para que no se vea tan cargada. En el resto de la
-  /// app cada categoría usa su propio color.
-  final Color color;
+  /// Tonos de las tarjetas de la sección en la pantalla de categorías: un
+  /// mismo color, del más oscuro al más claro, que se alternan en orden.
+  /// Así no se ve tan cargada y cada tarjeta se distingue de la de al lado.
+  /// En el resto de la app cada categoría usa su propio color.
+  final List<Color> shades;
+
+  /// El tono de la tarjeta en la posición [index] de la sección.
+  Color shade(int index) => shades[index % shades.length];
 
   /// Texto a la derecha del título en vez de cuántas categorías tiene.
   final String? note;

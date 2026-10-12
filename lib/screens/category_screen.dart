@@ -124,6 +124,8 @@ class CategoryScreen extends ConsumerWidget {
                 height: width / cardAspect,
                 child: CategoryCard.game(
                   GameCategory.free,
+                  // Un color que no se repite abajo, para que destaque.
+                  color: AppColors.yellow,
                   onTap: () => _choose(context, ref, GameCategory.free),
                 ),
               ),
@@ -155,12 +157,12 @@ class CategoryScreen extends ConsumerWidget {
             crossAxisSpacing: sectionSpacing,
             childAspectRatio: sectionAspect,
             children: [
-              for (final category in categories)
+              for (final (i, category) in categories.indexed)
                 CategoryCard.game(
                   category,
                   compact: true,
-                  // Todas las de la sección, del mismo color.
-                  color: section.color,
+                  // Todas las de la sección en tonos del mismo color.
+                  color: section.shade(i),
                   onTap: () => _choose(context, ref, category),
                 ),
             ],

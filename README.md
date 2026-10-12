@@ -95,11 +95,13 @@ la cámara frontal graba a los participantes para revivir las risas.
   4. Cultura general: Geografía, Lugares, Personajes históricos, Dichos y
      refranes y Marcas.
   5. Deportes: Deportes y Equipos de fútbol.
-  En esta pantalla todas las tarjetas de una sección van del mismo color,
-  para que no se vea tan cargada: Clásicos verde, Entretenimiento azul,
-  Especiales rojo, Cultura general verde azulado y Deportes azul oscuro
-  (`CategorySection.color`). En el resto de la app cada categoría conserva
-  su color propio.
+  En esta pantalla las tarjetas de una sección van en tonos de un mismo
+  color (del más oscuro al más claro, alternados en orden), para que no se
+  vea tan cargada y cada tarjeta se distinga de la de al lado: Clásicos
+  verdes, Entretenimiento azules, Especiales rojos, Cultura general verdes
+  azulados y Deportes azules oscuros (`CategorySection.shades`). Libre va
+  en amarillo, un color que no se repite abajo. En el resto de la app cada
+  categoría conserva su color propio.
   6. Mis categorías (al final): la tarjeta "Nueva categoría" y las que creó
      el usuario, en la misma cuadrícula, con cuántas son a la derecha. Se
      juegan, editan y borran igual que en la pestaña "Mías".
