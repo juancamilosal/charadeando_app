@@ -106,8 +106,11 @@ la cámara frontal graba a los participantes para revivir las risas.
   Directus en un solo pedido (`categorias`) con la dificultad elegida y sin
   repetir las ya jugadas; las propias salen del celular y no tienen
   dificultad (si solo hay propias, no se usa internet ni se muestra la
-  dificultad). Cada palabra conserva su categoría: la tarjeta del turno, el
-  Modo TV y el video la muestran arriba ("Película").
+  dificultad). Cada palabra conserva su categoría, que el video muestra
+  arriba de la palabra ("Película"); en la pantalla del juego no se
+  muestra. Si el servidor devuelve palabras de categorías que no se
+  pidieron (la extensión sin actualizar), se descartan y se pide cada
+  categoría por separado.
 - Mis categorías: en la pantalla de categorías hay un selector en forma de
   píldora, "Todas | ✨ Mías" (animado, y la app recuerda la última pestaña).
   "Todas" es lo de siempre; "Mías" muestra las categorías que creó el

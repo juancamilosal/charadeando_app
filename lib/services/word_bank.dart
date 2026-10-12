@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../models/models.dart';
 import 'directus_service.dart';
+import 'mix_words.dart';
 
 /// Palabras descargadas para una partida automática.
 class WordBatch {
@@ -59,13 +60,14 @@ class WordBank {
     final cacheKey = '$which/${difficulty ?? ''}';
     final List<RemoteWord> fetched;
     try {
-      fetched = await _directus.fetchWords(
-        count: count,
-        category: category,
-        categories: categories,
-        difficulty: difficulty,
-        exclude: stored.history,
-      );
+      fetched = categories == null
+          ? await _directus.fetchWords(
+              count: count,
+              category: category,
+              difficulty: difficulty,
+              exclude: stored.history,
+            )
+          : await _fetchMix(count, categories, difficulty, stored.history);
     } on DirectusException catch (e) {
       if (stored.cache.isEmpty || stored.cacheKey != cacheKey) rethrow;
       debugPrint('[WordBank] Sin conexión, se usa el último lote: $e');
@@ -90,6 +92,45 @@ class WordBank {
       ),
     );
     return WordBatch([for (final w in batch) w.toWord()], offline: false);
+  }
+
+  /// Palabras de varias categorías en un solo pedido. Si llegan palabras de
+  /// otras categorías, el servidor no sabe repartirlas (la extensión no
+  /// está actualizada): se descartan y se pide cada categoría por separado,
+  /// en partes iguales.
+  Future<List<RemoteWord>> _fetchMix(
+    int count,
+    List<String> categories,
+    String? difficulty,
+    List<String> exclude,
+  ) async {
+    final wanted = categories.toSet();
+    final all = await _directus.fetchWords(
+      count: count,
+      categories: categories,
+      difficulty: difficulty,
+      exclude: exclude,
+    );
+    final ours = [
+      for (final w in all)
+        if (wanted.contains(w.categoria)) w,
+    ];
+    if (ours.length == all.length) return ours;
+    debugPrint(
+      '[WordBank] El servidor no repartió por categorías: se pide cada una.',
+    );
+    final quotas = MixWords.quotas(count, categories.length);
+    return [
+      for (var i = 0; i < categories.length; i++)
+        if (quotas[i] > 0)
+          for (final w in await _directus.fetchWords(
+            count: quotas[i],
+            category: categories[i],
+            difficulty: difficulty,
+            exclude: exclude,
+          ))
+            if (w.categoria == categories[i]) w,
+    ];
   }
 
   /// Forma de comparar palabras sin importar mayúsculas ni espacios.

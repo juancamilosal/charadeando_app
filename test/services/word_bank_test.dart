@@ -27,9 +27,14 @@ void main() {
         final body = jsonDecode(request.body) as Map<String, dynamic>;
         collectionRequests.add(body);
         final excluded = (body['excluir'] as List).toSet();
+        // Como la extensión anterior: filtra por "categoria" pero no conoce
+        // "categorias".
+        final category = body['categoria'];
         final data = [
           for (final w in collection)
-            if (!excluded.contains(w['id'])) w,
+            if (!excluded.contains(w['id']) &&
+                (category == null || w['categoria'] == category))
+              w,
         ].take(body['n'] as int).toList();
         return http.Response(jsonEncode({'data': data}), 200);
       }),
@@ -119,4 +124,25 @@ void main() {
       );
     },
   );
+
+  test('con varias categorías, si el servidor no las reparte, se descartan '
+      'las de otras y se pide cada una por separado', () async {
+    collection = [
+      for (var i = 0; i < 10; i++) word('p$i', 'Pelicula $i', 'PELICULAS'),
+      for (var i = 0; i < 10; i++) word('a$i', 'Animal $i', 'ANIMALES'),
+      for (var i = 0; i < 10; i++) word('g$i', 'Lugar $i', 'GEOGRAFIA'),
+    ];
+    final batch = await bank().load(6, categories: ['ANIMALES', 'GEOGRAFIA']);
+    expect(batch.words.map((w) => w.category).toSet(), {
+      'ANIMALES',
+      'GEOGRAFIA',
+    });
+    expect(batch.words.where((w) => w.category == 'ANIMALES'), hasLength(3));
+    expect(batch.words.where((w) => w.category == 'GEOGRAFIA'), hasLength(3));
+    expect(collectionRequests.first['categorias'], ['ANIMALES', 'GEOGRAFIA']);
+    expect(
+      [for (final r in collectionRequests.skip(1)) r['categoria']],
+      ['ANIMALES', 'GEOGRAFIA'],
+    );
+  });
 }

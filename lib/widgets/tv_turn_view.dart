@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../theme.dart';
 import 'end_game_dialog.dart';
-import 'word_card.dart';
 
 /// Turno del Modo TV. El celular se duplica en el televisor, así que esta
 /// vista es la que ve todo el grupo. Es sencilla a propósito: el turno del
@@ -16,7 +15,6 @@ class TvTurnView extends StatelessWidget {
     required this.remaining,
     required this.feedback,
     required this.title,
-    this.category,
     required this.onPass,
     required this.onHit,
     this.onEndGame,
@@ -31,10 +29,6 @@ class TvTurnView extends StatelessWidget {
 
   /// "Turno de Los Tigres", o "¡A jugar!" sin grupos.
   final String title;
-
-  /// En una partida con varias categorías, la de esta palabra
-  /// ("Película"), que se ve arriba de ella.
-  final String? category;
   final VoidCallback onPass;
   final VoidCallback onHit;
 
@@ -95,10 +89,6 @@ class TvTurnView extends StatelessWidget {
                   _Timer(remaining: remaining),
                 ],
               ),
-              if (category != null && marking) ...[
-                const SizedBox(height: 8),
-                Center(child: CategoryTag(category!)),
-              ],
               Expanded(
                 child: Center(
                   child: FittedBox(
