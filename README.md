@@ -115,7 +115,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   echa salsa al taco en zigzag; quieto, el taco queda con su salsa) y
   Profesiones (un bombero que parpadea mientras a su lado se prende una
   sirena que lo alumbra), Acciones (un muñeco que corre: las piernas siguen un
-  ciclo de carrera, mece el brazo, rebota y las líneas de velocidad pasan
+  ciclo de carrera con la pantaloneta, mece el brazo, rebota y las líneas de velocidad pasan
   hacia atrás) y Lugares (el mapa
   solo y el pin cae una sola vez desde arriba, se aplasta, rebota y queda
   clavado).
