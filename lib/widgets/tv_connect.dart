@@ -151,12 +151,68 @@ Future<void> showTvSteps(BuildContext context) => showModalBottomSheet<void>(
   shape: const RoundedRectangleBorder(
     borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
   ),
-  builder: (_) => TvStepsSheet(
-    title: 'Conectar a un televisor',
-    steps: _connectSteps,
-    note: Platform.isIOS ? null : 'También sirve un cable HDMI',
-  ),
+  builder: (_) => const _ConnectSheet(),
 );
+
+/// Los pasos para conectar, con un aviso: si el TV ya está duplicando la
+/// pantalla no hay que hacer nada, la app lo detecta sola. Si se conecta
+/// con la ventana abierta, lo muestra ahí mismo.
+class _ConnectSheet extends ConsumerWidget {
+  const _ConnectSheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final connected = ref.watch(tvConnectedProvider).value ?? false;
+    return TvStepsSheet(
+      title: 'Conectar a un televisor',
+      steps: _connectSteps,
+      note: Platform.isIOS ? null : 'También sirve un cable HDMI',
+      info: _TvInfo(connected: connected),
+    );
+  }
+}
+
+/// Recuadro que explica cómo se ve cuando el TV ya está conectado, o que
+/// ya se conectó.
+class _TvInfo extends StatelessWidget {
+  const _TvInfo({required this.connected});
+
+  final bool connected;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = connected ? AppColors.green : AppColors.purple;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withValues(alpha: 0.5), width: 1.5),
+      ),
+      child: Row(
+        children: [
+          Icon(connected ? Icons.check_circle : Icons.tv, color: color),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              connected
+                  ? '¡Listo! El televisor está conectado y el juego se ve '
+                        'en la pantalla grande.'
+                  : '¿Tu TV ya está duplicando la pantalla del celular? No '
+                        'tienes que hacer nada: la app lo detecta sola y aquí '
+                        'verás "Modo TV activado".',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: AppColors.ink,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 /// Abre la lista de televisores del sistema. Si el sistema no tiene una,
 /// como en iPhone, muestra los pasos.
@@ -191,6 +247,7 @@ class TvStepsSheet extends StatelessWidget {
     required this.title,
     required this.steps,
     this.note,
+    this.info,
   });
 
   final String title;
@@ -198,6 +255,9 @@ class TvStepsSheet extends StatelessWidget {
 
   /// Una línea pequeña al final, como "También sirve un cable HDMI".
   final String? note;
+
+  /// Un recuadro debajo del título, antes de los pasos.
+  final Widget? info;
 
   static const _colors = [
     AppColors.purple,
@@ -236,6 +296,7 @@ class TvStepsSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
+            if (info case final info?) ...[info, const SizedBox(height: 8)],
             for (var i = 0; i < steps.length; i++)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
