@@ -73,28 +73,11 @@ class PlayModeSelector extends StatelessWidget {
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Row(
       children: [
-        Row(
-          children: [
-            option(false, 'Sin grupos'),
-            const SizedBox(width: 10),
-            option(true, 'En grupos'),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Text(
-          inGroups
-              ? 'Cada grupo con su nombre y sus puntos.'
-              : 'Solo salen las palabras: ustedes se organizan.',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: onBackdrop,
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        option(false, 'Sin grupos'),
+        const SizedBox(width: 10),
+        option(true, 'En grupos'),
       ],
     );
   }

@@ -468,8 +468,15 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('¿Cómo van a jugar?'), findsOneWidget);
+    // Sin grupos viene marcado.
     expect(
-      find.text('Solo salen las palabras: ustedes se organizan.'),
+      find.descendant(
+        of: find.ancestor(
+          of: find.text('Sin grupos'),
+          matching: find.byType(Row),
+        ),
+        matching: find.byIcon(Icons.radio_button_checked),
+      ),
       findsOneWidget,
     );
     expect(find.text('Grupos'), findsNothing);
