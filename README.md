@@ -79,17 +79,17 @@ la cámara frontal graba a los participantes para revivir las risas.
   Después, las secciones, cada una con su título a la izquierda (Fredoka) y
   cuántas categorías tiene a la derecha ("8 categorías"), y sus tarjetas en
   una cuadrícula de 3 columnas, todas visibles:
-  1. Especiales ("Solo por temporada"): Navidad. Solo aparece cuando hay
+  1. Clásicos: Animales, Comida, Objetos, Profesiones y Acciones.
+  2. Entretenimiento: Películas, Series y novelas, Personajes, Superhéroes,
+     Dibujos animados, Videojuegos, Música y canciones y Celebridades.
+  3. Especiales ("Solo por temporada"): Navidad. Solo aparece cuando hay
      una especial en temporada; Navidad va del 1 de diciembre al 6 de enero
      y fuera de esas fechas no sale en ningún lado (ni en Combinar ni en la
      bienvenida). Otra especial se agrega con su `Season` (mes y día de
      inicio y fin; por ejemplo, Halloween del 1 al 31 de octubre).
-  2. Entretenimiento: Películas, Series y novelas, Personajes, Superhéroes,
-     Dibujos animados, Videojuegos, Música y canciones y Celebridades.
-  3. Cultura general: Geografía, Lugares, Personajes históricos, Dichos y
+  4. Cultura general: Geografía, Lugares, Personajes históricos, Dichos y
      refranes y Marcas.
-  4. Deportes: Deportes y Equipos de fútbol.
-  5. Clásicos: Animales, Comida, Objetos, Profesiones y Acciones.
+  5. Deportes: Deportes y Equipos de fútbol.
 
   Cada categoría guarda su sección, su temporada, si es nueva (`isNew`) y
   si ya tiene palabras (`available`) en `lib/models/category.dart`; el enum

@@ -4,11 +4,11 @@ import '../theme.dart';
 
 /// Secciones de la pantalla de categorías, en el orden en que se ven.
 enum CategorySection {
-  special('Especiales', note: 'Solo por temporada'),
+  classics('Clásicos'),
   entertainment('Entretenimiento'),
+  special('Especiales', note: 'Solo por temporada'),
   culture('Cultura general'),
-  sports('Deportes'),
-  classics('Clásicos');
+  sports('Deportes');
 
   const CategorySection(this.title, {this.note});
 
@@ -43,8 +43,9 @@ class Season {
 
 /// Categorías de palabras. En "Libre" los grupos escriben las palabras o
 /// se descargan frases de la categoría LIBRE; las demás descargan palabras
-/// de su categoría en Directus. Van en el orden de la pantalla: Libre,
-/// las especiales y después cada sección.
+/// de su categoría en Directus. Van en el orden de la pantalla: Libre y
+/// después cada sección (Clásicos, Entretenimiento, Especiales, Cultura
+/// general y Deportes).
 enum GameCategory {
   free(
     'Libre',
@@ -55,18 +56,51 @@ enum GameCategory {
     'Palabra',
   ),
 
-  // Especiales: solo se ven en su temporada.
-  christmas(
-    'Navidad',
-    'Novenas, regalos y buñuelos',
-    Icons.park,
-    AppColors.red,
-    'NAVIDAD',
-    'Palabra navideña',
-    section: CategorySection.special,
-    season: Season((12, 1), (1, 6)),
-    isNew: true,
-    available: false,
+  // Clásicos.
+  animals(
+    'Animales',
+    'Del perro a la jirafa',
+    Icons.pets,
+    AppColors.green,
+    'ANIMALES',
+    'Animal',
+    section: CategorySection.classics,
+  ),
+  food(
+    'Comida',
+    'Para chuparse los dedos',
+    Icons.lunch_dining,
+    AppColors.tomato,
+    'COMIDA',
+    'Comida',
+    section: CategorySection.classics,
+  ),
+  objects(
+    'Objetos',
+    'Cosas de todos los días',
+    Icons.key,
+    AppColors.coral,
+    'OBJETOS',
+    'Objeto',
+    section: CategorySection.classics,
+  ),
+  professions(
+    'Profesiones',
+    '¿A qué te dedicas?',
+    Icons.work,
+    AppColors.brown,
+    'PROFESIONES',
+    'Profesión',
+    section: CategorySection.classics,
+  ),
+  actions(
+    'Acciones',
+    '¡A actuar!',
+    Icons.directions_run,
+    AppColors.magenta,
+    'ACCIONES',
+    'Acción',
+    section: CategorySection.classics,
   ),
 
   // Entretenimiento.
@@ -155,6 +189,20 @@ enum GameCategory {
     section: CategorySection.entertainment,
   ),
 
+  // Especiales: solo se ven en su temporada.
+  christmas(
+    'Navidad',
+    'Novenas, regalos y buñuelos',
+    Icons.park,
+    AppColors.red,
+    'NAVIDAD',
+    'Palabra navideña',
+    section: CategorySection.special,
+    season: Season((12, 1), (1, 6)),
+    isNew: true,
+    available: false,
+  ),
+
   // Cultura general.
   geography(
     'Geografía',
@@ -224,53 +272,6 @@ enum GameCategory {
     'EQUIPOS_FUTBOL',
     'Equipo de fútbol',
     section: CategorySection.sports,
-  ),
-
-  // Clásicos.
-  animals(
-    'Animales',
-    'Del perro a la jirafa',
-    Icons.pets,
-    AppColors.green,
-    'ANIMALES',
-    'Animal',
-    section: CategorySection.classics,
-  ),
-  food(
-    'Comida',
-    'Para chuparse los dedos',
-    Icons.lunch_dining,
-    AppColors.tomato,
-    'COMIDA',
-    'Comida',
-    section: CategorySection.classics,
-  ),
-  objects(
-    'Objetos',
-    'Cosas de todos los días',
-    Icons.key,
-    AppColors.coral,
-    'OBJETOS',
-    'Objeto',
-    section: CategorySection.classics,
-  ),
-  professions(
-    'Profesiones',
-    '¿A qué te dedicas?',
-    Icons.work,
-    AppColors.brown,
-    'PROFESIONES',
-    'Profesión',
-    section: CategorySection.classics,
-  ),
-  actions(
-    'Acciones',
-    '¡A actuar!',
-    Icons.directions_run,
-    AppColors.magenta,
-    'ACCIONES',
-    'Acción',
-    section: CategorySection.classics,
   );
 
   const GameCategory(

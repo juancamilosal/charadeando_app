@@ -14,7 +14,11 @@ void main() {
     expect(
       [for (final c in GameCategory.themed) c.code],
       [
-        'NAVIDAD',
+        'ANIMALES',
+        'COMIDA',
+        'OBJETOS',
+        'PROFESIONES',
+        'ACCIONES',
         'PELICULAS',
         'SERIES_NOVELAS',
         'PERSONAJES',
@@ -23,6 +27,7 @@ void main() {
         'VIDEOJUEGOS',
         'MUSICA',
         'CELEBRIDADES',
+        'NAVIDAD',
         'GEOGRAFIA',
         'LUGARES',
         'PERSONAJES_HISTORICOS',
@@ -30,11 +35,6 @@ void main() {
         'MARCAS',
         'DEPORTES',
         'EQUIPOS_FUTBOL',
-        'ANIMALES',
-        'COMIDA',
-        'OBJETOS',
-        'PROFESIONES',
-        'ACCIONES',
       ],
     );
     expect(GameCategory.byCode('COMIDA'), GameCategory.food);
@@ -49,11 +49,11 @@ void main() {
     expect(
       [for (final (s, _) in GameCategory.sectionsOn(december)) s.title],
       [
-        'Especiales',
+        'Clásicos',
         'Entretenimiento',
+        'Especiales',
         'Cultura general',
         'Deportes',
-        'Clásicos',
       ],
     );
     expect(labels(CategorySection.special), ['Navidad']);
@@ -100,7 +100,8 @@ void main() {
     ]) {
       expect(GameCategory.christmas.shownOn(date), shown, reason: '$date');
       expect(
-        GameCategory.sectionsOn(date).first.$1 == CategorySection.special,
+        GameCategory.sectionsOn(date)
+            .any((s) => s.$1 == CategorySection.special),
         shown,
         reason: '$date',
       );

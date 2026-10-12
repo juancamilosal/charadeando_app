@@ -98,7 +98,10 @@ void main() {
       await tester.pump();
     }
 
+    // Clásicos va primero.
+    expect(_inSheet(find.text('Clásicos')), findsOneWidget);
     // Las de "Pronto" se ven con su etiqueta y no se marcan.
+    await showInSheet('Personajes');
     expect(_inSheet(find.text('Pronto')), findsWidgets);
     // (Si se hubiera marcado, con Animales ya serían 2.)
     await tester.tap(_inSheet(find.text('Personajes')));
@@ -107,13 +110,13 @@ void main() {
     // Fuera de diciembre no está Navidad.
     expect(_inSheet(find.text('Navidad')), findsNothing);
 
-    await showInSheet('Animales');
+    await showInSheet('Animales', up: true);
     await tester.tap(_inSheet(find.text('Animales')));
     await tester.pump();
     expect(find.text('Elige al menos 2 categorías'), findsOneWidget);
 
     // Marcas es premium y no está desbloqueada: avisa y no se marca.
-    await showInSheet('Marcas', up: true);
+    await showInSheet('Marcas');
     expect(_inSheet(find.byIcon(Icons.lock)), findsOneWidget);
     await tester.tap(_inSheet(find.text('Marcas')));
     await tester.pump();
