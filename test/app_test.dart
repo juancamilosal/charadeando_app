@@ -42,11 +42,10 @@ void main() {
           child: const CharadeandoApp(),
         ),
       );
-      expect(find.text('Charadeando'), findsOneWidget);
-      // La animación de cómo se juega está en la bienvenida.
-      expect(find.text('PALABRA SECRETA'), findsOneWidget);
+      // "Cómo se juega" empieza por las categorías.
+      expect(find.text('Elige una categoría'), findsOneWidget);
 
-      await tester.tap(find.text('Listo'));
+      await tester.tap(find.text('Omitir'));
       await settle(tester);
       expect(find.text('Pronto'), findsNothing);
 

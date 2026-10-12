@@ -1,4 +1,6 @@
 import 'package:charadeando_app/app.dart';
+import 'package:charadeando_app/models/models.dart';
+import 'package:charadeando_app/screens/welcome_screen.dart';
 import 'package:charadeando_app/providers/providers.dart';
 import 'package:charadeando_app/services/services.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +44,7 @@ Future<void> _settle(WidgetTester tester) async {
   await tester.pump(const Duration(seconds: 1));
 }
 
-final _welcome = find.text('El juego de charadas que graba tus risas');
+final _welcome = find.text('Elige una categoría');
 final _categories = find.text('Selección de categoría');
 
 void main() {
@@ -55,10 +57,22 @@ void main() {
 
     await _open(tester, store);
     expect(_welcome, findsOneWidget);
-    expect(find.text('Formen equipos y elijan una categoría.'), findsOneWidget);
     expect(_categories, findsNothing);
 
-    await tester.tap(find.text('Listo'));
+    // Seis pantallas con "Continuar"; la última, "¡Vamos a jugar!".
+    for (final title in [
+      'Cómo empezar',
+      '¿Lo has acertado?',
+      '¿No puedes adivinar?',
+      'Castiga al equipo que pierda',
+      '¡Listos para divertirse!',
+    ]) {
+      await tester.tap(find.text('Continuar'));
+      await _settle(tester);
+      expect(find.text(title), findsOneWidget);
+    }
+    expect(find.text('Omitir'), findsNothing);
+    await tester.tap(find.text('¡Vamos a jugar!'));
     await _settle(tester);
     expect(_categories, findsOneWidget);
     expect(store.value, isTrue);
@@ -68,7 +82,7 @@ void main() {
     expect(_welcome, findsNothing);
   });
 
-  testWidgets('"Cómo se juega" abre la bienvenida y "Listo" vuelve', (
+  testWidgets('"Cómo se juega" abre la bienvenida y "Omitir" vuelve', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1080, 2400);
@@ -96,9 +110,37 @@ void main() {
     // La bienvenida no lleva la barra de abajo.
     expect(find.text('Equipos'), findsNothing);
 
-    await tester.tap(find.text('Listo'));
+    await tester.tap(find.text('Omitir'));
     await _settle(tester);
     expect(_welcome, findsNothing);
     expect(find.text('Preferencias de juego'), findsOneWidget);
+  });
+
+  testWidgets('con el controlador Toque, explica que se toca la pantalla', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          settingsProvider.overrideWith(
+            () => SettingsController(
+              const AppSettings(controller: PlayController.touch),
+            ),
+          ),
+        ],
+        child: const MaterialApp(home: WelcomeScreen()),
+      ),
+    );
+    await _settle(tester);
+    for (var i = 0; i < 2; i++) {
+      await tester.tap(find.text('Continuar'));
+      await _settle(tester);
+    }
+    expect(
+      find.text('Toca la derecha de la pantalla y suma un punto.'),
+      findsOneWidget,
+    );
   });
 }

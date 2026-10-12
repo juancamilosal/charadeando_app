@@ -17,11 +17,20 @@ la cámara frontal graba a los participantes para revivir las risas.
   sombra oscuros) en Mostaza. En los fondos claros los textos y botones van
   oscuros. Se guarda en el celular (`fondo.txt`) y se aplica en todas las
   pantallas desde que abre la app.
-- Inicio: la bienvenida (la animación de cómo se juega, los pasos y
-  "Listo") se muestra solo la primera vez que se abre la app; al tocar
-  "Listo" queda guardado en el celular y las demás veces la app abre
-  directo en Categorías. "Cómo se juega", en Ajustes > Ayuda, vuelve a abrir
-  la bienvenida y "Listo" regresa.
+- Inicio, "Cómo se juega" (`lib/screens/welcome_screen.dart`): seis
+  pantallas sobre un degradado azul a violeta, que se pasan con el botón
+  verde "Continuar" o deslizando, con puntos que dicen en cuál se está y
+  "Omitir" arriba a la derecha: 1) "Elige una categoría" con seis
+  categorías de ejemplo; 2) "Cómo empezar" con los amigos jugando; 3) "¿Lo
+  has acertado?" con el celular verde; 4) "¿No puedes adivinar?" con el
+  celular naranja; 5) "Castiga al equipo que pierda" con la ruleta de
+  castigos y algunos de ejemplo; 6) "¡Listos para divertirse!" con los
+  amigos abrazados y "¡Vamos a jugar!". Los textos de acertar y pasar
+  dicen cómo se marca según el controlador de Ajustes. Las ilustraciones
+  están en `assets/img/inicio/` (WebP sin fondo). Se ven solo la primera
+  vez que se abre la app (queda guardado en el celular); después abre
+  directo en Categorías. "Cómo se juega", en Ajustes > Ayuda, las vuelve a
+  abrir y al terminar u omitir regresa.
 - Barra de navegación abajo (`StatefulShellRoute` de go_router, en
   `lib/widgets/app_nav_bar.dart`): "Ruleta", "Equipos", "Categorías" (en el
   centro; es la que abre al iniciar), "Videos" y "Ajustes", cada una con su

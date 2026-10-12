@@ -72,6 +72,7 @@ flutter:
   assets:
     - assets/img/categorias/
     - assets/img/categorias/reposo/
+    - assets/img/inicio/
 
   fonts:
     - family: Fredoka
