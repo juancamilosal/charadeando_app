@@ -33,7 +33,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   configuración con palabras automáticas de su categoría.
 - Cada categoría puede tener un dibujo animado (GIF de 256 px en
   `assets/img/categorias/`, con el nombre de la categoría) que se ve en su
-  tarjeta. Ya lo tienen: Libre (una hoja
+  tarjeta y, grande y animado, arriba de la configuración con el nombre de
+  la categoría (una propia muestra su ícono en su color; una mezcla, los
+  dibujos de las elegidas). Ya lo tienen: Libre (una hoja
   a la que se le van escribiendo las líneas), Animales, Geografía, Películas, Celebridades, Marcas,
   Deportes y Equipos de fútbol.
 - En la pantalla de categorías los dibujos no se mueven todos a la vez: se

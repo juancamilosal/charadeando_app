@@ -5,6 +5,7 @@ import 'package:charadeando_app/providers/providers.dart';
 import 'package:charadeando_app/router.dart';
 import 'package:charadeando_app/screens/config_screen.dart';
 import 'package:charadeando_app/services/services.dart';
+import 'package:charadeando_app/widgets/category_art.dart';
 import 'package:charadeando_app/widgets/config_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -115,6 +116,11 @@ void main() {
 
   testWidgets('recuerda escribir más palabras, sin cálculos', (tester) async {
     await pumpConfig(tester);
+    await tester.scrollUntilVisible(
+      find.textContaining('Recuerda: mientras más rondas'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(
       find.textContaining('Recuerda: mientras más rondas'),
       findsOneWidget,
@@ -476,5 +482,24 @@ void main() {
     await tester.tap(find.text('En grupos'));
     await tester.pumpAndSettle();
     expect(find.text('Grupos'), findsOneWidget);
+  });
+
+  testWidgets('arriba muestra el dibujo y el nombre de la categoría', (
+    tester,
+  ) async {
+    await pumpConfig(
+      tester,
+      config: const GameConfig(
+        category: GameCategory.movies,
+        wordSource: WordSource.random,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(CategoryArt), findsOneWidget);
+    expect(
+      tester.widget<CategoryArt>(find.byType(CategoryArt)).category,
+      GameCategory.movies,
+    );
+    expect(find.text('Películas'), findsOneWidget);
   });
 }
