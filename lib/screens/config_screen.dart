@@ -289,26 +289,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                 onChanged: (v) => _update(_config.copyWith(inGroups: v)),
               ),
               const SizedBox(height: 20),
-              OutlinedButton.icon(
-                icon: const Icon(Icons.auto_awesome),
-                label: const Text('Configuración aleatoria'),
-                onPressed: _autoFill,
-              ),
-              SizedBox(height: 6),
-              Text(
-                _inGroups
-                    ? 'El juego pone los nombres de los grupos y elige la '
-                          'configuración por ti. Tócalo otra vez para '
-                          'cambiarla.'
-                    : 'El juego elige la configuración por ti. Tócalo otra '
-                          'vez para cambiarla.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: context.onBackdrop,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+              _RandomButton(onTap: _autoFill),
               gap,
               if (_inGroups) ...[
                 ConfigSection(
@@ -376,9 +357,6 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                   children: [
                     ConfigRow(
                       label: 'Rondas',
-                      hint: _inGroups
-                          ? 'Cada grupo juega un turno por ronda.'
-                          : 'Un turno por ronda.',
                       child: NumberStepper(
                         value: _config.rounds,
                         min: GameConfig.minRounds,
@@ -431,7 +409,6 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                       errorText: _choiceError(_hitMode),
                       labelOf: (o) => o.label,
                       lockReasonOf: (o) => o.available ? null : 'Próximamente',
-                      description: _hitMode?.description,
                       onSelected: (o) => setState(() => _hitMode = o),
                     ),
                   ],
@@ -448,9 +425,6 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                       labelOf: (o) => o.label,
                       lockReasonOf: (o) =>
                           o.premium && !premium ? 'Premium' : null,
-                      description:
-                          'Si tu celular no soporta la resolución elegida, '
-                          'se usa la más cercana.',
                       onSelected: (o) =>
                           _update(_config.copyWith(resolution: o)),
                     ),
@@ -503,7 +477,6 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
           options: Difficulty.values,
           selected: _difficulty,
           labelOf: (o) => o.label,
-          description: _difficulty?.description,
           errorText: _choiceError(_difficulty),
           onSelected: (o) => setState(() {
             _difficulty = o;
@@ -529,7 +502,6 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
       children: [
         ConfigRow(
           label: 'Rondas',
-          hint: 'Cada turno dura hasta que se acabe el tiempo.',
           child: NumberStepper(
             value: _config.rounds,
             min: GameConfig.minRounds,
@@ -687,6 +659,50 @@ class _Badge extends StatelessWidget {
         border: Border.all(color: Colors.white, width: 2),
       ),
       child: Center(child: child),
+    );
+  }
+}
+
+/// "Configuración aleatoria": morado oscuro con el texto blanco, para que se
+/// distinga del fondo y del botón amarillo "Continuar".
+class _RandomButton extends StatelessWidget {
+  const _RandomButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.ink,
+      elevation: 4,
+      shadowColor: const Color(0x66000000),
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onTap,
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.auto_awesome, color: Colors.white, size: 24),
+              SizedBox(width: 10),
+              Flexible(
+                child: Text(
+                  'Configuración aleatoria',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: AppFonts.display,
+                    fontSize: 21,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

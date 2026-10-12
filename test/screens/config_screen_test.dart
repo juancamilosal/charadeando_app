@@ -157,10 +157,7 @@ void main() {
       200,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(
-      find.text('Cada turno dura hasta que se acabe el tiempo.'),
-      findsOneWidget,
-    );
+    expect(rounds, findsOneWidget);
     expect(find.text('Palabras por grupo'), findsNothing);
     final more = find.descendant(of: rounds, matching: find.byIcon(Icons.add));
     await tester.ensureVisible(more);
@@ -201,15 +198,13 @@ void main() {
       tester,
       config: const GameConfig(wordSource: WordSource.random),
     );
-    final mixed = find.text(
-      'Fáciles, normales y difíciles: el doble de variedad.',
-    );
+    final mixed = find.widgetWithText(ChoiceChip, 'Mezcladas');
     await tester.scrollUntilVisible(
       mixed,
       200,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(mixed, findsOneWidget);
+    expect(tester.widget<ChoiceChip>(mixed).selected, isTrue);
   });
 
   testWidgets('vienen marcadas Por frase, Movimiento y el video; solo '
@@ -377,8 +372,10 @@ void main() {
     await tester.tap(hard);
     await tester.pump();
     expect(
-      find.text('Poco conocidas, abstractas o emociones.'),
-      findsOneWidget,
+      tester
+          .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Difícil'))
+          .selected,
+      isTrue,
     );
 
     await tapContinue(tester);
@@ -447,7 +444,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Grupos'), findsNothing);
     expect(find.text('Palabras por grupo'), findsNothing);
-    expect(find.text('Un turno por ronda.'), findsOneWidget);
 
     // No pide nombres: sigue directo a escribir las palabras.
     await tapContinue(tester);
