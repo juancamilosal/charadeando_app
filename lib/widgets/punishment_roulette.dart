@@ -14,6 +14,8 @@ enum _Spin { idle, spinning, stopping, result }
 /// Ruleta de castigos con su botón. "Girar" la pone a toda velocidad hasta
 /// que tocan "¡Parar!" (o pasan 30 segundos); entonces se elige el castigo
 /// al azar y la ruleta frena poco a poco hasta el centro de ese campo.
+/// También se puede girar con el dedo: sigue al dedo y, si se suelta con
+/// impulso, gira hacia ese lado y frena sola.
 class PunishmentRoulette extends ConsumerStatefulWidget {
   const PunishmentRoulette({
     super.key,
@@ -90,6 +92,16 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
   /// Ángulo al empezar la fase actual (girar o frenar).
   double _from = 0;
   double _to = 0;
+
+  /// Lo que tarda en frenar: 10 segundos con "¡Parar!"; al soltarla con el
+  /// dedo, según la fuerza.
+  double _stopSeconds = PunishmentRoulette.stopDuration.inMilliseconds / 1000;
+
+  /// Al arrastrarla: el ángulo del dedo respecto al centro, y su última
+  /// posición (para calcular el impulso al soltar).
+  double? _fingerAngle;
+  Offset? _fingerPos;
+  Offset _center = Offset.zero;
   int _chosen = 0;
   int _lastField = 0;
 
@@ -127,6 +139,7 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
     // El castigo se elige al azar: el momento del toque no influye.
     _chosen = Roulette.pickField(_fields, _random);
     final seconds = PunishmentRoulette.stopDuration.inMilliseconds / 1000;
+    _stopSeconds = seconds;
     // Con easeOutQuart la velocidad inicial es 4 · distancia / duración:
     // así arranca a la misma velocidad que traía.
     _to = Roulette.stopAngle(
@@ -149,8 +162,7 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
         _setAngle(_from + _speed * seconds);
         if (elapsed >= PunishmentRoulette.autoStopAfter) _stop();
       case _Spin.stopping:
-        final total = PunishmentRoulette.stopDuration.inMicroseconds / 1e6;
-        final t = seconds / total;
+        final t = seconds / _stopSeconds;
         _setAngle(_from + (_to - _from) * Roulette.easeOutQuart(t));
         if (t >= 1) _land();
       case _Spin.idle:
@@ -181,6 +193,74 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
     widget.onResult?.call(true);
   }
 
+  /// Velocidad mínima (radianes por segundo) para que al soltarla gire.
+  static const _minFling = 2.5;
+
+  bool get _canDrag => _spin == _Spin.idle || _spin == _Spin.result;
+
+  void _dragStart(DragStartDetails d) {
+    if (!_canDrag) return;
+    final r = d.localPosition - _center;
+    _fingerAngle = atan2(r.dy, r.dx);
+    _fingerPos = d.localPosition;
+  }
+
+  /// La ruleta sigue al dedo.
+  void _dragUpdate(DragUpdateDetails d) {
+    final last = _fingerAngle;
+    if (last == null || !_canDrag) return;
+    final r = d.localPosition - _center;
+    final now = atan2(r.dy, r.dx);
+    var delta = now - last;
+    if (delta > pi) delta -= 2 * pi;
+    if (delta < -pi) delta += 2 * pi;
+    _fingerAngle = now;
+    _fingerPos = d.localPosition;
+    _setAngle(_angle + delta);
+  }
+
+  /// Al soltarla con impulso, gira hacia ese lado y frena sola. El castigo
+  /// igual sale al azar: la fuerza solo cambia cuánto tarda.
+  void _dragEnd(DragEndDetails d) {
+    final pos = _fingerPos;
+    _fingerAngle = null;
+    _fingerPos = null;
+    if (pos == null || !_canDrag) return;
+    final r = pos - _center;
+    final v = d.velocity.pixelsPerSecond;
+    final r2 = max(r.distanceSquared, 400.0);
+    // Velocidad de giro: la parte de la velocidad del dedo que va
+    // alrededor del centro.
+    final omega = (r.dx * v.dy - r.dy * v.dx) / r2;
+    if (omega.abs() < _minFling) return;
+    _fling(omega.clamp(-25.0, 25.0));
+  }
+
+  void _fling(double omega) {
+    if (widget.onBeforeSpin?.call() == false) return;
+    if (_spin == _Spin.result) widget.onResult?.call(false);
+    _ticker.stop();
+    _reveal.reset();
+    _chosen = Roulette.pickField(_fields, _random);
+    final speed = omega.abs();
+    // Más fuerza, más vueltas: entre 3 y 9 segundos frenando.
+    final seconds = (speed / 2).clamp(3.0, 9.0);
+    _to = Roulette.stopAngle(
+      from: _angle,
+      field: _chosen,
+      fields: _fields,
+      minDistance: speed * seconds / 4,
+      direction: omega.sign.toInt(),
+    );
+    // Con easeOutQuart la velocidad inicial es 4 · distancia / duración.
+    _stopSeconds = max(1.5, 4 * (_to - _angle).abs() / speed);
+    setState(() {
+      _spin = _Spin.stopping;
+      _from = _angle;
+    });
+    _ticker.start();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -190,11 +270,24 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
           child: Center(
             child: AspectRatio(
               aspectRatio: 1,
-              child: CustomPaint(
-                painter: RoulettePainter(
-                  punishments: widget.punishments,
-                  angle: _angle,
-                ),
+              // Se puede girar con el dedo, hacia un lado o hacia el otro.
+              child: LayoutBuilder(
+                builder: (context, box) {
+                  _center = Offset(box.maxWidth / 2, box.maxHeight / 2);
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onPanStart: _dragStart,
+                    onPanUpdate: _dragUpdate,
+                    onPanEnd: _dragEnd,
+                    child: CustomPaint(
+                      size: Size.infinite,
+                      painter: RoulettePainter(
+                        punishments: widget.punishments,
+                        angle: _angle,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),

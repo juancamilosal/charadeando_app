@@ -31,6 +31,22 @@ Future<void> wait(WidgetTester tester, Duration total) async {
   }
 }
 
+/// La sección con la ruta de la ruleta a pantalla completa.
+Widget _section(Widget screen) => MaterialApp.router(
+  routerConfig: GoRouter(
+    routes: [
+      GoRoute(path: '/', builder: (_, _) => screen),
+      GoRoute(
+        path: Routes.punishmentSpin,
+        builder: (_, state) => PunishmentSpinScreen(
+          punishments: state.extra! as List<String>,
+          random: Random(5),
+        ),
+      ),
+    ],
+  ),
+);
+
 void main() {
   late List<String> haptics;
 
@@ -127,9 +143,10 @@ void main() {
     expect(find.text('Girar otra vez'), findsOneWidget);
   });
 
-  /// Los castigos que muestra la ruleta de la sección.
+  /// Los castigos que muestra la ruleta (la de pantalla completa, si se
+  /// abrió).
   List<String> wheel(WidgetTester tester) => tester
-      .widget<PunishmentRoulette>(find.byType(PunishmentRoulette))
+      .widget<PunishmentRoulette>(find.byType(PunishmentRoulette).last)
       .punishments;
 
   Future<void> spin(WidgetTester tester) async {
@@ -152,7 +169,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: MaterialApp(home: RouletteScreen(random: Random(1))),
+        child: _section(RouletteScreen(random: Random(1))),
       ),
     );
     await tester.pumpAndSettle();
@@ -184,7 +201,9 @@ void main() {
     expect(wheel(tester), ['?', 'Cantar el himno', '?']);
 
     await spin(tester);
+    // Gira a pantalla completa: solo la ruleta y "¡Parar!".
     expect(find.text('¡Parar!'), findsOneWidget);
+    expect(find.text('Campos de la ruleta'), findsNothing);
     final saved = store.saved!;
     expect(saved.source, PunishmentSource.mixed);
     expect(saved.fields, 3);
@@ -209,7 +228,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const MaterialApp(home: RouletteScreen()),
+        child: _section(const RouletteScreen()),
       ),
     );
     await tester.pumpAndSettle();
@@ -245,7 +264,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: MaterialApp(home: RouletteScreen(random: Random(3))),
+        child: _section(RouletteScreen(random: Random(3))),
       ),
     );
     await tester.pumpAndSettle();
@@ -349,5 +368,47 @@ void main() {
   testWidgets('al final, si todos empatan no hay ruleta', (tester) async {
     await finalScreen(tester, [2, 2]);
     expect(find.textContaining('Ruleta de castigo'), findsNothing);
+  });
+
+  testWidgets('se gira con el dedo, hacia un lado o hacia el otro, y cae '
+      'en un castigo', (tester) async {
+    mockHaptics(tester);
+    tester.view.physicalSize = const Size(1080, 3600);
+    addTearDown(tester.view.reset);
+    for (final down in [true, false]) {
+      var done = false;
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: PunishmentRoulette(
+                key: ValueKey(down),
+                punishments: const ['A', 'B', 'C', 'D'],
+                random: Random(2),
+                onDone: () => done = true,
+              ),
+            ),
+          ),
+        ),
+      );
+      final wheelBox = tester.getRect(
+        find.byWidgetPredicate(
+          (w) => w is CustomPaint && w.painter is RoulettePainter,
+        ),
+      );
+      // Un empujón por el lado derecho, hacia abajo o hacia arriba.
+      await tester.flingFrom(
+        Offset(wheelBox.right - 30, wheelBox.center.dy),
+        Offset(0, down ? 200 : -200),
+        2500,
+      );
+      await tester.pump();
+      expect(find.text('Frenando…'), findsOneWidget);
+      await wait(tester, const Duration(seconds: 12));
+      await tester.pumpAndSettle();
+      expect(find.text('¡Castigo!'), findsOneWidget);
+      await tester.tap(find.text('Listo'));
+      expect(done, isTrue);
+    }
   });
 }

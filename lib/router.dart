@@ -58,8 +58,9 @@ abstract final class Routes {
   static const myVideos = '/mis-videos';
   static const myVideo = '/mis-videos/ver';
 
-  /// Ruleta de castigo de un grupo al final de la partida. Recibe el nombre
-  /// del grupo como `extra`.
+  /// La ruleta a pantalla completa: al final de la partida (recibe el
+  /// nombre del equipo como `extra`) o desde la sección Ruleta (recibe la
+  /// lista de castigos).
   static const punishmentSpin = '/castigo';
 }
 
@@ -151,8 +152,15 @@ final List<RouteBase> appRoutes = [
   ),
   GoRoute(
     path: Routes.punishmentSpin,
-    builder: (_, state) =>
-        PunishmentSpinScreen(groupName: state.extra as String? ?? ''),
+    // Al final de la partida recibe el nombre del equipo; desde la sección
+    // Ruleta, los castigos con que se gira.
+    builder: (_, state) => switch (state.extra) {
+      final List<String> punishments => PunishmentSpinScreen(
+        punishments: punishments,
+      ),
+      final String group => PunishmentSpinScreen(groupName: group),
+      _ => const PunishmentSpinScreen(),
+    },
   ),
   GoRoute(
     path: Routes.finalResult,

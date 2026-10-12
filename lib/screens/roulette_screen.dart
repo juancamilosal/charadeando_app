@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../models/models.dart';
 import '../providers/providers.dart';
 import '../services/punishments.dart';
+import '../router.dart';
 import '../theme.dart';
 import '../widgets/config_section.dart';
 import '../widgets/number_stepper.dart';
@@ -43,16 +44,6 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
     RouletteSetup.maxFields,
     _random,
   );
-
-  /// Castigos con los que se giró. Mientras sea null, la ruleta muestra lo
-  /// que se va configurando.
-  List<String>? _spun;
-
-  /// Se está mostrando el castigo que salió.
-  bool _showingResult = false;
-
-  /// Cambia para volver a la ruleta quieta, con su botón "Girar".
-  int _wheelKey = 0;
 
   @override
   void initState() {
@@ -121,20 +112,12 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
   }
 
   /// Algo cambió en la configuración: la ruleta vuelve a mostrarlo.
-  void _changed(VoidCallback change) {
-    setState(() {
-      change();
-      if (_spun != null || _showingResult) {
-        _spun = null;
-        _showingResult = false;
-        _wheelKey++;
-      }
-    });
-  }
+  void _changed(VoidCallback change) => setState(change);
 
-  /// Antes de girar: revisa que esté completa, fija los castigos (en
-  /// "Mezclados", el juego llena los vacíos) y la guarda para el final de
-  /// la partida.
+  /// "Girar" (o soltarla con impulso): revisa que esté completa, fija los
+  /// castigos (en "Mezclados", el juego llena los vacíos), la guarda para
+  /// el final de la partida y la gira a pantalla completa. Aquí la ruleta
+  /// no gira: solo muestra lo que se va configurando.
   bool _beforeSpin() {
     final error = _error;
     if (error != null) {
@@ -144,7 +127,6 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
         ..showSnackBar(SnackBar(content: Text(error)));
       return false;
     }
-    if (_spun != null) return true;
     final source = _source!;
     final written = _written;
     final setup = RouletteSetup(
@@ -160,9 +142,9 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
         ),
       },
     );
-    setState(() => _spun = setup.punishments);
     ref.read(punishmentStoreProvider).save(setup).ignore();
-    return true;
+    context.push(Routes.punishmentSpin, extra: setup.punishments);
+    return false;
   }
 
   @override
@@ -183,23 +165,14 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
               return ListView(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
                 children: [
-                  // La ruleta con su botón; con el castigo que salió, el
-                  // espacio crece para mostrarlo.
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    height: wheel + (_showingResult ? 230 : 72),
+                  // La ruleta con su botón "Girar".
+                  SizedBox(
+                    height: wheel + 72,
                     child: PunishmentRoulette(
-                      key: ValueKey(_wheelKey),
-                      punishments: _spun ?? _preview,
+                      punishments: _preview,
                       random: _random,
                       onBeforeSpin: _beforeSpin,
-                      onResult: (showing) =>
-                          setState(() => _showingResult = showing),
-                      onDone: () => setState(() {
-                        _spun = null;
-                        _showingResult = false;
-                        _wheelKey++;
-                      }),
+                      onDone: () {},
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -296,11 +269,21 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
 /// Ruleta de castigo de un grupo al final de la partida. Usa la ruleta
 /// guardada en la sección; si nunca se configuró, 8 castigos del sistema.
 class PunishmentSpinScreen extends ConsumerStatefulWidget {
-  const PunishmentSpinScreen({super.key, required this.groupName, this.random});
+  const PunishmentSpinScreen({
+    super.key,
+    this.groupName = '',
+    this.punishments,
+    this.random,
+  });
 
   static const defaultFields = 8;
 
+  /// El equipo que gira al final de la partida; vacío desde la sección
+  /// Ruleta, que no lleva título: solo la ruleta y su botón.
   final String groupName;
+
+  /// Los castigos con que se gira; si es null, los de la ruleta guardada.
+  final List<String>? punishments;
   final Random? random;
 
   @override
@@ -319,6 +302,11 @@ class _PunishmentSpinScreenState extends ConsumerState<PunishmentSpinScreen> {
   }
 
   Future<void> _load() async {
+    final given = widget.punishments;
+    if (given != null) {
+      setState(() => _punishments = given);
+      return;
+    }
     final saved = await ref.read(punishmentStoreProvider).load();
     if (!mounted) return;
     setState(() {
@@ -340,17 +328,19 @@ class _PunishmentSpinScreenState extends ConsumerState<PunishmentSpinScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  '¡Ruleta de castigo para ${widget.groupName}!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: AppFonts.display,
-                    fontSize: 30,
-                    fontWeight: FontWeight.w700,
-                    color: context.onBackdrop,
+                if (widget.groupName.isNotEmpty) ...[
+                  Text(
+                    '¡Ruleta de castigo para ${widget.groupName}!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: AppFonts.display,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w700,
+                      color: context.onBackdrop,
+                    ),
                   ),
-                ),
-                SizedBox(height: 12),
+                  const SizedBox(height: 12),
+                ],
                 Expanded(
                   child: punishments == null
                       ? Center(

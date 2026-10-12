@@ -57,6 +57,24 @@ void main() {
       });
     }
 
+    test('girando al revés también cae en el centro del campo', () {
+      const fields = 6;
+      for (final from in [0.0, 3.1, -7.5]) {
+        for (var field = 0; field < fields; field++) {
+          final to = Roulette.stopAngle(
+            from: from,
+            field: field,
+            fields: fields,
+            minDistance: 20,
+            direction: -1,
+          );
+          expect(Roulette.fieldAt(to, fields), field);
+          expect(from - to, greaterThanOrEqualTo(20));
+          expect(from - to, lessThan(20 + 2 * pi));
+        }
+      }
+    });
+
     test('el frenado empieza rápido y termina muy lento', () {
       expect(Roulette.easeOutQuart(0), 0);
       expect(Roulette.easeOutQuart(1), 1);

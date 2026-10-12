@@ -53,20 +53,23 @@ abstract final class Roulette {
 
   /// Ángulo final para que la ruleta, girando desde [from], quede con el
   /// indicador justo en el centro de [field], después de recorrer al menos
-  /// [minDistance] radianes.
+  /// [minDistance] radianes. Con [direction] negativo gira al revés (en
+  /// contra del reloj).
   static double stopAngle({
     required double from,
     required int field,
     required int fields,
     required double minDistance,
+    int direction = 1,
   }) {
     final turn = 2 * pi;
     // Ángulo (módulo una vuelta) que pone el centro del campo arriba.
     final center = (-(field + 0.5) * segment(fields)) % turn;
-    final earliest = from + minDistance;
+    final earliest = from + direction * minDistance;
     final base = earliest - earliest % turn;
     var target = base + center;
-    if (target < earliest) target += turn;
+    if (direction >= 0 && target < earliest) target += turn;
+    if (direction < 0 && target > earliest) target -= turn;
     return target;
   }
 
