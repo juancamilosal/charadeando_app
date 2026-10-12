@@ -27,10 +27,12 @@ void main() {
     final dir = await Directory.systemTemp.createTemp('fondo');
     addTearDown(() => dir.delete(recursive: true));
     final store = BackdropStore(directory: () async => dir);
-    expect(await store.load(), Backdrop.uva);
+    expect(await store.load(), Backdrop.clasico);
     await store.save(Backdrop.mostaza);
     expect(await store.load(), Backdrop.mostaza);
-    expect(Backdrop.byName('no existe'), Backdrop.uva);
+    expect(Backdrop.byName('no existe'), Backdrop.clasico);
+    expect(Backdrop.clasico.gradient, isNotNull);
+    expect(Backdrop.clasico.cards, CardStyle.flat);
   });
 
   test('en los fondos claros los textos van oscuros', () {
@@ -77,19 +79,19 @@ void main() {
     for (final b in Backdrop.values) {
       expect(find.text(b.label), findsOneWidget);
     }
-    Color background() =>
-        (tester
-                .widgetList<DecoratedBox>(find.byType(DecoratedBox))
-                .map((d) => d.decoration)
-                .whereType<BoxDecoration>()
-                .first)
-            .color!;
-    expect(background(), Backdrop.uva.color);
+    BoxDecoration background() => tester
+        .widgetList<DecoratedBox>(find.byType(DecoratedBox))
+        .map((d) => d.decoration)
+        .whereType<BoxDecoration>()
+        .first;
+    // Viene elegido el clásico, con su degradado.
+    expect(background().gradient, isNotNull);
 
     await tester.tap(find.text('Noche'));
     await tester.pumpAndSettle();
     expect(container.read(backdropProvider), Backdrop.noche);
     expect(store.saved, Backdrop.noche);
-    expect(background(), Backdrop.noche.color);
+    expect(background().gradient, isNull);
+    expect(background().color, Backdrop.noche.color);
   });
 }

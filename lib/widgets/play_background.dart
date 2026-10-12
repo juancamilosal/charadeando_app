@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../theme.dart';
 
-/// Fondo de las pantallas: el color que eligió el usuario en "Fondos".
+/// Fondo de las pantallas: el que eligió el usuario en "Fondos".
 /// Algunos momentos del juego (la cuenta regresiva) llevan su propio
 /// degradado en [colors]. Envuelve un [Scaffold] transparente.
 class PlayBackground extends StatelessWidget {
@@ -14,10 +14,10 @@ class PlayBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = this.colors;
     final backdrop = context.backdrop;
+    final colors = this.colors ?? backdrop.gradient;
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: colors == null && backdrop.light
+      value: this.colors == null && backdrop.light
           ? SystemUiOverlayStyle.dark
           : SystemUiOverlayStyle.light,
       child: DecoratedBox(

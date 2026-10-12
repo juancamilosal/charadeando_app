@@ -42,6 +42,19 @@ class BackdropScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 16),
+              // El clásico (el degradado de siempre) va arriba, a lo ancho.
+              SizedBox(
+                height: 150,
+                child: _BackdropTile(
+                  backdrop: Backdrop.clasico,
+                  selected: selected == Backdrop.clasico,
+                  wide: true,
+                  onTap: () => ref
+                      .read(backdropProvider.notifier)
+                      .select(Backdrop.clasico),
+                ),
+              ),
+              const SizedBox(height: 14),
               GridView.count(
                 crossAxisCount: 2,
                 shrinkWrap: true,
@@ -51,12 +64,14 @@ class BackdropScreen extends ConsumerWidget {
                 childAspectRatio: 0.82,
                 children: [
                   for (final backdrop in Backdrop.values)
-                    _BackdropTile(
-                      backdrop: backdrop,
-                      selected: backdrop == selected,
-                      onTap: () =>
-                          ref.read(backdropProvider.notifier).select(backdrop),
-                    ),
+                    if (backdrop != Backdrop.clasico)
+                      _BackdropTile(
+                        backdrop: backdrop,
+                        selected: backdrop == selected,
+                        onTap: () => ref
+                            .read(backdropProvider.notifier)
+                            .select(backdrop),
+                      ),
                 ],
               ),
             ],
@@ -74,15 +89,48 @@ class _BackdropTile extends StatelessWidget {
     required this.backdrop,
     required this.selected,
     required this.onTap,
+    this.wide = false,
   });
 
   final Backdrop backdrop;
   final bool selected;
   final VoidCallback onTap;
 
+  /// A lo ancho, con el nombre al lado de las tarjetas.
+  final bool wide;
+
   @override
   Widget build(BuildContext context) {
     final mark = context.backdrop.light ? AppColors.ink : AppColors.yellow;
+    final cards = Row(
+      children: [
+        Expanded(
+          child: _MiniCard(
+            color: AppColors.green,
+            style: backdrop.cards,
+            light: backdrop.light,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _MiniCard(
+            color: AppColors.indigo,
+            style: backdrop.cards,
+            light: backdrop.light,
+          ),
+        ),
+      ],
+    );
+    final label = Text(
+      backdrop.label,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontFamily: AppFonts.display,
+        fontSize: wide ? 26 : 22,
+        fontWeight: FontWeight.w600,
+        color: backdrop.onColor,
+      ),
+    );
     return Semantics(
       button: true,
       selected: selected,
@@ -93,6 +141,13 @@ class _BackdropTile extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
             color: backdrop.color,
+            gradient: backdrop.gradient == null
+                ? null
+                : LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: backdrop.gradient!,
+                  ),
             borderRadius: BorderRadius.circular(22),
             border: Border.all(
               color: selected ? mark : Colors.white,
@@ -109,43 +164,23 @@ class _BackdropTile extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(12, 14, 12, 10),
           child: Stack(
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: _MiniCard(
-                            color: AppColors.green,
-                            style: backdrop.cards,
-                            light: backdrop.light,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _MiniCard(
-                            color: AppColors.indigo,
-                            style: backdrop.cards,
-                            light: backdrop.light,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    backdrop.label,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: AppFonts.display,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w600,
-                      color: backdrop.onColor,
-                    ),
-                  ),
-                ],
-              ),
+              if (wide)
+                Row(
+                  children: [
+                    Expanded(child: cards),
+                    const SizedBox(width: 16),
+                    Expanded(child: Center(child: label)),
+                  ],
+                )
+              else
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(child: cards),
+                    const SizedBox(height: 10),
+                    label,
+                  ],
+                ),
               if (selected)
                 Positioned(
                   top: 0,
@@ -185,6 +220,7 @@ class _MiniCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (fill, border, shadow) = switch (style) {
+      CardStyle.flat => (color, null, null),
       CardStyle.sticker => (
         color,
         Colors.white,
@@ -209,8 +245,8 @@ class _MiniCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: fill,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: border, width: 2),
-        boxShadow: [shadow],
+        border: border == null ? null : Border.all(color: border, width: 2),
+        boxShadow: [?shadow],
       ),
       padding: const EdgeInsets.all(8),
       child: Column(

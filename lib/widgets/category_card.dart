@@ -107,7 +107,10 @@ class CategoryCard extends StatelessWidget {
         : Colors.white;
     final textScaler = MediaQuery.textScalerOf(context);
 
+    // Las de borde quedan un poco más adentro.
+    final radius = style == CardStyle.flat ? 24.0 : 21.0;
     final (border, shadow) = switch (style) {
+      CardStyle.flat => (null, null),
       CardStyle.sticker => (
         Colors.white,
         BoxShadow(
@@ -135,15 +138,15 @@ class CategoryCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: border, width: 3),
-        boxShadow: [shadow],
+        border: border == null ? null : Border.all(color: border, width: 3),
+        boxShadow: [?shadow],
       ),
       child: Material(
         color: style == CardStyle.white ? Colors.white : color,
-        borderRadius: BorderRadius.circular(21),
+        borderRadius: BorderRadius.circular(radius),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          borderRadius: BorderRadius.circular(21),
+          borderRadius: BorderRadius.circular(radius),
           onTap: onTap,
           onLongPress: onLongPress,
           child: Stack(

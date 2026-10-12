@@ -9,7 +9,8 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Diseño colorido con las fuentes Fredoka y Nunito (licencia OFL, en
   `assets/fonts`). Los colores no cambian con el modo oscuro del celular.
 - Fondos (botón de paleta arriba en Categorías): el usuario elige el fondo de
-  la app, de un solo color: Uva (viene elegido), Noche, Crema, Mostaza,
+  la app: Clásico (el degradado de siempre, con las tarjetas de color sin
+  borde; viene elegido) o uno de un solo color: Uva, Noche, Crema, Mostaza,
   Coral o Turquesa. Cada uno trae su estilo de tarjetas: calcomanía (borde
   blanco y sombra sólida) en Uva, Noche, Coral y Turquesa; blancas con el
   borde y el título del color de la categoría en Crema; cómic (borde y
