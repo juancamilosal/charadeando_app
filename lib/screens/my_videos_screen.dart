@@ -109,11 +109,8 @@ class MyVideosScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text('Mis videos'),
-          leading: BackButton(
-            onPressed: () => context.canPop()
-                ? context.pop()
-                : context.go(Routes.categories),
-          ),
+          // Es una pestaña de la barra de abajo.
+          automaticallyImplyLeading: false,
         ),
         body: SafeArea(
           top: false,

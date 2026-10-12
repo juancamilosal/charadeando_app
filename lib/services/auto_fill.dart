@@ -8,7 +8,6 @@ class AutoFillResult {
     required this.config,
     required this.names,
     required this.scoring,
-    required this.hitMode,
     required this.difficulty,
   });
 
@@ -16,7 +15,6 @@ class AutoFillResult {
   final GameConfig config;
   final List<String> names;
   final ScoringMode scoring;
-  final HitMode hitMode;
 
   /// Solo se usa con palabras automáticas.
   final Difficulty difficulty;
@@ -87,10 +85,6 @@ abstract final class AutoFill {
       config: config,
       names: names,
       scoring: any(ScoringMode.values),
-      hitMode: any([
-        for (final m in HitMode.selectable)
-          if (m.available) m,
-      ]),
       difficulty: difficulty,
     );
   }

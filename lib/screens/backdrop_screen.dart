@@ -22,9 +22,8 @@ class BackdropScreen extends ConsumerWidget {
         appBar: AppBar(
           title: const Text('Fondos'),
           leading: BackButton(
-            onPressed: () => context.canPop()
-                ? context.pop()
-                : context.go(Routes.categories),
+            onPressed: () =>
+                context.canPop() ? context.pop() : context.go(Routes.settings),
           ),
         ),
         body: SafeArea(

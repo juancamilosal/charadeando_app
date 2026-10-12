@@ -43,7 +43,6 @@ void main() {
         AutoFill.turnSeconds,
         contains(result.config.turnDuration.inSeconds),
       );
-      expect(result.hitMode.available, isTrue);
     }
   });
 

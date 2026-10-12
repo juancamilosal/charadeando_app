@@ -4,6 +4,7 @@ import 'package:charadeando_app/models/models.dart';
 import 'package:charadeando_app/providers/providers.dart';
 import 'package:charadeando_app/router.dart';
 import 'package:charadeando_app/screens/config_screen.dart';
+import 'package:charadeando_app/screens/team_editor_screen.dart';
 import 'package:charadeando_app/services/services.dart';
 import 'package:charadeando_app/widgets/category_art.dart';
 import 'package:charadeando_app/widgets/config_section.dart';
@@ -11,6 +12,45 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+
+/// Equipos guardados en memoria, sin archivos.
+class MemoryTeamStore extends TeamStore {
+  MemoryTeamStore([this.teams = const []]);
+
+  List<SavedTeam> teams;
+
+  @override
+  Future<List<SavedTeam>> load() async => teams;
+
+  @override
+  Future<void> save(List<SavedTeam> teams) async => this.teams = teams;
+}
+
+/// Equipos guardados para las pruebas.
+const savedTeams = [
+  SavedTeam(id: 't1', name: 'Los Primos', colorIndex: 0),
+  SavedTeam(id: 't2', name: 'Los Abuelos', colorIndex: 3),
+  SavedTeam(id: 't3', name: 'Las Tías', colorIndex: 5),
+  SavedTeam(id: 't4', name: 'Los Vecinos', colorIndex: 7),
+  SavedTeam(id: 't5', name: 'La Oficina', colorIndex: 9),
+];
+
+/// Toca un equipo de la sección Equipos de la configuración.
+Future<void> tapTeam(WidgetTester tester, String name) async {
+  // Desde arriba de la lista: los equipos van al principio.
+  await tester.drag(find.byType(Scrollable).first, const Offset(0, 3000));
+  await tester.pumpAndSettle();
+  final team = find.text(name);
+  await tester.scrollUntilVisible(
+    team,
+    200,
+    scrollable: find.byType(Scrollable).first,
+  );
+  await tester.ensureVisible(team);
+  await tester.pumpAndSettle();
+  await tester.tap(team);
+  await tester.pump();
+}
 
 /// Configuración guardada en memoria, sin archivos.
 class MemoryConfigStore extends ConfigStore {
@@ -30,6 +70,7 @@ Future<ProviderContainer> pumpConfig(
   GameConfig? config,
   Stream<bool>? tv,
   ConfigStore? store,
+  TeamStore? teams,
 }) async {
   tester.view.physicalSize = const Size(1080, 2400);
   addTearDown(tester.view.reset);
@@ -37,6 +78,7 @@ Future<ProviderContainer> pumpConfig(
     overrides: [
       tvConnectedProvider.overrideWith((ref) => tv ?? Stream.value(false)),
       configStoreProvider.overrideWithValue(store ?? MemoryConfigStore()),
+      teamStoreProvider.overrideWithValue(teams ?? MemoryTeamStore()),
     ],
   );
   addTearDown(container.dispose);
@@ -48,6 +90,10 @@ Future<ProviderContainer> pumpConfig(
     routes: [
       GoRoute(path: Routes.config, builder: (_, _) => const ConfigScreen()),
       GoRoute(path: Routes.words, builder: (_, _) => const Text('Palabras')),
+      GoRoute(
+        path: Routes.teamEditor,
+        builder: (_, _) => const TeamEditorScreen(),
+      ),
       GoRoute(
         path: Routes.autoWords,
         builder: (_, _) => const Text('Descargando'),
@@ -77,41 +123,75 @@ Future<void> tapContinue(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('llena la configuración automáticamente y la cambia en cada '
-      'toque', (tester) async {
-    final container = await pumpConfig(tester);
+  testWidgets('la configuración aleatoria pone equipos al azar que no se '
+      'guardan, y los cambia en cada toque', (tester) async {
+    final teams = MemoryTeamStore();
+    final container = await pumpConfig(tester, teams: teams);
     await tester.tap(find.text('Configuración aleatoria'));
     await tester.pump();
-    List<String> names() => [
-      for (final f in tester.widgetList<TextField>(find.byType(TextField)))
-        f.controller!.text,
+    List<String> chosen() => [
+      for (final n in AutoFill.groupNames)
+        if (find.text(n).evaluate().isNotEmpty) n,
     ];
-    final first = names();
+    final first = chosen();
     expect(first, hasLength(2));
-    expect(first.every(AutoFill.groupNames.contains), isTrue);
+    expect(find.text('Solo esta partida'), findsNWidgets(2));
 
-    // Al agregar un grupo y volver a tocar, el juego también lo nombra.
-    await tester.tap(find.byIcon(Icons.add).first);
-    await tester.pump();
     await tester.tap(find.text('Configuración aleatoria'));
     await tester.pump();
-    final second = names();
-    expect(second, hasLength(3));
-    expect(second.toSet(), hasLength(3));
+    final second = chosen();
+    expect(second, hasLength(2));
     expect(second.any(first.contains), isFalse);
 
     await tapContinue(tester);
     expect(find.text('Palabras'), findsOneWidget);
     final config = container.read(gameControllerProvider).config;
-    expect(config.groups.map((g) => g.name), second);
+    expect(config.groups.map((g) => g.name).toSet(), second.toSet());
+    expect(config.groups.every((g) => g.teamId == null), isTrue);
+    // No se guardaron en Equipos.
+    expect(teams.teams, isEmpty);
   });
 
-  testWidgets('no continúa si falta el nombre de algún grupo', (tester) async {
-    await pumpConfig(tester);
+  testWidgets('no continúa sin elegir al menos 2 equipos', (tester) async {
+    await pumpConfig(tester, teams: MemoryTeamStore(savedTeams));
+    await tapTeam(tester, 'Los Primos');
     await tapContinue(tester);
 
     expect(find.text('Palabras'), findsNothing);
-    expect(find.text('Escriban el nombre de cada grupo.'), findsOneWidget);
+    expect(find.text('Elijan de 2 a 4 equipos.'), findsWidgets);
+  });
+
+  testWidgets('sin equipos guardados se pueden crear ahí mismo y vuelven '
+      'marcados', (tester) async {
+    final container = await pumpConfig(tester);
+    await tester.pumpAndSettle();
+    expect(find.text('Creen sus equipos para jugar.'), findsOneWidget);
+    final add = find.text('Nuevo equipo');
+    for (final name in ['Los Primos', 'Los Tigres']) {
+      await tester.scrollUntilVisible(
+        add,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(add);
+      await tester.pumpAndSettle();
+      await tester.tap(add);
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const ValueKey('nombre-equipo')), name);
+      final create = find.text('Crear equipo');
+      await tester.scrollUntilVisible(
+        create,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(create);
+      await tester.pumpAndSettle();
+    }
+    await tapContinue(tester);
+    expect(find.text('Palabras'), findsOneWidget);
+    final groups = container.read(gameControllerProvider).config.groups;
+    expect(groups.map((g) => g.name), ['Los Primos', 'Los Tigres']);
+    expect(groups.every((g) => g.teamId != null), isTrue);
   });
 
   testWidgets('recuerda escribir más palabras, sin cálculos', (tester) async {
@@ -124,14 +204,32 @@ void main() {
     expect(find.textContaining('Más rondas = más palabras'), findsOneWidget);
   });
 
-  testWidgets('no deja pasar de 4 grupos', (tester) async {
-    await pumpConfig(tester);
-    final add = find.byIcon(Icons.add).first;
-    for (var i = 0; i < 4; i++) {
-      await tester.tap(add);
-      await tester.pump();
+  testWidgets('se eligen hasta 4 equipos guardados, en el orden en que se '
+      'tocan', (tester) async {
+    final container = await pumpConfig(
+      tester,
+      teams: MemoryTeamStore(savedTeams),
+    );
+    await tester.pumpAndSettle();
+    for (final t in ['Los Abuelos', 'Los Primos', 'Las Tías', 'Los Vecinos']) {
+      await tapTeam(tester, t);
     }
-    expect(find.textContaining('Nombre del grupo'), findsNWidgets(4));
+    await tapTeam(tester, 'La Oficina');
+    expect(find.text('Máximo 4 equipos.'), findsOneWidget);
+    // Se cierra el aviso para que no tape el botón.
+    ScaffoldMessenger.of(tester.element(find.byType(ConfigScreen)))
+        .removeCurrentSnackBar();
+    await tester.pumpAndSettle();
+
+    await tapContinue(tester);
+    final groups = container.read(gameControllerProvider).config.groups;
+    expect(groups.map((g) => g.name), [
+      'Los Abuelos',
+      'Los Primos',
+      'Las Tías',
+      'Los Vecinos',
+    ]);
+    expect(groups.map((g) => g.teamId), ['t2', 't1', 't3', 't4']);
   });
 
   testWidgets('con palabras automáticas solo se eligen las rondas y el '
@@ -139,12 +237,13 @@ void main() {
     final container = await pumpConfig(
       tester,
       config: const GameConfig(wordSource: WordSource.random),
+      teams: MemoryTeamStore(savedTeams),
     );
+    await tester.pumpAndSettle();
     expect(find.textContaining('Más rondas = más palabras'), findsNothing);
     expect(find.text('Duración del juego'), findsNothing);
-    for (var i = 0; i < 2; i++) {
-      await tester.enterText(find.byType(TextField).at(i), 'G$i');
-    }
+    await tapTeam(tester, 'Los Primos');
+    await tapTeam(tester, 'Los Abuelos');
     final rounds = find.ancestor(
       of: find.text('Rondas'),
       matching: find.byType(ConfigRow),
@@ -155,7 +254,7 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(rounds, findsOneWidget);
-    expect(find.text('Palabras por grupo'), findsNothing);
+    expect(find.text('Palabras por equipo'), findsNothing);
     final more = find.descendant(of: rounds, matching: find.byIcon(Icons.add));
     await tester.ensureVisible(more);
     await tester.pumpAndSettle();
@@ -171,16 +270,9 @@ void main() {
     await tester.ensureVisible(perPhrase);
     await tester.pumpAndSettle();
     await tester.tap(perPhrase);
-    final tilt = find.text('Movimiento');
-    await tester.scrollUntilVisible(
-      tilt,
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.ensureVisible(tilt);
-    await tester.pumpAndSettle();
-    await tester.tap(tilt);
     await tester.pump();
+    // Cómo se marcan los aciertos ya no se elige aquí, sino en Ajustes.
+    expect(find.text('Movimiento'), findsNothing);
 
     await tapContinue(tester);
     expect(find.text('Descargando'), findsOneWidget);
@@ -204,25 +296,22 @@ void main() {
     expect(tester.widget<ChoiceChip>(mixed).selected, isTrue);
   });
 
-  testWidgets('vienen marcadas Por frase, Movimiento y el video; solo '
-      'faltan los nombres', (tester) async {
+  testWidgets('vienen marcadas Por frase y el video; solo faltan los '
+      'equipos', (tester) async {
     final container = await pumpConfig(
       tester,
       config: const GameConfig(wordSource: WordSource.random),
+      teams: MemoryTeamStore(savedTeams),
     );
+    await tester.pumpAndSettle();
     await tapContinue(tester);
-    expect(find.text('Escriban el nombre de cada grupo.'), findsOneWidget);
+    expect(find.text('Elijan de 2 a 4 equipos.'), findsWidgets);
     // Se espera a que el aviso se cierre para que no tape el botón.
     await tester.pump(const Duration(seconds: 5));
     await tester.pumpAndSettle();
 
-    await tester.scrollUntilVisible(
-      find.text('Configuración aleatoria'),
-      -300,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.enterText(find.byType(TextField).at(0), 'A');
-    await tester.enterText(find.byType(TextField).at(1), 'B');
+    await tapTeam(tester, 'Los Primos');
+    await tapTeam(tester, 'Los Abuelos');
     await tapContinue(tester);
     expect(find.text('Descargando'), findsOneWidget);
     final config = container.read(gameControllerProvider).config;
@@ -232,44 +321,49 @@ void main() {
     expect(config.resolution, VideoResolution.hd);
   });
 
-  testWidgets('guarda la configuración y la próxima vez aparece llena', (
-    tester,
-  ) async {
+  testWidgets('guarda la configuración y la próxima vez aparece llena, con '
+      'los mismos equipos', (tester) async {
     final store = MemoryConfigStore();
+    final teams = MemoryTeamStore(savedTeams);
     await pumpConfig(
       tester,
       config: const GameConfig(wordSource: WordSource.random),
       store: store,
+      teams: teams,
     );
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Configuración aleatoria'));
     await tester.pump();
+    // Se cambian los equipos al azar por dos guardados.
+    for (final n in AutoFill.groupNames) {
+      if (find.text(n).evaluate().isNotEmpty) await tapTeam(tester, n);
+    }
+    await tapTeam(tester, 'Las Tías');
+    await tapTeam(tester, 'Los Primos');
     await tapContinue(tester);
     final saved = store.saved!;
-    expect(saved.groupNames, hasLength(2));
+    expect(saved.teamIds, ['t3', 't1']);
 
-    // Una partida nueva: los nombres y las opciones vienen de la guardada.
+    // Una partida nueva: los equipos y las opciones vienen de la guardada.
     await tester.pumpWidget(const SizedBox());
     final container = await pumpConfig(
       tester,
       config: const GameConfig(wordSource: WordSource.random),
       store: store,
+      teams: teams,
     );
     await tester.pumpAndSettle();
-    final names = [
-      for (final f in tester.widgetList<TextField>(find.byType(TextField)))
-        f.controller!.text,
-    ];
-    expect(names, saved.groupNames);
     await tapContinue(tester);
     final config = container.read(gameControllerProvider).config;
+    expect(config.groups.map((g) => g.teamId), ['t3', 't1']);
     expect(config.rounds, saved.rounds);
     expect(config.turnDuration, saved.turnDuration);
     expect(config.scoringMode, saved.scoringMode);
     expect(config.difficulty, saved.difficulty);
   });
 
-  testWidgets('al duplicar la pantalla se activa el Modo TV y se ocultan '
-      'los aciertos y el video', (tester) async {
+  testWidgets('al duplicar la pantalla se activa el Modo TV y se oculta '
+      'el video', (tester) async {
     final tv = StreamController<bool>();
     addTearDown(tv.close);
     final container = await pumpConfig(tester, tv: tv.stream);
@@ -296,7 +390,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Desconectar TV'), findsOneWidget);
     expect(find.textContaining('Modo TV activado'), findsWidgets);
-    expect(find.text('Cómo se marcan los aciertos'), findsNothing);
     expect(find.text('Resolución'), findsNothing);
     // Se espera a que el aviso se cierre para que no tape el botón.
     await tester.pump(const Duration(seconds: 5));
@@ -332,15 +425,13 @@ void main() {
     expect(find.text('Conectar a un televisor'), findsNothing);
   });
 
-  testWidgets('al desconectar el TV vuelven los aciertos y el video', (
-    tester,
-  ) async {
+  testWidgets('al desconectar el TV vuelve el video', (tester) async {
     final tv = StreamController<bool>();
     addTearDown(tv.close);
     await pumpConfig(tester, tv: tv.stream);
     tv.add(true);
     await tester.pumpAndSettle();
-    expect(find.text('Cómo se marcan los aciertos'), findsNothing);
+    expect(find.text('Resolución'), findsNothing);
 
     tv.add(false);
     await tester.pumpAndSettle();
@@ -353,7 +444,7 @@ void main() {
       200,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(find.text('Cómo se marcan los aciertos'), findsOneWidget);
+    expect(find.text('Resolución'), findsOneWidget);
   });
 
   testWidgets('el Modo TV también está con palabras automáticas', (
@@ -456,7 +547,7 @@ void main() {
     expect(config.customCategory?.name, 'Mi familia');
   });
 
-  testWidgets('sin grupos no se ven Grupos ni Palabras por grupo', (
+  testWidgets('sin equipos no se ven Equipos ni Palabras por equipo', (
     tester,
   ) async {
     final container = await pumpConfig(
@@ -464,8 +555,8 @@ void main() {
       config: const GameConfig(inGroups: false),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Grupos'), findsNothing);
-    expect(find.text('Palabras por grupo'), findsNothing);
+    expect(find.text('Equipos'), findsNothing);
+    expect(find.text('Palabras por equipo'), findsNothing);
 
     // No pide nombres: sigue directo a escribir las palabras.
     await tapContinue(tester);
@@ -475,7 +566,7 @@ void main() {
     expect(config.groupCount, 1);
   });
 
-  testWidgets('lo primero es elegir sin grupos o en grupos', (tester) async {
+  testWidgets('lo primero es elegir sin equipos o en equipos', (tester) async {
     await pumpConfig(
       tester,
       config: const GameConfig(
@@ -485,27 +576,27 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    // Sin grupos viene marcado.
+    // Sin equipos viene marcado.
     expect(
       find.descendant(
         of: find.ancestor(
-          of: find.text('Sin grupos'),
+          of: find.text('Sin equipos'),
           matching: find.byType(Row),
         ),
         matching: find.byIcon(Icons.radio_button_checked),
       ),
       findsOneWidget,
     );
-    expect(find.text('Grupos'), findsNothing);
+    expect(find.text('Equipos'), findsNothing);
     // Va antes que todo lo demás.
     expect(
-      tester.getTopLeft(find.text('Sin grupos')).dy,
+      tester.getTopLeft(find.text('Sin equipos')).dy,
       lessThan(tester.getTopLeft(find.text('Configuración aleatoria')).dy),
     );
 
-    await tester.tap(find.text('En grupos'));
+    await tester.tap(find.text('En equipos'));
     await tester.pumpAndSettle();
-    expect(find.text('Grupos'), findsOneWidget);
+    expect(find.text('Equipos'), findsOneWidget);
   });
 
   testWidgets('arriba muestra el dibujo y el nombre de la categoría', (

@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../models/models.dart';
 import '../theme.dart';
 
 /// Una palabra del ejemplo: la palabra, tres pistas y el intento de quien
@@ -10,13 +11,15 @@ import '../theme.dart';
 typedef DemoRound = (String word, List<String> clues, String guess);
 
 /// Animación de cómo se juega: una persona tiene el celular en la frente,
-/// su grupo le describe la palabra secreta sin decirla y, cuando acierta,
-/// inclina el celular y sale la siguiente palabra.
+/// su equipo le describe la palabra secreta sin decirla y, cuando acierta,
+/// marca el acierto (inclinando el celular o tocando la pantalla, según el
+/// controlador) y sale la siguiente palabra.
 class HowToPlayDemo extends StatefulWidget {
   const HowToPlayDemo({
     super.key,
     this.rounds = defaultRounds,
     this.tvMode = false,
+    this.controller = PlayController.tilt,
   });
 
   /// Palabras del ejemplo de Libre.
@@ -32,6 +35,9 @@ class HowToPlayDemo extends StatefulWidget {
   /// Hay un televisor conectado: los aciertos los marca el juez en el
   /// celular, no se inclina.
   final bool tvMode;
+
+  /// Cómo se marcan los aciertos fuera del Modo TV (ajuste "Controlador").
+  final PlayController controller;
 
   @override
   State<HowToPlayDemo> createState() => _HowToPlayDemoState();
@@ -85,7 +91,7 @@ class _HowToPlayDemoState extends State<HowToPlayDemo>
 
   bool get _correct => _step == _steps - 1;
 
-  /// Quién habla en este paso: una persona del grupo, o quien adivina.
+  /// Quién habla en este paso: una persona del equipo, o quien adivina.
   int get _speaker => _step >= 3 ? _guesser : _step;
 
   String get _bubble => switch (_step) {
@@ -138,7 +144,9 @@ class _HowToPlayDemoState extends State<HowToPlayDemo>
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              widget.tvMode ? Icons.touch_app : Icons.swap_vert,
+              widget.tvMode || widget.controller == PlayController.touch
+                  ? Icons.touch_app
+                  : Icons.swap_vert,
               size: 18,
               color: AppColors.purple,
             ),
@@ -147,6 +155,9 @@ class _HowToPlayDemoState extends State<HowToPlayDemo>
               child: Text(
                 widget.tvMode
                     ? 'El juez toca ¡Correcto! o Pasar en el celular.'
+                    : widget.controller == PlayController.touch
+                    ? 'Toca a la derecha si aciertas y a la izquierda para '
+                          'pasar.'
                     : 'Inclina el celular hacia abajo si aciertas y hacia '
                           'arriba para pasar.',
                 style: const TextStyle(fontSize: 13),
@@ -231,9 +242,16 @@ class _HowToPlayDemoState extends State<HowToPlayDemo>
             ),
           ),
           const SizedBox(height: 4),
-          // Al acertar, quien adivina inclina el celular hacia abajo.
+          // Al acertar con inclinación, quien adivina inclina el celular
+          // hacia abajo.
           AnimatedRotation(
-            turns: guessing && _correct ? 0.06 : 0,
+            turns:
+                guessing &&
+                    _correct &&
+                    !widget.tvMode &&
+                    widget.controller == PlayController.tilt
+                ? 0.06
+                : 0,
             duration: const Duration(milliseconds: 300),
             child: Container(
               width: guessing ? 56 : 48,

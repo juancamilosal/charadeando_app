@@ -27,12 +27,12 @@ const systemPunishments = [
   'Decir cinco frutas en 5 segundos',
   'Hablar con acento de otro país por un turno',
   'Hacer una reverencia a cada jugador',
-  'Inventar una canción de 4 versos sobre el grupo ganador',
+  'Inventar una canción de 4 versos sobre el equipo ganador',
   'Hacer mímica de cepillarse los dientes',
   'Dar tres vueltas y decir "¡Charadeando!"',
   'Imitar a un mesero que lleva una bandeja llena',
   'Hacer el baile del robot',
-  'Decir algo bonito de cada grupo',
+  'Decir algo bonito de cada equipo',
 ];
 
 /// Lógica de la ruleta de castigos, sin pantallas ni animaciones.

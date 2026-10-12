@@ -55,7 +55,7 @@ void main() {
 
     await _open(tester, store);
     expect(_welcome, findsOneWidget);
-    expect(find.text('Formen grupos y elijan una categoría.'), findsOneWidget);
+    expect(find.text('Formen equipos y elijan una categoría.'), findsOneWidget);
     expect(_categories, findsNothing);
 
     await tester.tap(find.text('Listo'));
@@ -80,16 +80,18 @@ void main() {
     // Es la primera pantalla: no tiene botón de atrás.
     expect(find.byType(BackButton), findsNothing);
 
-    // Desde el menú de configuración.
-    await tester.tap(find.byTooltip('Configuración'));
+    // Desde Ajustes, en la barra de abajo.
+    await tester.tap(find.text('Ajustes'));
     await _settle(tester);
     await tester.tap(find.text('Cómo se juega'));
     await _settle(tester);
     expect(_welcome, findsOneWidget);
+    // La bienvenida no lleva la barra de abajo.
+    expect(find.text('Equipos'), findsNothing);
 
     await tester.tap(find.text('Listo'));
     await _settle(tester);
-    expect(_categories, findsOneWidget);
     expect(_welcome, findsNothing);
+    expect(find.text('Preferencias de juego'), findsOneWidget);
   });
 }

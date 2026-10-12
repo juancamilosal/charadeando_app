@@ -66,7 +66,7 @@ enum WordSource {
   random('Automáticas', available: true),
 
   /// Cada grupo escribe las palabras de sus rivales. Funciona sin internet.
-  groups('Escritas por los grupos', available: true);
+  groups('Escritas por los equipos', available: true);
 
   const WordSource(this.label, {required this.available});
 

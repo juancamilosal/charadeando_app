@@ -48,5 +48,5 @@ class WordService {
   /// Cómo nombrar a los rivales de [author]: el nombre del grupo si solo hay
   /// uno, o "los demás grupos" si hay varios.
   static String rivalsLabel(int author, List<Group> groups) =>
-      groups.length == 2 ? groups[(author + 1) % 2].name : 'los demás grupos';
+      groups.length == 2 ? groups[(author + 1) % 2].name : 'los demás equipos';
 }

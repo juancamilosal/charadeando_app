@@ -75,9 +75,9 @@ class PlayModeSelector extends StatelessWidget {
 
     return Row(
       children: [
-        option(false, 'Sin grupos'),
+        option(false, 'Sin equipos'),
         const SizedBox(width: 10),
-        option(true, 'En grupos'),
+        option(true, 'En equipos'),
       ],
     );
   }

@@ -76,7 +76,13 @@ ThemeData buildAppTheme([Backdrop backdrop = Backdrop.standard]) {
     surface: Colors.white,
     onSurface: AppColors.ink,
   );
-  final base = ThemeData(colorScheme: scheme, fontFamily: AppFonts.body);
+  final base = ThemeData(
+    colorScheme: scheme,
+    fontFamily: AppFonts.body,
+    // Los emojis de los equipos y los resultados: es la fuente de emojis de
+    // Android (en iPhone el sistema usa la suya).
+    fontFamilyFallback: const ['Noto Color Emoji'],
+  );
   const display = TextStyle(fontFamily: AppFonts.display);
   final text = base.textTheme
       .copyWith(

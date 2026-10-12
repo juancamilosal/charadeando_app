@@ -1,14 +1,14 @@
 # Charadeando
 
 Juego de charadas para Android e iOS hecho en Flutter. Un jugador se pone el
-celular en la frente y adivina la palabra con las pistas de su grupo, mientras
+celular en la frente y adivina la palabra con las pistas de su equipo, mientras
 la cámara frontal graba a los participantes para revivir las risas.
 
 ## Versión 0.1
 
 - Diseño colorido con las fuentes Fredoka y Nunito (licencia OFL, en
   `assets/fonts`). Los colores no cambian con el modo oscuro del celular.
-- Fondos (en el menú de Configuración de Categorías): el usuario elige el fondo de
+- Fondos (en Ajustes > Apariencia): el usuario elige el fondo de
   la app: Clásico (el degradado de siempre, con las tarjetas de color sin
   borde; viene elegido) o uno de un solo color: Uva, Noche, Crema, Mostaza,
   Coral o Turquesa. Cada uno trae su estilo de tarjetas: calcomanía (borde
@@ -18,27 +18,51 @@ la cámara frontal graba a los participantes para revivir las risas.
   oscuros. Se guarda en el celular (`fondo.txt`) y se aplica en todas las
   pantallas desde que abre la app.
 - Inicio: la bienvenida (la animación de cómo se juega, los pasos y
-  "Listo") se muestra solo la
-  primera vez que se abre la app; al tocar "Listo" queda guardado en el
-  celular y las demás veces la app abre directo en Categorías. Categorías no
-  tiene botón de atrás: "Cómo se juega", en el menú de Configuración, vuelve
-  a abrir la bienvenida y "Listo" regresa.
-- Barra de Categorías: el título "Selección de categoría" (se achica si no
-  cabe en un celular angosto) y solo dos íconos: Mis videos y Configuración.
-  Configuración abre un menú desde abajo, del mismo color del fondo elegido
-  (en Clásico, el degradado; en Crema y Mostaza, con textos oscuros), con "Fondos" ("Cambia el color de la app") y "Cómo se
-  juega" ("Ver la explicación otra vez"), cada una con su ícono en un cuadro
-  de color y una flecha. Las opciones están en `settingsOptions`
-  (`lib/widgets/settings_sheet.dart`), para sumar después sonido,
-  vibración, premium o privacidad. Debajo de la barra va directo el
-  selector "Todas | Mías", sin texto encima, y la cuadrícula no lleva el
-  título "Categorías". "Salir de la categoría" y salir del turno
-  llevan a Categorías.
+  "Listo") se muestra solo la primera vez que se abre la app; al tocar
+  "Listo" queda guardado en el celular y las demás veces la app abre
+  directo en Categorías. "Cómo se juega", en Ajustes > Ayuda, vuelve a abrir
+  la bienvenida y "Listo" regresa.
+- Barra de navegación abajo (`StatefulShellRoute` de go_router, en
+  `lib/widgets/app_nav_bar.dart`): "Ruleta", "Equipos", "Categorías" (en el
+  centro; es la que abre al iniciar), "Videos" y "Ajustes", cada una con su
+  ícono y su nombre. Cada pestaña conserva su estado. La activa va en el
+  color de la app (amarillo sobre los fondos oscuros, morado sobre los
+  claros) y las demás, más suaves; la barra toma el color del fondo
+  elegido. Solo se ve en esas cinco pantallas: la bienvenida, la
+  configuración, las palabras, el turno, los resultados, el video, Fondos y
+  los editores se abren encima, sin la barra.
+- Categorías: arriba solo el título "Selección de categoría" (se achica si
+  no cabe en un celular angosto); Mis videos, la configuración y la Ruleta
+  de castigos ahora están en la barra de abajo. Debajo va directo el
+  selector "Todas | Mías", sin texto encima. "Salir de la categoría" y
+  salir del turno llevan a Categorías.
+- Equipos (`lib/screens/teams_screen.dart`): la lista de equipos guardados,
+  cada uno con su nombre, su color, un ícono o emoji, sus jugadores y su
+  historial (partidas, victorias y mejor puntaje). "Crear equipo" abre el
+  editor: nombre (obligatorio, hasta 24 letras, sin repetir), color de la
+  paleta de la app, ícono o emoji y jugadores (opcional). Mantener
+  presionado un equipo o su botón de tres puntos: "Editar" y "Borrar" (pide
+  confirmación). Sin equipos: "Crea tu primer equipo" con "Crear equipo".
+  Se guardan solo en el celular (`equipos.json`), no en un servidor.
+- Ajustes (`lib/screens/settings_screen.dart`), en tarjetas con un ícono en
+  cada fila. "Preferencias de juego": "Música" y "Efectos de sonido"
+  (encendidos; la app todavía no trae sonidos, pero `SoundService` ya
+  respeta el ajuste), "Vibración" (encendida; todas las vibraciones pasan
+  por `Haptics`, que no vibra si está apagada), "Rotación invertida"
+  (apagada; encendida, el juego gira a horizontal derecha y la vista de la
+  cámara y el video siguen esa orientación; la inclinación se mide en el
+  eje de la pantalla, así que abajo sigue siendo acierto) y "Controlador":
+  "Inclinación" (por defecto: abajo es acierto y arriba, pasar) o "Toque"
+  (la mitad derecha de la pantalla es acierto y la izquierda, pasar, con
+  una marca suave en cada borde durante el turno; en Modo TV el juez sigue
+  con sus botones). "Apariencia": "Fondos". "Ayuda": "Cómo se juega". Se
+  guardan en el celular (`ajustes.json`) y se aplican desde que abre la
+  app. La animación de la bienvenida explica el controlador elegido.
 - Pantalla de categorías: Libre, Animales, Geografía, Películas,
   Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos, Comida,
   Profesiones, Acciones y Lugares (las 13 categorías de la colección
   `palabras`; las 5 últimas, por ahora con su ícono en vez de GIF). Libre
-  deja elegir entre palabras manuales (las escriben los grupos) y
+  deja elegir entre palabras manuales (las escriben los equipos) y
   automáticas (frases de la categoría LIBRE); las demás juegan con palabras
   automáticas de su categoría.
 - Partida rápida o personalizada: al tocar una categoría del juego, una de
@@ -47,10 +71,10 @@ la cámara frontal graba a los participantes para revivir las risas.
   fondo) el dibujo y el nombre de la categoría con dos tarjetas del mismo
   tamaño, lado a lado (una debajo de la otra si la pantalla mide menos de
   340 px): naranja "⚡ Partida rápida" ("1 minuto, sin configurar nada") y
-  morada "⚙️ Personalizada" ("Grupos, rondas, video y ruleta"), con el
+  morada "⚙️ Personalizada" ("Equipos, rondas, video y ruleta"), con el
   estilo de las tarjetas del fondo. Personalizada va a la configuración.
 - Partida rápida (`QuickGame`, `lib/services/quick_game.dart`): se salta la
-  configuración. Sin grupos, un solo turno de 1 minuto, con hasta 20
+  configuración. Sin equipos, un solo turno de 1 minuto, con hasta 20
   palabras (se piden 20 al servidor; de una categoría propia, 20 al azar),
   dificultad Mezcladas, aciertos con movimiento (o los botones del juez si
   hay un TV conectado) y el video con la resolución de la última
@@ -91,24 +115,28 @@ la cámara frontal graba a los participantes para revivir las risas.
   elige en la configuración de las palabras automáticas, en Libre y en todas
   las categorías. Las palabras manuales no tienen dificultad. En Directus se
   conserva la columna `dificultad`.
-- "Sin grupos" o "En grupos": es lo primero de la configuración, debajo
+- "Sin equipos" o "En equipos": es lo primero de la configuración, debajo
   del dibujo y el nombre de la categoría, en todas las categorías, con "Sin
-  grupos" marcado por defecto. Sin grupos solo salen las palabras y los jugadores
-  se organizan como quieran: la configuración no muestra Grupos ni Palabras
-  por grupo, con palabras manuales se escribe una sola lista (mínimo 10) y
+  equipos" marcado por defecto. En equipos se eligen de 2 a 4 equipos
+  guardados (tocar para marcar; juegan en ese orden, con su número) y "Nuevo
+  equipo" abre el mismo editor de Equipos y vuelve con el equipo marcado; si
+  no hay ninguno guardado, se crean ahí mismo. Sin equipos solo salen las
+  palabras y los jugadores se organizan como quieran: la configuración no
+  muestra Equipos ni Palabras
+  por equipo, con palabras manuales se escribe una sola lista (mínimo 10) y
   el turno, los resultados y el final muestran solo los puntos en total,
   sin ganador ni ruleta de castigo.
-- Límites: de 2 a 4 grupos, de 1 a 10 rondas y de 30 segundos a 1:30 por
+- Límites: de 2 a 4 equipos, de 1 a 10 rondas y de 30 segundos a 1:30 por
   turno.
 - Libre pregunta "¿Cómo quieren las palabras?": "Las escribimos" (palabras
   manuales, antes de empezar) o "Al azar" (automáticas, el juego las pone) y
   sigue a la configuración.
 - Solo se juega con palabras en español: el servidor entrega las de
   `idioma` `ESPAÑOL` (o `ESPANOL`) y las que no tienen idioma.
-- Palabras automáticas: en la configuración se eligen los grupos, las
+- Palabras automáticas: en la configuración se eligen los equipos, las
   rondas (hasta 10) y el tiempo por turno. Cada turno dura hasta que se
   acabe el tiempo, sin límite de palabras: se piden las que alcanzaría un
-  grupo rápido (una cada 3 segundos) y, si a un grupo se le acaban, vuelven
+  equipo rápido (una cada 3 segundos) y, si a un equipo se le acaban, vuelven
   palabras ya jugadas, así que nunca se acaban antes del tiempo.
   La partida termina al completar las rondas. Al tocar
   "Continuar" se muestra "Buscando palabras…" mientras se traen al azar de la
@@ -118,19 +146,24 @@ la cámara frontal graba a los participantes para revivir las risas.
   palabras jugadas para no repetirlas, y guarda el
   último lote para jugar sin internet. Ver `server/README.md`.
 - La configuración viene con "Por frase" (la primera opción, antes de "Por
-  palabra"), aciertos con "Movimiento", dificultad Mezcladas y video HD ya
-  marcados. Al tocar "Continuar" se guarda en el celular la última
-  configuración (nombres de los grupos, rondas, tiempo, palabras por grupo,
-  dificultad, puntuación, aciertos y video), y la próxima partida aparece
+  palabra"), dificultad Mezcladas y video HD ya marcados. Cómo se marcan los
+  aciertos ya no se elige ahí, sino en Ajustes > Controlador. Al tocar
+  "Continuar" se guarda en el celular la última configuración (los equipos
+  elegidos, rondas, tiempo, palabras por equipo, dificultad, puntuación y
+  video), y la próxima partida aparece
   llena con ella. Es una sola para todas las categorías; el Modo TV no se
   guarda porque depende del televisor conectado.
-- "Configuración aleatoria" (arriba en la configuración): el juego pone los
-  nombres de los grupos (por defecto 2; si agregan más, también los nombra)
-  y elige al azar el resto: rondas, tiempo por turno, dificultad,
-  puntuación y aciertos. Cada toque da una configuración nueva, con otros nombres.
+- "Configuración aleatoria" (arriba en la configuración): el juego pone
+  equipos con nombres al azar (por defecto 2, o tantos como haya elegidos),
+  que son solo de esa partida y no se guardan en Equipos, y elige al azar
+  el resto: rondas, tiempo por turno, dificultad y puntuación. Cada toque
+  da una configuración nueva, con otros nombres.
+- Al terminar una partida se suma al historial de cada equipo guardado la
+  partida jugada, la victoria (si ganó; en empate no cuenta) y el mejor
+  puntaje si lo superó.
 - Si una dificultad se queda sin palabras, el servidor completa con las
   otras, y si se acaban todas vuelve a usar las ya jugadas.
-- Con las palabras escritas por los grupos, en el turno se ve cuántas
+- Con las palabras escritas por los equipos, en el turno se ve cuántas
   faltan de toda la partida. Con las automáticas no se muestra, porque el
   turno dura hasta que se acabe el tiempo.
 - Combinar categorías: arriba de la cuadrícula de categorías, el botón
@@ -182,13 +215,12 @@ la cámara frontal graba a los participantes para revivir las risas.
   categorías gratis (por ahora sin límite).
 - Los nombres de las tarjetas nunca se parten a la mitad de una palabra: si
   no caben, se achica la letra y, como último recurso, se cortan con "…".
-- Ruleta de castigos: una sección propia (en la pantalla de categorías, debajo
-  de las tarjetas, una tarjeta blanca con una ruleta pequeña que gira y el
-  nombre "Ruleta de castigos"; no es una categoría de palabras). Se elige la
+- Ruleta de castigos: una sección propia ("Ruleta" en la barra de abajo; no
+  es una categoría de palabras). Se elige la
   cantidad de campos (de 2 a 10, la ruleta se divide en partes iguales) y de
   dónde salen los castigos: "Los escribimos nosotros", "Que los ponga el
   juego" (unos 30 castigos para todo público, en `services/punishments.dart`)
-  o "Mezclados" (el grupo escribe algunos y el juego completa los vacíos sin
+  o "Mezclados" (el equipo escribe algunos y el juego completa los vacíos sin
   repetir). La ruleta queda guardada en el celular.
 - Cómo gira: "Girar" la pone a toda velocidad y sigue sola hasta que tocan
   "¡Parar!" (o pasan 30 segundos). Entonces se elige el castigo al azar (el
@@ -200,7 +232,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   campo, se corta con "…" (completo se ve al caer). La cara de la ruleta se
   dibuja una vez y solo se gira, así los textos quedan fijos a la ruleta
   mientras da vueltas.
-- Al final de la partida, el grupo con menos puntos ve "¡Ruleta de castigo
+- Al final de la partida, el equipo con menos puntos ve "¡Ruleta de castigo
   para …!" con "Girar" o "Sin castigo". Si varios empatan con menos puntos,
   cada uno gira su ruleta, uno después del otro; si todos empatan, no hay
   castigo. Usa la ruleta guardada en la sección o, si nunca se configuró, 8
@@ -216,10 +248,10 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Modo TV, en todas las categorías: se activa solo cuando el celular duplica
   la pantalla en un TV (AirPlay, Chromecast o HDMI). Mientras está activo, la
   configuración oculta las secciones de aciertos y de video, durante el turno el
-  TV muestra solo el turno del grupo, el tiempo, "Finalizar juego", la
+  TV muestra solo el turno del equipo, el tiempo, "Finalizar juego", la
   palabra y los botones (sin marcador, para no confundir), y después los
   resultados del turno, y un
-  juez del grupo rival marca "Pasar" y "¡Correcto!" con botones en el
+  juez del equipo rival marca "Pasar" y "¡Correcto!" con botones en el
   celular. En la configuración, sin TV se ve "Jugar en un TV" y el enlace
   "¿Cómo conectar un TV?", que abre desde abajo "Conectar a un televisor"
   con tres pasos numerados (Android o iPhone) y "Entendido"; con el TV
@@ -237,25 +269,26 @@ la cámara frontal graba a los participantes para revivir las risas.
   muy simple: de fondo, la cámara frontal en vivo (todavía sin grabar; se
   graba desde la cuenta regresiva) con un degradado oscuro a la izquierda y
   arriba a la derecha "● Cámara"; a la izquierda, "Finalizar juego", a
-  quién le toca (solo con grupos: "Turno de Los Primos"), las píldoras
-  "↓ Acierto" y "↑ Pasar", y "¡Listo!". Sin video o en Modo TV es la misma
+  quién le toca (solo con equipos: "Turno de Los Primos"), las píldoras
+  según el controlador ("↓ Acierto" y "↑ Pasar" con Inclinación; "Toca a la
+  derecha: Acierto" y "Toca a la izquierda: Pasar" con Toque) y "¡Listo!". Sin video o en Modo TV es la misma
   pantalla sobre el fondo de la app; mientras abre la cámara también se ve
   el fondo, y sin permiso de cámara se juega sin video. La vista de la
   cámara se fija en horizontal. Al terminar el turno vuelve a vertical.
 - Resultado de cada turno: "¡Tiempo!" y "Los Primos · Ronda 2 de 3" (sin
-  grupos, "Ronda 2 de 3"), los puntos en grande ("Aciertos" si la
+  equipos, "Ronda 2 de 3"), los puntos en grande ("Aciertos" si la
   puntuación es por frase), las píldoras de aciertos y pases, las palabras
-  con ✅ y sus puntos ("+2") o ⏭️, y con grupos un marcador pequeño con el
+  con ✅ y sus puntos ("+2") o ⏭️, y con equipos un marcador pequeño con el
   líder resaltado (la lista y las píldoras, igual que en la rápida). Abajo,
   "🎬 Ver video" con "Se borra al continuar", el botón
   que dice a quién le toca ("Turno de Los Tigres"; en el último turno, "Ver
   resultados") y "Finalizar juego".
 - Resultado final: "¡Ganó Los Primos!" (o "¡Empate entre…!", o "¡Fin del
-  juego!" sin grupos) con los puntos en grande, la tabla de puntajes con el
+  juego!" sin equipos) con los puntos en grande, la tabla de puntajes con el
   primero resaltado, la ruleta de castigo ("Girar" o "Sin castigo") y abajo
   "Jugar otra vez" (misma configuración; pide palabras nuevas o las vuelven
   a escribir), "⚙️ Cambiar configuración" y "← Salir de la categoría".
-- Palabras escritas por los grupos: las de cada grupo se reparten entre todos
+- Palabras escritas por los equipos: las de cada equipo se reparten entre todos
   los demás, así que a nadie le salen las suyas y cada palabra se juega una
   sola vez. El texto se oculta al guardarlo. Funciona sin internet.
 - Puntuación por palabra (cuentan artículos y conectores) o por frase. Pasar
@@ -276,10 +309,10 @@ la cámara frontal graba a los participantes para revivir las risas.
   los resultados finales con los puntajes de ese momento (si el turno estaba
   en pausa, sus palabras marcadas cuentan). Si todavía no se jugó ningún
   turno, vuelve a Categorías.
-- Mis videos (ícono de video en la barra de Categorías): al tocar "Guardar" en
+- Mis videos ("Videos" en la barra de abajo): al tocar "Guardar" en
   el video de un turno, se guarda en la galería (en Android, en
   `Movies/Charadeando`) y aparece en Mis videos, del más nuevo al más
-  viejo, con su miniatura, el grupo y los puntos del turno, la categoría,
+  viejo, con su miniatura, el equipo y los puntos del turno, la categoría,
   la ronda, la fecha y los puntajes de ese momento. El video vive una sola
   vez, en la galería: Mis videos guarda solo su referencia y los datos de
   la partida en `mis_videos.json`, en el celular, y nunca se sube a ningún
@@ -294,7 +327,7 @@ la cámara frontal graba a los participantes para revivir las risas.
 
 - Textos cortos: máximo 10 a 12 palabras por mensaje y, donde se puede,
   íconos en vez de explicaciones ("Más rondas = más palabras", "¿Cuántas
-  palabras escribe cada grupo?" con "20 en total", "El que pierde, gira" en
+  palabras escribe cada equipo?" con "20 en total", "El que pierde, gira" en
   la ruleta, "Guarda un video al final del turno y aparece aquí." y "Da
   permiso a la galería para ver tus videos" en Mis videos).
 
@@ -307,8 +340,6 @@ agua. Además:
 - Dificultad (fácil, normal, difícil): campo `dificultad` en las palabras de
   Directus (`FACIL`, `NORMAL`, `DIFICIL`), para que `POST /juego/palabras`
   traiga solo palabras de la dificultad elegida.
-- Perfiles de grupo guardados en el celular, para no volver a escribir los
-  nombres, con historial de victorias.
 
 ## Estructura
 

@@ -150,7 +150,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.text('1 minuto, sin configurar nada'), findsOneWidget);
-    expect(find.text('Grupos, rondas, video y ruleta'), findsOneWidget);
+    expect(find.text('Equipos, rondas, video y ruleta'), findsOneWidget);
     await tester.tap(find.text('Partida rápida'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));

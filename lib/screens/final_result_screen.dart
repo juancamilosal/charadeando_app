@@ -35,6 +35,8 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
     super.initState();
     // Por si quedó algún video temporal de la partida.
     ref.read(videoServiceProvider).deleteAll().ignore();
+    // La partida se suma al historial de los equipos guardados.
+    ref.read(gameControllerProvider.notifier).saveHistory().ignore();
   }
 
   /// Otra partida con la misma configuración: las palabras se vuelven a
@@ -189,7 +191,7 @@ class _PunishmentCard extends StatelessWidget {
           ),
           if (tied)
             const Text(
-              'Empataron con menos puntos: cada grupo gira su ruleta.',
+              'Empataron con menos puntos: cada equipo gira su ruleta.',
               textAlign: TextAlign.center,
               style: TextStyle(color: Color(0xFF6B5A86)),
             ),

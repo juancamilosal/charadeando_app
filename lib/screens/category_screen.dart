@@ -12,8 +12,6 @@ import '../widgets/category_card.dart';
 import '../widgets/combine_categories_sheet.dart';
 import '../widgets/play_background.dart';
 import '../widgets/play_choice.dart';
-import '../widgets/roulette_banner.dart';
-import '../widgets/settings_sheet.dart';
 
 /// Elección de la categoría. "Todas" muestra Libre, las categorías del
 /// juego y la Ruleta de castigos; "Mías", las categorías que creó el
@@ -55,7 +53,7 @@ class CategoryScreen extends ConsumerWidget {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          // En celulares angostos se achica para caber con los íconos.
+          // En celulares angostos se achica para caber.
           title: const FittedBox(
             fit: BoxFit.scaleDown,
             child: Text('Selección de categoría'),
@@ -63,19 +61,6 @@ class CategoryScreen extends ConsumerWidget {
           titleSpacing: 20,
           // Es la primera pantalla: no hay a dónde volver.
           automaticallyImplyLeading: false,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.video_library_outlined),
-              tooltip: 'Mis videos',
-              onPressed: () => context.push(Routes.myVideos),
-            ),
-            IconButton(
-              icon: const Icon(Icons.settings),
-              tooltip: 'Configuración',
-              onPressed: () => showSettingsMenu(context),
-            ),
-            const SizedBox(width: 4),
-          ],
         ),
         // Los dibujos de las categorías se animan uno por uno.
         body: ArtCycle(
@@ -149,9 +134,7 @@ class CategoryScreen extends ConsumerWidget {
               onTap: () => _choose(context, ref, category),
             ),
         ]),
-        const SizedBox(height: 28),
-        // Sección aparte, no es una categoría de palabras.
-        RouletteBanner(onTap: () => context.go(Routes.punishments)),
+        const SizedBox(height: 16),
       ],
     );
   }

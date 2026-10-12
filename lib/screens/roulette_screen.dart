@@ -118,11 +118,12 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text('Ruleta de castigos'),
-          leading: BackButton(
-            onPressed: () => setup == null
-                ? context.go(Routes.categories)
-                : setState(() => _setup = null),
-          ),
+          // Es una pestaña de la barra de abajo: solo la ruleta vuelve a
+          // sus castigos.
+          automaticallyImplyLeading: false,
+          leading: setup == null
+              ? null
+              : BackButton(onPressed: () => setState(() => _setup = null)),
         ),
         body: SafeArea(
           top: false,

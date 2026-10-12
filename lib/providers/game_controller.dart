@@ -15,6 +15,7 @@ class GameState {
     this.round = 1,
     this.groupIndex = 0,
     this.finished = false,
+    this.historySaved = false,
   });
 
   factory GameState.fromConfig(GameConfig config) => GameState(
@@ -39,6 +40,9 @@ class GameState {
   /// Grupo al que le toca jugar.
   final int groupIndex;
   final bool finished;
+
+  /// Ya se sumó esta partida al historial de los equipos guardados.
+  final bool historySaved;
 
   List<Group> get groups => config.groups;
   Group get currentGroup => groups[groupIndex];
@@ -88,6 +92,7 @@ class GameState {
     int? round,
     int? groupIndex,
     bool? finished,
+    bool? historySaved,
   }) {
     return GameState(
       config: config,
@@ -97,6 +102,7 @@ class GameState {
       round: round ?? this.round,
       groupIndex: groupIndex ?? this.groupIndex,
       finished: finished ?? this.finished,
+      historySaved: historySaved ?? this.historySaved,
     );
   }
 }
@@ -154,6 +160,15 @@ class GameController extends Notifier<GameState> {
   /// turnos jugados hasta ahora.
   void endGame() {
     state = state.copyWith(finished: true);
+  }
+
+  /// Al terminar la partida, la suma una sola vez al historial de los
+  /// equipos guardados.
+  Future<void> saveHistory() async {
+    if (state.historySaved || !state.finished) return;
+    final game = state;
+    state = state.copyWith(historySaved: true);
+    await ref.read(teamsProvider.notifier).recordGame(game);
   }
 
   /// Con palabras automáticas el turno dura hasta que se acabe el tiempo: si al

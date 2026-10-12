@@ -11,11 +11,15 @@ import 'screens/final_result_screen.dart';
 import 'screens/free_mode_screen.dart';
 import 'screens/my_videos_screen.dart';
 import 'screens/roulette_screen.dart';
+import 'screens/settings_screen.dart';
+import 'screens/team_editor_screen.dart';
+import 'screens/teams_screen.dart';
 import 'screens/turn_result_screen.dart';
 import 'screens/turn_screen.dart';
 import 'screens/video_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/word_entry_screen.dart';
+import 'widgets/app_nav_bar.dart';
 
 abstract final class Routes {
   /// Solo se ve la primera vez que se abre la app, o con el botón "i" de
@@ -42,6 +46,14 @@ abstract final class Routes {
   /// Elegir el fondo de la app.
   static const backdrops = '/fondos';
 
+  /// "Equipos" y crear o editar uno (recibe el equipo como `extra` para
+  /// editarlo y vuelve con el equipo guardado).
+  static const teams = '/equipos';
+  static const teamEditor = '/equipo';
+
+  /// "Ajustes".
+  static const settings = '/ajustes';
+
   /// "Mis videos" y ver uno de ellos, que recibe el video como `extra`.
   static const myVideos = '/mis-videos';
   static const myVideo = '/mis-videos/ver';
@@ -53,52 +65,97 @@ abstract final class Routes {
 
 /// Las rutas de la app. La primera vez abre en la bienvenida y no deja ir
 /// a otra pantalla hasta tocar "Listo"; después, abre directo en Categorías.
+///
+/// Ruleta, Equipos, Categorías, Videos y Ajustes son las pestañas de la
+/// barra de abajo: cada una conserva su estado. Las demás pantallas (la
+/// configuración, las palabras, el turno, los resultados, el video, la
+/// bienvenida…) se abren encima, sin la barra.
 GoRouter createRouter({required bool Function() welcomeSeen}) => GoRouter(
   initialLocation: welcomeSeen() ? Routes.categories : Routes.welcome,
   redirect: (_, state) =>
       !welcomeSeen() && state.matchedLocation != Routes.welcome
       ? Routes.welcome
       : null,
-  routes: [
-    GoRoute(path: Routes.welcome, builder: (_, _) => const WelcomeScreen()),
-    GoRoute(path: Routes.categories, builder: (_, _) => const CategoryScreen()),
-    GoRoute(path: Routes.freeMode, builder: (_, _) => const FreeModeScreen()),
-    GoRoute(path: Routes.config, builder: (_, _) => const ConfigScreen()),
-    GoRoute(path: Routes.words, builder: (_, _) => const WordEntryScreen()),
-    GoRoute(path: Routes.autoWords, builder: (_, _) => const AutoWordsScreen()),
-    GoRoute(path: Routes.turn, builder: (_, _) => const TurnScreen()),
-    GoRoute(
-      path: Routes.turnResult,
-      builder: (_, _) => const TurnResultScreen(),
-    ),
-    GoRoute(path: Routes.video, builder: (_, _) => const VideoScreen()),
-    GoRoute(
-      path: Routes.directusTest,
-      builder: (_, _) => const DirectusTestScreen(),
-    ),
-    GoRoute(
-      path: Routes.punishments,
-      builder: (_, _) => const RouletteScreen(),
-    ),
-    GoRoute(
-      path: Routes.customCategory,
-      builder: (_, state) =>
-          CustomCategoryScreen(category: state.extra as CustomCategory?),
-    ),
-    GoRoute(path: Routes.backdrops, builder: (_, _) => const BackdropScreen()),
-    GoRoute(path: Routes.myVideos, builder: (_, _) => const MyVideosScreen()),
-    GoRoute(
-      path: Routes.myVideo,
-      builder: (_, state) => MyVideoScreen(video: state.extra! as SavedVideo),
-    ),
-    GoRoute(
-      path: Routes.punishmentSpin,
-      builder: (_, state) =>
-          PunishmentSpinScreen(groupName: state.extra as String? ?? ''),
-    ),
-    GoRoute(
-      path: Routes.finalResult,
-      builder: (_, _) => const FinalResultScreen(),
-    ),
-  ],
+  routes: appRoutes,
 );
+
+/// Todas las rutas, también para las pruebas.
+final List<RouteBase> appRoutes = [
+  StatefulShellRoute.indexedStack(
+    builder: (context, state, shell) => AppNavShell(shell: shell),
+    branches: [
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: Routes.punishments,
+            builder: (_, _) => const RouletteScreen(),
+          ),
+        ],
+      ),
+      StatefulShellBranch(
+        routes: [
+          GoRoute(path: Routes.teams, builder: (_, _) => const TeamsScreen()),
+        ],
+      ),
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: Routes.categories,
+            builder: (_, _) => const CategoryScreen(),
+          ),
+        ],
+      ),
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: Routes.myVideos,
+            builder: (_, _) => const MyVideosScreen(),
+          ),
+        ],
+      ),
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: Routes.settings,
+            builder: (_, _) => const SettingsScreen(),
+          ),
+        ],
+      ),
+    ],
+  ),
+  GoRoute(path: Routes.welcome, builder: (_, _) => const WelcomeScreen()),
+  GoRoute(path: Routes.freeMode, builder: (_, _) => const FreeModeScreen()),
+  GoRoute(path: Routes.config, builder: (_, _) => const ConfigScreen()),
+  GoRoute(path: Routes.words, builder: (_, _) => const WordEntryScreen()),
+  GoRoute(path: Routes.autoWords, builder: (_, _) => const AutoWordsScreen()),
+  GoRoute(path: Routes.turn, builder: (_, _) => const TurnScreen()),
+  GoRoute(path: Routes.turnResult, builder: (_, _) => const TurnResultScreen()),
+  GoRoute(path: Routes.video, builder: (_, _) => const VideoScreen()),
+  GoRoute(
+    path: Routes.directusTest,
+    builder: (_, _) => const DirectusTestScreen(),
+  ),
+  GoRoute(
+    path: Routes.customCategory,
+    builder: (_, state) =>
+        CustomCategoryScreen(category: state.extra as CustomCategory?),
+  ),
+  GoRoute(
+    path: Routes.teamEditor,
+    builder: (_, state) => TeamEditorScreen(team: state.extra as SavedTeam?),
+  ),
+  GoRoute(path: Routes.backdrops, builder: (_, _) => const BackdropScreen()),
+  GoRoute(
+    path: Routes.myVideo,
+    builder: (_, state) => MyVideoScreen(video: state.extra! as SavedVideo),
+  ),
+  GoRoute(
+    path: Routes.punishmentSpin,
+    builder: (_, state) =>
+        PunishmentSpinScreen(groupName: state.extra as String? ?? ''),
+  ),
+  GoRoute(
+    path: Routes.finalResult,
+    builder: (_, _) => const FinalResultScreen(),
+  ),
+];

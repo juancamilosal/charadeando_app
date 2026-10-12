@@ -14,11 +14,14 @@ Future<void> main() async {
   // instante a quien ya la vio, ni otro fondo que el elegido.
   final welcomeSeen = await WelcomeStore().seen();
   final backdrop = await BackdropStore().load();
+  final settings = await SettingsStore().load();
+  ScreenOrientation.inverted = settings.invertedRotation;
   runApp(
     ProviderScope(
       overrides: [
         welcomeSeenProvider.overrideWith(() => WelcomeSeen(welcomeSeen)),
         backdropProvider.overrideWith(() => BackdropController(backdrop)),
+        settingsProvider.overrideWith(() => SettingsController(settings)),
       ],
       child: const CharadeandoApp(),
     ),

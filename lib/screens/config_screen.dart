@@ -14,6 +14,7 @@ import '../widgets/option_selector.dart';
 import '../widgets/play_mode_selector.dart';
 import '../widgets/play_background.dart';
 import '../widgets/tv_connect.dart';
+import '../widgets/team_badge.dart';
 import '../widgets/words_reminder.dart';
 
 class ConfigScreen extends ConsumerStatefulWidget {
@@ -25,7 +26,10 @@ class ConfigScreen extends ConsumerStatefulWidget {
 
 class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   late GameConfig _config;
-  final List<TextEditingController> _names = [];
+
+  /// Equipos elegidos, en el orden en que juegan: guardados en "Equipos"
+  /// (con su id) o de esta partida (de la configuración aleatoria).
+  List<Group> _teams = [];
 
   @override
   void initState() {
@@ -36,32 +40,28 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
       _difficulty = Difficulty.mixed;
       _config = _config.copyWith(difficulty: _difficulty);
     }
-    for (final group in _config.groups) {
-      _names.add(TextEditingController(text: group.name));
-    }
-    // Si es una partida nueva (sin nombres), se llena con la última
+    _teams = [
+      for (final g in _config.groups)
+        if (g.name.trim().isNotEmpty) g,
+    ];
+    // Si es una partida nueva (sin equipos), se llena con la última
     // configuración guardada.
-    if (_names.every((c) => c.text.trim().isEmpty)) _loadSaved();
+    if (_teams.isEmpty) _loadSaved();
   }
 
   Future<void> _loadSaved() async {
     final saved = await ref.read(configStoreProvider).load();
     if (saved == null || !mounted) return;
+    // Los equipos guardados que se eligieron la última vez, si siguen.
+    final teams = await ref.read(teamsProvider.future);
+    if (!mounted) return;
     setState(() {
-      final names = saved.groupNames.take(GameConfig.maxGroups).toList();
-      if (names.length >= GameConfig.minGroups) {
-        while (_names.length < names.length) {
-          _names.add(TextEditingController());
-        }
-        while (_names.length > names.length) {
-          _names.removeLast().dispose();
-        }
-        for (var i = 0; i < names.length; i++) {
-          _names[i].text = names[i];
-        }
-      }
+      _teams = [
+        for (final id in saved.teamIds.take(GameConfig.maxGroups))
+          for (final t in teams)
+            if (t.id == id) Group(t.name, teamId: t.id),
+      ];
       _config = _config.copyWith(
-        groups: [for (final c in _names) Group(c.text.trim())],
         rounds: saved.rounds.clamp(GameConfig.minRounds, GameConfig.maxRounds),
         turnDuration: Duration(
           seconds: saved.turnDuration.inSeconds.clamp(
@@ -76,7 +76,6 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
         resolution: saved.resolution,
       );
       _scoring = saved.scoringMode;
-      _hitMode = saved.hitMode;
       if (_automatic && !_noDifficulty && saved.difficulty != null) {
         _difficulty = saved.difficulty;
         _config = _config.copyWith(difficulty: _difficulty);
@@ -90,13 +89,17 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
         .read(configStoreProvider)
         .save(
           SavedConfig(
-            // Sin grupos se conservan los nombres de la vez anterior.
-            groupNames: [for (final c in _names) c.text.trim()],
+            // Sin equipos se conservan los de la vez anterior.
+            groupNames: [for (final t in _teams) t.name],
+            teamIds: [
+              for (final t in _teams)
+                if (t.teamId != null) t.teamId!,
+            ],
             rounds: config.rounds,
             turnDuration: config.turnDuration,
             wordsPerGroup: config.wordsPerGroup,
             scoringMode: _scoring ?? ScoringMode.perPhrase,
-            hitMode: _hitMode ?? HitMode.tilt,
+            hitMode: HitMode.tilt,
             resolution: config.resolution,
             difficulty: _automatic && !_noDifficulty ? _difficulty : null,
           ),
@@ -104,21 +107,13 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
         .ignore();
   }
 
-  @override
-  void dispose() {
-    for (final controller in _names) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
-
   /// Verdadero después de tocar "Continuar" con algo sin completar.
   bool _showErrors = false;
 
-  // Vienen marcadas por defecto: puntuación por frase, aciertos con
-  // movimiento, dificultad Mezcladas y video HD. Se pueden cambiar.
+  // Vienen marcadas por defecto: puntuación por frase, dificultad
+  // Mezcladas y video HD. Se pueden cambiar. Cómo se marcan los aciertos
+  // se elige en Ajustes > Controlador.
   ScoringMode? _scoring = ScoringMode.perPhrase;
-  HitMode? _hitMode = HitMode.tilt;
 
   /// Dificultad de las palabras automáticas. Las manuales no tienen.
   Difficulty? _difficulty;
@@ -137,71 +132,94 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   bool get _noDifficulty => !_config.usesDifficulty;
 
   /// Modo TV: el celular está duplicando la pantalla en un televisor. El
-  /// juez marca con botones y no se graba, así que las secciones de
-  /// aciertos y de video no se muestran.
+  /// juez marca con botones y no se graba, así que la sección de video no
+  /// se muestra.
   bool get _tvMode => ref.read(tvConnectedProvider).value ?? false;
 
   /// Lo que falta elegir, para el aviso al tocar "Continuar".
   List<String> get _missingChoices => [
     if (_automatic && !_noDifficulty && _difficulty == null) 'la dificultad',
     if (_scoring == null) 'la puntuación',
-    if (!_tvMode && _hitMode == null) 'cómo se marcan los aciertos',
   ];
 
   String? _choiceError(Object? choice) =>
       _showErrors && choice == null ? 'Elijan una opción' : null;
 
-  void _setGroupCount(int count) {
-    setState(() {
-      while (_names.length < count) {
-        _names.add(TextEditingController());
-      }
-      while (_names.length > count) {
-        _names.removeLast().dispose();
-      }
-      _config = _config.copyWith(
-        groups: [for (final c in _names) Group(c.text.trim())],
-      );
-    });
+  /// Marca o desmarca un equipo guardado. Se juega en el orden en que se
+  /// marcan.
+  void _toggleTeam(SavedTeam team) {
+    final i = _teams.indexWhere((t) => t.teamId == team.id);
+    if (i >= 0) {
+      setState(() => _teams = [..._teams]..removeAt(i));
+      return;
+    }
+    if (_teams.length >= GameConfig.maxGroups) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Máximo ${GameConfig.maxGroups} equipos.'),
+          ),
+        );
+      return;
+    }
+    setState(() => _teams = [..._teams, Group(team.name, teamId: team.id)]);
   }
+
+  /// "Nuevo equipo": se crea en la misma pantalla de Equipos y vuelve
+  /// marcado.
+  Future<void> _newTeam() async {
+    final team = await context.push<SavedTeam>(Routes.teamEditor);
+    if (team == null || !mounted) return;
+    if (!_teams.any((t) => t.teamId == team.id)) _toggleTeam(team);
+  }
+
+  /// Los equipos elegidos con el nombre que tienen ahora en "Equipos"; los
+  /// que se borraron ya no cuentan.
+  List<Group> _currentTeams(List<SavedTeam> saved) => [
+    for (final t in _teams)
+      if (t.teamId == null)
+        t
+      else
+        for (final s in saved)
+          if (s.id == t.teamId) Group(s.name, teamId: s.id),
+  ];
 
   /// "Configuración aleatoria": el juego pone los nombres de los grupos y
   /// elige el resto al azar, con valores que tienen sentido para la
   /// cantidad de grupos. Cada toque da una configuración nueva.
   void _autoFill() {
+    // Los equipos de la configuración aleatoria son solo de esta partida:
+    // no se guardan en "Equipos".
     final result = AutoFill.pick(
       _config,
-      groups: _names.length,
-      previousNames: [for (final c in _names) c.text],
+      groups: _teams.length,
+      previousNames: [for (final t in _teams) t.name],
     );
     setState(() {
       _config = result.config;
-      for (var i = 0; i < result.names.length; i++) {
-        _names[i].text = result.names[i];
-      }
+      _teams = [for (final n in result.names) Group(n)];
       _scoring = result.scoring;
-      _hitMode = result.hitMode;
       _difficulty = result.difficulty;
       _showErrors = false;
     });
   }
 
   void _continue() {
-    final missingNames = _inGroups && _names.any((c) => c.text.trim().isEmpty);
+    final teams = _currentTeams(ref.read(teamsProvider).value ?? const []);
+    final missingNames = _inGroups && teams.length < GameConfig.minGroups;
     final missing = _missingChoices;
     if (missingNames || missing.isNotEmpty) {
       setState(() => _showErrors = true);
       final message = missingNames
-          ? 'Escriban el nombre de cada grupo.'
+          ? 'Elijan de ${GameConfig.minGroups} a ${GameConfig.maxGroups} equipos.'
           : 'Elijan ${_joinList(missing)}.';
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(SnackBar(content: Text(message)));
       return;
     }
-    final groups = _inGroups
-        ? [for (final c in _names) Group(c.text.trim())]
-        : const [Group('')];
+    final groups = _inGroups ? teams : const [Group('')];
     _save(_config.copyWith(groups: groups));
     ref
         .read(gameControllerProvider.notifier)
@@ -209,7 +227,8 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
           _config.copyWith(
             groups: groups,
             scoringMode: _scoring,
-            hitMode: _tvMode ? HitMode.tv : _hitMode,
+            // Inclinación o toque se elige en Ajustes > Controlador.
+            hitMode: _tvMode ? HitMode.tv : HitMode.tilt,
             difficulty: _automatic && !_noDifficulty ? _difficulty : null,
             clearDifficulty: _noDifficulty,
           ),
@@ -280,26 +299,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
               const SizedBox(height: 20),
               _RandomButton(onTap: _autoFill),
               gap,
-              if (_inGroups) ...[
-                ConfigSection(
-                  icon: Icons.groups,
-                  title: 'Grupos',
-                  children: [
-                    ConfigRow(
-                      label: 'Número de grupos',
-                      hint: 'Hasta ${GameConfig.maxGroups} grupos.',
-                      child: NumberStepper(
-                        value: _names.length,
-                        min: GameConfig.minGroups,
-                        max: GameConfig.maxGroups,
-                        onChanged: _setGroupCount,
-                      ),
-                    ),
-                    _nameFields(),
-                  ],
-                ),
-                gap,
-              ],
+              if (_inGroups) ...[_teamsSection(), gap],
               if (automatic) ...[
                 _autoGameSection(),
                 gap,
@@ -310,14 +310,14 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                 if (_inGroups) ...[
                   ConfigSection(
                     icon: Icons.edit_note,
-                    title: 'Palabras por grupo',
+                    title: 'Palabras por equipo',
                     children: [
                       const Text(
-                        '¿Cuántas palabras escribe cada grupo?',
+                        '¿Cuántas palabras escribe cada equipo?',
                         style: TextStyle(fontWeight: FontWeight.w800),
                       ),
                       ConfigRow(
-                        label: 'Palabras o frases por grupo',
+                        label: 'Palabras o frases por equipo',
                         child: NumberStepper(
                           value: _config.wordsPerGroup,
                           min: GameConfig.minWordsPerGroup,
@@ -385,22 +385,6 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
               ),
               gap,
               if (!_tvMode) ...[
-                ConfigSection(
-                  icon: Icons.swap_vert,
-                  title: 'Aciertos',
-                  children: [
-                    OptionSelector<HitMode>(
-                      label: 'Cómo se marcan los aciertos',
-                      options: HitMode.selectable,
-                      selected: _hitMode,
-                      errorText: _choiceError(_hitMode),
-                      labelOf: (o) => o.label,
-                      lockReasonOf: (o) => o.available ? null : 'Próximamente',
-                      onSelected: (o) => setState(() => _hitMode = o),
-                    ),
-                  ],
-                ),
-                gap,
                 ConfigSection(
                   icon: Icons.videocam,
                   title: 'Video',
@@ -502,50 +486,178 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
     );
   }
 
-  /// Un campo de nombre por grupo, uno debajo del otro.
-  Widget _nameFields() {
-    return Column(
+  /// "Equipos": se eligen de 2 a 4 de los guardados (tocar para marcar),
+  /// con "Nuevo equipo" para crear otro. Los de la configuración aleatoria
+  /// también se ven, marcados como de esta partida.
+  Widget _teamsSection() {
+    final saved = ref.watch(teamsProvider).value ?? const <SavedTeam>[];
+    final chosen = _currentTeams(saved);
+    final error = _showErrors && chosen.length < GameConfig.minGroups
+        ? 'Elijan de ${GameConfig.minGroups} a ${GameConfig.maxGroups} '
+              'equipos.'
+        : null;
+    int? order(String? teamId, String name) {
+      final i = chosen.indexWhere(
+        (t) => teamId != null ? t.teamId == teamId : t.name == name,
+      );
+      return i < 0 ? null : i + 1;
+    }
+
+    final temporary = [
+      for (final t in chosen)
+        if (t.teamId == null) t,
+    ];
+    return ConfigSection(
+      icon: Icons.groups,
+      title: 'Equipos',
       children: [
-        for (var i = 0; i < _names.length; i++)
-          Padding(
-            padding: EdgeInsets.only(top: i == 0 ? 0 : 12),
-            child: _nameField(i),
+        Text(
+          saved.isEmpty && temporary.isEmpty
+              ? 'Creen sus equipos para jugar.'
+              : 'Toquen de ${GameConfig.minGroups} a ${GameConfig.maxGroups} '
+                    'equipos. Juegan en ese orden.',
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ),
+        for (final t in temporary)
+          _TeamChoice(
+            name: t.name,
+            badge: const CircleAvatar(
+              backgroundColor: AppColors.ink,
+              child: Icon(Icons.shuffle, color: Colors.white, size: 20),
+            ),
+            note: 'Solo esta partida',
+            order: order(null, t.name),
+            onTap: () => setState(
+              () => _teams = [
+                for (final x in _teams)
+                  if (x.teamId != null || x.name != t.name) x,
+              ],
+            ),
           ),
+        for (final team in saved)
+          _TeamChoice(
+            name: team.name,
+            badge: TeamBadge(team: team, size: 40),
+            order: order(team.id, team.name),
+            onTap: () => _toggleTeam(team),
+          ),
+        if (error != null)
+          Text(
+            error,
+            style: const TextStyle(
+              color: AppColors.coral,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.purple,
+            side: const BorderSide(color: AppColors.purple, width: 2),
+          ),
+          icon: const Icon(Icons.add),
+          label: const Text('Nuevo equipo'),
+          onPressed: _newTeam,
+        ),
       ],
     );
   }
+}
 
-  Widget _nameField(int i) {
-    final empty = _names[i].text.trim().isEmpty;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text.rich(
-          TextSpan(
-            text: 'Nombre del grupo ${i + 1} ',
-            children: const [
-              TextSpan(
-                text: '*',
-                style: TextStyle(color: Colors.red),
+/// Un equipo que se puede marcar para la partida. Marcado, lleva su número
+/// de turno.
+class _TeamChoice extends StatelessWidget {
+  const _TeamChoice({
+    required this.name,
+    required this.badge,
+    required this.order,
+    required this.onTap,
+    this.note,
+  });
+
+  final String name;
+  final Widget badge;
+
+  /// Su lugar en el orden de los turnos, o null si no está marcado.
+  final int? order;
+  final VoidCallback onTap;
+  final String? note;
+
+  @override
+  Widget build(BuildContext context) {
+    final selected = order != null;
+    return Semantics(
+      checked: selected,
+      child: Material(
+        color: selected ? const Color(0xFFF1E8FF) : const Color(0xFFF8F5FD),
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: selected ? AppColors.purple : Colors.transparent,
+                width: 2,
               ),
-            ],
+            ),
+            child: Row(
+              children: [
+                SizedBox.square(dimension: 40, child: badge),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.ink,
+                        ),
+                      ),
+                      if (note != null)
+                        Text(
+                          note!,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF6B5A86),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: 30,
+                  height: 30,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: selected ? AppColors.purple : Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: selected
+                          ? AppColors.purple
+                          : const Color(0xFFCFC3E6),
+                      width: 2,
+                    ),
+                  ),
+                  child: selected
+                      ? Text(
+                          '$order',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        )
+                      : null,
+                ),
+              ],
+            ),
           ),
-          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
         ),
-        const SizedBox(height: 6),
-        TextField(
-          controller: _names[i],
-          maxLength: 20,
-          textCapitalization: TextCapitalization.words,
-          onChanged: (_) => setState(() {}),
-          decoration: InputDecoration(
-            hintText: 'Ej: Los Invencibles',
-            counterText: '',
-            isDense: true,
-            errorText: _showErrors && empty ? 'Escribe un nombre' : null,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

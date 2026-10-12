@@ -42,7 +42,7 @@ void main() {
     const three = [Group('A'), Group('B'), Group('C')];
     expect(WordService.rivalsLabel(0, two), 'B');
     expect(WordService.rivalsLabel(1, two), 'A');
-    expect(WordService.rivalsLabel(2, three), 'los demás grupos');
+    expect(WordService.rivalsLabel(2, three), 'los demás equipos');
   });
 
   test('reparte las palabras automáticas sin repetir', () {

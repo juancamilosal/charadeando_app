@@ -21,12 +21,12 @@ class WelcomeScreen extends ConsumerStatefulWidget {
 class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
     with SingleTickerProviderStateMixin {
   static const _steps = [
-    (Icons.groups, AppColors.blue, 'Formen grupos y elijan una categoría.'),
+    (Icons.groups, AppColors.blue, 'Formen equipos y elijan una categoría.'),
     (Icons.face, AppColors.orange, 'Uno se pone el celular en la frente.'),
     (
       Icons.record_voice_over,
       AppColors.magenta,
-      'Su grupo le da pistas sin decir la palabra.',
+      'Su equipo le da pistas sin decir la palabra.',
     ),
     (Icons.swap_vert, AppColors.green, 'Abajo si acierta, arriba para pasar.'),
     (Icons.videocam, AppColors.coral, 'La cámara graba las risas.'),
@@ -113,6 +113,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
                           child: HowToPlayDemo(
                             tvMode:
                                 ref.watch(tvConnectedProvider).value ?? false,
+                            controller: ref.watch(settingsProvider).controller,
                           ),
                         ),
                         const SizedBox(height: 14),

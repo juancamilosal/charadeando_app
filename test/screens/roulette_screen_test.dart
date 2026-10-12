@@ -57,12 +57,14 @@ void main() {
     final expected = punishments[Random(42).nextInt(punishments.length)];
     var done = false;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: PunishmentRoulette(
-            punishments: punishments,
-            random: Random(42),
-            onDone: () => done = true,
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: PunishmentRoulette(
+              punishments: punishments,
+              random: Random(42),
+              onDone: () => done = true,
+            ),
           ),
         ),
       ),
@@ -103,12 +105,14 @@ void main() {
     tester.view.physicalSize = const Size(1080, 3600);
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: PunishmentRoulette(
-            punishments: const ['A', 'B', 'C'],
-            autoStart: true,
-            onDone: () {},
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: PunishmentRoulette(
+              punishments: const ['A', 'B', 'C'],
+              autoStart: true,
+              onDone: () {},
+            ),
           ),
         ),
       ),
@@ -297,7 +301,7 @@ void main() {
     await finalScreen(tester, [3, 1, 1]);
     expect(find.text('¡Ruleta de castigo para Águilas!'), findsOneWidget);
     expect(
-      find.text('Empataron con menos puntos: cada grupo gira su ruleta.'),
+      find.text('Empataron con menos puntos: cada equipo gira su ruleta.'),
       findsOneWidget,
     );
     await tester.ensureVisible(find.text('Girar'));

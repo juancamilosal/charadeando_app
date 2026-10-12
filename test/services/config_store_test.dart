@@ -21,9 +21,11 @@ void main() {
         hitMode: HitMode.tilt,
         resolution: VideoResolution.off,
         difficulty: Difficulty.easy,
+        teamIds: ['t1', 't2'],
       ),
     );
     final loaded = (await store.load())!;
+    expect(loaded.teamIds, ['t1', 't2']);
     expect(loaded.groupNames, ['Los Tigres', 'Las Águilas', 'Los Lobos']);
     expect(loaded.rounds, 5);
     expect(loaded.turnDuration, const Duration(seconds: 75));

@@ -19,6 +19,7 @@ class SavedConfig {
     required this.hitMode,
     required this.resolution,
     this.difficulty,
+    this.teamIds = const [],
   });
 
   factory SavedConfig.fromJson(Map<String, dynamic> json) {
@@ -48,6 +49,10 @@ class SavedConfig {
         json['video'],
         VideoResolution.hd,
       ),
+      teamIds: [
+        for (final id in json['equipos'] as List? ?? const [])
+          if (id is String) id,
+      ],
       difficulty: json['dificultad'] == null
           ? null
           : byName(Difficulty.values, json['dificultad'], Difficulty.mixed),
@@ -65,6 +70,10 @@ class SavedConfig {
   /// Solo con palabras automáticas.
   final Difficulty? difficulty;
 
+  /// Equipos guardados elegidos para la partida, en orden. Los de una sola
+  /// partida (como los de la configuración aleatoria) no se recuerdan.
+  final List<String> teamIds;
+
   Map<String, dynamic> toJson() => {
     'grupos': groupNames,
     'rondas': rounds,
@@ -74,6 +83,7 @@ class SavedConfig {
     'aciertos': hitMode.name,
     'video': resolution.name,
     'dificultad': difficulty?.name,
+    'equipos': teamIds,
   };
 }
 

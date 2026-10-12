@@ -136,7 +136,7 @@ class PlayChoiceCards extends StatelessWidget {
       color: AppColors.purple,
       icon: Icons.settings,
       title: 'Personalizada',
-      text: 'Grupos, rondas, video y ruleta',
+      text: 'Equipos, rondas, video y ruleta',
       onTap: onCustom,
     );
     if (MediaQuery.sizeOf(context).width < sideBySideWidth) {

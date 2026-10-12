@@ -2,10 +2,11 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 
 import '../services/punishments.dart';
+import '../providers/providers.dart';
 import '../theme.dart';
 
 enum _Spin { idle, spinning, stopping, result }
@@ -13,7 +14,7 @@ enum _Spin { idle, spinning, stopping, result }
 /// Ruleta de castigos con su botón. "Girar" la pone a toda velocidad hasta
 /// que tocan "¡Parar!" (o pasan 30 segundos); entonces se elige el castigo
 /// al azar y la ruleta frena poco a poco hasta el centro de ese campo.
-class PunishmentRoulette extends StatefulWidget {
+class PunishmentRoulette extends ConsumerStatefulWidget {
   const PunishmentRoulette({
     super.key,
     required this.punishments,
@@ -59,10 +60,10 @@ class PunishmentRoulette extends StatefulWidget {
   ];
 
   @override
-  State<PunishmentRoulette> createState() => _PunishmentRouletteState();
+  ConsumerState<PunishmentRoulette> createState() => _PunishmentRouletteState();
 }
 
-class _PunishmentRouletteState extends State<PunishmentRoulette>
+class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
     with TickerProviderStateMixin {
   late final Ticker _ticker = createTicker(_tick);
   late final Random _random = widget.random ?? Random();
@@ -150,15 +151,16 @@ class _PunishmentRouletteState extends State<PunishmentRoulette>
     final field = Roulette.fieldAt(angle, _fields);
     if (field != _lastField) {
       _lastField = field;
-      HapticFeedback.selectionClick();
+      ref.read(hapticsProvider).selection();
     }
     setState(() => _angle = angle);
   }
 
   void _land() {
     _ticker.stop();
-    HapticFeedback.heavyImpact();
-    HapticFeedback.vibrate();
+    final haptics = ref.read(hapticsProvider);
+    haptics.heavy();
+    haptics.vibrate();
     setState(() {
       _angle = _to;
       _spin = _Spin.result;

@@ -90,7 +90,7 @@ class FreeModeScreen extends ConsumerWidget {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  '2 grupos, 2 rondas de 60 s y 10 palabras por grupo.',
+                  '2 equipos, 2 rondas de 60 s y 10 palabras por equipo.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: context.onBackdrop.withValues(alpha: 0.8),

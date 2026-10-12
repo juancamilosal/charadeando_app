@@ -21,3 +21,6 @@ export 'backdrop_store.dart';
 export 'mix_words.dart';
 export 'mix_store.dart';
 export 'quick_game.dart';
+export 'settings_store.dart';
+export 'feedback_services.dart';
+export 'team_store.dart';

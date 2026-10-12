@@ -4,11 +4,13 @@ import '../models/models.dart';
 import '../services/services.dart';
 import 'custom_categories_controller.dart';
 import 'my_videos_controller.dart';
+import 'teams_controller.dart';
 import 'game_controller.dart';
 import 'turn_video_controller.dart';
 
 export 'custom_categories_controller.dart';
 export 'my_videos_controller.dart';
+export 'teams_controller.dart';
 export 'game_controller.dart';
 export 'turn_video_controller.dart';
 
@@ -47,6 +49,50 @@ class BackdropController extends Notifier<Backdrop> {
     ref.read(backdropStoreProvider).save(backdrop).ignore();
   }
 }
+
+final settingsStoreProvider = Provider((ref) => SettingsStore());
+
+/// Los ajustes de la app. `main` los lee del celular antes de abrir la app.
+final settingsProvider = NotifierProvider<SettingsController, AppSettings>(
+  SettingsController.new,
+);
+
+class SettingsController extends Notifier<AppSettings> {
+  SettingsController([this._initial = const AppSettings()]);
+
+  final AppSettings _initial;
+
+  @override
+  AppSettings build() {
+    ScreenOrientation.inverted = _initial.invertedRotation;
+    return _initial;
+  }
+
+  /// Cambia los ajustes y los guarda en el celular.
+  void update(AppSettings settings) {
+    state = settings;
+    ScreenOrientation.inverted = settings.invertedRotation;
+    ref.read(settingsStoreProvider).save(settings).ignore();
+  }
+}
+
+/// Vibraciones, según el ajuste "Vibración".
+final hapticsProvider = Provider(
+  (ref) => Haptics(enabled: ref.watch(settingsProvider).vibration),
+);
+
+/// Música y efectos de sonido, según los ajustes.
+final soundServiceProvider = Provider((ref) {
+  final settings = ref.watch(settingsProvider);
+  return SoundService(music: settings.music, effects: settings.sounds);
+});
+
+final teamStoreProvider = Provider((ref) => TeamStore());
+
+/// "Equipos", guardados en el celular.
+final teamsProvider = AsyncNotifierProvider<TeamsController, List<SavedTeam>>(
+  TeamsController.new,
+);
 
 final videoGalleryProvider = Provider((ref) => VideoGallery());
 final myVideosStoreProvider = Provider((ref) => MyVideosStore());

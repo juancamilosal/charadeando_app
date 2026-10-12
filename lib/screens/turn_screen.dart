@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -98,6 +97,11 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   bool get _records => ref.read(gameControllerProvider).config.records;
 
   bool get _tvMode => ref.read(gameControllerProvider).config.tvMode;
+
+  /// Ajuste "Controlador: Toque": la mitad derecha de la pantalla es
+  /// acierto y la izquierda, pasar.
+  bool get _touch =>
+      ref.read(settingsProvider).controller == PlayController.touch;
 
   /// Verdadero si es Modo TV y el televisor no está conectado: no se puede
   /// empezar ni seguir el turno.
@@ -288,8 +292,9 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     } else {
       _showWordCaption();
     }
-    // En el Modo TV el juez marca con los botones.
-    if (!_tvMode) {
+    // En el Modo TV el juez marca con los botones, y con el controlador
+    // Toque se marca tocando la pantalla.
+    if (!_tvMode && !_touch) {
       _tilt = ref
           .read(tiltServiceProvider)
           .actions()
@@ -312,9 +317,8 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   void _mark(WordOutcome outcome) {
     if (_phase != _Phase.playing || _feedback != null) return;
     _entries.add(TurnEntry(_deck[_wordIndex], outcome));
-    outcome == WordOutcome.hit
-        ? HapticFeedback.heavyImpact()
-        : HapticFeedback.lightImpact();
+    final haptics = ref.read(hapticsProvider);
+    outcome == WordOutcome.hit ? haptics.heavy() : haptics.light();
     _showCaption(
       outcome == WordOutcome.hit ? '¡Correcto!' : 'Paso',
       outcome == WordOutcome.hit ? CaptionStyle.hit : CaptionStyle.pass,
@@ -526,7 +530,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
           ),
           const SizedBox(height: 10),
         ],
-        _HowToHint(tv: config.tvMode),
+        _HowToHint(tv: config.tvMode, touch: _touch),
         // Sin televisor no se puede empezar: se ve cómo conectarlo.
         if (tvMissing) ...[
           const SizedBox(height: 8),
@@ -751,9 +755,9 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
       wordsLeft: _wordsLeft(game),
       onEndGame: _endGame,
     );
-    if (!kDebugMode) return card;
-    // En desarrollo, tocar la mitad izquierda pasa y la derecha acierta,
-    // para probar sin inclinar el celular.
+    final touch = _touch;
+    // En desarrollo también se puede tocar, para probar sin inclinar.
+    if (!touch && !kDebugMode) return card;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTapUp: (details) {
@@ -764,18 +768,30 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
               : WordOutcome.hit,
         );
       },
-      child: card,
+      child: touch
+          ? Stack(
+              fit: StackFit.expand,
+              children: [
+                card,
+                const _TouchMark(left: true),
+                const _TouchMark(left: false),
+              ],
+            )
+          : card,
     );
   }
 }
 
-/// Antes del turno, cómo se juega con dos píldoras: abajo si aciertas y
-/// arriba para pasar o, en el Modo TV, "Correcto" y "Pasar" (los botones
-/// del juez).
+/// Antes del turno, cómo se juega con dos píldoras, según el controlador:
+/// abajo si aciertas y arriba para pasar, o tocar a la derecha o a la
+/// izquierda. En el Modo TV, "Correcto" y "Pasar" (los botones del juez).
 class _HowToHint extends StatelessWidget {
-  const _HowToHint({required this.tv});
+  const _HowToHint({required this.tv, required this.touch});
 
   final bool tv;
+
+  /// Controlador Toque: se toca a la derecha o a la izquierda.
+  final bool touch;
 
   @override
   Widget build(BuildContext context) {
@@ -790,12 +806,14 @@ class _HowToHint extends StatelessWidget {
         children: [
           Icon(icon, size: 22, color: Colors.white),
           const SizedBox(width: 4),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
+          Flexible(
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
         ],
@@ -808,6 +826,19 @@ class _HowToHint extends StatelessWidget {
           ? [
               pill(AppColors.green, Icons.check, 'Correcto'),
               pill(AppColors.orange, Icons.skip_next, 'Pasar'),
+            ]
+          : touch
+          ? [
+              pill(
+                AppColors.green,
+                Icons.touch_app,
+                'Toca a la derecha: Acierto',
+              ),
+              pill(
+                AppColors.orange,
+                Icons.touch_app,
+                'Toca a la izquierda: Pasar',
+              ),
             ]
           : [
               pill(AppColors.green, Icons.arrow_downward, 'Acierto'),
@@ -881,6 +912,50 @@ class _CameraTag extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Con el controlador Toque, una marca suave en cada borde: "Pasar" a la
+/// izquierda y "Acierto" a la derecha.
+class _TouchMark extends StatelessWidget {
+  const _TouchMark({required this.left});
+
+  final bool left;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: left ? Alignment.centerLeft : Alignment.centerRight,
+      child: IgnorePointer(
+        child: Container(
+          width: 44,
+          height: 180,
+          decoration: BoxDecoration(
+            color: (left ? AppColors.orange : AppColors.green).withValues(
+              alpha: 0.35,
+            ),
+            borderRadius: BorderRadius.horizontal(
+              left: Radius.circular(left ? 0 : 22),
+              right: Radius.circular(left ? 22 : 0),
+            ),
+          ),
+          child: RotatedBox(
+            quarterTurns: left ? 3 : 1,
+            child: Center(
+              child: Text(
+                left ? 'Pasar' : 'Acierto',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
