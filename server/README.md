@@ -163,6 +163,7 @@ con "Pronto" en la app hasta que se carguen.
 | Categoría | Código |
 |---|---|
 | Libre | `LIBRE` |
+| Vacaciones (del 15 de junio al 31 de julio) | `VACACIONES` |
 | Halloween (del 1 al 31 de octubre) | `HALLOWEEN` |
 | Navidad (del 1 de diciembre al 6 de enero) | `NAVIDAD` |
 | Películas | `PELICULAS` |

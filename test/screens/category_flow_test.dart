@@ -35,6 +35,7 @@ void main() {
         'MARCAS',
         'DEPORTES',
         'EQUIPOS_FUTBOL',
+        'VACACIONES',
         'HALLOWEEN',
         'NAVIDAD',
       ],
@@ -101,13 +102,17 @@ void main() {
     }
   });
 
-  test('Navidad solo se ve del 1 de diciembre al 6 de enero y Halloween '
-      'en octubre', () {
+  test('Navidad solo se ve del 1 de diciembre al 6 de enero, Halloween '
+      'en octubre y Vacaciones del 15 de junio al 31 de julio', () {
     List<GameCategory> specials(DateTime date) => [
       for (final (s, list) in GameCategory.sectionsOn(date))
         if (s == CategorySection.special) ...list,
     ];
     for (final (date, expected) in [
+      (DateTime(2026, 6, 14), <GameCategory>[]),
+      (DateTime(2026, 6, 15), [GameCategory.vacations]),
+      (DateTime(2026, 7, 31), [GameCategory.vacations]),
+      (DateTime(2026, 8, 1), <GameCategory>[]),
       (DateTime(2026, 9, 30), <GameCategory>[]),
       (DateTime(2026, 10, 1), [GameCategory.halloween]),
       (DateTime(2026, 10, 31), [GameCategory.halloween]),

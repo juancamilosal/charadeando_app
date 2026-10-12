@@ -89,8 +89,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   3. Cultura general: Geografía, Lugares, Personajes históricos, Dichos y
      refranes y Marcas.
   4. Deportes: Deportes y Equipos de fútbol.
-  5. Especiales ("Solo por temporada"): Halloween (del 1 al 31 de octubre)
-     y Navidad (del 1 de diciembre al 6 de enero). Solo aparece cuando hay
+  5. Especiales ("Solo por temporada"): Vacaciones (del 15 de junio al 31
+     de julio), Halloween (del 1 al 31 de octubre) y Navidad (del 1 de
+     diciembre al 6 de enero). Solo aparece cuando hay
      una especial en temporada; fuera de sus fechas no salen en ningún lado
      (ni en Combinar ni en la bienvenida). TEMPORAL: `allSeasonsProvider`
      está en `true` para probarlas todo el año; volver a `false` antes de
@@ -163,7 +164,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   Películas, Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos,
   Comida, Profesiones, Acciones, Lugares, Series y novelas, Personajes,
   Superhéroes, Dibujos animados, Videojuegos, Música y canciones,
-  Personajes históricos, Dichos y refranes, Halloween y Navidad: todas.
+  Personajes históricos, Dichos y refranes, Halloween y Navidad (falta
+  Vacaciones).
 - Dificultad: Mezcladas (viene elegida: trae de todas, 300 palabras por
   categoría), Fácil (ideal con niños), Normal o Difícil (100 cada una). Se
   elige en la configuración de las palabras automáticas, en Libre y en todas

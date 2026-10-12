@@ -270,6 +270,16 @@ enum GameCategory {
   ),
 
   // Especiales: solo se ven en su temporada.
+  vacations(
+    'Vacaciones',
+    'Playa, viajes y descanso',
+    Icons.beach_access,
+    AppColors.turquoise,
+    'VACACIONES',
+    'Palabra de vacaciones',
+    section: CategorySection.special,
+    season: Season((6, 15), (7, 31)),
+  ),
   halloween(
     'Halloween',
     'Disfraces, sustos y dulces',
