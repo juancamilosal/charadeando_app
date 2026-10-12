@@ -156,8 +156,8 @@ La colección `palabras` tiene el campo `dificultad` (`FACIL`, `NORMAL`,
 ### Códigos de las categorías
 
 Cada categoría de la app busca sus palabras en `palabras` con su código en
-el campo `categoria`. Las nueve nuevas todavía no tienen palabras: en la app
-salen con "Pronto" hasta que se carguen y se cambie `available` a `true` en
+el campo `categoria`. Todas tienen palabras menos `NAVIDAD`, que en la app
+sale con "Pronto" hasta que se carguen y se cambie `available` a `true` en
 `lib/models/category.dart`.
 
 | Categoría | Código |

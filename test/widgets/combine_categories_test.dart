@@ -53,8 +53,8 @@ void main() {
         mixStoreProvider.overrideWithValue(mixStore),
         premiumUnlockedProvider.overrideWithValue(false),
         premiumCategoriesProvider.overrideWithValue({GameCategory.brands}),
-        // Fuera de la temporada de Navidad.
-        clockProvider.overrideWithValue(() => DateTime(2026, 10, 12)),
+        // En diciembre, para que se vea Navidad, que sigue en "Pronto".
+        clockProvider.overrideWithValue(() => DateTime(2026, 12, 10)),
         allSeasonsProvider.overrideWithValue(false),
       ],
     );
@@ -101,15 +101,13 @@ void main() {
 
     // Clásicos va primero.
     expect(_inSheet(find.text('Clásicos')), findsOneWidget);
-    // Las de "Pronto" se ven con su etiqueta y no se marcan.
-    await showInSheet('Personajes');
-    expect(_inSheet(find.text('Pronto')), findsWidgets);
+    // Las de "Pronto" (Navidad) se ven con su etiqueta y no se marcan.
+    await showInSheet('Navidad');
+    expect(_inSheet(find.text('Pronto')), findsOneWidget);
     // (Si se hubiera marcado, con Animales ya serían 2.)
-    await tester.tap(_inSheet(find.text('Personajes')));
+    await tester.tap(_inSheet(find.text('Navidad')));
     await tester.pump();
     expect(find.text('Elige al menos 2 categorías'), findsOneWidget);
-    // Fuera de diciembre no está Navidad.
-    expect(_inSheet(find.text('Navidad')), findsNothing);
 
     await showInSheet('Animales', up: true);
     await tester.tap(_inSheet(find.text('Animales')));

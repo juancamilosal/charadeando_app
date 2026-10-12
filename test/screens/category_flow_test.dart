@@ -113,16 +113,18 @@ void main() {
     expect(halloween.contains(DateTime(2026, 11, 1)), isFalse);
   });
 
-  test('las nueve nuevas llevan "Nueva" y están en "Pronto"', () {
+  test('las nueve nuevas llevan "Nueva"; solo Navidad sigue en "Pronto"', () {
     final fresh = [
       for (final c in GameCategory.values)
         if (c.isNew) c,
     ];
     expect(fresh, hasLength(9));
-    expect(fresh.every((c) => !c.available), isTrue);
     expect(
-      GameCategory.values.where((c) => !c.isNew).every((c) => c.available),
-      isTrue,
+      [
+        for (final c in GameCategory.values)
+          if (!c.available) c,
+      ],
+      [GameCategory.christmas],
     );
   });
 
@@ -196,26 +198,27 @@ void main() {
   testWidgets('las nuevas llevan "Nueva" y las de "Pronto" no se juegan', (
     tester,
   ) async {
-    final container = await pumpCategories(tester, DateTime(2026, 10, 12));
-    // En la parte de arriba: Series y novelas, Personajes, Superhéroes,
-    // Dibujos animados, Videojuegos y Música.
+    // En diciembre, para que se vea Navidad, que sigue en "Pronto".
+    final container = await pumpCategories(tester, DateTime(2026, 12, 10));
     expect(find.text('Nueva'), findsWidgets);
-    expect(find.text('Pronto'), findsWidgets);
-    final series = find.text('Series y novelas');
-    await tester.ensureVisible(series);
+    final christmas = find.text('Navidad');
+    await tester.scrollUntilVisible(
+      christmas,
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pump();
-    await tester.tap(series);
+    expect(find.text('Pronto'), findsOneWidget);
+    await tester.tap(christmas);
     await tester.pump();
     expect(
-      find.text(
-        '¡Pronto! Estamos preparando las palabras de Series y novelas.',
-      ),
+      find.text('¡Pronto! Estamos preparando las palabras de Navidad.'),
       findsOneWidget,
     );
     expect(find.text('Partida rápida'), findsNothing);
     expect(
       container.read(gameControllerProvider).config.category,
-      isNot(GameCategory.seriesNovels),
+      isNot(GameCategory.christmas),
     );
   });
 

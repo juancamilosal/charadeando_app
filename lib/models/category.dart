@@ -147,7 +147,6 @@ enum GameCategory {
     'Serie o novela',
     section: CategorySection.entertainment,
     isNew: true,
-    available: false,
   ),
   characters(
     'Personajes',
@@ -158,7 +157,6 @@ enum GameCategory {
     'Personaje',
     section: CategorySection.entertainment,
     isNew: true,
-    available: false,
   ),
   superheroes(
     'Superhéroes',
@@ -169,7 +167,6 @@ enum GameCategory {
     'Superhéroe',
     section: CategorySection.entertainment,
     isNew: true,
-    available: false,
   ),
   cartoons(
     'Dibujos animados',
@@ -180,7 +177,6 @@ enum GameCategory {
     'Dibujo animado',
     section: CategorySection.entertainment,
     isNew: true,
-    available: false,
   ),
   videogames(
     'Videojuegos',
@@ -191,7 +187,6 @@ enum GameCategory {
     'Videojuego',
     section: CategorySection.entertainment,
     isNew: true,
-    available: false,
   ),
   music(
     'Música y canciones',
@@ -202,7 +197,6 @@ enum GameCategory {
     'Canción o artista',
     section: CategorySection.entertainment,
     isNew: true,
-    available: false,
   ),
   celebrities(
     'Celebridades',
@@ -242,7 +236,6 @@ enum GameCategory {
     'Personaje histórico',
     section: CategorySection.culture,
     isNew: true,
-    available: false,
   ),
   sayings(
     'Dichos y refranes',
@@ -253,7 +246,6 @@ enum GameCategory {
     'Dicho o refrán',
     section: CategorySection.culture,
     isNew: true,
-    available: false,
   ),
   brands(
     'Marcas',

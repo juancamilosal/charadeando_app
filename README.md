@@ -111,8 +111,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   va en el orden de la pantalla. Las nueve nuevas (Navidad, Series y
   novelas, Personajes, Superhéroes, Dibujos animados, Videojuegos, Música y
   canciones, Personajes históricos y Dichos y refranes) llevan la etiqueta
-  amarilla "Nueva" arriba a la izquierda y, mientras no tengan palabras en
-  Directus, "Pronto" sobre su ícono apagado: al tocarlas avisa "¡Pronto!
+  amarilla "Nueva" arriba a la izquierda. Ya tienen palabras en Directus
+  todas menos Navidad; una categoría sin palabras (hoy solo Navidad) lleva
+  "Pronto" sobre su dibujo apagado: al tocarla avisa "¡Pronto!
   Estamos preparando las palabras de…" y no se juegan ni se combinan. Las
   que todavía no tienen dibujo muestran su ícono. Las tarjetas de las
   secciones llevan el dibujo arriba y el nombre debajo, grande, en dos
@@ -161,7 +162,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   a `CategoryArt.withImage` (`lib/widgets/category_art.dart`); mientras
   tanto muestra su ícono. Ya lo tienen: Libre, Animales, Geografía,
   Películas, Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos,
-  Comida, Profesiones, Acciones, Lugares y Series y novelas.
+  Comida, Profesiones, Acciones, Lugares, Series y novelas y Personajes.
 - Dificultad: Mezcladas (viene elegida: trae de todas, 300 palabras por
   categoría), Fácil (ideal con niños), Normal o Difícil (100 cada una). Se
   elige en la configuración de las palabras automáticas, en Libre y en todas

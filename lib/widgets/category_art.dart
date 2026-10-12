@@ -31,6 +31,7 @@ class CategoryArt extends StatelessWidget {
     GameCategory.actions,
     GameCategory.places,
     GameCategory.seriesNovels,
+    GameCategory.characters,
   };
 
   final GameCategory category;
