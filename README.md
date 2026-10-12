@@ -37,7 +37,9 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Barra de navegación abajo (`StatefulShellRoute` de go_router, en
   `lib/widgets/app_nav_bar.dart`): "Ruleta", "Equipos", "Categorías" (en el
   centro; es la que abre al iniciar), "Videos" y "Ajustes", cada una con su
-  ícono grande y su nombre. Cada pestaña conserva su estado. La barra es
+  ícono grande y su nombre (la Ruleta tiene un ícono de ruleta dibujado,
+  con sus campos y el indicador arriba, porque Material no trae uno). Cada
+  pestaña conserva su estado. La barra es
   blanca, con el borde de arriba curvo (sube un poco en el centro) y una
   sombra suave; la activa va en morado y las demás, en lila claro, así se
   ve igual con todos los fondos. Solo se ve en esas cinco pantallas: la bienvenida, la

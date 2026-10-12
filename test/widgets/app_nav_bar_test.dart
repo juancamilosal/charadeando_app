@@ -55,6 +55,9 @@ void main() {
     expect(find.text('Selección de categoría'), findsOneWidget);
     final labels = [for (final item in navItems) item.$2];
     expect(labels, ['Ruleta', 'Equipos', 'Categorías', 'Videos', 'Ajustes']);
+    // La ruleta tiene ícono de ruleta, no de dado.
+    expect(find.byType(RouletteIcon), findsOneWidget);
+    expect(find.byIcon(Icons.casino_rounded), findsNothing);
     // Categorías va en el centro.
     final center = tester.getCenter(find.text('Categorías'));
     expect(center.dx, closeTo(1080 / tester.view.devicePixelRatio / 2, 2));

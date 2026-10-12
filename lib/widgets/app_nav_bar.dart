@@ -1,19 +1,28 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../theme.dart';
 
-/// Una pestaña de la barra de abajo.
-typedef NavItem = (IconData icon, String label);
+/// Una pestaña de la barra de abajo: su ícono (con el color y el tamaño) y
+/// su nombre.
+typedef NavItem = (
+  Widget Function(Color color, double size) icon,
+  String label,
+);
+
+Widget Function(Color, double) _material(IconData icon) =>
+    (color, size) => Icon(icon, color: color, size: size);
 
 /// Las pestañas, en el orden de las ramas del router. Categorías va en el
 /// centro y es la que se abre al iniciar.
-const navItems = <NavItem>[
-  (Icons.casino_rounded, 'Ruleta'),
-  (Icons.groups_rounded, 'Equipos'),
-  (Icons.grid_view_rounded, 'Categorías'),
-  (Icons.videocam_rounded, 'Videos'),
-  (Icons.settings_rounded, 'Ajustes'),
+final navItems = <NavItem>[
+  ((color, size) => RouletteIcon(color: color, size: size), 'Ruleta'),
+  (_material(Icons.groups_rounded), 'Equipos'),
+  (_material(Icons.grid_view_rounded), 'Categorías'),
+  (_material(Icons.videocam_rounded), 'Videos'),
+  (_material(Icons.settings_rounded), 'Ajustes'),
 ];
 
 /// Las cinco pestañas con la barra de navegación abajo. Cada pestaña
@@ -130,7 +139,7 @@ class _NavButton extends StatelessWidget {
             AnimatedScale(
               scale: selected ? 1.1 : 1,
               duration: const Duration(milliseconds: 200),
-              child: Icon(item.$1, color: color, size: 32),
+              child: item.$1(color, 32),
             ),
             const SizedBox(height: 4),
             // En celulares angostos o con letra grande, se achica.
@@ -152,4 +161,77 @@ class _NavButton extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Ícono de una ruleta: la rueda dividida en campos, con su centro y el
+/// indicador arriba. Material no trae uno.
+class RouletteIcon extends StatelessWidget {
+  const RouletteIcon({super.key, required this.color, this.size = 24});
+
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.square(
+      dimension: size,
+      child: CustomPaint(painter: _RouletteIconPainter(color)),
+    );
+  }
+}
+
+class _RouletteIconPainter extends CustomPainter {
+  const _RouletteIconPainter(this.color);
+
+  final Color color;
+
+  static const _fields = 6;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final s = size.width;
+    final center = Offset(s / 2, s * 0.55);
+    final radius = s * 0.4;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    final sweep = 2 * pi / _fields;
+    for (var i = 0; i < _fields; i++) {
+      canvas.drawArc(
+        rect,
+        -pi / 2 + i * sweep,
+        sweep,
+        true,
+        Paint()..color = i.isEven ? color : Colors.white,
+      );
+    }
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = s * 0.07,
+    );
+    canvas.drawCircle(center, s * 0.1, Paint()..color = Colors.white);
+    canvas.drawCircle(center, s * 0.05, Paint()..color = color);
+    // El indicador, arriba, apuntando a la rueda.
+    final top = center.dy - radius;
+    final pointer = Path()
+      ..moveTo(center.dx - s * 0.11, top - s * 0.11)
+      ..lineTo(center.dx + s * 0.11, top - s * 0.11)
+      ..lineTo(center.dx, top + s * 0.08)
+      ..close();
+    canvas.drawPath(
+      pointer,
+      Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = s * 0.06
+        ..strokeJoin = StrokeJoin.round,
+    );
+    canvas.drawPath(pointer, Paint()..color = color);
+  }
+
+  @override
+  bool shouldRepaint(_RouletteIconPainter oldDelegate) =>
+      oldDelegate.color != color;
 }
