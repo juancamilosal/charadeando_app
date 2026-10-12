@@ -1,7 +1,9 @@
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../models/models.dart';
+import 'screen_orientation.dart';
 
 /// Graba a los participantes con la cámara frontal durante cada turno.
 class CameraService {
@@ -29,6 +31,15 @@ class CameraService {
     _controller = controller;
     await controller.initialize();
     await controller.prepareForVideoRecording();
+    // La pantalla de antes del turno ya va en horizontal: la vista de la
+    // cámara se fija en la misma orientación del juego. Si no, sigue al
+    // sensor y, con el celular todavía vertical, se ve como una franja
+    // angosta en el centro.
+    try {
+      await controller.lockCaptureOrientation(ScreenOrientation.game);
+    } on CameraException catch (e) {
+      debugPrint('[Cámara] No se pudo fijar la orientación: $e');
+    }
   }
 
   /// Graba con la orientación fija en [orientation], para que el video no

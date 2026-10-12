@@ -921,7 +921,8 @@ class _HowToHint extends StatelessWidget {
   }
 }
 
-/// La cámara frontal en vivo, a pantalla completa y sin deformarse.
+/// La cámara frontal en vivo, en horizontal, a pantalla completa y sin
+/// deformarse.
 class _CameraBackground extends StatelessWidget {
   const _CameraBackground({required this.controller});
 
@@ -933,7 +934,10 @@ class _CameraBackground extends StatelessWidget {
     if (size == null) return const SizedBox.shrink();
     final long = size.longestSide;
     final short = size.shortestSide;
+    // La vista está fijada en horizontal (ver CameraService.initialize);
+    // si no se pudo fijar, sigue la orientación de la pantalla.
     final landscape =
+        controller.value.lockedCaptureOrientation != null ||
         MediaQuery.orientationOf(context) == Orientation.landscape;
     return ClipRect(
       child: FittedBox(
