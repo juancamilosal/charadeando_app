@@ -163,8 +163,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   tanto muestra su ícono. Ya lo tienen: Libre, Animales, Geografía,
   Películas, Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos,
   Comida, Profesiones, Acciones, Lugares, Series y novelas, Personajes,
-  Superhéroes, Dibujos animados, Videojuegos, Música y canciones y
-  Personajes históricos.
+  Superhéroes, Dibujos animados, Videojuegos, Música y canciones,
+  Personajes históricos y Dichos y refranes (falta Navidad).
 - Dificultad: Mezcladas (viene elegida: trae de todas, 300 palabras por
   categoría), Fácil (ideal con niños), Normal o Difícil (100 cada una). Se
   elige en la configuración de las palabras automáticas, en Libre y en todas
