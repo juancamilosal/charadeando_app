@@ -182,42 +182,47 @@ class CategorySectionHeader extends StatelessWidget {
   final CategorySection section;
   final int count;
 
-  /// Color de los títulos: amarillo sobre los fondos oscuros y morado
-  /// sobre los claros, para que se distingan de las tarjetas.
-  static Color titleColor(BuildContext context) =>
-      context.backdrop.light ? AppColors.purple : AppColors.yellow;
-
   @override
   Widget build(BuildContext context) {
     final onBackdrop = context.onBackdrop;
+    // El título va en una píldora: blanca con el texto morado sobre los
+    // fondos oscuros y morada con el texto blanco sobre los claros, para que
+    // se distinga de las tarjetas.
+    final light = context.backdrop.light;
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(
-          child: Text(
-            section.title,
-            style: TextStyle(
-              fontFamily: AppFonts.display,
-              fontSize: 27,
-              height: 1.1,
-              fontWeight: FontWeight.w700,
-              color: titleColor(context),
-              shadows: const [
-                Shadow(color: Color(0x40000000), offset: Offset(0, 2)),
+        Flexible(
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(14, 5, 14, 6),
+            decoration: BoxDecoration(
+              color: light ? AppColors.purple : Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: const [
+                BoxShadow(color: Color(0x33000000), offset: Offset(0, 3)),
               ],
+            ),
+            child: Text(
+              section.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: AppFonts.display,
+                fontSize: 23,
+                height: 1.1,
+                fontWeight: FontWeight.w700,
+                color: light ? Colors.white : AppColors.purple,
+              ),
             ),
           ),
         ),
         const SizedBox(width: 8),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 3),
-          child: Text(
-            section.note ?? '$count ${count == 1 ? 'categoría' : 'categorías'}',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: onBackdrop.withValues(alpha: 0.8),
-            ),
+        Text(
+          section.note ?? '$count ${count == 1 ? 'categoría' : 'categorías'}',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: onBackdrop.withValues(alpha: 0.8),
           ),
         ),
       ],

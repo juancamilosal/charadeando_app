@@ -75,10 +75,10 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Pantalla de categorías (`lib/screens/category_screen.dart`), pestaña
   "Todas": arriba Libre, una tarjeta centrada (del tamaño de las de
   "Mías"), y el botón blanco "Combinar categorías" con el texto morado.
-  Después, las secciones, bien separadas, cada una con su título grande a
-  la izquierda (Fredoka, amarillo en los fondos oscuros y morado en los
-  claros) y cuántas categorías tiene a la derecha ("8 categorías"), y sus
-  tarjetas en
+  Después, las secciones, bien separadas, cada una con su título a la
+  izquierda en una píldora (blanca con el texto morado en los fondos
+  oscuros, morada con el texto blanco en los claros; Fredoka) y cuántas
+  categorías tiene a la derecha ("8 categorías"), y sus tarjetas en
   una cuadrícula de 3 columnas, todas visibles:
   1. Clásicos: Animales, Comida, Objetos, Profesiones y Acciones.
   2. Entretenimiento: Películas, Series y novelas, Personajes, Superhéroes,
