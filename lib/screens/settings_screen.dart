@@ -86,6 +86,12 @@ class SettingsScreen extends ConsumerWidget {
                     title: 'Cómo se juega',
                     onTap: () => context.push(Routes.welcome),
                   ),
+                  _LinkRow(
+                    icon: Icons.favorite_border,
+                    color: AppColors.coral,
+                    title: 'Créditos',
+                    onTap: () => showCredits(context),
+                  ),
                 ],
               ),
             ],
@@ -305,6 +311,112 @@ class _ControllerOption extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Muestra desde abajo los créditos de la música y de las imágenes.
+Future<void> showCredits(BuildContext context) => showModalBottomSheet<void>(
+  context: context,
+  useSafeArea: true,
+  isScrollControlled: true,
+  backgroundColor: Colors.white,
+  shape: const RoundedRectangleBorder(
+    borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+  ),
+  builder: (_) => const CreditsSheet(),
+);
+
+/// Créditos: de dónde salen la música y las imágenes de las categorías.
+class CreditsSheet extends StatelessWidget {
+  const CreditsSheet({super.key});
+
+  static const credits = [
+    (
+      Icons.music_note,
+      AppColors.purple,
+      'Música',
+      '"Comedy" de nastelbom, en Pixabay (pixabay.com), con la Licencia de '
+          'contenido de Pixabay.',
+    ),
+    (
+      Icons.image,
+      AppColors.turquoise,
+      'Imágenes de las categorías',
+      'Íconos de Flaticon (flaticon.com), hechos por sus autores.',
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 10, 24, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 44,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE3D7F7),
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            const Text(
+              'Créditos',
+              style: TextStyle(
+                fontFamily: AppFonts.display,
+                fontSize: 26,
+                fontWeight: FontWeight.w600,
+                color: AppColors.ink,
+              ),
+            ),
+            const SizedBox(height: 6),
+            for (final (icon, color, title, text) in credits)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _RowIcon(icon: icon, color: color),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(title, style: _rowTitle),
+                          const SizedBox(height: 2),
+                          Text(
+                            text,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF6B5A86),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 12),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.purple,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cerrar'),
+            ),
+          ],
         ),
       ),
     );

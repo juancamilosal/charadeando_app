@@ -73,7 +73,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   "Inclinación" (por defecto: abajo es acierto y arriba, pasar) o "Toque"
   (la mitad derecha de la pantalla es acierto y la izquierda, pasar, con
   una marca suave en cada borde durante el turno; en Modo TV el juez sigue
-  con sus botones). "Apariencia": "Fondos". "Ayuda": "Cómo se juega". Se
+  con sus botones). "Apariencia": "Fondos". "Ayuda": "Cómo se juega" y "Créditos"
+  (abre desde abajo de dónde salen la música, "Comedy" de nastelbom en
+  Pixabay, y las imágenes de las categorías, íconos de Flaticon). Se
   guardan en el celular (`ajustes.json`) y se aplican desde que abre la
   app. La animación de la bienvenida explica el controlador elegido.
 - Pantalla de categorías (`lib/screens/category_screen.dart`), pestaña

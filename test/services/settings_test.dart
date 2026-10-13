@@ -150,6 +150,18 @@ void main() {
     });
   });
 
+  testWidgets('Créditos muestra de dónde salen la música y las imágenes', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: CreditsSheet())),
+    );
+    expect(find.text('Créditos'), findsOneWidget);
+    expect(find.textContaining('nastelbom'), findsOneWidget);
+    expect(find.textContaining('Pixabay'), findsOneWidget);
+    expect(find.textContaining('Flaticon'), findsOneWidget);
+  });
+
   test('los sonidos respetan los ajustes', () async {
     const off = SoundService(music: false, effects: false);
     expect(await off.play(SoundEffect.hit), isFalse);
