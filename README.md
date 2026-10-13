@@ -349,8 +349,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   cuenta. Pide unos 32° desde la posición neutra, sostenidos unos 80 ms;
   la neutra se toma al empezar, puede estar inclinada hasta 50° (por
   ejemplo, con el celular debajo de la cara) y nunca pide pasar de 75°, así
-  que siempre se puede pasar y acertar; se ajusta despacio a la gravedad que
-  mide cada celular y a la postura del jugador.
+  que siempre se puede pasar y acertar. Al empezar toma la gravedad que
+  mide ese celular, y la neutra sigue despacio la postura del jugador.
 - En la configuración, la sección Modo TV va al final, después de Video.
 - Con un TV conectado, la animación de la bienvenida dice "El juez toca
   ¡Correcto! o Pasar en el celular." en vez de explicar cómo inclinarlo.
