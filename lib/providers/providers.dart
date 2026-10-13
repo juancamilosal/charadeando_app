@@ -81,11 +81,18 @@ final hapticsProvider = Provider(
   (ref) => Haptics(enabled: ref.watch(settingsProvider).vibration),
 );
 
-/// Música y efectos de sonido, según los ajustes.
-final soundServiceProvider = Provider((ref) {
-  final settings = ref.watch(settingsProvider);
-  return SoundService(music: settings.music, effects: settings.sounds);
-});
+/// El reproductor de los efectos de sonido; las pruebas lo cambian.
+final effectPlayerProvider = Provider<EffectPlayer>(
+  (ref) => defaultEffectPlayer(),
+);
+
+/// Efectos de sonido, según el ajuste "Efectos de sonido".
+final soundServiceProvider = Provider(
+  (ref) => SoundService(
+    effects: ref.watch(settingsProvider).sounds,
+    player: ref.watch(effectPlayerProvider),
+  ),
+);
 
 /// El reproductor de la música de fondo; las pruebas lo cambian.
 final musicPlayerProvider = Provider<MusicPlayer>(
@@ -99,11 +106,6 @@ final backgroundMusicProvider = Provider((ref) {
   ref.onDispose(music.dispose);
   return music;
 });
-
-/// El reproductor del sonido de los toques; las pruebas lo cambian.
-final tapSoundPlayerProvider = Provider<TapSoundPlayer>(
-  (ref) => defaultTapSoundPlayer(),
-);
 
 final teamStoreProvider = Provider((ref) => TeamStore());
 

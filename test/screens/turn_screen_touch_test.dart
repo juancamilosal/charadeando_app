@@ -26,6 +26,14 @@ class _CountingTilt extends TiltService {
   }
 }
 
+/// Efectos que sonaron en el turno.
+final _played = <SoundEffect>[];
+
+class _RecordEffects implements EffectPlayer {
+  @override
+  Future<void> play(SoundEffect effect) async => _played.add(effect);
+}
+
 Future<(ProviderContainer, _CountingTilt)> _show(
   WidgetTester tester,
   PlayController controller,
@@ -37,8 +45,10 @@ Future<(ProviderContainer, _CountingTilt)> _show(
   tester.view.physicalSize = const Size(1080, 2400);
   addTearDown(tester.view.reset);
   final tilt = _CountingTilt();
+  _played.clear();
   final container = ProviderContainer(
     overrides: [
+      effectPlayerProvider.overrideWithValue(_RecordEffects()),
       tvConnectedProvider.overrideWith((ref) => Stream.value(false)),
       videoServiceProvider.overrideWithValue(_NoVideos()),
       tiltServiceProvider.overrideWithValue(tilt),
@@ -112,8 +122,11 @@ void main() {
     final size = tester.getSize(find.byType(TurnScreen));
     await tester.tapAt(Offset(size.width * 0.8, size.height / 2));
     await tester.pump(const Duration(seconds: 1));
+    // El acierto suena a "¡Correcto!"; pasar, no.
+    expect(_played.where((e) => e == SoundEffect.hit), hasLength(1));
     await tester.tapAt(Offset(size.width * 0.2, size.height / 2));
     await tester.pump(const Duration(seconds: 1));
+    expect(_played.where((e) => e == SoundEffect.hit), hasLength(1));
     // Se acaba el tiempo.
     for (var i = 0; i < 60; i++) {
       await tester.pump(const Duration(seconds: 1));

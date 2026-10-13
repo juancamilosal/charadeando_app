@@ -19,7 +19,7 @@ export 'video_gallery.dart';
 export 'my_videos_store.dart';
 export 'backdrop_store.dart';
 export 'background_music.dart';
-export 'tap_sound.dart';
+export 'effect_player.dart';
 export 'mix_words.dart';
 export 'mix_store.dart';
 export 'quick_game.dart';

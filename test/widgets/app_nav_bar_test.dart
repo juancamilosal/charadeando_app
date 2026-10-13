@@ -30,7 +30,7 @@ Future<void> _settle(WidgetTester tester) async {
 Future<void> _open(
   WidgetTester tester, {
   MusicPlayer? music,
-  TapSoundPlayer? taps,
+  EffectPlayer? taps,
 }) async {
   tester.view.physicalSize = const Size(1080, 2400);
   addTearDown(tester.view.reset);
@@ -48,7 +48,7 @@ Future<void> _open(
         tvConnectedProvider.overrideWith((ref) => Stream.value(false)),
         settingsStoreProvider.overrideWithValue(MemorySettingsStore()),
         if (music != null) musicPlayerProvider.overrideWithValue(music),
-        if (taps != null) tapSoundPlayerProvider.overrideWithValue(taps),
+        if (taps != null) effectPlayerProvider.overrideWithValue(taps),
       ],
       child: const CharadeandoApp(),
     ),
@@ -158,9 +158,11 @@ void main() {
   });
 }
 
-class _CountTaps implements TapSoundPlayer {
+class _CountTaps implements EffectPlayer {
   int count = 0;
 
   @override
-  Future<void> play() async => count++;
+  Future<void> play(SoundEffect effect) async {
+    if (effect == SoundEffect.tap) count++;
+  }
 }

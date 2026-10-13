@@ -68,7 +68,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   suena con `assets/audio/toque.mp3`; va enganchado a la animación de toque
   de Material, `TapSoundSplashFactory`, así que suena solo al completar el
   toque, no al deslizar ni en lo deshabilitado, y no suena en el turno ni
-  en los videos; los demás efectos del juego todavía no tienen archivo), "Vibración" (encendida; todas las vibraciones pasan
+  en los videos; en el turno, cada acierto suena a "¡Correcto!" con
+  `assets/audio/correcto.mp3`; los efectos pasan por `AssetEffectPlayer` y
+  los demás todavía no tienen archivo), "Vibración" (encendida; todas las vibraciones pasan
   por `Haptics`, que no vibra si está apagada), "Rotación invertida"
   (apagada; encendida, el juego gira a horizontal derecha y la vista de la
   cámara y el video siguen esa orientación; la inclinación se mide en el

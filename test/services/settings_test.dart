@@ -162,9 +162,15 @@ void main() {
     expect(find.textContaining('Flaticon'), findsOneWidget);
   });
 
-  test('los sonidos respetan los ajustes', () async {
-    const off = SoundService(music: false, effects: false);
-    expect(await off.play(SoundEffect.hit), isFalse);
+  test('los sonidos respetan los ajustes', () {
+    final played = <SoundEffect>[];
+    final player = RecordingEffectPlayer(played);
+    final off = SoundService(effects: false, player: player);
+    expect(off.play(SoundEffect.hit), isFalse);
+    expect(played, isEmpty);
+    final on = SoundService(effects: true, player: player);
+    expect(on.play(SoundEffect.hit), isTrue);
+    expect(played, [SoundEffect.hit]);
   });
 
   test('la música suena con el ajuste encendido, se calla en el turno y '
@@ -210,4 +216,14 @@ class FakeMusicPlayer implements MusicPlayer {
 
   @override
   Future<void> dispose() async {}
+}
+
+/// Anota los efectos que suenan.
+class RecordingEffectPlayer implements EffectPlayer {
+  RecordingEffectPlayer(this.played);
+
+  final List<SoundEffect> played;
+
+  @override
+  Future<void> play(SoundEffect effect) async => played.add(effect);
 }

@@ -319,6 +319,9 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     _entries.add(TurnEntry(_deck[_wordIndex], outcome));
     final haptics = ref.read(hapticsProvider);
     outcome == WordOutcome.hit ? haptics.heavy() : haptics.light();
+    if (outcome == WordOutcome.hit) {
+      ref.read(soundServiceProvider).play(SoundEffect.hit);
+    }
     _showCaption(
       outcome == WordOutcome.hit ? '¡Correcto!' : 'Paso',
       outcome == WordOutcome.hit ? CaptionStyle.hit : CaptionStyle.pass,

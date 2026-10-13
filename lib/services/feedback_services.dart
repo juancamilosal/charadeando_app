@@ -1,5 +1,7 @@
 import 'package:flutter/services.dart';
 
+import 'effect_player.dart';
+
 /// Todas las vibraciones de la app pasan por aquí, para respetar el ajuste
 /// "Vibración".
 class Haptics {
@@ -25,22 +27,21 @@ class Haptics {
 }
 
 /// Efectos de sonido del juego.
-enum SoundEffect { hit, pass, countdown, timeUp, spin }
+enum SoundEffect { tap, hit, pass, countdown, timeUp, spin }
 
-/// Efectos de sonido. La app todavía no trae efectos: este servicio ya
-/// respeta el ajuste "Efectos de sonido" para cuando se agreguen los
-/// archivos. La música de fondo va aparte (`BackgroundMusic`).
+/// Efectos de sonido, según el ajuste "Efectos de sonido". Suenan los que ya
+/// tienen archivo (`AssetEffectPlayer.files`): el toque de los botones y el
+/// "¡Correcto!" del turno. La música de fondo va aparte (`BackgroundMusic`).
 class SoundService {
-  const SoundService({required this.music, required this.effects});
+  const SoundService({required this.effects, required this.player});
 
-  final bool music;
   final bool effects;
+  final EffectPlayer player;
 
-  /// Reproduce [effect] si los efectos están encendidos. Devuelve si sonó
-  /// (todavía nunca, porque no hay archivos).
-  Future<bool> play(SoundEffect effect) async {
+  /// Reproduce [effect] si los efectos están encendidos. Devuelve si lo pidió.
+  bool play(SoundEffect effect) {
     if (!effects) return false;
-    // Aquí se reproducirá el archivo del efecto.
-    return false;
+    player.play(effect).ignore();
+    return true;
   }
 }

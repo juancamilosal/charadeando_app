@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'providers/providers.dart';
+import 'services/services.dart';
 import 'router.dart';
 import 'theme.dart';
 import 'widgets/tap_sounds.dart';
@@ -45,9 +46,8 @@ class _CharadeandoAppState extends ConsumerState<CharadeandoApp>
   /// El sonido de un toque, si "Efectos de sonido" está encendido y no se
   /// está en el turno ni viendo un video.
   void _tapSound() {
-    if (!ref.read(settingsProvider).sounds) return;
     if (ref.read(backgroundMusicProvider).silenced) return;
-    ref.read(tapSoundPlayerProvider).play().ignore();
+    ref.read(soundServiceProvider).play(SoundEffect.tap);
   }
 
   @override
