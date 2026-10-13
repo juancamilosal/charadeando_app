@@ -27,9 +27,9 @@ class Haptics {
 /// Efectos de sonido del juego.
 enum SoundEffect { hit, pass, countdown, timeUp, spin }
 
-/// Música y efectos de sonido. La app todavía no trae sonidos: este
-/// servicio ya respeta los ajustes "Música" y "Efectos de sonido" para
-/// cuando se agreguen los archivos.
+/// Efectos de sonido. La app todavía no trae efectos: este servicio ya
+/// respeta el ajuste "Efectos de sonido" para cuando se agreguen los
+/// archivos. La música de fondo va aparte (`BackgroundMusic`).
 class SoundService {
   const SoundService({required this.music, required this.effects});
 
@@ -41,12 +41,6 @@ class SoundService {
   Future<bool> play(SoundEffect effect) async {
     if (!effects) return false;
     // Aquí se reproducirá el archivo del efecto.
-    return false;
-  }
-
-  /// Empieza la música de fondo si está encendida.
-  Future<bool> startMusic() async {
-    if (!music) return false;
     return false;
   }
 }

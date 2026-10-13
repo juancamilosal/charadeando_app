@@ -13,6 +13,8 @@ import '../screens/config_screen_test.dart'
     show MemoryConfigStore, MemoryTeamStore;
 import '../screens/my_categories_test.dart' show MemoryCustomStore;
 import '../screens/roulette_screen_test.dart' show MemoryStore;
+import '../services/settings_test.dart'
+    show FakeMusicPlayer, MemorySettingsStore;
 
 /// Sin carpeta de videos de verdad.
 class _NoVideos extends VideoService {
@@ -25,7 +27,7 @@ Future<void> _settle(WidgetTester tester) async {
   await tester.pump(const Duration(seconds: 1));
 }
 
-Future<void> _open(WidgetTester tester) async {
+Future<void> _open(WidgetTester tester, {MusicPlayer? music}) async {
   tester.view.physicalSize = const Size(1080, 2400);
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
@@ -40,6 +42,8 @@ Future<void> _open(WidgetTester tester) async {
         videoGalleryProvider.overrideWithValue(FakeGallery()),
         videoServiceProvider.overrideWithValue(_NoVideos()),
         tvConnectedProvider.overrideWith((ref) => Stream.value(false)),
+        settingsStoreProvider.overrideWithValue(MemorySettingsStore()),
+        if (music != null) musicPlayerProvider.overrideWithValue(music),
       ],
       child: const CharadeandoApp(),
     ),
@@ -104,5 +108,27 @@ void main() {
     router.go(Routes.categories);
     await _settle(tester);
     expect(find.byType(AppNavBar), findsOneWidget);
+  });
+
+  testWidgets('la música suena al abrir y se detiene al apagarla en Ajustes', (
+    tester,
+  ) async {
+    final player = FakeMusicPlayer();
+    await _open(tester, music: player);
+    expect(player.log, ['play']);
+
+    await tester.tap(find.text('Ajustes'));
+    await _settle(tester);
+    final music = find.widgetWithText(SwitchListTile, 'Música');
+    await tester.ensureVisible(music);
+    await tester.pump();
+    await tester.tap(music);
+    await tester.pump();
+    expect(player.log, ['play', 'pause']);
+
+    // Al volver a encenderla, suena otra vez.
+    await tester.tap(music);
+    await tester.pump();
+    expect(player.log, ['play', 'pause', 'play']);
   });
 }

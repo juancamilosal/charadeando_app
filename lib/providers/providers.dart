@@ -87,6 +87,19 @@ final soundServiceProvider = Provider((ref) {
   return SoundService(music: settings.music, effects: settings.sounds);
 });
 
+/// El reproductor de la música de fondo; las pruebas lo cambian.
+final musicPlayerProvider = Provider<MusicPlayer>(
+  (ref) => defaultMusicPlayer(),
+);
+
+/// La música de fondo. La app la enciende o apaga según el ajuste "Música"
+/// y la pausa en segundo plano; el turno y los videos la silencian.
+final backgroundMusicProvider = Provider((ref) {
+  final music = BackgroundMusic(ref.watch(musicPlayerProvider));
+  ref.onDispose(music.dispose);
+  return music;
+});
+
 final teamStoreProvider = Provider((ref) => TeamStore());
 
 /// "Equipos", guardados en el celular.

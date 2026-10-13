@@ -153,6 +153,46 @@ void main() {
   test('los sonidos respetan los ajustes', () async {
     const off = SoundService(music: false, effects: false);
     expect(await off.play(SoundEffect.hit), isFalse);
-    expect(await off.startMusic(), isFalse);
   });
+
+  test('la música suena con el ajuste encendido, se calla en el turno y '
+      'en segundo plano', () {
+    final player = FakeMusicPlayer();
+    final music = BackgroundMusic(player)..enabled = true;
+    expect(music.playing, isTrue);
+    expect(player.log, ['play']);
+
+    // El turno la silencia y al salir vuelve.
+    music.hold();
+    expect(music.playing, isFalse);
+    music.release();
+    expect(music.playing, isTrue);
+
+    // En segundo plano se pausa.
+    music.foreground = false;
+    expect(music.playing, isFalse);
+    music.foreground = true;
+    expect(music.playing, isTrue);
+
+    // Con "Música" apagada no suena, aunque vuelva al frente.
+    music.enabled = false;
+    music.foreground = false;
+    music.foreground = true;
+    expect(music.playing, isFalse);
+    expect(player.log, ['play', 'pause', 'play', 'pause', 'play', 'pause']);
+  });
+}
+
+/// Reproductor de mentira que anota lo que le piden.
+class FakeMusicPlayer implements MusicPlayer {
+  final log = <String>[];
+
+  @override
+  Future<void> play() async => log.add('play');
+
+  @override
+  Future<void> pause() async => log.add('pause');
+
+  @override
+  Future<void> dispose() async {}
 }

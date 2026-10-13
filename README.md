@@ -59,9 +59,13 @@ la cámara frontal graba a los participantes para revivir las risas.
   confirmación). Sin equipos: "Crea tu primer equipo" con "Crear equipo".
   Se guardan solo en el celular (`equipos.json`), no en un servidor.
 - Ajustes (`lib/screens/settings_screen.dart`), en tarjetas con un ícono en
-  cada fila. "Preferencias de juego": "Música" y "Efectos de sonido"
-  (encendidos; la app todavía no trae sonidos, pero `SoundService` ya
-  respeta el ajuste), "Vibración" (encendida; todas las vibraciones pasan
+  cada fila. "Preferencias de juego": "Música" (encendida: suena en bucle
+  y bajita la música de la app, `assets/audio/musica.mp3`, con
+  `audioplayers`; se detiene en cuanto se apaga el ajuste, se pausa con la
+  app en segundo plano y se calla en el turno y al ver los videos, que
+  tienen su propio sonido; todo pasa por `BackgroundMusic`), "Efectos de
+  sonido" (encendidos; la app todavía no trae efectos, pero `SoundService`
+  ya respeta el ajuste), "Vibración" (encendida; todas las vibraciones pasan
   por `Haptics`, que no vibra si está apagada), "Rotación invertida"
   (apagada; encendida, el juego gira a horizontal derecha y la vista de la
   cámara y el video siguen esa orientación; la inclinación se mide en el

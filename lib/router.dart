@@ -20,6 +20,7 @@ import 'screens/video_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/word_entry_screen.dart';
 import 'widgets/app_nav_bar.dart';
+import 'widgets/music_silence.dart';
 import 'widgets/punishment_roulette.dart';
 
 abstract final class Routes {
@@ -130,9 +131,16 @@ final List<RouteBase> appRoutes = [
   GoRoute(path: Routes.config, builder: (_, _) => const ConfigScreen()),
   GoRoute(path: Routes.words, builder: (_, _) => const WordEntryScreen()),
   GoRoute(path: Routes.autoWords, builder: (_, _) => const AutoWordsScreen()),
-  GoRoute(path: Routes.turn, builder: (_, _) => const TurnScreen()),
+  // El turno y los videos tienen su propio sonido: sin música de fondo.
+  GoRoute(
+    path: Routes.turn,
+    builder: (_, _) => const MusicSilence(child: TurnScreen()),
+  ),
   GoRoute(path: Routes.turnResult, builder: (_, _) => const TurnResultScreen()),
-  GoRoute(path: Routes.video, builder: (_, _) => const VideoScreen()),
+  GoRoute(
+    path: Routes.video,
+    builder: (_, _) => const MusicSilence(child: VideoScreen()),
+  ),
   GoRoute(
     path: Routes.directusTest,
     builder: (_, _) => const DirectusTestScreen(),
@@ -149,7 +157,8 @@ final List<RouteBase> appRoutes = [
   GoRoute(path: Routes.backdrops, builder: (_, _) => const BackdropScreen()),
   GoRoute(
     path: Routes.myVideo,
-    builder: (_, state) => MyVideoScreen(video: state.extra! as SavedVideo),
+    builder: (_, state) =>
+        MusicSilence(child: MyVideoScreen(video: state.extra! as SavedVideo)),
   ),
   GoRoute(
     path: Routes.punishmentSpin,

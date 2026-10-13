@@ -27,7 +27,6 @@ void main() {
     expect(CategoryArt.withImage, containsAll(GameCategory.values));
   });
 
-
   testWidgets('muestra la imagen quieta', (tester) async {
     await tester.pumpWidget(
       const Directionality(
