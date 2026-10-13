@@ -150,7 +150,7 @@ void main() {
     });
   });
 
-  testWidgets('Créditos muestra de dónde salen la música y las imágenes', (
+  testWidgets('Créditos muestra de dónde salen la música, los efectos y las imágenes', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -158,7 +158,10 @@ void main() {
     );
     expect(find.text('Créditos'), findsOneWidget);
     expect(find.textContaining('nastelbom'), findsOneWidget);
-    expect(find.textContaining('Pixabay'), findsOneWidget);
+    expect(find.textContaining('Pixabay'), findsNWidgets(2));
+    expect(find.text('Efectos de sonido'), findsOneWidget);
+    expect(find.textContaining('vadim_makes_sound'), findsOneWidget);
+    expect(find.textContaining('freesound_gamestudio'), findsOneWidget);
     expect(find.textContaining('Flaticon'), findsOneWidget);
   });
 

@@ -317,7 +317,7 @@ class _ControllerOption extends StatelessWidget {
   }
 }
 
-/// Muestra desde abajo los créditos de la música y de las imágenes.
+/// Muestra desde abajo los créditos de la música, los efectos y las imágenes.
 Future<void> showCredits(BuildContext context) => showModalBottomSheet<void>(
   context: context,
   useSafeArea: true,
@@ -329,7 +329,8 @@ Future<void> showCredits(BuildContext context) => showModalBottomSheet<void>(
   builder: (_) => const CreditsSheet(),
 );
 
-/// Créditos: de dónde salen la música y las imágenes de las categorías.
+/// Créditos: de dónde salen la música, los efectos de sonido y las
+/// imágenes de las categorías.
 class CreditsSheet extends StatelessWidget {
   const CreditsSheet({super.key});
 
@@ -340,6 +341,14 @@ class CreditsSheet extends StatelessWidget {
       'Música',
       '"Comedy" de nastelbom, en Pixabay (pixabay.com), con la Licencia de '
           'contenido de Pixabay.',
+    ),
+    (
+      Icons.volume_up,
+      AppColors.orange,
+      'Efectos de sonido',
+      'Toque de los botones de vadim_makes_sound y "¡Correcto!" de '
+          'freesound_gamestudio, en Pixabay (pixabay.com), con la Licencia '
+          'de contenido de Pixabay.',
     ),
     (
       Icons.image,

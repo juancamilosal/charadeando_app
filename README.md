@@ -80,7 +80,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   una marca suave en cada borde durante el turno; en Modo TV el juez sigue
   con sus botones). "Apariencia": "Fondos". "Ayuda": "Cómo se juega" y "Créditos"
   (abre desde abajo de dónde salen la música, "Comedy" de nastelbom en
-  Pixabay, y las imágenes de las categorías, íconos de Flaticon). Se
+  Pixabay; los efectos de sonido, el toque de vadim_makes_sound y
+  "¡Correcto!" de freesound_gamestudio, también de Pixabay; y las imágenes
+  de las categorías, íconos de Flaticon). Se
   guardan en el celular (`ajustes.json`) y se aplican desde que abre la
   app. La animación de la bienvenida explica el controlador elegido.
 - Pantalla de categorías (`lib/screens/category_screen.dart`), pestaña
