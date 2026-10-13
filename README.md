@@ -64,8 +64,11 @@ la cámara frontal graba a los participantes para revivir las risas.
   `audioplayers`; se detiene en cuanto se apaga el ajuste, se pausa con la
   app en segundo plano y se calla en el turno y al ver los videos, que
   tienen su propio sonido; todo pasa por `BackgroundMusic`), "Efectos de
-  sonido" (encendidos; la app todavía no trae efectos, pero `SoundService`
-  ya respeta el ajuste), "Vibración" (encendida; todas las vibraciones pasan
+  sonido" (encendidos: cada toque de un botón, tarjeta, fila o interruptor
+  suena con `assets/audio/toque.mp3`; va enganchado a la animación de toque
+  de Material, `TapSoundSplashFactory`, así que suena solo al completar el
+  toque, no al deslizar ni en lo deshabilitado, y no suena en el turno ni
+  en los videos; los demás efectos del juego todavía no tienen archivo), "Vibración" (encendida; todas las vibraciones pasan
   por `Haptics`, que no vibra si está apagada), "Rotación invertida"
   (apagada; encendida, el juego gira a horizontal derecha y la vista de la
   cámara y el video siguen esa orientación; la inclinación se mide en el

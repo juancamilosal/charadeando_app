@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'providers/providers.dart';
 import 'router.dart';
 import 'theme.dart';
+import 'widgets/tap_sounds.dart';
 
 class CharadeandoApp extends ConsumerStatefulWidget {
   const CharadeandoApp({super.key});
@@ -41,6 +42,14 @@ class _CharadeandoAppState extends ConsumerState<CharadeandoApp>
         state == AppLifecycleState.resumed;
   }
 
+  /// El sonido de un toque, si "Efectos de sonido" está encendido y no se
+  /// está en el turno ni viendo un video.
+  void _tapSound() {
+    if (!ref.read(settingsProvider).sounds) return;
+    if (ref.read(backgroundMusicProvider).silenced) return;
+    ref.read(tapSoundPlayerProvider).play().ignore();
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -53,7 +62,9 @@ class _CharadeandoAppState extends ConsumerState<CharadeandoApp>
     return MaterialApp.router(
       title: 'Charadeando',
       debugShowCheckedModeBanner: false,
-      theme: buildAppTheme(ref.watch(backdropProvider)),
+      // El toque de los botones suena en toda la app.
+      theme: buildAppTheme(ref.watch(backdropProvider))
+          .copyWith(splashFactory: TapSoundSplashFactory(onTap: _tapSound)),
       // Los colores del juego no cambian con el modo oscuro del celular.
       themeMode: ThemeMode.light,
       routerConfig: _router,

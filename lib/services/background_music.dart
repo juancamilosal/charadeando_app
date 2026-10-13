@@ -3,6 +3,12 @@ import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 
+/// La música y los efectos suenan juntos sin quitarse el audio el uno al
+/// otro (y sin parar la música de otras apps).
+final mixedAudioContext = AudioContextConfig(
+  focus: AudioContextConfigFocus.mixWithOthers,
+).build();
+
 /// Lo que necesita la música de fondo de un reproductor.
 abstract interface class MusicPlayer {
   Future<void> play();
@@ -23,6 +29,7 @@ class AssetMusicPlayer implements MusicPlayer {
     final current = _player;
     if (current != null) return current;
     final player = _player = AudioPlayer();
+    await player.setAudioContext(mixedAudioContext);
     await player.setReleaseMode(ReleaseMode.loop);
     await player.setVolume(volume);
     await player.setSource(AssetSource(asset));
@@ -89,6 +96,10 @@ class BackgroundMusic {
 
   /// Si está sonando.
   bool get playing => _playing;
+
+  /// Si alguna pantalla pidió silencio (el turno, los videos): ahí tampoco
+  /// suenan los toques.
+  bool get silenced => _holds > 0;
 
   /// El ajuste "Música".
   set enabled(bool value) {

@@ -100,6 +100,11 @@ final backgroundMusicProvider = Provider((ref) {
   return music;
 });
 
+/// El reproductor del sonido de los toques; las pruebas lo cambian.
+final tapSoundPlayerProvider = Provider<TapSoundPlayer>(
+  (ref) => defaultTapSoundPlayer(),
+);
+
 final teamStoreProvider = Provider((ref) => TeamStore());
 
 /// "Equipos", guardados en el celular.

@@ -27,7 +27,11 @@ Future<void> _settle(WidgetTester tester) async {
   await tester.pump(const Duration(seconds: 1));
 }
 
-Future<void> _open(WidgetTester tester, {MusicPlayer? music}) async {
+Future<void> _open(
+  WidgetTester tester, {
+  MusicPlayer? music,
+  TapSoundPlayer? taps,
+}) async {
   tester.view.physicalSize = const Size(1080, 2400);
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
@@ -44,6 +48,7 @@ Future<void> _open(WidgetTester tester, {MusicPlayer? music}) async {
         tvConnectedProvider.overrideWith((ref) => Stream.value(false)),
         settingsStoreProvider.overrideWithValue(MemorySettingsStore()),
         if (music != null) musicPlayerProvider.overrideWithValue(music),
+        if (taps != null) tapSoundPlayerProvider.overrideWithValue(taps),
       ],
       child: const CharadeandoApp(),
     ),
@@ -131,4 +136,31 @@ void main() {
     await tester.pump();
     expect(player.log, ['play', 'pause', 'play']);
   });
+
+  testWidgets('los botones suenan al tocarlos, salvo con "Efectos de '
+      'sonido" apagado', (tester) async {
+    final taps = _CountTaps();
+    await _open(tester, taps: taps);
+    await tester.tap(find.text('Ajustes'));
+    await _settle(tester);
+    expect(taps.count, 1);
+
+    final effects = find.widgetWithText(SwitchListTile, 'Efectos de sonido');
+    await tester.ensureVisible(effects);
+    await tester.pump();
+    // Apagarlo suena (todavía estaba encendido); después, ya no.
+    await tester.tap(effects);
+    await tester.pumpAndSettle();
+    expect(taps.count, 2);
+    await tester.tap(find.text('Equipos'));
+    await _settle(tester);
+    expect(taps.count, 2);
+  });
+}
+
+class _CountTaps implements TapSoundPlayer {
+  int count = 0;
+
+  @override
+  Future<void> play() async => count++;
 }

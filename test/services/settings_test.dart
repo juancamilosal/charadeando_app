@@ -177,8 +177,11 @@ void main() {
     // El turno la silencia y al salir vuelve.
     music.hold();
     expect(music.playing, isFalse);
+    // Ahí tampoco suenan los toques.
+    expect(music.silenced, isTrue);
     music.release();
     expect(music.playing, isTrue);
+    expect(music.silenced, isFalse);
 
     // En segundo plano se pausa.
     music.foreground = false;
