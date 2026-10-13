@@ -460,6 +460,79 @@ void main() {
     expect(find.textContaining('Ruleta de castigo'), findsNothing);
   });
 
+  testWidgets('al final se pueden cambiar los castigos y agregar los '
+      'propios, hasta 10, antes de girar', (tester) async {
+    final container = await finalScreen(tester, [3, 1]);
+    final store = container.read(punishmentStoreProvider) as MemoryStore;
+    await tester.tap(find.text('Editar castigos'));
+    await tester.pumpAndSettle();
+    expect(find.text('Castigos de la ruleta'), findsOneWidget);
+    // Sin ruleta guardada, empieza con 8 castigos de la app.
+    expect(find.byType(TextField), findsNWidgets(8));
+    expect(find.text('Agregar castigo (8 de 10)'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField).first, 'Cantar como gallo');
+    await tester.tap(find.text('Agregar castigo (8 de 10)'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).last, 'Bailar salsa');
+    await tester.tap(find.text('Agregar castigo (9 de 10)'));
+    await tester.pumpAndSettle();
+    // Con 10 ya no se agregan más; el que quedó vacío no se guarda.
+    expect(find.byType(TextField), findsNWidgets(10));
+    final full = find.widgetWithText(TextButton, 'Ya tiene 10 castigos');
+    expect(tester.widget<TextButton>(full).onPressed, isNull);
+    await tester.ensureVisible(find.text('Guardar'));
+    await tester.tap(find.text('Guardar'));
+    await tester.pumpAndSettle();
+
+    final saved = store.saved!;
+    expect(saved.fields, 9);
+    expect(saved.punishments.first, 'Cantar como gallo');
+    expect(saved.punishments.last, 'Bailar salsa');
+    expect(saved.source, PunishmentSource.mixed);
+    expect(find.text('La ruleta tiene 9 castigos.'), findsOneWidget);
+
+    // Al volver a abrirla, están los guardados; se puede quitar uno.
+    await tester.tap(find.text('Editar castigos'));
+    await tester.pumpAndSettle();
+    expect(find.byType(TextField), findsNWidgets(9));
+    expect(find.text('Cantar como gallo'), findsOneWidget);
+    await tester.tap(find.byTooltip('Quitar castigo 1'));
+    await tester.pumpAndSettle();
+    expect(find.text('Cantar como gallo'), findsNothing);
+    await tester.ensureVisible(find.text('Guardar'));
+    await tester.tap(find.text('Guardar'));
+    await tester.pumpAndSettle();
+    expect(store.saved!.fields, 8);
+    expect(store.saved!.punishments.last, 'Bailar salsa');
+  });
+
+  testWidgets('la ruleta editada necesita al menos 2 castigos', (tester) async {
+    final container = await finalScreen(tester, [3, 1]);
+    final store = container.read(punishmentStoreProvider) as MemoryStore;
+    store.saved = const RouletteSetup(
+      source: PunishmentSource.own,
+      punishments: ['Cantar', 'Bailar'],
+      written: ['Cantar', 'Bailar'],
+    );
+    await tester.tap(find.text('Editar castigos'));
+    await tester.pumpAndSettle();
+    // Con 2 no se puede quitar ninguno.
+    final remove = find.widgetWithIcon(IconButton, Icons.close);
+    expect(remove, findsNWidgets(2));
+    for (final button in tester.widgetList<IconButton>(remove)) {
+      expect(button.onPressed, isNull);
+    }
+    await tester.enterText(find.byType(TextField).last, '');
+    await tester.tap(find.text('Guardar'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('La ruleta necesita al menos 2 castigos.'),
+      findsOneWidget,
+    );
+    expect(store.saved!.punishments, ['Cantar', 'Bailar']);
+  });
+
   testWidgets('al final, si todos empatan no hay ruleta', (tester) async {
     await finalScreen(tester, [2, 2]);
     expect(find.textContaining('Ruleta de castigo'), findsNothing);

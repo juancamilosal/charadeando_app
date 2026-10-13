@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,10 +8,13 @@ import '../providers/providers.dart';
 import '../router.dart';
 import '../theme.dart';
 import '../models/models.dart';
+import '../services/punishments.dart';
 import '../widgets/backdrop_tile.dart';
 import '../widgets/play_background.dart';
+import '../widgets/punishment_editor.dart';
 import '../widgets/result_parts.dart';
 import '../widgets/scoreboard.dart';
+import 'roulette_screen.dart' show PunishmentSpinScreen;
 
 /// Ganador (o empate) con sus puntos en grande, la tabla de puntajes, la
 /// ruleta de castigo y "Jugar otra vez" o "Cambiar configuración".
@@ -28,6 +33,33 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
   Future<void> _spin(String group) async {
     await context.push<bool>(Routes.punishmentSpin, extra: group);
     if (mounted) setState(() => _punished++);
+  }
+
+  /// Antes de girar, los jugadores pueden cambiar los castigos de la ruleta
+  /// o agregar los suyos. Quedan guardados: la ruleta gira con ellos y la
+  /// sección Ruleta los muestra la próxima vez.
+  Future<void> _editPunishments() async {
+    final store = ref.read(punishmentStoreProvider);
+    final saved = await store.load();
+    if (!mounted) return;
+    final current =
+        saved?.punishments ??
+        Roulette.systemPick(PunishmentSpinScreen.defaultFields, Random());
+    final edited = await showPunishmentEditor(context, current);
+    if (edited == null) return;
+    await store.save(
+      RouletteSetup(
+        source: PunishmentSource.mixed,
+        punishments: edited,
+        written: edited,
+      ),
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(content: Text('La ruleta tiene ${edited.length} castigos.')),
+      );
   }
 
   @override
@@ -115,6 +147,7 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
                             group: losers[_punished],
                             tied: losers.length > 1,
                             onSpin: () => _spin(losers[_punished]),
+                            onEdit: _editPunishments,
                             onSkip: () => setState(() => _punished++),
                           ),
                         ],
@@ -162,6 +195,7 @@ class _PunishmentCard extends StatelessWidget {
     required this.group,
     required this.tied,
     required this.onSpin,
+    required this.onEdit,
     required this.onSkip,
   });
 
@@ -170,6 +204,9 @@ class _PunishmentCard extends StatelessWidget {
   /// Varios grupos empataron con menos puntos: cada uno gira su ruleta.
   final bool tied;
   final VoidCallback onSpin;
+
+  /// Cambiar los castigos o agregar los propios antes de girar.
+  final VoidCallback onEdit;
   final VoidCallback onSkip;
 
   @override
@@ -204,6 +241,16 @@ class _PunishmentCard extends StatelessWidget {
               foregroundColor: Colors.white,
             ),
             onPressed: onSpin,
+          ),
+          const SizedBox(height: 4),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.edit_note),
+            label: const Text('Editar castigos'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.purple,
+              side: const BorderSide(color: AppColors.purple, width: 1.5),
+            ),
+            onPressed: onEdit,
           ),
           TextButton(
             style: TextButton.styleFrom(foregroundColor: AppColors.purple),

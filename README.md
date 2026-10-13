@@ -334,7 +334,11 @@ la cámara frontal graba a los participantes para revivir las risas.
   para …!" con "Girar" o "Sin castigo". Si varios empatan con menos puntos,
   cada uno gira su ruleta, uno después del otro; si todos empatan, no hay
   castigo. Usa la ruleta guardada en la sección o, si nunca se configuró, 8
-  castigos del juego. En Modo TV la ruleta se ve en el televisor porque el
+  castigos del juego. Con "Editar castigos" (`showPunishmentEditor`,
+  `lib/widgets/punishment_editor.dart`) los jugadores cambian o quitan
+  castigos y agregan los suyos, hasta 10 (mínimo 2; los campos vacíos no
+  se guardan); la ruleta queda guardada como "Jugadores y app", gira con
+  ellos y la sección Ruleta los muestra la próxima vez. En Modo TV la ruleta se ve en el televisor porque el
   celular duplica su pantalla. Queda preparado `PunishmentService` para
   traer los castigos de una colección `castigos` de Directus
   (`POST /juego/castigos`), pero todavía no se usa.
