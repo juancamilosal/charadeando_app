@@ -20,6 +20,8 @@ class AssetEffectPlayer implements EffectPlayer {
     SoundEffect.tap: ('audio/toque.mp3', 0.6),
     SoundEffect.hit: ('audio/correcto.mp3', 0.8),
     SoundEffect.pass: ('audio/paso.mp3', 0.6),
+    SoundEffect.countdown: ('audio/cuenta.mp3', 0.7),
+    SoundEffect.start: ('audio/ya.mp3', 0.7),
   };
 
   final _pools = <SoundEffect, Future<AudioPool>>{};

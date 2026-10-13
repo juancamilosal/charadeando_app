@@ -27,7 +27,7 @@ class Haptics {
 }
 
 /// Efectos de sonido del juego.
-enum SoundEffect { tap, hit, pass, countdown, timeUp, spin }
+enum SoundEffect { tap, hit, pass, countdown, start, timeUp, spin }
 
 /// Efectos de sonido, según el ajuste "Efectos de sonido". Suenan los que ya
 /// tienen archivo (`AssetEffectPlayer.files`): el toque de los botones y el

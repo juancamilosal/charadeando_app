@@ -347,8 +347,9 @@ class CreditsSheet extends StatelessWidget {
       AppColors.orange,
       'Efectos de sonido',
       'Toque de los botones de vadim_makes_sound, "¡Correcto!" de '
-          'freesound_gamestudio y "Paso" de soynoviembre, en Pixabay '
-          '(pixabay.com), con la Licencia de contenido de Pixabay.',
+          'freesound_gamestudio, "Paso" de soynoviembre y la cuenta '
+          'regresiva de transcendedlifting, en Pixabay (pixabay.com), con '
+          'la Licencia de contenido de Pixabay.',
     ),
     (
       Icons.image,

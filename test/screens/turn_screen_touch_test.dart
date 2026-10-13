@@ -122,11 +122,18 @@ void main() {
     final size = tester.getSize(find.byType(TurnScreen));
     await tester.tapAt(Offset(size.width * 0.8, size.height / 2));
     await tester.pump(const Duration(seconds: 1));
-    // El acierto suena a "¡Correcto!" y pasar, con su propio sonido.
-    expect(_played, [SoundEffect.hit]);
+    // Un pitido por número y otro al arrancar; el acierto suena a
+    // "¡Correcto!" y pasar, con su propio sonido.
+    const countdown = [
+      SoundEffect.countdown,
+      SoundEffect.countdown,
+      SoundEffect.countdown,
+      SoundEffect.start,
+    ];
+    expect(_played, [...countdown, SoundEffect.hit]);
     await tester.tapAt(Offset(size.width * 0.2, size.height / 2));
     await tester.pump(const Duration(seconds: 1));
-    expect(_played, [SoundEffect.hit, SoundEffect.pass]);
+    expect(_played, [...countdown, SoundEffect.hit, SoundEffect.pass]);
     // Se acaba el tiempo.
     for (var i = 0; i < 60; i++) {
       await tester.pump(const Duration(seconds: 1));

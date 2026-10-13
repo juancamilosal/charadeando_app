@@ -272,11 +272,16 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
           : '¡A jugar!',
       CaptionStyle.title,
     );
+    // Un pitido en cada número y uno más agudo al arrancar.
+    final sounds = ref.read(soundServiceProvider);
+    sounds.play(SoundEffect.countdown);
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_countdown > 1) {
         setState(() => _countdown--);
+        sounds.play(SoundEffect.countdown);
       } else {
         timer.cancel();
+        sounds.play(SoundEffect.start);
         _startPlaying();
       }
     });
