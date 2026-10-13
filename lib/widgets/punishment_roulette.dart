@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/scheduler.dart';
 
-import '../services/punishments.dart';
+import '../services/services.dart';
 import '../providers/providers.dart';
 import '../theme.dart';
 
@@ -198,7 +198,10 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
     final field = Roulette.fieldAt(angle, _fields);
     if (field != _lastField) {
       _lastField = field;
+      // Un clic por cada castigo que pasa: así el sonido va al ritmo de la
+      // ruleta y se espacia solo cuando frena.
       ref.read(hapticsProvider).selection();
+      ref.read(soundServiceProvider).play(SoundEffect.spin);
     }
     setState(() => _angle = angle);
   }

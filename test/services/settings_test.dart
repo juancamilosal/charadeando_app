@@ -166,6 +166,7 @@ void main() {
       expect(find.textContaining('transcendedlifting'), findsOneWidget);
       expect(find.textContaining('sspsurvival'), findsOneWidget);
       expect(find.textContaining('universfield'), findsOneWidget);
+      expect(find.textContaining('victorabdo'), findsOneWidget);
       expect(find.textContaining('Flaticon'), findsOneWidget);
     },
   );

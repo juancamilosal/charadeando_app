@@ -75,7 +75,10 @@ la cámara frontal graba a los participantes para revivir las risas.
   (`assets/audio/ya.mp3`); en los últimos 10 segundos del turno se oye
   el tic-tac de un reloj, un segundo a la vez (`assets/audio/reloj.mp3`),
   y una marimba suave cierra el turno, por tiempo o por quedarse sin
-  palabras (`assets/audio/fin.mp3`);
+  palabras (`assets/audio/fin.mp3`); la ruleta de castigos hace un clic
+  (`assets/audio/ruleta.mp3`) cada vez que pasa un castigo, igual que la
+  vibración, así que va al ritmo del giro y se espacia sola al frenar;
+  cada sonido devuelve su reproductor al grupo al terminar;
   los efectos pasan por `AssetEffectPlayer` y
   los demás todavía no tienen archivo), "Vibración" (encendida; todas las vibraciones pasan
   por `Haptics`, que no vibra si está apagada), "Rotación invertida"
@@ -90,7 +93,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   Pixabay; los efectos de sonido, el toque de vadim_makes_sound y
   "¡Correcto!" de freesound_gamestudio, "Paso" de soynoviembre y la
   cuenta regresiva de transcendedlifting, el reloj de sspsurvival y la
-  marimba del final de universfield, también de Pixabay; y las imágenes
+  marimba del final de universfield y la ruleta de victorabdo, también
+  de Pixabay; y las imágenes
   de las categorías, íconos de Flaticon). Se
   guardan en el celular (`ajustes.json`) y se aplican desde que abre la
   app. La animación de la bienvenida explica el controlador elegido.

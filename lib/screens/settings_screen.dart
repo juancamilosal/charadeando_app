@@ -348,9 +348,9 @@ class CreditsSheet extends StatelessWidget {
       'Efectos de sonido',
       'Toque de los botones de vadim_makes_sound, "¡Correcto!" de '
           'freesound_gamestudio, "Paso" de soynoviembre, la cuenta '
-          'regresiva de transcendedlifting, el reloj de sspsurvival y la '
-          'marimba del final de universfield, en Pixabay (pixabay.com), con '
-          'la Licencia de contenido de Pixabay.',
+          'regresiva de transcendedlifting, el reloj de sspsurvival, la '
+          'marimba del final de universfield y la ruleta de victorabdo, en '
+          'Pixabay (pixabay.com), con la Licencia de contenido de Pixabay.',
     ),
     (
       Icons.image,

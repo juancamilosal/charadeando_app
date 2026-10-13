@@ -77,8 +77,10 @@ void main() {
     const punishments = ['Cantar', 'Bailar', 'Saltar', 'Aplaudir', 'Reír'];
     final expected = punishments[Random(42).nextInt(punishments.length)];
     var done = false;
+    final clicks = _CountClicks();
     await tester.pumpWidget(
       ProviderScope(
+        overrides: [effectPlayerProvider.overrideWithValue(clicks)],
         child: MaterialApp(
           home: Scaffold(
             body: PunishmentRoulette(
@@ -97,9 +99,18 @@ void main() {
     expect(find.text('¡Parar!'), findsOneWidget);
     final ticksSpinning = haptics.length;
     expect(ticksSpinning, greaterThan(20));
+    // Suena un clic por cada castigo que pasa, igual que la vibración.
+    expect(clicks.count, ticksSpinning);
 
     await tester.tap(find.text('¡Parar!'));
-    await wait(tester, const Duration(seconds: 9));
+    // Al frenar, los clics se espacian: hay más al principio que al final.
+    await wait(tester, const Duration(seconds: 3));
+    final early = clicks.count;
+    await wait(tester, const Duration(seconds: 3));
+    final middle = clicks.count;
+    await wait(tester, const Duration(seconds: 3));
+    expect(middle - early, lessThan(early - ticksSpinning));
+    expect(clicks.count - middle, lessThan(middle - early));
     expect(find.text('Frenando…'), findsOneWidget);
     await wait(tester, const Duration(milliseconds: 1500));
     await tester.pumpAndSettle();
@@ -547,4 +558,14 @@ void main() {
       }
     }
   });
+}
+
+/// Cuenta los clics de la ruleta.
+class _CountClicks implements EffectPlayer {
+  int count = 0;
+
+  @override
+  Future<void> play(SoundEffect effect) async {
+    if (effect == SoundEffect.spin) count++;
+  }
 }
