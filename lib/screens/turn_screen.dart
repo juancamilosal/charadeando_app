@@ -373,6 +373,8 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   Future<void> _endTurn() async {
     if (_phase == _Phase.saving) return;
     _timer?.cancel();
+    // Una marimba suave cierra el turno.
+    ref.read(soundServiceProvider).play(SoundEffect.timeUp);
     await _tilt?.cancel();
     setState(() => _phase = _Phase.saving);
     _closeCaption();

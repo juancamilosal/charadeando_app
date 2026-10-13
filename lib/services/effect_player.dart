@@ -23,6 +23,7 @@ class AssetEffectPlayer implements EffectPlayer {
     SoundEffect.countdown: ('audio/cuenta.mp3', 0.7),
     SoundEffect.start: ('audio/ya.mp3', 0.7),
     SoundEffect.clock: ('audio/reloj.mp3', 0.8),
+    SoundEffect.timeUp: ('audio/fin.mp3', 0.8),
   };
 
   final _pools = <SoundEffect, Future<AudioPool>>{};

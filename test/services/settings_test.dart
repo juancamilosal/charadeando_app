@@ -165,6 +165,7 @@ void main() {
       expect(find.textContaining('soynoviembre'), findsOneWidget);
       expect(find.textContaining('transcendedlifting'), findsOneWidget);
       expect(find.textContaining('sspsurvival'), findsOneWidget);
+      expect(find.textContaining('universfield'), findsOneWidget);
       expect(find.textContaining('Flaticon'), findsOneWidget);
     },
   );

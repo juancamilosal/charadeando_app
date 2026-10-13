@@ -73,7 +73,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   `assets/audio/paso.mp3`; la cuenta regresiva pita en cada número
   (`assets/audio/cuenta.mp3`) y con uno más agudo al arrancar
   (`assets/audio/ya.mp3`); en los últimos 10 segundos del turno se oye
-  el tic-tac de un reloj, un segundo a la vez (`assets/audio/reloj.mp3`);
+  el tic-tac de un reloj, un segundo a la vez (`assets/audio/reloj.mp3`),
+  y una marimba suave cierra el turno, por tiempo o por quedarse sin
+  palabras (`assets/audio/fin.mp3`);
   los efectos pasan por `AssetEffectPlayer` y
   los demás todavía no tienen archivo), "Vibración" (encendida; todas las vibraciones pasan
   por `Haptics`, que no vibra si está apagada), "Rotación invertida"
@@ -87,8 +89,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   (abre desde abajo de dónde salen la música, "Comedy" de nastelbom en
   Pixabay; los efectos de sonido, el toque de vadim_makes_sound y
   "¡Correcto!" de freesound_gamestudio, "Paso" de soynoviembre y la
-  cuenta regresiva de transcendedlifting y el reloj de sspsurvival,
-  también de Pixabay; y las imágenes
+  cuenta regresiva de transcendedlifting, el reloj de sspsurvival y la
+  marimba del final de universfield, también de Pixabay; y las imágenes
   de las categorías, íconos de Flaticon). Se
   guardan en el celular (`ajustes.json`) y se aplican desde que abre la
   app. La animación de la bienvenida explica el controlador elegido.

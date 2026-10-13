@@ -141,8 +141,12 @@ void main() {
     }
     await tester.pumpAndSettle();
     expect(find.text('Resultado'), findsOneWidget);
-    // El reloj sonó en cada uno de los últimos 10 segundos.
-    expect(_played.where((e) => e == SoundEffect.clock), hasLength(10));
+    // El reloj sonó en cada uno de los últimos 10 segundos y la marimba
+    // cerró el turno.
+    expect(_played, [
+      for (var i = 0; i < 10; i++) SoundEffect.clock,
+      SoundEffect.timeUp,
+    ]);
     final turn = container.read(gameControllerProvider).lastTurn!;
     expect(turn.entries.map((e) => e.outcome), [
       WordOutcome.hit,
