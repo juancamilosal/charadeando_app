@@ -164,6 +164,7 @@ void main() {
       expect(find.textContaining('freesound_gamestudio'), findsOneWidget);
       expect(find.textContaining('soynoviembre'), findsOneWidget);
       expect(find.textContaining('transcendedlifting'), findsOneWidget);
+      expect(find.textContaining('sspsurvival'), findsOneWidget);
       expect(find.textContaining('Flaticon'), findsOneWidget);
     },
   );

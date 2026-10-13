@@ -134,12 +134,15 @@ void main() {
     await tester.tapAt(Offset(size.width * 0.2, size.height / 2));
     await tester.pump(const Duration(seconds: 1));
     expect(_played, [...countdown, SoundEffect.hit, SoundEffect.pass]);
+    _played.clear();
     // Se acaba el tiempo.
     for (var i = 0; i < 60; i++) {
       await tester.pump(const Duration(seconds: 1));
     }
     await tester.pumpAndSettle();
     expect(find.text('Resultado'), findsOneWidget);
+    // El reloj sonó en cada uno de los últimos 10 segundos.
+    expect(_played.where((e) => e == SoundEffect.clock), hasLength(10));
     final turn = container.read(gameControllerProvider).lastTurn!;
     expect(turn.entries.map((e) => e.outcome), [
       WordOutcome.hit,

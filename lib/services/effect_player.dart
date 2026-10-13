@@ -22,6 +22,7 @@ class AssetEffectPlayer implements EffectPlayer {
     SoundEffect.pass: ('audio/paso.mp3', 0.6),
     SoundEffect.countdown: ('audio/cuenta.mp3', 0.7),
     SoundEffect.start: ('audio/ya.mp3', 0.7),
+    SoundEffect.clock: ('audio/reloj.mp3', 0.8),
   };
 
   final _pools = <SoundEffect, Future<AudioPool>>{};

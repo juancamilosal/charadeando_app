@@ -72,7 +72,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   `assets/audio/correcto.mp3` y cada palabra pasada, con
   `assets/audio/paso.mp3`; la cuenta regresiva pita en cada número
   (`assets/audio/cuenta.mp3`) y con uno más agudo al arrancar
-  (`assets/audio/ya.mp3`); los efectos pasan por `AssetEffectPlayer` y
+  (`assets/audio/ya.mp3`); en los últimos 10 segundos del turno se oye
+  el tic-tac de un reloj, un segundo a la vez (`assets/audio/reloj.mp3`);
+  los efectos pasan por `AssetEffectPlayer` y
   los demás todavía no tienen archivo), "Vibración" (encendida; todas las vibraciones pasan
   por `Haptics`, que no vibra si está apagada), "Rotación invertida"
   (apagada; encendida, el juego gira a horizontal derecha y la vista de la
@@ -85,7 +87,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   (abre desde abajo de dónde salen la música, "Comedy" de nastelbom en
   Pixabay; los efectos de sonido, el toque de vadim_makes_sound y
   "¡Correcto!" de freesound_gamestudio, "Paso" de soynoviembre y la
-  cuenta regresiva de transcendedlifting, también de Pixabay; y las imágenes
+  cuenta regresiva de transcendedlifting y el reloj de sspsurvival,
+  también de Pixabay; y las imágenes
   de las categorías, íconos de Flaticon). Se
   guardan en el celular (`ajustes.json`) y se aplican desde que abre la
   app. La animación de la bienvenida explica el controlador elegido.

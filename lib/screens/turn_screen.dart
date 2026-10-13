@@ -38,6 +38,7 @@ class TurnScreen extends ConsumerStatefulWidget {
 class _TurnScreenState extends ConsumerState<TurnScreen>
     with WidgetsBindingObserver {
   static const _countdownFrom = 3;
+  static const _clockFrom = Duration(seconds: 10);
   static const _feedbackDuration = Duration(milliseconds: 700);
 
   final _camera = CameraService();
@@ -315,6 +316,10 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
         _endTurn();
       } else {
         setState(() => _remaining = remaining);
+        // En los últimos segundos se oye el reloj, un segundo a la vez.
+        if (remaining <= _clockFrom) {
+          ref.read(soundServiceProvider).play(SoundEffect.clock);
+        }
       }
     });
   }
