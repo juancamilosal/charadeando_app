@@ -182,6 +182,20 @@ void main() {
     expect(played, [SoundEffect.hit]);
   });
 
+  testWidgets('holdFor calla la música un rato y después sigue sola', (
+    tester,
+  ) async {
+    final player = FakeMusicPlayer();
+    final music = BackgroundMusic(player)..enabled = true;
+    music.holdFor(const Duration(seconds: 2));
+    expect(music.playing, isFalse);
+    await tester.pump(const Duration(milliseconds: 1900));
+    expect(music.playing, isFalse);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(music.playing, isTrue);
+    expect(player.log, ['play', 'pause', 'play']);
+  });
+
   test('la música suena con el ajuste encendido, se calla en el turno y '
       'en segundo plano', () {
     final player = FakeMusicPlayer();

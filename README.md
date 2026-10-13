@@ -75,7 +75,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   (`assets/audio/ya.mp3`); en los últimos 10 segundos del turno se oye
   el tic-tac de un reloj, un segundo a la vez (`assets/audio/reloj.mp3`),
   y una marimba suave cierra el turno, por tiempo o por quedarse sin
-  palabras (`assets/audio/fin.mp3`); la ruleta de castigos hace un clic
+  palabras (`assets/audio/fin.mp3`), y la música de la app vuelve cuando
+  la marimba termina (`BackgroundMusic.holdFor`), no encima de ella; la ruleta de castigos hace un clic
   (`assets/audio/ruleta.mp3`) cada vez que pasa un castigo, igual que la
   vibración, así que va al ritmo del giro y se espacia sola al frenar;
   cada sonido devuelve su reproductor al grupo al terminar;

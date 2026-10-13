@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
@@ -123,6 +124,13 @@ class BackgroundMusic {
   void release() {
     if (_holds > 0) _holds--;
     _sync();
+  }
+
+  /// Silencio por un rato, por ejemplo mientras suena un efecto que no
+  /// debe quedar tapado; después la música sigue sola.
+  void holdFor(Duration duration) {
+    hold();
+    Timer(duration, release);
   }
 
   void _sync() {

@@ -27,6 +27,11 @@ class AssetEffectPlayer implements EffectPlayer {
     SoundEffect.spin: ('audio/ruleta.mp3', 0.9, 130),
   };
 
+  /// Lo que dura la marimba del final del turno.
+  static final timeUpLength = Duration(
+    milliseconds: files[SoundEffect.timeUp]!.$3,
+  );
+
   final _pools = <SoundEffect, Future<AudioPool>>{};
 
   @override

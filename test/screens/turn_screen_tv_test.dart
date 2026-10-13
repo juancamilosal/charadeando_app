@@ -4,6 +4,7 @@ import 'package:charadeando_app/models/models.dart';
 import 'package:charadeando_app/providers/providers.dart';
 import 'package:charadeando_app/router.dart';
 import 'package:charadeando_app/screens/turn_screen.dart';
+import 'package:charadeando_app/services/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -105,6 +106,12 @@ void main() {
     await tester.pump(const Duration(milliseconds: 700));
     await tester.pumpAndSettle();
     expect(find.text('Resultados'), findsOneWidget);
+    // Sin palabras también suena la marimba, y la música de la app espera
+    // a que termine.
+    final music = container.read(backgroundMusicProvider);
+    expect(music.silenced, isTrue);
+    await tester.pump(AssetEffectPlayer.timeUpLength);
+    expect(music.silenced, isFalse);
     final turn = container.read(gameControllerProvider).lastTurn!;
     expect(turn.hits.map((w) => w.text), ['Pizza']);
     expect(turn.passed.map((w) => w.text), ['Jirafa']);
