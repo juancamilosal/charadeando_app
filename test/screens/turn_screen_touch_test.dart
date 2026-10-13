@@ -122,11 +122,11 @@ void main() {
     final size = tester.getSize(find.byType(TurnScreen));
     await tester.tapAt(Offset(size.width * 0.8, size.height / 2));
     await tester.pump(const Duration(seconds: 1));
-    // El acierto suena a "¡Correcto!"; pasar, no.
-    expect(_played.where((e) => e == SoundEffect.hit), hasLength(1));
+    // El acierto suena a "¡Correcto!" y pasar, con su propio sonido.
+    expect(_played, [SoundEffect.hit]);
     await tester.tapAt(Offset(size.width * 0.2, size.height / 2));
     await tester.pump(const Duration(seconds: 1));
-    expect(_played.where((e) => e == SoundEffect.hit), hasLength(1));
+    expect(_played, [SoundEffect.hit, SoundEffect.pass]);
     // Se acaba el tiempo.
     for (var i = 0; i < 60; i++) {
       await tester.pump(const Duration(seconds: 1));

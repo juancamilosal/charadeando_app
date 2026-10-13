@@ -19,6 +19,7 @@ class AssetEffectPlayer implements EffectPlayer {
   static const files = {
     SoundEffect.tap: ('audio/toque.mp3', 0.6),
     SoundEffect.hit: ('audio/correcto.mp3', 0.8),
+    SoundEffect.pass: ('audio/paso.mp3', 0.6),
   };
 
   final _pools = <SoundEffect, Future<AudioPool>>{};

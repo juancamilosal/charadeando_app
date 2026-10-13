@@ -69,7 +69,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   de Material, `TapSoundSplashFactory`, así que suena solo al completar el
   toque, no al deslizar ni en lo deshabilitado, y no suena en el turno ni
   en los videos; en el turno, cada acierto suena a "¡Correcto!" con
-  `assets/audio/correcto.mp3`; los efectos pasan por `AssetEffectPlayer` y
+  `assets/audio/correcto.mp3` y cada palabra pasada, con
+  `assets/audio/paso.mp3`; los efectos pasan por `AssetEffectPlayer` y
   los demás todavía no tienen archivo), "Vibración" (encendida; todas las vibraciones pasan
   por `Haptics`, que no vibra si está apagada), "Rotación invertida"
   (apagada; encendida, el juego gira a horizontal derecha y la vista de la
@@ -81,7 +82,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   con sus botones). "Apariencia": "Fondos". "Ayuda": "Cómo se juega" y "Créditos"
   (abre desde abajo de dónde salen la música, "Comedy" de nastelbom en
   Pixabay; los efectos de sonido, el toque de vadim_makes_sound y
-  "¡Correcto!" de freesound_gamestudio, también de Pixabay; y las imágenes
+  "¡Correcto!" de freesound_gamestudio y "Paso" de soynoviembre, también
+  de Pixabay; y las imágenes
   de las categorías, íconos de Flaticon). Se
   guardan en el celular (`ajustes.json`) y se aplican desde que abre la
   app. La animación de la bienvenida explica el controlador elegido.

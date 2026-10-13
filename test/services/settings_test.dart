@@ -150,20 +150,22 @@ void main() {
     });
   });
 
-  testWidgets('Créditos muestra de dónde salen la música, los efectos y las imágenes', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: CreditsSheet())),
-    );
-    expect(find.text('Créditos'), findsOneWidget);
-    expect(find.textContaining('nastelbom'), findsOneWidget);
-    expect(find.textContaining('Pixabay'), findsNWidgets(2));
-    expect(find.text('Efectos de sonido'), findsOneWidget);
-    expect(find.textContaining('vadim_makes_sound'), findsOneWidget);
-    expect(find.textContaining('freesound_gamestudio'), findsOneWidget);
-    expect(find.textContaining('Flaticon'), findsOneWidget);
-  });
+  testWidgets(
+    'Créditos muestra de dónde salen la música, los efectos y las imágenes',
+    (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: CreditsSheet())),
+      );
+      expect(find.text('Créditos'), findsOneWidget);
+      expect(find.textContaining('nastelbom'), findsOneWidget);
+      expect(find.textContaining('Pixabay'), findsNWidgets(2));
+      expect(find.text('Efectos de sonido'), findsOneWidget);
+      expect(find.textContaining('vadim_makes_sound'), findsOneWidget);
+      expect(find.textContaining('freesound_gamestudio'), findsOneWidget);
+      expect(find.textContaining('soynoviembre'), findsOneWidget);
+      expect(find.textContaining('Flaticon'), findsOneWidget);
+    },
+  );
 
   test('los sonidos respetan los ajustes', () {
     final played = <SoundEffect>[];
