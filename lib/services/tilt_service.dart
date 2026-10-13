@@ -1,72 +1,139 @@
+import 'dart:math';
+
 import 'package:sensors_plus/sensors_plus.dart';
 
 /// Acción detectada al inclinar el celular que está en la frente.
 enum TiltAction { hit, pass }
 
-/// Convierte lecturas del eje Z del acelerómetro en aciertos y pases.
+/// Convierte lecturas del acelerómetro en aciertos y pases.
 ///
-/// Con el celular vertical en la frente, Z vale cerca de 0. Al inclinar la
-/// pantalla hacia el piso Z baja (acierto) y hacia el techo sube (pasar).
-/// La primera lectura fija la posición neutra del jugador, y después de cada
-/// acción hay que volver a ella antes de que cuente la siguiente; así una
-/// sola inclinación no se cuenta dos veces.
+/// Mide el ángulo de la pantalla con el horizonte: con el celular vertical
+/// en la frente vale cerca de 0°; al inclinar la pantalla hacia el piso
+/// baja (acierto) y hacia el techo sube (pasar). El ángulo sale de dos
+/// formas, con el eje Z (hacia afuera de la pantalla) y con lo que queda de
+/// la gravedad en el plano de la pantalla, y se usa la menor: al girar la
+/// cabeza a un lado el giro empuja el eje Z pero no le quita gravedad al
+/// plano, así que no cuenta como inclinación.
+///
+/// La primera lectura fija la posición neutra del jugador, que puede estar
+/// bastante inclinada (por ejemplo, con el celular debajo de la cara), y
+/// se ajusta despacio mientras está quieto en ella. Después de cada acción
+/// hay que volver a la neutra antes de que cuente la siguiente, y la
+/// inclinación tiene que sostenerse unas lecturas: los golpes y sacudidas
+/// sueltos no cuentan.
 class TiltDetector {
   TiltDetector({
-    this.triggerThreshold = 6.0,
-    this.neutralThreshold = 3.0,
-    this.maxBaseline = 4.0,
-    this.smoothing = 0.35,
+    this.triggerAngle = 32,
+    this.neutralAngle = 15,
+    this.maxBaseline = 50,
+    this.limitAngle = 75,
+    this.holdSamples = 4,
+    this.smoothing = 0.3,
+    this.drift = 0.01,
   });
 
-  /// Diferencia con la posición neutra (m/s²) que dispara una acción.
-  /// 6 m/s² equivale a unos 40° de inclinación.
-  final double triggerThreshold;
+  static const gravity = 9.81;
 
-  /// Diferencia máxima para considerar que el celular volvió a la neutra.
-  final double neutralThreshold;
+  /// Grados de inclinación desde la neutra que disparan una acción.
+  final double triggerAngle;
 
-  /// Límite de la posición neutra, por si se calibra con el celular inclinado.
+  /// Grados desde la neutra para considerar que el celular volvió a ella.
+  final double neutralAngle;
+
+  /// Límite de la posición neutra, en grados.
   final double maxBaseline;
+
+  /// Hasta dónde se le pide inclinar: si la neutra ya está muy inclinada,
+  /// basta con llegar aquí, para que siempre se pueda pasar o acertar.
+  final double limitAngle;
+
+  /// Lecturas seguidas (unos 20 ms cada una) que tiene que durar la
+  /// inclinación para contar.
+  final int holdSamples;
 
   /// Peso de cada lectura nueva en el filtro que suaviza el temblor.
   final double smoothing;
 
-  double? _filtered;
+  /// Qué tan rápido la neutra sigue al jugador cuando está quieto en ella.
+  final double drift;
+
+  List<double>? _filtered;
   double? _baseline;
+
+  /// La gravedad medida en la primera lectura, con el celular quieto.
+  double _g = gravity;
   bool _armed = false;
+  TiltAction? _pending;
+  int _held = 0;
 
   /// Olvida la calibración; la siguiente lectura fija la posición neutra.
   void reset() {
     _filtered = null;
     _baseline = null;
+    _g = gravity;
     _armed = false;
+    _pending = null;
+    _held = 0;
   }
 
-  TiltAction? addSample(double z) {
+  /// Ángulo (en grados) de la pantalla con el horizonte: positivo hacia el
+  /// techo, negativo hacia el piso.
+  /// [g] es la gravedad que mide este celular (cada sensor se desvía un
+  /// poco de 9,81).
+  static double pitch(double x, double y, double z, {double g = gravity}) {
+    final byZ = asin((z / g).clamp(-1.0, 1.0));
+    final inPlane = sqrt(x * x + y * y);
+    final byPlane = acos((inPlane / g).clamp(0.0, 1.0)) * z.sign;
+    final angle = byZ.abs() < byPlane.abs() ? byZ : byPlane;
+    return angle * 180 / pi;
+  }
+
+  TiltAction? addSample(double x, double y, double z) {
     final previous = _filtered;
     final filtered = previous == null
-        ? z
-        : previous + smoothing * (z - previous);
+        ? [x, y, z]
+        : [
+            for (final (i, v) in [x, y, z].indexed)
+              previous[i] + smoothing * (v - previous[i]),
+          ];
     _filtered = filtered;
+    if (previous == null) {
+      final measured = sqrt(x * x + y * y + z * z);
+      // Si arranca en plena sacudida, mejor la de siempre.
+      _g = (measured - gravity).abs() < 1.5 ? measured : gravity;
+    }
+    final angle = pitch(filtered[0], filtered[1], filtered[2], g: _g);
 
-    final baseline = _baseline ??= filtered
+    final baseline = _baseline ??= angle
         .clamp(-maxBaseline, maxBaseline)
         .toDouble();
-    final delta = filtered - baseline;
+    final delta = angle - baseline;
 
     if (!_armed) {
-      if (delta.abs() < neutralThreshold) _armed = true;
+      if (delta.abs() < neutralAngle) _armed = true;
       return null;
     }
-    if (delta <= -triggerThreshold) {
-      _armed = false;
-      return TiltAction.hit;
+    if (delta.abs() < neutralAngle) {
+      _baseline = baseline + drift * delta;
     }
-    if (delta >= triggerThreshold) {
-      _armed = false;
-      return TiltAction.pass;
+    final hitAt = max(baseline - triggerAngle, -limitAngle);
+    final passAt = min(baseline + triggerAngle, limitAngle);
+    final action = angle <= hitAt
+        ? TiltAction.hit
+        : angle >= passAt
+        ? TiltAction.pass
+        : null;
+    if (action == null || action != _pending) {
+      _pending = action;
+      _held = action == null ? 0 : 1;
+    } else {
+      _held++;
     }
-    return null;
+    if (action == null || _held < holdSamples) return null;
+    _armed = false;
+    _pending = null;
+    _held = 0;
+    return action;
   }
 }
 
@@ -76,7 +143,7 @@ class TiltService {
   Stream<TiltAction> actions() {
     final detector = TiltDetector();
     return accelerometerEventStream(samplingPeriod: SensorInterval.gameInterval)
-        .map((event) => detector.addSample(event.z))
+        .map((event) => detector.addSample(event.x, event.y, event.z))
         .where((action) => action != null)
         .cast<TiltAction>();
   }
