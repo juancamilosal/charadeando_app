@@ -81,7 +81,7 @@ void main() {
     expect(find.text('Desbloquea Anime'), findsOneWidget);
     expect(find.text(r'Solo Anime · $3.900'), findsOneWidget);
     expect(find.text('o mejor'), findsOneWidget);
-    expect(find.text(r'Desbloquear todo · $14.900'), findsOneWidget);
+    expect(find.text(r'Todas las categorías · $14.900'), findsOneWidget);
     // Sin decir cuánto se ahorra: solo los dos precios.
     expect(find.textContaining('Ahorras'), findsNothing);
     for (final benefit in premiumBenefits) {
@@ -89,7 +89,7 @@ void main() {
     }
     expect(find.text('Config'), findsNothing);
 
-    await tester.tap(find.text(r'Desbloquear todo · $14.900'));
+    await tester.tap(find.text(r'Todas las categorías · $14.900'));
     await tester.pump();
     expect(billing.bought, [null]);
     billing.send(const BillingEvent(BillingStatus.owned));
@@ -129,8 +129,8 @@ void main() {
   testWidgets('sin Google Play avisa que no se puede comprar', (tester) async {
     await pump(tester, billing: FakeBilling(available: false));
     await tapCard(tester, 'Futbolistas');
-    expect(find.text('Desbloquear todo'), findsOneWidget);
-    await tester.tap(find.text('Desbloquear todo'));
+    expect(find.text('Todas las categorías'), findsOneWidget);
+    await tester.tap(find.text('Todas las categorías'));
     await tester.pump();
     expect(
       find.textContaining('Las compras no están disponibles'),

@@ -409,8 +409,8 @@ class _PremiumBox extends StatelessWidget {
           const SizedBox(height: 12),
           _BuyButton(
             label: price == null
-                ? 'Desbloquear todo'
-                : 'Desbloquear todo · ${price!.text}',
+                ? 'Todas las categorías'
+                : 'Todas las categorías · ${price!.text}',
             color: AppColors.yellow,
             foreground: AppColors.ink,
             busy: busy,
