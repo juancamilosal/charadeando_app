@@ -22,7 +22,6 @@ class CategoryCard extends StatelessWidget {
     this.isNew = false,
     this.soon = false,
     this.locked = false,
-    this.golden = false,
   });
 
   /// Tarjeta de una categoría del juego, con su imagen (o su ícono, si todavía
@@ -35,7 +34,6 @@ class CategoryCard extends StatelessWidget {
     bool compact = false,
     Color? color,
     bool locked = false,
-    bool golden = false,
   }) => CategoryCard(
     title: category.label,
     color: color ?? category.color,
@@ -46,7 +44,6 @@ class CategoryCard extends StatelessWidget {
     isNew: category.isNew,
     soon: !category.available,
     locked: locked,
-    golden: golden,
   );
 
   /// Tarjeta de una categoría propia: su ícono, su color y cuántas palabras
@@ -94,9 +91,6 @@ class CategoryCard extends StatelessWidget {
   /// ve con todos sus colores, para que den ganas de abrirla.
   final bool locked;
 
-  /// De pago y ya es suya: borde dorado, como un trofeo.
-  final bool golden;
-
   /// Tamaño de letra más grande, hasta [maxSize], con el que [text] cabe en
   /// [maxLines] renglones de [width] sin partir ninguna palabra. Si ni con
   /// [minSize] cabe, devuelve [minSize] y el texto se corta con "…".
@@ -138,7 +132,6 @@ class CategoryCard extends StatelessWidget {
     final textScaler = MediaQuery.textScalerOf(context);
     return CategoryCardFrame(
       color: color,
-      golden: golden,
       onTap: onTap,
       onLongPress: onLongPress,
       builder: (onColor) => Stack(
@@ -262,16 +255,9 @@ class CategoryCardFrame extends StatelessWidget {
     required this.builder,
     this.onTap,
     this.onLongPress,
-    this.golden = false,
   });
 
-  /// Dorado del borde de las categorías de pago que ya son suyas.
-  static const gold = Color(0xFFFFC21A);
-
   final Color color;
-
-  /// Borde dorado en vez del del fondo.
-  final bool golden;
   final Widget Function(Color onColor) builder;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
@@ -319,11 +305,7 @@ class CategoryCardFrame extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        border: golden
-            ? Border.all(color: gold, width: 3.5)
-            : border == null
-            ? null
-            : Border.all(color: border, width: 3),
+        border: border == null ? null : Border.all(color: border, width: 3),
         boxShadow: [?shadow],
       ),
       child: Material(

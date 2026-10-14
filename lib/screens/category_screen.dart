@@ -146,7 +146,6 @@ class CategoryScreen extends ConsumerWidget {
   Widget _allCategories(BuildContext context, WidgetRef ref) {
     final today = ref.watch(clockProvider)();
     final locked = ref.watch(lockedCategoriesProvider);
-    final golden = ref.watch(goldenCategoriesProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -202,7 +201,6 @@ class CategoryScreen extends ConsumerWidget {
                   // Todas las de la sección en tonos del mismo color.
                   color: section.shade(i),
                   locked: locked.contains(category),
-                  golden: golden.contains(category),
                   onTap: () =>
                       _choose(context, ref, category, color: section.shade(i)),
                 ),

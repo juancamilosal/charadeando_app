@@ -204,16 +204,6 @@ final lockedCategoriesProvider = Provider<Set<GameCategory>>((ref) {
   };
 });
 
-/// Categorías de pago que ya son suyas (compradas, con un código o con Todo
-/// Charadeando): van con borde dorado.
-final goldenCategoriesProvider = Provider<Set<GameCategory>>((ref) {
-  final locked = ref.watch(lockedCategoriesProvider);
-  return {
-    for (final c in ref.watch(premiumCategoriesProvider))
-      if (!locked.contains(c)) c,
-  };
-});
-
 final gameControllerProvider = NotifierProvider<GameController, GameState>(
   GameController.new,
 );
