@@ -78,8 +78,15 @@ void main() {
     expect(tester.widget<CategoryCard>(card('Animales')).locked, isFalse);
 
     await tapCard(tester, 'Anime');
-    expect(find.text('Anime es Premium'), findsOneWidget);
+    expect(find.text('Desbloquea Anime'), findsOneWidget);
+    expect(find.text(r'Solo Anime · $3.900'), findsOneWidget);
+    expect(find.text('o mejor'), findsOneWidget);
     expect(find.text(r'Desbloquear todo · $14.900'), findsOneWidget);
+    // 6 sueltas a $3.900 son $23.400: Premium ahorra $8.500.
+    expect(
+      find.text(r'Ahorras $8.500 frente a comprar las 6 sueltas'),
+      findsOneWidget,
+    );
     for (final benefit in premiumBenefits) {
       expect(find.text(benefit), findsOneWidget);
     }
@@ -87,19 +94,39 @@ void main() {
 
     await tester.tap(find.text(r'Desbloquear todo · $14.900'));
     await tester.pump();
-    expect(billing.buys, 1);
-    billing.send(BillingEvent.owned);
+    expect(billing.bought, [null]);
+    billing.send(const BillingEvent(BillingStatus.owned));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    expect(find.text('Anime es Premium'), findsNothing);
+    expect(find.text('Desbloquea Anime'), findsNothing);
     expect(find.text('¡Listo! Ya tienes Charadeando Premium.'), findsOneWidget);
     expect(container.read(premiumUnlockedProvider), isTrue);
     expect(tester.widget<CategoryCard>(card('Anime')).locked, isFalse);
 
     // Ahora sí se juega: se elige cómo jugar.
     await tapCard(tester, 'Anime');
-    expect(find.text('Anime es Premium'), findsNothing);
+    expect(find.text('Desbloquea Anime'), findsNothing);
     expect(find.text('Personalizada'), findsOneWidget);
+  });
+
+  testWidgets('comprar solo una categoría abre esa y las demás siguen con '
+      'candado', (tester) async {
+    final billing = FakeBilling();
+    final container = await pump(tester, billing: billing);
+    await tapCard(tester, 'Futbolistas');
+    await tester.tap(find.text(r'Solo Futbolistas · $3.900'));
+    await tester.pump();
+    expect(billing.bought, ['FUTBOLISTAS']);
+    billing.send(
+      const BillingEvent(BillingStatus.owned, category: 'FUTBOLISTAS'),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Desbloquea Futbolistas'), findsNothing);
+    expect(find.text('¡Listo! Ya tienes Futbolistas.'), findsOneWidget);
+    expect(tester.widget<CategoryCard>(card('Futbolistas')).locked, isFalse);
+    expect(tester.widget<CategoryCard>(card('Anime')).locked, isTrue);
+    expect(container.read(premiumUnlockedProvider), isFalse);
   });
 
   testWidgets('sin Google Play avisa que no se puede comprar', (tester) async {
@@ -112,7 +139,10 @@ void main() {
       find.textContaining('Las compras no están disponibles'),
       findsOneWidget,
     );
-    expect(find.text('Futbolistas es Premium'), findsOneWidget);
+    expect(find.text('Desbloquea Futbolistas'), findsOneWidget);
+    // Sin tienda tampoco hay precios ni ahorro.
+    expect(find.text('Solo Futbolistas'), findsOneWidget);
+    expect(find.textContaining('Ahorras'), findsNothing);
   });
 
   testWidgets('un código abre la categoría y cierra la oferta; uno vencido '
@@ -120,6 +150,8 @@ void main() {
     final store = MemoryPremiumStore();
     final container = await pump(tester, billing: FakeBilling(), store: store);
     await tapCard(tester, 'Anime');
+    await tester.ensureVisible(find.text('Tengo un código'));
+    await tester.pump();
     await tester.tap(find.text('Tengo un código'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
@@ -135,7 +167,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('Canjear código'), findsNothing);
-    expect(find.text('Anime es Premium'), findsNothing);
+    expect(find.text('Desbloquea Anime'), findsNothing);
     expect(find.text('¡Listo! Desbloqueaste Anime.'), findsOneWidget);
     expect(store.saved.codeCategories, {'ANIME'});
     // Solo Anime: las demás de pago siguen con candado.

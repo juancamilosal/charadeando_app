@@ -26,15 +26,20 @@ class MemoryPremiumStore extends PremiumStore {
   Future<String> deviceId() async => 'celular-de-prueba';
 }
 
-/// Google Play de mentira: [available] dice si se puede comprar y [owned]
-/// manda una compra como si llegara de la tienda.
+/// Google Play de mentira: Premium a $14.900 y cada categoría a $3.900.
+/// [available] dice si se puede comprar y [send] manda una compra como si
+/// llegara de la tienda.
 class FakeBilling implements PremiumBilling {
   FakeBilling({this.available = true});
 
   final bool available;
   final _events = StreamController<BillingEvent>.broadcast();
-  int buys = 0;
+
+  /// Lo que se intentó comprar: null es Premium.
+  final bought = <String?>[];
   int restores = 0;
+
+  int get buys => bought.length;
 
   void send(BillingEvent event) => _events.add(event);
 
@@ -42,11 +47,16 @@ class FakeBilling implements PremiumBilling {
   Stream<BillingEvent> get events => _events.stream;
 
   @override
-  Future<String?> price() async => available ? r'$14.900' : null;
+  Future<StorePrice?> price({String? category}) async {
+    if (!available) return null;
+    return category == null
+        ? const StorePrice(r'$14.900', 14900, 'COP', symbol: r'$')
+        : const StorePrice(r'$3.900', 3900, 'COP', symbol: r'$');
+  }
 
   @override
-  Future<bool> buy() async {
-    buys++;
+  Future<bool> buy({String? category}) async {
+    bought.add(category);
     return available;
   }
 
@@ -99,6 +109,7 @@ void main() {
       const access = PremiumAccess(
         purchased: true,
         codeCategories: {'FUTBOLISTAS', 'ANIME'},
+        boughtCategories: {'NAVIDAD'},
       );
       final back = PremiumAccess.fromJson(
         jsonDecode(jsonEncode(access.toJson())) as Map<String, dynamic>,
@@ -106,6 +117,8 @@ void main() {
       expect(back.purchased, isTrue);
       expect(back.codeAll, isFalse);
       expect(back.codeCategories, {'ANIME', 'FUTBOLISTAS'});
+      expect(back.boughtCategories, {'NAVIDAD'});
+      expect(back.unlocks(GameCategory.christmas), isTrue);
     });
   });
 
@@ -243,11 +256,33 @@ void main() {
       await pumpEventQueue();
       expect(await c.read(premiumProvider.notifier).buy(), isTrue);
       expect(billing.buys, 1);
-      billing.send(BillingEvent.owned);
+      billing.send(const BillingEvent(BillingStatus.owned));
       await pumpEventQueue();
       expect(c.read(premiumUnlockedProvider), isTrue);
       expect(c.read(lockedCategoriesProvider), isEmpty);
       expect(store.saved.purchased, isTrue);
+    });
+
+    test('una categoría comprada suelta abre solo esa y se guarda', () async {
+      final billing = FakeBilling();
+      final store = MemoryPremiumStore();
+      final c = container(billing: billing, store: store);
+      expect(c.read(lockedCategoriesProvider), contains(GameCategory.anime));
+      await pumpEventQueue();
+      await c.read(premiumProvider.notifier).buy(category: 'ANIME');
+      expect(billing.bought, ['ANIME']);
+      billing.send(const BillingEvent(BillingStatus.owned, category: 'ANIME'));
+      await pumpEventQueue();
+      expect(c.read(premiumUnlockedProvider), isFalse);
+      expect(
+        c.read(lockedCategoriesProvider),
+        isNot(contains(GameCategory.anime)),
+      );
+      expect(
+        c.read(lockedCategoriesProvider),
+        contains(GameCategory.christmas),
+      );
+      expect(store.saved.boughtCategories, {'ANIME'});
     });
 
     test('ya comprado no vuelve a buscar compras al abrir', () async {
@@ -289,5 +324,22 @@ void main() {
       expect(store.saved.codeAll, isTrue);
       expect(store.saved.codeCategories, {'ANIME'});
     });
+  });
+
+  test('los productos de Google Play y el precio de los ahorros', () {
+    expect(PlayBilling.productId(null), 'charadeando_premium');
+    expect(
+      PlayBilling.productId('DEPORTISTAS_FAMOSOS'),
+      'categoria_deportistas_famosos',
+    );
+    expect(PlayBilling.categoryOf('charadeando_premium'), isNull);
+    expect(PlayBilling.categoryOf('categoria_anime'), 'ANIME');
+    expect(PlayBilling.categoryOf('otra_cosa'), '');
+    const cop = StorePrice(r'$14.900', 14900, 'COP', symbol: r'$');
+    expect(formatPrice(8500, cop), r'$8.500');
+    expect(formatPrice(123456789, cop), r'$123.456.789');
+    expect(formatPrice(999, cop), r'$999');
+    const usd = StorePrice(r'US$3.99', 3.99, 'USD', symbol: r'US$');
+    expect(formatPrice(4.5, usd), r'US$4,50');
   });
 }

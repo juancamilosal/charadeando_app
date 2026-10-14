@@ -7,7 +7,8 @@ import '../services/services.dart';
 import 'providers.dart';
 
 /// Lo desbloqueado: Premium (comprado en Google Play o con un código) y las
-/// categorías abiertas con códigos. Se guarda en el celular.
+/// categorías sueltas, compradas o abiertas con códigos. Se guarda en el
+/// celular.
 class PremiumController extends Notifier<PremiumAccess> {
   final _events = StreamController<BillingEvent>.broadcast();
 
@@ -31,25 +32,32 @@ class PremiumController extends Notifier<PremiumAccess> {
   Future<void> _load(PremiumBilling billing) async {
     final saved = await _store.load();
     // Lo que llegó mientras se leía (una compra) no se pierde.
-    state = saved.copyWith(
-      purchased: saved.purchased || state.purchased,
-      codeAll: saved.codeAll || state.codeAll,
-      codeCategories: {...saved.codeCategories, ...state.codeCategories},
-    );
-    // Si se reinstaló la app, la compra vuelve sola.
+    state = saved.merge(state);
+    // Si se reinstaló la app, las compras vuelven solas.
     if (!state.purchased) await billing.restore();
   }
 
   Future<void> _onBilling(BillingEvent event) async {
-    if (event == BillingEvent.owned && !state.purchased) {
-      state = state.copyWith(purchased: true);
-      await _store.save(state);
+    final category = event.category;
+    if (event.owned) {
+      final before = state;
+      state = category == null
+          ? state.copyWith(purchased: true)
+          : state.copyWith(
+              boughtCategories: {...state.boughtCategories, category},
+            );
+      if (state.purchased != before.purchased ||
+          state.boughtCategories.length != before.boughtCategories.length) {
+        await _store.save(state);
+      }
     }
     if (!_events.isClosed) _events.add(event);
   }
 
-  /// Abre la ventana de pago de Google Play. Falso si no está disponible.
-  Future<bool> buy() => ref.read(premiumBillingProvider).buy();
+  /// Abre la ventana de pago de Google Play: Premium, o la categoría
+  /// [category] suelta. Falso si no está disponible.
+  Future<bool> buy({String? category}) =>
+      ref.read(premiumBillingProvider).buy(category: category);
 
   /// Busca en Google Play las compras ya hechas.
   Future<void> restore() => ref.read(premiumBillingProvider).restore();

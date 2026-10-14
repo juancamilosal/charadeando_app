@@ -17,8 +17,9 @@ const premiumBenefits = [
   'Categorías propias sin límite',
 ];
 
-/// Abre desde abajo la invitación a Premium. Con [category], muestra esa
-/// categoría de pago arriba. Devuelve verdadero si quedó desbloqueado.
+/// Abre desde abajo la invitación a comprar. Con [category], ofrece esa
+/// categoría de pago suelta y, debajo, Premium como la mejor opción.
+/// Devuelve verdadero si quedó desbloqueada.
 Future<bool?> showPremiumSheet(
   BuildContext context, {
   GameCategory? category,
@@ -34,8 +35,21 @@ Future<bool?> showPremiumSheet(
   builder: (_) => PremiumSheet(category: category, color: color),
 );
 
-/// "Charadeando Premium": pago único con Google Play, "Restaurar compras" y
-/// "Tengo un código". Se cierra sola cuando queda desbloqueado.
+/// Los precios de la tienda que muestra la hoja.
+class _Prices {
+  const _Prices({this.premium, this.category, this.savings});
+
+  final StorePrice? premium;
+  final StorePrice? category;
+
+  /// "Ahorras $8.700 frente a comprar las 6 sueltas", o null si no se
+  /// puede calcular (falta algún precio) o no hay ahorro.
+  final String? savings;
+}
+
+/// Comprar: la categoría suelta (si se tocó una) y "o mejor" Premium, con
+/// cuánto se ahorra frente a comprar todas sueltas. Abajo, "Restaurar
+/// compras" y "Tengo un código". Se cierra sola cuando queda desbloqueado.
 class PremiumSheet extends ConsumerStatefulWidget {
   const PremiumSheet({super.key, this.category, this.color});
 
@@ -50,9 +64,11 @@ class PremiumSheet extends ConsumerStatefulWidget {
 }
 
 class _PremiumSheetState extends ConsumerState<PremiumSheet> {
-  late final Future<String?> _price = ref.read(premiumBillingProvider).price();
+  late final Future<_Prices> _prices = _loadPrices();
   StreamSubscription<BillingEvent>? _events;
-  bool _buying = false;
+
+  /// Lo que se está comprando: '' es Premium y un código, esa categoría.
+  String? _buying;
 
   @override
   void initState() {
@@ -66,19 +82,52 @@ class _PremiumSheetState extends ConsumerState<PremiumSheet> {
     super.dispose();
   }
 
+  Future<_Prices> _loadPrices() async {
+    final billing = ref.read(premiumBillingProvider);
+    final paid = ref.read(premiumCategoriesProvider);
+    final premium = await billing.price();
+    final category = widget.category;
+    final singles = await Future.wait([
+      for (final c in paid) billing.price(category: c.code),
+    ]);
+    String? savings;
+    if (premium != null &&
+        singles.isNotEmpty &&
+        singles.every((p) => p != null && p.currency == premium.currency)) {
+      final total = singles.fold<double>(0, (sum, p) => sum + p!.amount);
+      if (total > premium.amount) {
+        savings =
+            'Ahorras ${formatPrice(total - premium.amount, premium)} frente '
+            'a comprar las ${singles.length} sueltas';
+      }
+    }
+    return _Prices(
+      premium: premium,
+      category: category == null
+          ? null
+          : await billing.price(category: category.code),
+      savings: savings,
+    );
+  }
+
   void _say(String text) => ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: Text(text)));
 
   void _onEvent(BillingEvent event) {
     if (!mounted) return;
-    setState(() => _buying = false);
-    switch (event) {
-      case BillingEvent.owned:
+    setState(() => _buying = null);
+    final category = widget.category;
+    switch (event.status) {
+      case BillingStatus.owned when event.category == null:
         _done('¡Listo! Ya tienes Charadeando Premium.');
-      case BillingEvent.failed:
+      case BillingStatus.owned when event.category == category?.code:
+        _done('¡Listo! Ya tienes ${category!.label}.');
+      case BillingStatus.owned:
+        break;
+      case BillingStatus.failed:
         _say('No se pudo completar la compra. Inténtalo otra vez.');
-      case BillingEvent.canceled:
+      case BillingStatus.canceled:
         break;
     }
   }
@@ -93,12 +142,15 @@ class _PremiumSheetState extends ConsumerState<PremiumSheet> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  Future<void> _buy() async {
-    setState(() => _buying = true);
-    final started = await ref.read(premiumProvider.notifier).buy();
+  /// Premium, o la categoría [category] suelta.
+  Future<void> _buy({String? category}) async {
+    setState(() => _buying = category ?? '');
+    final started = await ref
+        .read(premiumProvider.notifier)
+        .buy(category: category);
     if (!mounted) return;
     if (!started) {
-      setState(() => _buying = false);
+      setState(() => _buying = null);
       _say(
         'Las compras no están disponibles en este celular. Revisa que '
         'tenga Google Play.',
@@ -130,106 +182,198 @@ class _PremiumSheetState extends ConsumerState<PremiumSheet> {
       top: false,
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(22, 10, 22, 12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 44,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE3D7F7),
-                  borderRadius: BorderRadius.circular(3),
-                ),
-              ),
-            ),
-            const SizedBox(height: 14),
-            if (category != null) ...[
-              Center(
-                child: SizedBox(
-                  width: 112,
-                  height: 140,
-                  child: CategoryCard.game(
-                    category,
-                    compact: true,
-                    color: widget.color,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
-            Text(
-              category != null
-                  ? '${category.label} es Premium'
-                  : 'Charadeando Premium',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: AppFonts.display,
-                fontSize: 26,
-                fontWeight: FontWeight.w600,
-                color: AppColors.ink,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              category != null
-                  ? 'Desbloquéala con Premium, junto con todo lo demás.'
-                  : 'Un solo pago y es tuyo para siempre.',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF6B5A86),
-              ),
-            ),
-            const SizedBox(height: 14),
-            _PremiumBox(price: _price, buying: _buying, onBuy: _buy),
-            const SizedBox(height: 6),
-            // En celulares angostos (o con letra grande) los dos botones
-            // pasan uno debajo del otro.
-            Wrap(
-              alignment: WrapAlignment.spaceEvenly,
+        child: FutureBuilder<_Prices>(
+          future: _prices,
+          builder: (context, snapshot) {
+            final prices = snapshot.data ?? const _Prices();
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                TextButton(
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.purple,
+                Center(
+                  child: Container(
+                    width: 44,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE3D7F7),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
                   ),
-                  onPressed: _restore,
-                  child: const Text('Restaurar compras'),
                 ),
-                TextButton(
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.purple,
+                const SizedBox(height: 14),
+                if (category != null) ...[
+                  Center(
+                    child: SizedBox(
+                      width: 112,
+                      height: 140,
+                      child: CategoryCard.game(
+                        category,
+                        compact: true,
+                        color: widget.color,
+                      ),
+                    ),
                   ),
-                  onPressed: _code,
-                  child: const Text('Tengo un código'),
+                  const SizedBox(height: 12),
+                ],
+                Text(
+                  category != null
+                      ? 'Desbloquea ${category.label}'
+                      : 'Desbloquea todo',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: AppFonts.display,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.ink,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  category != null
+                      ? 'Cómprala sola o llévate todas con Premium.'
+                      : 'Un solo pago y es tuyo para siempre.',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF6B5A86),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                if (category != null) ...[
+                  _BuyButton(
+                    label: prices.category == null
+                        ? 'Solo ${category.label}'
+                        : 'Solo ${category.label} · ${prices.category!.text}',
+                    color: AppColors.coral,
+                    foreground: Colors.white,
+                    busy: _buying == category.code,
+                    onPressed: _buying != null
+                        ? null
+                        : () => _buy(category: category.code),
+                  ),
+                  const SizedBox(height: 12),
+                  const Row(
+                    children: [
+                      Expanded(child: Divider(color: Color(0xFFE3D7F7))),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: Text(
+                          'o mejor',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF6B5A86),
+                          ),
+                        ),
+                      ),
+                      Expanded(child: Divider(color: Color(0xFFE3D7F7))),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                ],
+                _PremiumBox(
+                  price: prices.premium,
+                  savings: prices.savings,
+                  busy: _buying == '',
+                  onBuy: _buying != null ? null : () => _buy(),
+                ),
+                const SizedBox(height: 6),
+                // En celulares angostos (o con letra grande) los dos botones
+                // pasan uno debajo del otro.
+                Wrap(
+                  alignment: WrapAlignment.spaceEvenly,
+                  children: [
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.purple,
+                      ),
+                      onPressed: _restore,
+                      child: const Text('Restaurar compras'),
+                    ),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.purple,
+                      ),
+                      onPressed: _code,
+                      child: const Text('Tengo un código'),
+                    ),
+                  ],
+                ),
+                const Text(
+                  'Pago único con Google Play: es tuyo para siempre.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12, color: Color(0xFF8E80A6)),
                 ),
               ],
-            ),
-            const Text(
-              'Pago único con Google Play.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12, color: Color(0xFF8E80A6)),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
   }
 }
 
-/// El recuadro morado de Premium: lo que trae y el botón con el precio.
+/// Botón grande y redondo de comprar, con una ruedita mientras se abre
+/// Google Play.
+class _BuyButton extends StatelessWidget {
+  const _BuyButton({
+    required this.label,
+    required this.color,
+    required this.foreground,
+    required this.busy,
+    required this.onPressed,
+  });
+
+  final String label;
+  final Color color;
+  final Color foreground;
+  final bool busy;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return FilledButton(
+      style: FilledButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: foreground,
+        disabledBackgroundColor: color.withValues(alpha: 0.6),
+        disabledForegroundColor: foreground,
+        minimumSize: const Size.fromHeight(54),
+        textStyle: const TextStyle(
+          fontFamily: AppFonts.display,
+          fontSize: 19,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      onPressed: onPressed,
+      child: busy
+          ? SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                color: foreground,
+              ),
+            )
+          : Text(label, textAlign: TextAlign.center),
+    );
+  }
+}
+
+/// El recuadro morado de Premium: lo que trae, cuánto se ahorra y el botón
+/// con el precio.
 class _PremiumBox extends StatelessWidget {
   const _PremiumBox({
     required this.price,
-    required this.buying,
+    required this.savings,
+    required this.busy,
     required this.onBuy,
   });
 
-  final Future<String?> price;
-  final bool buying;
-  final VoidCallback onBuy;
+  final StorePrice? price;
+  final String? savings;
+  final bool busy;
+  final VoidCallback? onBuy;
 
   @override
   Widget build(BuildContext context) {
@@ -287,36 +431,39 @@ class _PremiumBox extends StatelessWidget {
                 ],
               ),
             ),
-          const SizedBox(height: 12),
-          FutureBuilder<String?>(
-            future: price,
-            builder: (context, snapshot) {
-              final price = snapshot.data;
-              return FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.yellow,
-                  foregroundColor: AppColors.ink,
-                  minimumSize: const Size.fromHeight(54),
-                  textStyle: const TextStyle(
-                    fontFamily: AppFonts.display,
-                    fontSize: 19,
-                    fontWeight: FontWeight.w600,
+          if (savings != null) ...[
+            const SizedBox(height: 10),
+            Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  savings!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.yellow,
                   ),
                 ),
-                onPressed: buying ? null : onBuy,
-                child: buying
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(strokeWidth: 3),
-                      )
-                    : Text(
-                        price == null
-                            ? 'Desbloquear todo'
-                            : 'Desbloquear todo · $price',
-                      ),
-              );
-            },
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          _BuyButton(
+            label: price == null
+                ? 'Desbloquear todo'
+                : 'Desbloquear todo · ${price!.text}',
+            color: AppColors.yellow,
+            foreground: AppColors.ink,
+            busy: busy,
+            onPressed: onBuy,
           ),
         ],
       ),

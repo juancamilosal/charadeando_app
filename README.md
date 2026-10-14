@@ -58,23 +58,29 @@ la cámara frontal graba a los participantes para revivir las risas.
   presionado un equipo o su botón de tres puntos: "Editar" y "Borrar" (pide
   confirmación). Sin equipos: "Crea tu primer equipo" con "Crear equipo".
   Se guardan solo en el celular (`equipos.json`), no en un servidor.
-- Premium, pago único (`lib/widgets/premium_sheet.dart`,
-  `PremiumController`): desbloquea las categorías de pago
-  (`GameCategory.paid`: Anime, Futbolistas, Deportistas famosos, Vacaciones,
-  Halloween y Navidad; se cambian en esa lista), el video Full HD y Máxima y
-  las categorías propias sin límite. Las de pago llevan un candado amarillo
-  en su tarjeta (con todos sus colores) y en Combinar; al tocarlas, o una
-  resolución bloqueada, o "Nueva categoría" sin cupo, se abre la hoja
-  "Anime es Premium" con lo que trae, "Desbloquear todo · $precio" (el
-  precio y la moneda los da Google Play), "Restaurar compras" y "Tengo un
-  código". La compra es el producto `charadeando_premium` de Google Play
-  (`PlayBilling`, con `in_app_purchase`; solo en Android): al llegar se
+- Compras de pago único (`lib/widgets/premium_sheet.dart`,
+  `PremiumController`): cada categoría de pago se puede comprar suelta, o
+  todo junto con Premium, que además trae el video Full HD y Máxima y las
+  categorías propias sin límite. Las de pago (`GameCategory.paid`: Anime,
+  Futbolistas, Deportistas famosos, Vacaciones, Halloween y Navidad; se
+  cambian en esa lista) llevan un candado amarillo en su tarjeta (con todos
+  sus colores) y en Combinar. Al tocar una se abre "Desbloquea Anime":
+  "Solo Anime · $3.900" y, debajo, "o mejor" el recuadro de Premium con lo
+  que trae, "Ahorras $8.500 frente a comprar las 6 sueltas" (la suma de los
+  precios sueltos menos el de Premium; no sale si falta algún precio o no
+  hay ahorro) y "Desbloquear todo · $14.900". Los precios y la moneda los
+  da Google Play. Una resolución bloqueada o "Nueva categoría" sin cupo
+  abren solo Premium ("Desbloquea todo"). Abajo, "Restaurar compras" y
+  "Tengo un código". Los productos de Google Play (`PlayBilling`, con
+  `in_app_purchase`; solo en Android) son `charadeando_premium` y
+  `categoria_<código en minúsculas>` (`categoria_anime`). Cada compra se
   confirma a Google (si no, la devuelve a los 3 días), se guarda en el
   celular (`premium.json`) y la hoja se cierra con "¡Listo! Ya tienes
-  Charadeando Premium.". Al abrir la app, si no hay compra guardada, se
-  buscan las compras hechas (por si se reinstaló). Sin Google Play avisa
-  que las compras no están disponibles. Los códigos promocionales de Google
-  Play se canjean en Play Store y llegan como una compra más.
+  Anime." (o "…Charadeando Premium."). Al abrir la app, si no tiene
+  Premium, se buscan las compras hechas (por si se reinstaló). Sin Google
+  Play avisa que las compras no están disponibles. Los códigos
+  promocionales de Google Play se canjean en Play Store y llegan como una
+  compra más.
 - Códigos propios ("Canjear código" en Ajustes o "Tengo un código" en la
   hoja): se validan en el servidor (`POST /juego/canjear`, ver
   `server/README.md`) con el código y un identificador al azar del celular

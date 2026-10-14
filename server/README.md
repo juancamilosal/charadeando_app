@@ -125,21 +125,37 @@ queden. Pruebas: `node --test server/tests/juego.test.mjs`.
 
 ## Compra en Google Play
 
-La app vende Premium como un producto de pago único con el id
-`charadeando_premium`:
+La app vende productos de pago único ("productos integrados en la
+aplicación"): Premium, que abre todo, y cada categoría de pago suelta. Los
+ids tienen que ser exactamente estos:
+
+| Producto | Id |
+|---|---|
+| Premium (todo) | `charadeando_premium` |
+| Anime | `categoria_anime` |
+| Futbolistas | `categoria_futbolistas` |
+| Deportistas famosos | `categoria_deportistas_famosos` |
+| Vacaciones | `categoria_vacaciones` |
+| Halloween | `categoria_halloween` |
+| Navidad | `categoria_navidad` |
+
+Si se agrega otra categoría de pago (en `GameCategory.paid`), su producto es
+`categoria_` y su código en minúsculas. Para que Premium se vea como la
+mejor opción, que cueste menos que la suma de las sueltas: la app muestra
+cuánto se ahorra.
 
 1. Play Console → **Configuración → Perfil de pagos**: tener la cuenta de
    comerciante.
 2. Subir a **Prueba interna** una versión que ya tenga `in_app_purchase`
    (Play no deja crear productos antes).
 3. **Monetizar → Productos → Productos integrados en la aplicación →
-   Crear producto**: id `charadeando_premium`, nombre, descripción y
-   precio; activarlo.
+   Crear producto**: uno por cada id de la tabla, con nombre, descripción y
+   precio; activarlos.
 4. Para probar sin que cobre: **Configuración → Prueba de licencias**, con
    los correos de los probadores, e instalar la app desde la prueba
    interna (instalada desde Android Studio no puede comprar).
-5. Códigos de Google Play: **Monetizar → Promociones**, para el producto
-   `charadeando_premium`. Se canjean en Play Store y la app los recibe como
+5. Códigos de Google Play: **Monetizar → Promociones**, para
+   `charadeando_premium` o para una categoría. Se canjean en Play Store y la app los recibe como
    una compra.
 
 ## Instalar o actualizar la extensión

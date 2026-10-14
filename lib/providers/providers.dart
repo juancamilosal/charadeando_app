@@ -162,7 +162,7 @@ final videoRendererProvider = Provider((ref) => VideoRenderer());
 
 final premiumStoreProvider = Provider((ref) => PremiumStore());
 final premiumBillingProvider = Provider<PremiumBilling>(
-  (ref) => defaultPremiumBilling(),
+  (ref) => defaultPremiumBilling([for (final c in GameCategory.paid) c.code]),
 );
 final promoCodeServiceProvider = Provider((ref) => PromoCodeService());
 
@@ -197,10 +197,10 @@ final premiumCategoriesProvider = Provider<Set<GameCategory>>(
 /// candado.
 final lockedCategoriesProvider = Provider<Set<GameCategory>>((ref) {
   if (ref.watch(premiumUnlockedProvider)) return const {};
-  final byCode = ref.watch(premiumProvider).codeCategories;
+  final owned = ref.watch(premiumProvider).categories;
   return {
     for (final c in ref.watch(premiumCategoriesProvider))
-      if (!byCode.contains(c.code)) c,
+      if (!owned.contains(c.code)) c,
   };
 });
 

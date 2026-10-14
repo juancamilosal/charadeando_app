@@ -113,11 +113,11 @@ void main() {
     await tester.tap(_inSheet(find.text('Marcas')));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    expect(find.text('Marcas es Premium'), findsOneWidget);
-    Navigator.of(tester.element(find.text('Marcas es Premium'))).pop();
+    expect(find.text('Desbloquea Marcas'), findsOneWidget);
+    Navigator.of(tester.element(find.text('Desbloquea Marcas'))).pop();
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    expect(find.text('Marcas es Premium'), findsNothing);
+    expect(find.text('Desbloquea Marcas'), findsNothing);
     expect(find.text('Elige al menos 2 categorías'), findsOneWidget);
 
     // La oficina tiene menos de 10 palabras.
