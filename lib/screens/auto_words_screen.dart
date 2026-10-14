@@ -74,7 +74,7 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
       if (batch.words.length < config.groupCount) {
         setState(() {
           _loading = false;
-          _error = 'Todavía no hay suficientes palabras en el servidor.';
+          _error = 'Todavía no hay suficientes palabras para jugar. Inténtalo más tarde.';
         });
       } else if (batch.offline) {
         setState(() {
@@ -144,7 +144,7 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
       if (words.length < config.groupCount) {
         setState(() {
           _loading = false;
-          _error = 'Todavía no hay suficientes palabras en el servidor.';
+          _error = 'Todavía no hay suficientes palabras para jugar. Inténtalo más tarde.';
         });
       } else if (offline) {
         setState(() {
@@ -225,9 +225,9 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
       icon: Icons.cloud_off,
       title: 'No se pudieron traer las palabras',
       text: switch (error) {
-        DirectusException() => error.hint,
+        DirectusException() => error.userMessage,
         String() => error,
-        _ => 'Ocurrió un error inesperado.',
+        _ => 'Inténtalo otra vez en un momento.',
       },
       action: 'Reintentar',
       onAction: _load,

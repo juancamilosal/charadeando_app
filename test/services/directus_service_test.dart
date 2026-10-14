@@ -119,4 +119,24 @@ void main() {
       ),
     );
   });
+
+  test('al jugador no se le habla de Directus ni de rutas', () {
+    for (final status in [null, 400, 404, 429, 500, 502]) {
+      final message = DirectusException(status, 'algo').userMessage;
+      expect(message, isNot(contains('Directus')), reason: '$status');
+      expect(message, isNot(contains('extensión')), reason: '$status');
+      expect(message, isNot(contains('ruta')), reason: '$status');
+    }
+    expect(
+      const DirectusException(null, '').userMessage,
+      contains('conexión a internet'),
+    );
+  });
+
+  test('el servidor es el del dominio nuevo', () {
+    expect(
+      DirectusService.defaultBaseUrl,
+      'https://charadeando-api.valkiriacode.com',
+    );
+  });
 }

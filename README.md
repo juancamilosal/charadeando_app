@@ -552,3 +552,13 @@ flutter run
 La app se prueba en un celular real: necesita cámara frontal y acelerómetro.
 En modo debug, durante el turno tocar la mitad izquierda de la pantalla pasa
 y la mitad derecha acierta, para probar en un emulador.
+
+La app habla con el servidor del juego en
+`https://charadeando-api.valkiriacode.com` (`DirectusService.defaultBaseUrl`).
+Para probar con otro servidor: `flutter run --dart-define=DIRECTUS_URL=https://...`.
+
+Si no llegan las palabras, el jugador solo ve "No se pudieron traer las
+palabras" con una indicación sencilla (revisar el internet o intentarlo en un
+momento) y "Reintentar"; nunca el detalle técnico del servidor
+(`DirectusException.userMessage`). El detalle (`hint`) queda para la pantalla
+de prueba del servidor.

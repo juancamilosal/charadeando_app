@@ -17,7 +17,7 @@ class DirectusService {
   /// `--dart-define=DIRECTUS_URL=https://...`.
   static const defaultBaseUrl = String.fromEnvironment(
     'DIRECTUS_URL',
-    defaultValue: 'https://charadeando.vps.webdock.cloud',
+    defaultValue: 'https://charadeando-api.valkiriacode.com',
   );
 
   /// Máximo de palabras por petición. Debe coincidir con `MAX_COUNT` de la
@@ -115,7 +115,16 @@ class DirectusException implements Exception {
   final int? statusCode;
   final String body;
 
-  /// Explicación en palabras simples de los errores más comunes.
+  /// Lo que ve el jugador: sin nombres técnicos, solo qué hacer.
+  String get userMessage => switch (statusCode) {
+    null => 'Revisa tu conexión a internet e inténtalo otra vez.',
+    429 =>
+      'Hay muchas partidas al tiempo. Espera un minuto e inténtalo otra vez.',
+    _ => 'Inténtalo otra vez en un momento.',
+  };
+
+  /// Explicación técnica de los errores más comunes, para la pantalla de
+  /// prueba del servidor (no para el jugador).
   String get hint => switch (statusCode) {
     null => 'Revisa la conexión a internet y que Directus esté encendido.',
     404 =>

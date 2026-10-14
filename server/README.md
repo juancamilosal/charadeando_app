@@ -249,7 +249,7 @@ Todo en la terminal del servidor.
 5. Probar la ruta:
 
    ```sh
-   curl -s -X POST https://charadeando.vps.webdock.cloud/juego/palabras \
+   curl -s -X POST https://charadeando-api.valkiriacode.com/juego/palabras \
      -H 'Content-Type: application/json' -d '{"n":3}'
    ```
 
@@ -258,7 +258,7 @@ Todo en la terminal del servidor.
 
    ```sh
    curl -s -o /dev/null -w '%{http_code}\n' \
-     https://charadeando.vps.webdock.cloud/items/palabras
+     https://charadeando-api.valkiriacode.com/items/palabras
    ```
 
 ## Gemini
