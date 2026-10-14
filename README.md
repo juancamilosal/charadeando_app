@@ -66,10 +66,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   cambian en esa lista) llevan un candado amarillo en su tarjeta (con todos
   sus colores) y en Combinar. Al tocar una se abre "Desbloquea Anime":
   "Solo Anime · $3.900" y, debajo, "o mejor" el recuadro de Premium con lo
-  que trae, "Ahorras $8.500 frente a comprar las 6 sueltas" (la suma de los
-  precios sueltos menos el de Premium; no sale si falta algún precio o no
-  hay ahorro) y "Desbloquear todo · $14.900". Los precios y la moneda los
-  da Google Play. Una resolución bloqueada o "Nueva categoría" sin cupo
+  que trae (también las categorías nuevas que vayan llegando con las
+  actualizaciones) y "Desbloquear todo · $14.900", pago único. No se dice
+  cuánto se ahorra. Los precios y la moneda los da Google Play. Una resolución bloqueada o "Nueva categoría" sin cupo
   abren solo Premium ("Desbloquea todo"). Abajo, "Restaurar compras" y
   "Tengo un código". Los productos de Google Play (`PlayBilling`, con
   `in_app_purchase`; solo en Android) son `charadeando_premium` y

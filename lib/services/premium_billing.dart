@@ -178,19 +178,3 @@ PremiumBilling defaultPremiumBilling(Iterable<String> categories) =>
     !Platform.environment.containsKey('FLUTTER_TEST') && Platform.isAndroid
     ? PlayBilling(categories: categories)
     : NoBilling();
-
-/// [amount] con el símbolo de [like] y puntos de miles ("$23.600"). Sin
-/// centavos si es un valor entero, como en pesos.
-String formatPrice(double amount, StorePrice like) {
-  final whole = amount == amount.roundToDouble();
-  final fixed = amount.toStringAsFixed(whole ? 0 : 2);
-  final parts = fixed.split('.');
-  final digits = parts.first;
-  final grouped = StringBuffer();
-  for (var i = 0; i < digits.length; i++) {
-    if (i > 0 && (digits.length - i) % 3 == 0) grouped.write('.');
-    grouped.write(digits[i]);
-  }
-  final cents = parts.length > 1 ? ',${parts[1]}' : '';
-  return '${like.symbol}$grouped$cents';
-}

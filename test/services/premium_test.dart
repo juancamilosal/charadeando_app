@@ -326,7 +326,7 @@ void main() {
     });
   });
 
-  test('los productos de Google Play y el precio de los ahorros', () {
+  test('los productos de Google Play', () {
     expect(PlayBilling.productId(null), 'charadeando_premium');
     expect(
       PlayBilling.productId('DEPORTISTAS_FAMOSOS'),
@@ -335,11 +335,5 @@ void main() {
     expect(PlayBilling.categoryOf('charadeando_premium'), isNull);
     expect(PlayBilling.categoryOf('categoria_anime'), 'ANIME');
     expect(PlayBilling.categoryOf('otra_cosa'), '');
-    const cop = StorePrice(r'$14.900', 14900, 'COP', symbol: r'$');
-    expect(formatPrice(8500, cop), r'$8.500');
-    expect(formatPrice(123456789, cop), r'$123.456.789');
-    expect(formatPrice(999, cop), r'$999');
-    const usd = StorePrice(r'US$3.99', 3.99, 'USD', symbol: r'US$');
-    expect(formatPrice(4.5, usd), r'US$4,50');
   });
 }

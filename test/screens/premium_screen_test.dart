@@ -82,11 +82,8 @@ void main() {
     expect(find.text(r'Solo Anime · $3.900'), findsOneWidget);
     expect(find.text('o mejor'), findsOneWidget);
     expect(find.text(r'Desbloquear todo · $14.900'), findsOneWidget);
-    // 6 sueltas a $3.900 son $23.400: Premium ahorra $8.500.
-    expect(
-      find.text(r'Ahorras $8.500 frente a comprar las 6 sueltas'),
-      findsOneWidget,
-    );
+    // Sin decir cuánto se ahorra: solo los dos precios.
+    expect(find.textContaining('Ahorras'), findsNothing);
     for (final benefit in premiumBenefits) {
       expect(find.text(benefit), findsOneWidget);
     }
@@ -140,9 +137,8 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Desbloquea Futbolistas'), findsOneWidget);
-    // Sin tienda tampoco hay precios ni ahorro.
+    // Sin tienda no hay precios.
     expect(find.text('Solo Futbolistas'), findsOneWidget);
-    expect(find.textContaining('Ahorras'), findsNothing);
   });
 
   testWidgets('un código abre la categoría y cierra la oferta; uno vencido '

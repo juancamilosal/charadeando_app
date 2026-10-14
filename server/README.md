@@ -140,9 +140,8 @@ ids tienen que ser exactamente estos:
 | Navidad | `categoria_navidad` |
 
 Si se agrega otra categoría de pago (en `GameCategory.paid`), su producto es
-`categoria_` y su código en minúsculas. Para que Premium se vea como la
-mejor opción, que cueste menos que la suma de las sueltas: la app muestra
-cuánto se ahorra.
+`categoria_` y su código en minúsculas, y quien ya tenga Premium la recibe
+sin pagar más.
 
 1. Play Console → **Configuración → Perfil de pagos**: tener la cuenta de
    comerciante.

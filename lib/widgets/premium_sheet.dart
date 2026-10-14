@@ -12,7 +12,7 @@ import 'category_card.dart';
 
 /// Lo que trae Premium, para mostrarlo igual en todas partes.
 const premiumBenefits = [
-  'Todas las categorías de pago, también las que vengan',
+  'Todas las categorías de pago, también las nuevas que vayan llegando',
   'Videos en Full HD y calidad máxima',
   'Categorías propias sin límite',
 ];
@@ -37,19 +37,15 @@ Future<bool?> showPremiumSheet(
 
 /// Los precios de la tienda que muestra la hoja.
 class _Prices {
-  const _Prices({this.premium, this.category, this.savings});
+  const _Prices({this.premium, this.category});
 
   final StorePrice? premium;
   final StorePrice? category;
-
-  /// "Ahorras $8.700 frente a comprar las 6 sueltas", o null si no se
-  /// puede calcular (falta algún precio) o no hay ahorro.
-  final String? savings;
 }
 
-/// Comprar: la categoría suelta (si se tocó una) y "o mejor" Premium, con
-/// cuánto se ahorra frente a comprar todas sueltas. Abajo, "Restaurar
-/// compras" y "Tengo un código". Se cierra sola cuando queda desbloqueado.
+/// Comprar: la categoría suelta (si se tocó una) con su precio y, debajo,
+/// "o mejor" Premium, pago único. Abajo, "Restaurar compras" y "Tengo un
+/// código". Se cierra sola cuando queda desbloqueado.
 class PremiumSheet extends ConsumerStatefulWidget {
   const PremiumSheet({super.key, this.category, this.color});
 
@@ -84,29 +80,12 @@ class _PremiumSheetState extends ConsumerState<PremiumSheet> {
 
   Future<_Prices> _loadPrices() async {
     final billing = ref.read(premiumBillingProvider);
-    final paid = ref.read(premiumCategoriesProvider);
-    final premium = await billing.price();
     final category = widget.category;
-    final singles = await Future.wait([
-      for (final c in paid) billing.price(category: c.code),
-    ]);
-    String? savings;
-    if (premium != null &&
-        singles.isNotEmpty &&
-        singles.every((p) => p != null && p.currency == premium.currency)) {
-      final total = singles.fold<double>(0, (sum, p) => sum + p!.amount);
-      if (total > premium.amount) {
-        savings =
-            'Ahorras ${formatPrice(total - premium.amount, premium)} frente '
-            'a comprar las ${singles.length} sueltas';
-      }
-    }
     return _Prices(
-      premium: premium,
+      premium: await billing.price(),
       category: category == null
           ? null
           : await billing.price(category: category.code),
-      savings: savings,
     );
   }
 
@@ -273,7 +252,6 @@ class _PremiumSheetState extends ConsumerState<PremiumSheet> {
                 ],
                 _PremiumBox(
                   price: prices.premium,
-                  savings: prices.savings,
                   busy: _buying == '',
                   onBuy: _buying != null ? null : () => _buy(),
                 ),
@@ -360,18 +338,15 @@ class _BuyButton extends StatelessWidget {
   }
 }
 
-/// El recuadro morado de Premium: lo que trae, cuánto se ahorra y el botón
-/// con el precio.
+/// El recuadro morado de Premium: lo que trae y el botón con el precio.
 class _PremiumBox extends StatelessWidget {
   const _PremiumBox({
     required this.price,
-    required this.savings,
     required this.busy,
     required this.onBuy,
   });
 
   final StorePrice? price;
-  final String? savings;
   final bool busy;
   final VoidCallback? onBuy;
 
@@ -431,30 +406,6 @@ class _PremiumBox extends StatelessWidget {
                 ],
               ),
             ),
-          if (savings != null) ...[
-            const SizedBox(height: 10),
-            Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  savings!,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.yellow,
-                  ),
-                ),
-              ),
-            ),
-          ],
           const SizedBox(height: 12),
           _BuyButton(
             label: price == null
