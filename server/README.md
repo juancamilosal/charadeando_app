@@ -156,7 +156,7 @@ La colección `palabras` tiene el campo `dificultad` (`FACIL`, `NORMAL`,
 ### Códigos de las categorías
 
 Cada categoría de la app busca sus palabras en `palabras` con su código en
-el campo `categoria`. Todas tienen palabras. Una categoría nueva sin
+el campo `categoria`. Todas tienen palabras, menos `ANIME`. Una categoría nueva sin
 palabras se marca con `available: false` en `lib/models/category.dart` y sale
 con "Pronto" en la app hasta que se carguen.
 
@@ -171,6 +171,7 @@ con "Pronto" en la app hasta que se carguen.
 | Personajes | `PERSONAJES` |
 | Superhéroes | `SUPERHEROES` |
 | Dibujos animados | `DIBUJOS_ANIMADOS` |
+| Anime (sale con "Pronto" hasta que tenga palabras) | `ANIME` |
 | Videojuegos | `VIDEOJUEGOS` |
 | Música y canciones | `MUSICA` |
 | Celebridades | `CELEBRIDADES` |
@@ -194,6 +195,9 @@ combinadas, cada persona o personaje se carga en una sola categoría:
 
 - Superhéroes (Spider-Man, Batman): solo en `SUPERHEROES`.
 - Dibujos animados (Bob Esponja, Peppa Pig): solo en `DIBUJOS_ANIMADOS`.
+- Anime (Goku, Naruto, Pikachu) y sus series (Dragon Ball, One Piece):
+  solo en `ANIME`, aunque también sean dibujos animados o salgan en
+  videojuegos.
 - `PERSONAJES` queda para los de películas, libros y videojuegos (Harry
   Potter, Shrek, Mario Bros).
 - Personas reales que hicieron historia (Simón Bolívar, Einstein): solo en

@@ -25,6 +25,7 @@ void main() {
         'PERSONAJES',
         'SUPERHEROES',
         'DIBUJOS_ANIMADOS',
+        'ANIME',
         'VIDEOJUEGOS',
         'MUSICA',
         'CELEBRIDADES',
@@ -76,6 +77,7 @@ void main() {
       'Personajes',
       'Superhéroes',
       'Dibujos animados',
+      'Anime',
       'Videojuegos',
       'Música y canciones',
       'Celebridades',
@@ -127,9 +129,12 @@ void main() {
     }
   });
 
-  test('ninguna lleva "Nueva" por ahora y todas tienen palabras', () {
+  test('ninguna lleva "Nueva" por ahora y todas tienen palabras menos '
+      'Anime', () {
     expect(GameCategory.values.where((c) => c.isNew), isEmpty);
-    expect(GameCategory.values.where((c) => !c.available), isEmpty);
+    expect(GameCategory.values.where((c) => !c.available), [
+      GameCategory.anime,
+    ]);
   });
 
   Future<ProviderContainer> pumpCategories(
@@ -181,7 +186,7 @@ void main() {
     expect(sectionTitle('Especiales'), findsOneWidget);
     expect(find.text('Solo por temporada'), findsOneWidget);
     expect(find.text('Navidad'), findsOneWidget);
-    expect(find.text('8 categorías'), findsOneWidget);
+    expect(find.text('9 categorías'), findsOneWidget);
 
     expect(find.text('Halloween', skipOffstage: false), findsNothing);
 

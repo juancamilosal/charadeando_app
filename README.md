@@ -108,11 +108,12 @@ la cámara frontal graba a los participantes para revivir las risas.
   izquierda en una píldora (blanca con el texto morado en los fondos
   oscuros, morada con el texto blanco en los claros; Fredoka) y cuántas
   categorías tiene a la
-  derecha ("8 categorías"), y sus tarjetas en
+  derecha ("9 categorías"), y sus tarjetas en
   una cuadrícula de 3 columnas, todas visibles:
   1. Clásicos: Animales, Comida, Objetos, Profesiones y Acciones.
   2. Entretenimiento: Películas, Series y novelas, Personajes, Superhéroes,
-     Dibujos animados, Videojuegos, Música y canciones y Celebridades.
+     Dibujos animados, Anime (con "Pronto" hasta que tenga palabras con el
+     código `ANIME`), Videojuegos, Música y canciones y Celebridades.
   3. Cultura general: Geografía, Lugares, Personajes históricos, Dichos y
      refranes y Marcas.
   4. Deportes: Deportes y Equipos de fútbol.
@@ -192,7 +193,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   Comida, Profesiones, Acciones, Lugares, Series y novelas, Personajes,
   Superhéroes, Dibujos animados, Videojuegos, Música y canciones,
   Personajes históricos, Dichos y refranes, Vacaciones, Halloween y
-  Navidad: todas.
+  Navidad: todas menos Anime, que muestra una Pokébola.
 - Dificultad: Mezcladas (viene elegida: trae de todas, 300 palabras por
   categoría), Fácil (ideal con niños), Normal o Difícil (100 cada una). Se
   elige en la configuración de las palabras automáticas, en Libre y en todas

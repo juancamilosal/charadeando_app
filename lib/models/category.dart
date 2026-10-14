@@ -174,6 +174,17 @@ enum GameCategory {
     'Dibujo animado',
     section: CategorySection.entertainment,
   ),
+  anime(
+    'Anime',
+    'Goku, Naruto y compañía',
+    Icons.catching_pokemon,
+    AppColors.coral,
+    'ANIME',
+    'Anime',
+    section: CategorySection.entertainment,
+    // Todavía no hay palabras con el código ANIME en Directus.
+    available: false,
+  ),
   videogames(
     'Videojuegos',
     'Del Pac-Man al Fortnite',
@@ -315,7 +326,6 @@ enum GameCategory {
     // vengan.
     // ignore: unused_element_parameter
     this.isNew = false,
-    // ignore: unused_element_parameter
     this.available = true,
   });
 

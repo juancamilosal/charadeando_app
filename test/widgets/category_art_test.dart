@@ -23,8 +23,13 @@ void main() {
     );
   });
 
-  test('todas las categorías tienen su dibujo', () {
-    expect(CategoryArt.withImage, containsAll(GameCategory.values));
+  test('todas las categorías tienen su dibujo, menos Anime, que todavía '
+      'muestra su ícono', () {
+    expect(
+      CategoryArt.withImage,
+      containsAll(GameCategory.values.where((c) => c != GameCategory.anime)),
+    );
+    expect(CategoryArt.withImage, isNot(contains(GameCategory.anime)));
   });
 
   testWidgets('muestra la imagen quieta', (tester) async {
