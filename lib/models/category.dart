@@ -277,6 +277,28 @@ enum GameCategory {
     'Equipo de fútbol',
     section: CategorySection.sports,
   ),
+  footballers(
+    'Futbolistas',
+    'Los cracks de la cancha',
+    Icons.sports_soccer,
+    AppColors.green,
+    'FUTBOLISTAS',
+    'Futbolista',
+    section: CategorySection.sports,
+    // Todavía no hay palabras con el código FUTBOLISTAS en Directus.
+    available: false,
+  ),
+  athletes(
+    'Deportistas famosos',
+    'Leyendas de todos los deportes',
+    Icons.emoji_events,
+    AppColors.orange,
+    'DEPORTISTAS_FAMOSOS',
+    'Deportista',
+    section: CategorySection.sports,
+    // Todavía no hay palabras con el código DEPORTISTAS_FAMOSOS en Directus.
+    available: false,
+  ),
 
   // Especiales: solo se ven en su temporada.
   vacations(
@@ -324,7 +346,6 @@ enum GameCategory {
     // vengan.
     // ignore: unused_element_parameter
     this.isNew = false,
-    // ignore: unused_element_parameter
     this.available = true,
   });
 

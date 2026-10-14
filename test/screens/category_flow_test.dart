@@ -36,6 +36,8 @@ void main() {
         'MARCAS',
         'DEPORTES',
         'EQUIPOS_FUTBOL',
+        'FUTBOLISTAS',
+        'DEPORTISTAS_FAMOSOS',
         'VACACIONES',
         'HALLOWEEN',
         'NAVIDAD',
@@ -89,7 +91,12 @@ void main() {
       'Dichos y refranes',
       'Marcas',
     ]);
-    expect(labels(CategorySection.sports), ['Deportes', 'Equipos de fútbol']);
+    expect(labels(CategorySection.sports), [
+      'Deportes',
+      'Equipos de fútbol',
+      'Futbolistas',
+      'Deportistas famosos',
+    ]);
     expect(labels(CategorySection.classics), [
       'Animales',
       'Comida',
@@ -129,9 +136,13 @@ void main() {
     }
   });
 
-  test('ninguna lleva "Nueva" por ahora y todas tienen palabras', () {
+  test('ninguna lleva "Nueva" por ahora y todas tienen palabras menos '
+      'Futbolistas y Deportistas famosos', () {
     expect(GameCategory.values.where((c) => c.isNew), isEmpty);
-    expect(GameCategory.values.where((c) => !c.available), isEmpty);
+    expect(GameCategory.values.where((c) => !c.available), [
+      GameCategory.footballers,
+      GameCategory.athletes,
+    ]);
   });
 
   Future<ProviderContainer> pumpCategories(

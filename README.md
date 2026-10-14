@@ -116,7 +116,10 @@ la cámara frontal graba a los participantes para revivir las risas.
      Celebridades.
   3. Cultura general: Geografía, Lugares, Personajes históricos, Dichos y
      refranes y Marcas.
-  4. Deportes: Deportes y Equipos de fútbol.
+  4. Deportes: Deportes, Equipos de fútbol, Futbolistas y Deportistas
+     famosos (estas dos con "Pronto" hasta que tengan palabras con los
+     códigos `FUTBOLISTAS` y `DEPORTISTAS_FAMOSOS`, y con su ícono hasta
+     que tengan imagen).
   5. Especiales ("Solo por temporada"): Vacaciones (del 15 de junio al 31
      de julio), Halloween (del 1 al 31 de octubre) y Navidad (del 1 de
      diciembre al 6 de enero). Solo aparece cuando hay
@@ -193,7 +196,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   Comida, Profesiones, Acciones, Lugares, Series y novelas, Personajes,
   Superhéroes, Dibujos animados, Anime, Videojuegos, Música y canciones,
   Personajes históricos, Dichos y refranes, Vacaciones, Halloween y
-  Navidad: todas.
+  Navidad; faltan Futbolistas y Deportistas famosos.
 - Dificultad: Mezcladas (viene elegida: trae de todas, 300 palabras por
   categoría), Fácil (ideal con niños), Normal o Difícil (100 cada una). Se
   elige en la configuración de las palabras automáticas, en Libre y en todas
