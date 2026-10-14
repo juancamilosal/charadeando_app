@@ -6,7 +6,9 @@ import '../models/models.dart';
 import '../providers/providers.dart';
 import '../router.dart';
 import '../theme.dart';
+import '../widgets/category_card.dart' show LockBadge;
 import '../widgets/play_background.dart';
+import '../widgets/premium_sheet.dart';
 
 /// "Fondos": el usuario elige el color de fondo de la app y, con él, el
 /// estilo de las tarjetas. Se guarda en el celular y cambia al instante.
@@ -16,6 +18,7 @@ class BackdropScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = ref.watch(backdropProvider);
+    final premium = ref.watch(premiumUnlockedProvider);
     return PlayBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -63,7 +66,7 @@ class BackdropScreen extends ConsumerWidget {
                 childAspectRatio: 0.82,
                 children: [
                   for (final backdrop in Backdrop.values)
-                    if (backdrop != Backdrop.clasico)
+                    if (backdrop != Backdrop.clasico && !backdrop.premium)
                       _BackdropTile(
                         backdrop: backdrop,
                         selected: backdrop == selected,
@@ -73,6 +76,24 @@ class BackdropScreen extends ConsumerWidget {
                       ),
                 ],
               ),
+              // Los exclusivos de Todo Charadeando, al final y a lo ancho.
+              for (final backdrop in Backdrop.values)
+                if (backdrop.premium) ...[
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    height: 150,
+                    child: _BackdropTile(
+                      backdrop: backdrop,
+                      selected: selected == backdrop && premium,
+                      wide: true,
+                      locked: !premium,
+                      note: 'Exclusivo de Todo Charadeando',
+                      onTap: () => premium
+                          ? ref.read(backdropProvider.notifier).select(backdrop)
+                          : showPremiumSheet(context),
+                    ),
+                  ),
+                ],
             ],
           ),
         ),
@@ -89,9 +110,17 @@ class _BackdropTile extends StatelessWidget {
     required this.selected,
     required this.onTap,
     this.wide = false,
+    this.locked = false,
+    this.note,
   });
 
   final Backdrop backdrop;
+
+  /// Exclusivo y todavía no se tiene: lleva candado.
+  final bool locked;
+
+  /// Línea pequeña debajo del nombre.
+  final String? note;
   final bool selected;
   final VoidCallback onTap;
 
@@ -120,16 +149,35 @@ class _BackdropTile extends StatelessWidget {
         ),
       ],
     );
-    final label = Text(
+    final name = Text(
       backdrop.label,
       textAlign: TextAlign.center,
       style: TextStyle(
         fontFamily: AppFonts.display,
         fontSize: wide ? 26 : 22,
         fontWeight: FontWeight.w600,
-        color: backdrop.onColor,
+        color: backdrop.cards == CardStyle.gold
+            ? Backdrop.gold
+            : backdrop.onColor,
       ),
     );
+    final label = note == null
+        ? name
+        : Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              name,
+              Text(
+                note!,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  color: backdrop.onColor,
+                ),
+              ),
+            ],
+          );
     return Semantics(
       button: true,
       selected: selected,
@@ -180,6 +228,8 @@ class _BackdropTile extends StatelessWidget {
                     label,
                   ],
                 ),
+              if (locked)
+                const Positioned(top: 0, right: 0, child: LockBadge()),
               if (selected)
                 Positioned(
                   top: 0,
@@ -232,6 +282,11 @@ class _MiniCard extends StatelessWidget {
         color,
         AppColors.ink,
         const BoxShadow(color: AppColors.ink, offset: Offset(2, 3)),
+      ),
+      CardStyle.gold => (
+        color,
+        Backdrop.gold,
+        const BoxShadow(color: Color(0x88000000), offset: Offset(0, 3)),
       ),
       CardStyle.white => (
         Colors.white,

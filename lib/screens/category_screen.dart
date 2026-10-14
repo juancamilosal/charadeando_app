@@ -146,6 +146,7 @@ class CategoryScreen extends ConsumerWidget {
   Widget _allCategories(BuildContext context, WidgetRef ref) {
     final today = ref.watch(clockProvider)();
     final locked = ref.watch(lockedCategoriesProvider);
+    final paid = ref.watch(premiumCategoriesProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -201,6 +202,11 @@ class CategoryScreen extends ConsumerWidget {
                   // Todas las de la sección en tonos del mismo color.
                   color: section.shade(i),
                   locked: locked.contains(category),
+                  // Las de pago que ya son suyas brillan de vez en cuando,
+                  // cada una a su tiempo.
+                  shine: paid.contains(category) && !locked.contains(category)
+                      ? i * 0.23
+                      : null,
                   onTap: () =>
                       _choose(context, ref, category, color: section.shade(i)),
                 ),
@@ -257,6 +263,8 @@ class CategorySectionHeader extends StatelessWidget {
     // fondos oscuros y morada con el texto blanco sobre los claros, para que
     // se distinga de las tarjetas.
     final light = context.backdrop.light;
+    // En el fondo Oro, los títulos van en píldoras doradas.
+    final gold = context.backdrop == Backdrop.oro;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -264,7 +272,11 @@ class CategorySectionHeader extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.fromLTRB(14, 5, 14, 6),
             decoration: BoxDecoration(
-              color: light ? AppColors.purple : Colors.white,
+              color: gold
+                  ? Backdrop.gold
+                  : light
+                  ? AppColors.purple
+                  : Colors.white,
               borderRadius: BorderRadius.circular(20),
               boxShadow: const [
                 BoxShadow(color: Color(0x33000000), offset: Offset(0, 3)),
@@ -279,7 +291,11 @@ class CategorySectionHeader extends StatelessWidget {
                 fontSize: 23,
                 height: 1.1,
                 fontWeight: FontWeight.w700,
-                color: light ? Colors.white : AppColors.purple,
+                color: gold
+                    ? AppColors.ink
+                    : light
+                    ? Colors.white
+                    : AppColors.purple,
               ),
             ),
           ),

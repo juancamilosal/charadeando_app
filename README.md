@@ -83,6 +83,17 @@ la cámara frontal graba a los participantes para revivir las risas.
   reinstaló). Sin Google Play avisa que las compras no están disponibles.
   Los códigos promocionales de Google Play se canjean en Play Store y
   llegan como una compra más.
+- Las categorías de pago que ya son suyas (compradas sueltas, con un
+  código o con Todo Charadeando) pierden el candado y, cada 6 segundos, les
+  pasa un brillo en diagonal (`Shine`), cada una a su tiempo para que no
+  brillen todas juntas. Si el celular pide menos animaciones, no brillan.
+- Fondo Oro (`Backdrop.oro`), exclusivo de Todo Charadeando: degradado
+  morado muy oscuro, tarjetas con borde dorado (`CardStyle.gold`) y los
+  títulos de las secciones en píldoras doradas. En "Fondos" va al final, a
+  lo ancho, con "Exclusivo de Todo Charadeando"; sin Todo Charadeando lleva
+  candado y al tocarlo se abre la hoja de compra. Si estaba elegido y ya no
+  lo tiene, la app usa el clásico (`Backdrop.allowedWith`). Está en la
+  lista de lo que trae Todo Charadeando ("Fondo exclusivo Oro").
 - Insignia de Todo Charadeando: quien lo tiene (comprado o con un código
   que abre todo) ve un sello dorado con la medalla (`TodoCharadeandoSeal`)
   a la derecha de "Selección de categoría" (al tocarlo: "Tienes Todo

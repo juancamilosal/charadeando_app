@@ -15,6 +15,7 @@ const premiumBenefits = [
   'Todas las categorías de pago, también las nuevas que vayan llegando',
   'Videos en Full HD y calidad máxima',
   'Categorías propias sin límite',
+  'Fondo exclusivo Oro',
 ];
 
 /// Abre desde abajo la invitación a comprar. Con [category], ofrece esa

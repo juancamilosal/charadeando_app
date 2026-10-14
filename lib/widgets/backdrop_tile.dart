@@ -49,6 +49,10 @@ class BackdropTile extends StatelessWidget {
         AppColors.ink,
         const BoxShadow(color: AppColors.ink, offset: Offset(3, 5)),
       ),
+      CardStyle.gold => (
+        Backdrop.gold,
+        const BoxShadow(color: Color(0x88000000), offset: Offset(0, 5)),
+      ),
       CardStyle.white => (
         color,
         const BoxShadow(

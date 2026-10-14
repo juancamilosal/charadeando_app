@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../theme.dart';
 import 'category_art.dart';
+import 'shine.dart';
 
 /// Tarjeta de una categoría: el dibujo grande arriba y el nombre debajo
 /// (las propias, también cuántas palabras tienen). Su estilo (calcomanía,
@@ -22,6 +23,7 @@ class CategoryCard extends StatelessWidget {
     this.isNew = false,
     this.soon = false,
     this.locked = false,
+    this.shine,
   });
 
   /// Tarjeta de una categoría del juego, con su imagen (o su ícono, si todavía
@@ -34,6 +36,7 @@ class CategoryCard extends StatelessWidget {
     bool compact = false,
     Color? color,
     bool locked = false,
+    double? shine,
   }) => CategoryCard(
     title: category.label,
     color: color ?? category.color,
@@ -44,6 +47,7 @@ class CategoryCard extends StatelessWidget {
     isNew: category.isNew,
     soon: !category.available,
     locked: locked,
+    shine: shine,
   );
 
   /// Tarjeta de una categoría propia: su ícono, su color y cuántas palabras
@@ -90,6 +94,10 @@ class CategoryCard extends StatelessWidget {
   /// De pago sin desbloquear: un candado amarillo arriba a la derecha. Se
   /// ve con todos sus colores, para que den ganas de abrirla.
   final bool locked;
+
+  /// De pago y ya es suya: cada tanto le pasa un brillo. El número corre el
+  /// momento del brillo (ver [Shine.offset]); null, sin brillo.
+  final double? shine;
 
   /// Tamaño de letra más grande, hasta [maxSize], con el que [text] cabe en
   /// [maxLines] renglones de [width] sin partir ninguna palabra. Si ni con
@@ -218,6 +226,8 @@ class CategoryCard extends StatelessWidget {
               },
             ),
           ),
+          if (shine case final offset?)
+            Positioned.fill(child: Shine(offset: offset)),
           if (isNew)
             const Positioned(top: 6, left: 6, child: CategoryBadge.isNew()),
           if (locked)
@@ -290,6 +300,10 @@ class CategoryCardFrame extends StatelessWidget {
       CardStyle.comic => (
         AppColors.ink,
         const BoxShadow(color: AppColors.ink, offset: Offset(4, 6)),
+      ),
+      CardStyle.gold => (
+        Backdrop.gold,
+        const BoxShadow(color: Color(0x88000000), offset: Offset(0, 6)),
       ),
       CardStyle.white => (
         color,

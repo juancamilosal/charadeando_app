@@ -35,6 +35,12 @@ void main() {
     expect(Backdrop.clasico.cards, CardStyle.sticker);
   });
 
+  test('sin Todo Charadeando, el fondo Oro guardado se ve como el clásico', () {
+    expect(Backdrop.oro.allowedWith(premium: false), Backdrop.clasico);
+    expect(Backdrop.oro.allowedWith(premium: true), Backdrop.oro);
+    expect(Backdrop.noche.allowedWith(premium: false), Backdrop.noche);
+  });
+
   test('en los fondos claros los textos van oscuros', () {
     expect(Backdrop.crema.onColor, AppColors.ink);
     expect(Backdrop.mostaza.onColor, AppColors.ink);
@@ -76,7 +82,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    for (final b in Backdrop.values) {
+    for (final b in Backdrop.values.where((b) => !b.premium)) {
       expect(find.text(b.label), findsOneWidget);
     }
     BoxDecoration background() => tester
@@ -93,5 +99,67 @@ void main() {
     expect(store.saved, Backdrop.noche);
     expect(background().gradient, isNull);
     expect(background().color, Backdrop.noche.color);
+  });
+
+  Future<ProviderContainer> pumpBackdrops(
+    WidgetTester tester, {
+    required bool premium,
+    MemoryBackdropStore? store,
+  }) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    addTearDown(tester.view.reset);
+    final container = ProviderContainer(
+      overrides: [
+        backdropStoreProvider.overrideWithValue(store ?? MemoryBackdropStore()),
+        premiumUnlockedProvider.overrideWithValue(premium),
+      ],
+    );
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: Consumer(
+          builder: (context, ref, _) => MaterialApp(
+            theme: buildAppTheme(ref.watch(backdropProvider)),
+            home: const BackdropScreen(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Oro'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    return container;
+  }
+
+  testWidgets('el fondo Oro es exclusivo de Todo Charadeando: sin él tiene '
+      'candado y ofrece comprarlo', (tester) async {
+    final store = MemoryBackdropStore();
+    final container = await pumpBackdrops(tester, premium: false, store: store);
+    expect(Backdrop.oro.premium, isTrue);
+    expect(find.text('Exclusivo de Todo Charadeando'), findsOneWidget);
+    expect(find.byIcon(Icons.lock), findsOneWidget);
+    await tester.tap(find.text('Oro'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Desbloquea todo'), findsOneWidget);
+    expect(find.text('Fondo exclusivo Oro'), findsOneWidget);
+    expect(container.read(backdropProvider), Backdrop.standard);
+    expect(store.saved, isNull);
+  });
+
+  testWidgets('con Todo Charadeando se elige el fondo Oro', (tester) async {
+    final store = MemoryBackdropStore();
+    final container = await pumpBackdrops(tester, premium: true, store: store);
+    expect(find.byIcon(Icons.lock), findsNothing);
+    await tester.tap(find.text('Oro'));
+    await tester.pumpAndSettle();
+    expect(container.read(backdropProvider), Backdrop.oro);
+    expect(store.saved, Backdrop.oro);
+    expect(Backdrop.oro.cards, CardStyle.gold);
   });
 }
