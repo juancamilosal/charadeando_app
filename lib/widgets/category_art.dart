@@ -25,6 +25,7 @@ class CategoryArt extends StatelessWidget {
     GameCategory.brands,
     GameCategory.sports,
     GameCategory.soccerTeams,
+    GameCategory.footballers,
     GameCategory.objects,
     GameCategory.food,
     GameCategory.professions,

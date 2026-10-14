@@ -169,6 +169,7 @@ void main() {
       expect(find.textContaining('victorabdo'), findsOneWidget);
       expect(find.textContaining('Flaticon'), findsOneWidget);
       expect(find.textContaining('smalllikeart'), findsOneWidget);
+      expect(find.textContaining('justicon'), findsOneWidget);
     },
   );
 
