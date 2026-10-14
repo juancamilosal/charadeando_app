@@ -156,7 +156,8 @@ La colección `palabras` tiene el campo `dificultad` (`FACIL`, `NORMAL`,
 ### Códigos de las categorías
 
 Cada categoría de la app busca sus palabras en `palabras` con su código en
-el campo `categoria`. Todas tienen palabras. Una categoría nueva sin
+el campo `categoria`. Todas tienen palabras, menos `FUTBOLISTAS` y
+`DEPORTISTAS_FAMOSOS`. Una categoría nueva sin
 palabras se marca con `available: false` en `lib/models/category.dart` y sale
 con "Pronto" en la app hasta que se carguen.
 
@@ -182,6 +183,8 @@ con "Pronto" en la app hasta que se carguen.
 | Marcas | `MARCAS` |
 | Deportes | `DEPORTES` |
 | Equipos de fútbol | `EQUIPOS_FUTBOL` |
+| Futbolistas (sale con "Pronto" hasta que tenga palabras) | `FUTBOLISTAS` |
+| Deportistas famosos (sale con "Pronto" hasta que tenga palabras) | `DEPORTISTAS_FAMOSOS` |
 | Animales | `ANIMALES` |
 | Comida | `COMIDA` |
 | Objetos | `OBJETOS` |
@@ -203,3 +206,8 @@ combinadas, cada persona o personaje se carga en una sola categoría:
 - Personas reales que hicieron historia (Simón Bolívar, Einstein): solo en
   `PERSONAJES_HISTORICOS`. Los artistas actuales van en `CELEBRIDADES` o, si
   son de la música, en `MUSICA`.
+- Futbolistas (Messi, Cristiano Ronaldo, James Rodríguez): solo en
+  `FUTBOLISTAS`. Los de los demás deportes (Michael Jordan, Serena
+  Williams, Usain Bolt, Egan Bernal): solo en `DEPORTISTAS_FAMOSOS`.
+  Ninguno de los dos va en `CELEBRIDADES`, y los clubes siguen en
+  `EQUIPOS_FUTBOL`.

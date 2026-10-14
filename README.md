@@ -96,7 +96,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   cuenta regresiva de transcendedlifting, el reloj de sspsurvival y la
   marimba del final de universfield y la ruleta de victorabdo, también
   de Pixabay; y las imágenes
-  de las categorías, íconos de Flaticon; el de Anime, de smalllikeart). Se
+  de las categorías, íconos de Flaticon; el de Anime, de smalllikeart, y
+  el de Futbolistas, de justicon). Se
   guardan en el celular (`ajustes.json`) y se aplican desde que abre la
   app. La animación de la bienvenida explica el controlador elegido.
 - Pantalla de categorías (`lib/screens/category_screen.dart`), pestaña
@@ -116,7 +117,10 @@ la cámara frontal graba a los participantes para revivir las risas.
      Celebridades.
   3. Cultura general: Geografía, Lugares, Personajes históricos, Dichos y
      refranes y Marcas.
-  4. Deportes: Deportes y Equipos de fútbol.
+  4. Deportes: Deportes, Equipos de fútbol, Futbolistas y Deportistas
+     famosos (estas dos con "Pronto" hasta que tengan palabras con los
+     códigos `FUTBOLISTAS` y `DEPORTISTAS_FAMOSOS`; Deportistas famosos
+     muestra su ícono hasta que tenga imagen).
   5. Especiales ("Solo por temporada"): Vacaciones (del 15 de junio al 31
      de julio), Halloween (del 1 al 31 de octubre) y Navidad (del 1 de
      diciembre al 6 de enero). Solo aparece cuando hay
@@ -193,7 +197,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   Comida, Profesiones, Acciones, Lugares, Series y novelas, Personajes,
   Superhéroes, Dibujos animados, Anime, Videojuegos, Música y canciones,
   Personajes históricos, Dichos y refranes, Vacaciones, Halloween y
-  Navidad: todas.
+  Navidad y Futbolistas; falta Deportistas famosos.
 - Dificultad: Mezcladas (viene elegida: trae de todas, 300 palabras por
   categoría), Fácil (ideal con niños), Normal o Difícil (100 cada una). Se
   elige en la configuración de las palabras automáticas, en Libre y en todas
