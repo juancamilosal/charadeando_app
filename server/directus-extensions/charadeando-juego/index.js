@@ -7,6 +7,8 @@
 //                         categoría o de varias en partes iguales.
 //   POST /juego/canjear   Canjea un código promocional (colección codigos)
 //                         y dice qué desbloquea: todo o algunas categorías.
+//   POST /juego/mis-codigos  Lo que abren los códigos que un celular ya
+//                         canjeó, para recuperarlo al reinstalar la app.
 //
 // El rol Public de Directus no tiene permisos sobre la colección, así que
 // estas rutas son la única forma de leer o crear palabras sin iniciar
@@ -85,6 +87,7 @@ const limits = {
   palabras: { points: 10, hits: new Map() },
   // Pocos intentos, para que no se puedan adivinar códigos probando.
   canjear: { points: 5, hits: new Map() },
+  misCodigos: { points: 5, hits: new Map() },
 };
 
 /// Códigos promocionales y sus canjes. Ninguna de las dos es pública.
@@ -278,6 +281,21 @@ export function parseUnlocks(value) {
   return { todo: false, categorias: [...new Set(parts)] };
 }
 
+/// Junta lo que abren los códigos que un celular ya canjeó ([rows], cada
+/// uno con `desbloquea` y `activo`). Los apagados no cuentan; los vencidos
+/// sí, porque lo canjeado es de por vida.
+export function restoredUnlocks(rows) {
+  let todo = false;
+  const categorias = new Set();
+  for (const row of rows ?? []) {
+    if (!row || row.activo === false) continue;
+    const unlocks = parseUnlocks(row.desbloquea);
+    if (unlocks.todo) todo = true;
+    for (const c of unlocks.categorias) categorias.add(c);
+  }
+  return { todo, categorias: todo ? [] : [...categorias] };
+}
+
 /// Revisa si un código de la colección se puede canjear hoy. Devuelve null
 /// si sí, o el error (estado HTTP y mensaje) si no. [alreadyHere] es que
 /// este celular ya lo había canjeado: entonces no gasta otro uso.
@@ -467,6 +485,27 @@ export default {
       } catch (e) {
         logger.error(e, '[juego] No se pudo canjear el código');
         return error(res, 500, 'No se pudo canjear el código.');
+      }
+    });
+
+    // Lo que abren los códigos que este celular ya canjeó:
+    // { "dispositivo": "..." }. No gasta usos. Sirve para recuperarlos al
+    // reinstalar la app.
+    router.post('/mis-codigos', async (req, res) => {
+      if (!allowed('misCodigos', clientIp(req))) {
+        return error(res, 429, 'Demasiados intentos. Espera un minuto.');
+      }
+      const dispositivo = normalizeDevice((req.body ?? {}).dispositivo);
+      if (!dispositivo) return error(res, 400, '"dispositivo" no es válido.');
+      try {
+        const rows = await database(REDEMPTIONS)
+          .join(CODES, `${CODES}.codigo`, `${REDEMPTIONS}.codigo`)
+          .where(`${REDEMPTIONS}.dispositivo`, dispositivo)
+          .select(`${CODES}.desbloquea`, `${CODES}.activo`);
+        return res.json({ data: restoredUnlocks(rows) });
+      } catch (e) {
+        logger.error(e, '[juego] No se pudieron leer los códigos canjeados');
+        return error(res, 500, 'No se pudieron leer los códigos canjeados.');
       }
     });
 

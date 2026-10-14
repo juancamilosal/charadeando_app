@@ -150,6 +150,26 @@ class _PremiumSheetState extends ConsumerState<PremiumSheet> {
     await ref.read(premiumProvider.notifier).restore();
   }
 
+  /// Recupera los códigos que este celular ya canjeó.
+  Future<void> _restoreCodes() async {
+    _say('Buscando tus códigos…');
+    try {
+      final unlock = await ref.read(premiumProvider.notifier).restoreCodes();
+      if (!mounted) return;
+      final category = widget.category;
+      if (unlock.isEmpty) {
+        _say('Este celular no tiene códigos canjeados.');
+      } else if (unlock.all ||
+          (category != null && unlock.categories.contains(category.code))) {
+        _done(restoredMessage(unlock));
+      } else {
+        _say(restoredMessage(unlock));
+      }
+    } on CodeException catch (e) {
+      if (mounted) _say(e.message);
+    }
+  }
+
   Future<void> _code() async {
     final unlock = await showRedeemCodeDialog(context);
     if (unlock == null || !mounted) return;
@@ -275,6 +295,13 @@ class _PremiumSheetState extends ConsumerState<PremiumSheet> {
                       ),
                       onPressed: _restore,
                       child: const Text('Restaurar compras'),
+                    ),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.purple,
+                      ),
+                      onPressed: _restoreCodes,
+                      child: const Text('Restaurar mis códigos'),
                     ),
                     TextButton(
                       style: TextButton.styleFrom(
@@ -526,6 +553,10 @@ class TodoCharadeandoCard extends StatelessWidget {
     );
   }
 }
+
+/// Qué se recuperó de los códigos ya canjeados, para avisarlo.
+String restoredMessage(CodeUnlock unlock) =>
+    redeemedMessage(unlock).replaceFirst('Desbloqueaste', 'Recuperaste');
 
 /// Qué se desbloqueó con un código, para avisarlo.
 String redeemedMessage(CodeUnlock unlock) {

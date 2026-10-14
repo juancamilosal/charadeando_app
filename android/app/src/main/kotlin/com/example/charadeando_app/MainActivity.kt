@@ -29,6 +29,21 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
+        // Identificador del celular para los códigos promocionales. Desde
+        // Android 8 es fijo por app y celular: sobrevive a desinstalar y
+        // reinstalar la app (solo cambia al restablecer de fábrica).
+        MethodChannel(messenger, "charadeando/dispositivo").setMethodCallHandler { call, result ->
+            when (call.method) {
+                "androidId" -> result.success(
+                    try {
+                        Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+                    } catch (e: Exception) {
+                        null
+                    }
+                )
+                else -> result.notImplemented()
+            }
+        }
     }
 
     override fun onDestroy() {

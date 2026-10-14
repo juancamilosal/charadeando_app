@@ -11,6 +11,9 @@ class CodeUnlock {
 
   final bool all;
   final Set<String> categories;
+
+  /// No abre nada (por ejemplo, un celular sin códigos canjeados).
+  bool get isEmpty => !all && categories.isEmpty;
 }
 
 /// El código no sirve; [message] dice por qué, para mostrarlo tal cual.
@@ -37,15 +40,23 @@ class PromoCodeService {
   final String baseUrl;
 
   Uri get redeemUri => Uri.parse('$baseUrl/juego/canjear');
+  Uri get restoreUri => Uri.parse('$baseUrl/juego/mis-codigos');
 
-  Future<CodeUnlock> redeem(String code, {required String device}) async {
+  Future<CodeUnlock> redeem(String code, {required String device}) =>
+      _post(redeemUri, {'codigo': code.trim(), 'dispositivo': device});
+
+  /// Lo que abren los códigos que este celular ya canjeó (no gasta usos).
+  Future<CodeUnlock> restore({required String device}) =>
+      _post(restoreUri, {'dispositivo': device});
+
+  Future<CodeUnlock> _post(Uri uri, Map<String, Object> body) async {
     final http.Response response;
     try {
       response = await _client
           .post(
-            redeemUri,
+            uri,
             headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({'codigo': code.trim(), 'dispositivo': device}),
+            body: jsonEncode(body),
           )
           .timeout(_timeout);
     } on Exception {

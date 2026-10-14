@@ -9,6 +9,7 @@ import {
   parseCategorias,
   parseUnlocks,
   quotas,
+  restoredUnlocks,
 } from '../directus-extensions/charadeando-juego/index.js';
 
 test('reparte en partes iguales y el sobrante de a una', () => {
@@ -66,4 +67,39 @@ test('revisa si un código se puede canjear', () => {
   // Sin límite de usos.
   assert.equal(codeProblem({ ...base, usos: 999, usos_max: null }, now), null);
   assert.equal(codeProblem({ ...base, desbloquea: '' }, now)[0], 404);
+});
+
+test('recupera lo que abren los códigos ya canjeados', () => {
+  // Sin canjes.
+  assert.deepEqual(restoredUnlocks([]), { todo: false, categorias: [] });
+  assert.deepEqual(restoredUnlocks(undefined), { todo: false, categorias: [] });
+  // Con categorías de varios códigos, sin repetir.
+  assert.deepEqual(
+    restoredUnlocks([
+      { desbloquea: 'ANIME', activo: true },
+      { desbloquea: 'anime, FUTBOLISTAS', activo: true },
+    ]),
+    { todo: false, categorias: ['ANIME', 'FUTBOLISTAS'] },
+  );
+  // Con uno que abre todo.
+  assert.deepEqual(
+    restoredUnlocks([
+      { desbloquea: 'ANIME', activo: true },
+      { desbloquea: 'TODO', activo: true },
+    ]),
+    { todo: true, categorias: [] },
+  );
+  // Un código apagado no cuenta.
+  assert.deepEqual(
+    restoredUnlocks([
+      { desbloquea: 'TODO', activo: false },
+      { desbloquea: 'NAVIDAD', activo: true },
+    ]),
+    { todo: false, categorias: ['NAVIDAD'] },
+  );
+  // Uno vencido igual se recupera: lo canjeado es de por vida.
+  assert.deepEqual(
+    restoredUnlocks([{ desbloquea: 'TODO', activo: true, vence: '2020-01-01' }]),
+    { todo: true, categorias: [] },
+  );
 });

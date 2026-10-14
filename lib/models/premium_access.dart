@@ -43,6 +43,13 @@ class PremiumAccess {
   /// categorías propias sin límite.
   bool get premium => purchased || codeAll;
 
+  /// No tiene nada desbloqueado (ni compras ni códigos).
+  bool get nothing =>
+      !purchased &&
+      !codeAll &&
+      codeCategories.isEmpty &&
+      boughtCategories.isEmpty;
+
   /// Si se puede jugar [category].
   bool unlocks(GameCategory category) =>
       !category.premium || premium || categories.contains(category.code);

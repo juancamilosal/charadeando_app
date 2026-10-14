@@ -110,12 +110,19 @@ la cámara frontal graba a los participantes para revivir las risas.
   apoyar Charadeando.".
 - Códigos propios ("Canjear código" en Ajustes o "Tengo un código" en la
   hoja): se validan en el servidor (`POST /juego/canjear`, ver
-  `server/README.md`) con el código y un identificador al azar del celular
-  (guardado en `premium.json`). Un código abre todo o algunas categorías
-  (por ejemplo, solo Anime); si no sirve, el mensaje del servidor sale bajo
-  el campo ("Este código ya venció."). Lo abierto se guarda en el celular y
-  se suma a lo que ya había. Si se reinstala la app, se vuelve a canjear el
-  mismo código.
+  `server/README.md`) con el código y el identificador del celular. Un
+  código abre todo o algunas categorías (por ejemplo, solo Anime); si no
+  sirve, el mensaje del servidor sale bajo el campo ("Este código ya
+  venció."). Lo abierto se guarda en el celular y se suma a lo que ya
+  había. El identificador es el SHA-256 de `charadeando:` + el
+  `ANDROID_ID` (canal `charadeando/dispositivo` en `MainActivity.kt`), que
+  no cambia al reinstalar la app; si no se puede leer, uno al azar guardado
+  en `premium.json`. Al abrir la app sin nada desbloqueado guardado (por
+  ejemplo, recién reinstalada), se recuperan solos los códigos que ese
+  celular ya canjeó (`POST /juego/mis-codigos`, no gasta usos); sin
+  internet se intenta la próxima vez. En la hoja de compra, "Restaurar mis
+  códigos" hace lo mismo ("¡Listo! Recuperaste Anime." o "Este celular no
+  tiene códigos canjeados.").
 - Ajustes (`lib/screens/settings_screen.dart`), en tarjetas con un ícono en
   cada fila. "Compras" va primero: "Todo Charadeando" ("Todas las
   categorías, pago único"; si ya lo tiene, su tarjeta dorada), "Canjear

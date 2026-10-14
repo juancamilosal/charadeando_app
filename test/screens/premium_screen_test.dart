@@ -18,6 +18,7 @@ void main() {
     WidgetTester tester, {
     required FakeBilling billing,
     MemoryPremiumStore? store,
+    FakeCodes? codes,
   }) async {
     tester.view.physicalSize = const Size(1080, 2400);
     addTearDown(tester.view.reset);
@@ -28,7 +29,7 @@ void main() {
         allSeasonsProvider.overrideWithValue(false),
         premiumBillingProvider.overrideWithValue(billing),
         premiumStoreProvider.overrideWithValue(store ?? MemoryPremiumStore()),
-        promoCodeServiceProvider.overrideWithValue(FakeCodes()),
+        promoCodeServiceProvider.overrideWithValue(codes ?? FakeCodes()),
       ],
     );
     addTearDown(container.dispose);
@@ -183,6 +184,52 @@ void main() {
     expect(tester.widget<CategoryCard>(card('Anime')).locked, isFalse);
     expect(tester.widget<CategoryCard>(card('Futbolistas')).locked, isTrue);
     expect(container.read(premiumUnlockedProvider), isFalse);
+  });
+
+  testWidgets('"Restaurar mis códigos" recupera los que este celular ya '
+      'canjeó', (tester) async {
+    final codes = FakeCodes(restored: const CodeUnlock(categories: {'ANIME'}));
+    // Con algo guardado no se recuperan solos al abrir.
+    final store = MemoryPremiumStore(
+      const PremiumAccess(boughtCategories: {'NAVIDAD'}),
+    );
+    await pump(tester, billing: FakeBilling(), store: store, codes: codes);
+    expect(codes.restores, isEmpty);
+    await tapCard(tester, 'Anime');
+    final restore = find.text('Restaurar mis códigos');
+    await tester.ensureVisible(restore);
+    await tester.pump();
+    await tester.tap(restore);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(codes.restores, hasLength(1));
+    expect(find.text('Desbloquea Anime'), findsNothing);
+    expect(find.text('¡Listo! Recuperaste Anime.'), findsOneWidget);
+    expect(tester.widget<CategoryCard>(card('Anime')).locked, isFalse);
+    expect(store.saved.codeCategories, {'ANIME'});
+  });
+
+  testWidgets('"Restaurar mis códigos" sin códigos lo dice', (tester) async {
+    final codes = FakeCodes();
+    await pump(
+      tester,
+      billing: FakeBilling(),
+      store: MemoryPremiumStore(
+        const PremiumAccess(boughtCategories: {'NAVIDAD'}),
+      ),
+      codes: codes,
+    );
+    await tapCard(tester, 'Anime');
+    final restore = find.text('Restaurar mis códigos');
+    await tester.ensureVisible(restore);
+    await tester.pump();
+    await tester.tap(restore);
+    await tester.pump();
+    expect(
+      find.text('Este celular no tiene códigos canjeados.'),
+      findsOneWidget,
+    );
+    expect(find.text('Desbloquea Anime'), findsOneWidget);
   });
 
   test('el mensaje dice qué se abrió', () {

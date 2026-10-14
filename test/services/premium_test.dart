@@ -72,7 +72,25 @@ class _NoBackdropFile extends BackdropStore {
 
 /// Códigos de mentira: FAMILIA abre todo y ANIME2026, Anime.
 class FakeCodes extends PromoCodeService {
+  FakeCodes({this.restored = const CodeUnlock(), this.offline = false});
+
   final redeemed = <(String, String)>[];
+
+  /// Lo que devuelve "mis códigos": lo que este celular ya canjeó.
+  final CodeUnlock restored;
+
+  /// Sin internet: "mis códigos" falla.
+  final bool offline;
+
+  /// Celulares que pidieron "mis códigos".
+  final restores = <String>[];
+
+  @override
+  Future<CodeUnlock> restore({required String device}) async {
+    restores.add(device);
+    if (offline) throw const CodeException('No hay conexión.');
+    return restored;
+  }
 
   @override
   Future<CodeUnlock> redeem(String code, {required String device}) async {
@@ -144,6 +162,63 @@ void main() {
     },
   );
 
+  group('PremiumStore.deviceId', () {
+    Future<Directory> tempDir() async {
+      final dir = await Directory.systemTemp.createTemp('dispositivo');
+      addTearDown(() => dir.delete(recursive: true));
+      return dir;
+    }
+
+    test(
+      'con ANDROID_ID manda su SHA-256, el mismo aunque se reinstale',
+      () async {
+        final dir = await tempDir();
+        final store = PremiumStore(
+          directory: () async => dir,
+          androidId: () async => 'abc123',
+        );
+        final id = await store.deviceId();
+        expect(id, PremiumStore.hashAndroidId('abc123'));
+        expect(id, isNot(contains('abc123')));
+        expect(RegExp(r'^[A-Za-z0-9_-]{8,100}$').hasMatch(id), isTrue);
+        // Otra instalación (otra carpeta, sin nada guardado) da el mismo.
+        final other = await tempDir();
+        expect(
+          await PremiumStore(
+            directory: () async => other,
+            androidId: () async => 'abc123',
+          ).deviceId(),
+          id,
+        );
+        // Es el SHA-256 de "charadeando:" + ANDROID_ID, en hexadecimal.
+        expect(
+          id,
+          'c9390c8cf7bb6fb9043db4e5a76096ad35b15ea11d58bc22a78b22a3181aa879',
+        );
+      },
+    );
+
+    for (final (name, read) in <(String, Future<String?> Function())>[
+      ('null', () async => null),
+      ('vacío', () async => '  '),
+      ('con error', () async => throw Exception('sin canal')),
+    ]) {
+      test(
+        'si el ANDROID_ID viene $name usa el de respaldo, siempre el mismo',
+        () async {
+          final dir = await tempDir();
+          final store = PremiumStore(
+            directory: () async => dir,
+            androidId: read,
+          );
+          final id = await store.deviceId();
+          expect(id, hasLength(24));
+          expect(await store.deviceId(), id);
+        },
+      );
+    }
+  });
+
   group('PromoCodeService', () {
     PromoCodeService service(int status, Object body, [List<String>? log]) =>
         PromoCodeService(
@@ -178,6 +253,24 @@ void main() {
       }).redeem('X1Y2Z3', device: 'abc12345');
       expect(unlock.all, isFalse);
       expect(unlock.categories, {'ANIME', 'FUTBOLISTAS'});
+    });
+
+    test('pide lo que abren los códigos ya canjeados', () async {
+      final log = <String>[];
+      final unlock = await service(200, {
+        'data': {
+          'todo': false,
+          'categorias': ['ANIME'],
+        },
+      }, log).restore(device: 'abc12345');
+      expect(unlock.categories, {'ANIME'});
+      expect(unlock.isEmpty, isFalse);
+      expect(log.single, contains('/juego/mis-codigos'));
+      expect(log.single, contains('"dispositivo":"abc12345"'));
+      final none = await service(200, {
+        'data': {'todo': false, 'categorias': <String>[]},
+      }).restore(device: 'abc12345');
+      expect(none.isEmpty, isTrue);
     });
 
     test('muestra el mensaje del servidor cuando no sirve', () async {
@@ -254,6 +347,50 @@ void main() {
         contains(GameCategory.footballers),
       );
     });
+
+    test(
+      'al abrir sin nada guardado recupera los códigos de este celular',
+      () async {
+        final codes = FakeCodes(restored: const CodeUnlock(all: true));
+        final store = MemoryPremiumStore();
+        final c = container(billing: FakeBilling(), store: store, codes: codes);
+        c.read(premiumProvider);
+        await pumpEventQueue();
+        expect(codes.restores, ['celular-de-prueba']);
+        expect(c.read(premiumUnlockedProvider), isTrue);
+        expect(store.saved.codeAll, isTrue);
+      },
+    );
+
+    test('con algo guardado no pide los códigos al abrir', () async {
+      final codes = FakeCodes(restored: const CodeUnlock(all: true));
+      final c = container(
+        billing: FakeBilling(),
+        store: MemoryPremiumStore(
+          const PremiumAccess(codeCategories: {'ANIME'}),
+        ),
+        codes: codes,
+      );
+      c.read(premiumProvider);
+      await pumpEventQueue();
+      expect(codes.restores, isEmpty);
+      expect(c.read(premiumUnlockedProvider), isFalse);
+    });
+
+    test(
+      'sin internet al abrir no pasa nada; se puede intentar después',
+      () async {
+        final codes = FakeCodes(offline: true);
+        final billing = FakeBilling();
+        final c = container(billing: billing, codes: codes);
+        c.read(premiumProvider);
+        await pumpEventQueue();
+        expect(codes.restores, hasLength(1));
+        expect(c.read(premiumProvider).nothing, isTrue);
+        // Igual busca las compras de Google Play.
+        expect(billing.restores, 1);
+      },
+    );
 
     test('una compra de Google Play desbloquea todo y se guarda', () async {
       final billing = FakeBilling();

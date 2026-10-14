@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/models.dart';
@@ -33,7 +34,17 @@ class PremiumController extends Notifier<PremiumAccess> {
     final saved = await _store.load();
     // Lo que llegó mientras se leía (una compra) no se pierde.
     state = saved.merge(state);
-    // Si se reinstaló la app, las compras vuelven solas.
+    // Si se reinstaló la app (no hay nada guardado), los códigos que este
+    // celular ya canjeó vuelven solos. Sin internet, se intenta la próxima
+    // vez que se abra la app.
+    if (state.nothing) {
+      try {
+        await restoreCodes();
+      } on CodeException catch (e) {
+        debugPrint('[Premium] No se pudieron recuperar los códigos: $e');
+      }
+    }
+    // Y las compras de Google Play.
     if (!state.purchased) await billing.restore();
   }
 
@@ -73,6 +84,23 @@ class PremiumController extends Notifier<PremiumAccess> {
     final unlock = await ref
         .read(promoCodeServiceProvider)
         .redeem(code, device: device);
+    await _addCodes(unlock);
+    return unlock;
+  }
+
+  /// Recupera lo que abren los códigos que este celular ya canjeó (por
+  /// ejemplo, después de reinstalar la app). No gasta usos. Lanza
+  /// [CodeException] si no hay conexión.
+  Future<CodeUnlock> restoreCodes() async {
+    final device = await _store.deviceId();
+    final unlock = await ref
+        .read(promoCodeServiceProvider)
+        .restore(device: device);
+    if (!unlock.isEmpty) await _addCodes(unlock);
+    return unlock;
+  }
+
+  Future<void> _addCodes(CodeUnlock unlock) async {
     final before = state;
     state = state.copyWith(
       codeAll: state.codeAll || unlock.all,
@@ -80,6 +108,5 @@ class PremiumController extends Notifier<PremiumAccess> {
     );
     if (state.premium && !before.premium) _wearGold();
     await _store.save(state);
-    return unlock;
   }
 }

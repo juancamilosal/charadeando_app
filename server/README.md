@@ -38,6 +38,9 @@ Directus 11 con PostgreSQL y Redis, desplegado con Coolify en el VPS.
   - `POST /juego/canjear`: canjea un código promocional (ver "Códigos
     promocionales" abajo). 5 intentos por minuto por IP, para que no se
     puedan adivinar códigos probando.
+  - `POST /juego/mis-codigos`: lo que abren los códigos que un celular ya
+    canjeó, para recuperarlos al reinstalar la app (ver abajo). 5 intentos
+    por minuto por IP.
 - El flujo de Gemini se cambia con la variable de entorno
   `CHARADEANDO_GEMINI_FLOW` (id del flujo); por defecto
   `2d91a34a-b82c-4f97-9e2f-12154ba86323`.
@@ -121,7 +124,30 @@ Para los personales, usa códigos largos y difíciles de adivinar
 
 Si el mismo celular canjea otra vez el mismo código (por ejemplo, después
 de reinstalar la app), responde lo mismo sin gastar otro uso, aunque ya no
-queden. Pruebas: `node --test server/tests/juego.test.mjs`.
+queden.
+
+### El celular y la reinstalación
+
+El `dispositivo` que manda la app es el SHA-256 (en hexadecimal) de
+`charadeando:` + el `ANDROID_ID` del celular. Desde Android 8 ese valor es
+fijo por app y celular: no cambia al desinstalar y reinstalar la app (solo
+al restablecer el celular de fábrica). No se manda el `ANDROID_ID` tal
+cual. Si no se puede leer, la app usa un identificador al azar guardado en
+el celular, que sí se pierde al desinstalar.
+
+`POST /juego/mis-codigos` con `{ "dispositivo": "..." }` cruza
+`codigos_canjes` con `codigos` y responde lo que abren todos los códigos
+que ese celular ya canjeó, con el mismo formato de `/juego/canjear`:
+`{ "data": { "todo": true, "categorias": [] } }` (o `todo` falso y las
+categorías). No gasta usos, ignora los códigos con `activo` falso y vale
+aunque el código ya haya vencido: lo canjeado es de por vida. Sin canjes
+responde `todo` falso y la lista vacía.
+
+La app la llama sola al abrir si no tiene nada desbloqueado guardado (por
+ejemplo, recién reinstalada); sin internet no pasa nada y lo intenta la
+próxima vez. También con "Restaurar mis códigos" en la hoja de compra.
+
+Pruebas: `node --test server/tests/juego.test.mjs`.
 
 ## Compra en Google Play
 
