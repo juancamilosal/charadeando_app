@@ -182,8 +182,6 @@ enum GameCategory {
     'ANIME',
     'Anime',
     section: CategorySection.entertainment,
-    // Todavía no hay palabras con el código ANIME en Directus.
-    available: false,
   ),
   videogames(
     'Videojuegos',
@@ -326,6 +324,7 @@ enum GameCategory {
     // vengan.
     // ignore: unused_element_parameter
     this.isNew = false,
+    // ignore: unused_element_parameter
     this.available = true,
   });
 

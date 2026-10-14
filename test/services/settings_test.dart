@@ -168,6 +168,7 @@ void main() {
       expect(find.textContaining('universfield'), findsOneWidget);
       expect(find.textContaining('victorabdo'), findsOneWidget);
       expect(find.textContaining('Flaticon'), findsOneWidget);
+      expect(find.textContaining('smalllikeart'), findsOneWidget);
     },
   );
 

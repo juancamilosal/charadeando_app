@@ -96,7 +96,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   cuenta regresiva de transcendedlifting, el reloj de sspsurvival y la
   marimba del final de universfield y la ruleta de victorabdo, también
   de Pixabay; y las imágenes
-  de las categorías, íconos de Flaticon). Se
+  de las categorías, íconos de Flaticon; el de Anime, de smalllikeart). Se
   guardan en el celular (`ajustes.json`) y se aplican desde que abre la
   app. La animación de la bienvenida explica el controlador elegido.
 - Pantalla de categorías (`lib/screens/category_screen.dart`), pestaña
@@ -112,8 +112,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   una cuadrícula de 3 columnas, todas visibles:
   1. Clásicos: Animales, Comida, Objetos, Profesiones y Acciones.
   2. Entretenimiento: Películas, Series y novelas, Personajes, Superhéroes,
-     Dibujos animados, Anime (con "Pronto" hasta que tenga palabras con el
-     código `ANIME`), Videojuegos, Música y canciones y Celebridades.
+     Dibujos animados, Anime, Videojuegos, Música y canciones y
+     Celebridades.
   3. Cultura general: Geografía, Lugares, Personajes históricos, Dichos y
      refranes y Marcas.
   4. Deportes: Deportes y Equipos de fútbol.
@@ -191,9 +191,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   tanto muestra su ícono. Ya lo tienen: Libre, Animales, Geografía,
   Películas, Celebridades, Marcas, Deportes, Equipos de fútbol, Objetos,
   Comida, Profesiones, Acciones, Lugares, Series y novelas, Personajes,
-  Superhéroes, Dibujos animados, Videojuegos, Música y canciones,
+  Superhéroes, Dibujos animados, Anime, Videojuegos, Música y canciones,
   Personajes históricos, Dichos y refranes, Vacaciones, Halloween y
-  Navidad: todas menos Anime, que muestra una Pokébola.
+  Navidad: todas.
 - Dificultad: Mezcladas (viene elegida: trae de todas, 300 palabras por
   categoría), Fácil (ideal con niños), Normal o Difícil (100 cada una). Se
   elige en la configuración de las palabras automáticas, en Libre y en todas

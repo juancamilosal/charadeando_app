@@ -356,7 +356,8 @@ class CreditsSheet extends StatelessWidget {
       Icons.image,
       AppColors.turquoise,
       'Imágenes de las categorías',
-      'Íconos de Flaticon (flaticon.com), hechos por sus autores.',
+      'Íconos de Flaticon (flaticon.com), hechos por sus autores; el de '
+          'Anime, por smalllikeart.',
     ),
   ];
 

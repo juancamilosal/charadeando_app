@@ -34,6 +34,7 @@ class CategoryArt extends StatelessWidget {
     GameCategory.characters,
     GameCategory.superheroes,
     GameCategory.cartoons,
+    GameCategory.anime,
     GameCategory.videogames,
     GameCategory.music,
     GameCategory.historicalFigures,
