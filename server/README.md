@@ -131,15 +131,33 @@ ids tienen que ser exactamente estos:
 
 | Producto | Id |
 |---|---|
-| Premium (todo) | `charadeando_premium` |
+| Todas las categorías (Todo Charadeando) | `charadeando_premium` |
+| Objetos | `categoria_objetos` |
+| Profesiones | `categoria_profesiones` |
+| Acciones | `categoria_acciones` |
+| Personajes | `categoria_personajes` |
+| Superhéroes | `categoria_superheroes` |
+| Dibujos animados | `categoria_dibujos_animados` |
 | Anime | `categoria_anime` |
+| Videojuegos | `categoria_videojuegos` |
+| Música y canciones | `categoria_musica` |
+| Celebridades | `categoria_celebridades` |
+| Personajes históricos | `categoria_personajes_historicos` |
+| Dichos y refranes | `categoria_dichos_refranes` |
+| Marcas | `categoria_marcas` |
 | Futbolistas | `categoria_futbolistas` |
 | Deportistas famosos | `categoria_deportistas_famosos` |
-| Vacaciones | `categoria_vacaciones` |
-| Halloween | `categoria_halloween` |
 | Navidad | `categoria_navidad` |
 
-Si se agrega otra categoría de pago (en `GameCategory.paid`), su producto es
+Son de pago todas menos las dos primeras de cada sección (Animales y
+Comida; Películas y Series y novelas; Geografía y Lugares; Deportes y
+Equipos de fútbol; Vacaciones y Halloween) y Libre. Mientras Play no da los
+precios (productos sin crear o celular sin Play), la app muestra $3.900 por
+categoría y $14.900 Todas las categorías (`fallbackCategoryPrice` y
+`fallbackAllPrice` en `lib/widgets/premium_sheet.dart`): conviene poner esos
+mismos precios en Play Console, o cambiar los de la app.
+
+Si se agrega otra categoría (después de las dos primeras de su sección), su producto es
 `categoria_` y su código en minúsculas, y quien ya tenga Premium la recibe
 sin pagar más.
 

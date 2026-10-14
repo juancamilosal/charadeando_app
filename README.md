@@ -63,14 +63,18 @@ la cámara frontal graba a los participantes para revivir las risas.
   todo junto con **Todo Charadeando** (en el código, "premium"), que además
   trae el video Full HD y Máxima y las categorías propias sin límite. No se
   llama "Premium" para que no suene a suscripción. Las de pago
-  (`GameCategory.paid`: Anime, Futbolistas, Deportistas famosos,
-  Vacaciones, Halloween y Navidad; se cambian en esa lista) llevan un
+  (`GameCategory.paid`: todas menos las dos primeras de cada sección,
+  `GameCategory.freePerSection`; gratis quedan Libre, Animales, Comida,
+  Películas, Series y novelas, Geografía, Lugares, Deportes, Equipos de
+  fútbol, Vacaciones y Halloween) llevan un
   candado amarillo en su tarjeta (con todos sus colores) y en Combinar. Al
   tocar una se abre "Desbloquea Anime": "Solo Anime · $3.900" y, debajo, "o
   mejor" el recuadro de Todo Charadeando con lo que trae (también las
   categorías nuevas que vayan llegando con las actualizaciones), "Todas las
   categorías · $14.900" y "Pago único · sin mensualidades". No se dice
-  cuánto se ahorra. Los precios y la moneda los da Google Play. Una
+  cuánto se ahorra. Los precios y la moneda los da Google Play; mientras
+  no los da, se muestran $3.900 y $14.900 (`fallbackCategoryPrice`,
+  `fallbackAllPrice`). Una
   resolución bloqueada ("Full HD (1080p) · Todo Charadeando") o "Nueva
   categoría" sin cupo abren solo Todo Charadeando ("Desbloquea todo").
   Abajo, "Restaurar compras" y "Tengo un código". Los productos de Google
@@ -83,9 +87,10 @@ la cámara frontal graba a los participantes para revivir las risas.
   reinstaló). Sin Google Play avisa que las compras no están disponibles.
   Los códigos promocionales de Google Play se canjean en Play Store y
   llegan como una compra más.
-- Las categorías de pago que ya son suyas (compradas sueltas, con un
-  código o con Todo Charadeando) pierden el candado y, cada 6 segundos, les
-  pasa un brillo en diagonal (`Shine`), cada una a su tiempo para que no
+- Las categorías de pago que ya son suyas (compradas sueltas o con un
+  código) pierden el candado y, cada 6 segundos, les pasa un brillo en
+  diagonal (`Shine`); con Todo Charadeando brillan todas las tarjetas de las
+  secciones, cada una a su tiempo para que no
   brillen todas juntas. Si el celular pide menos animaciones, no brillan.
 - Fondo Oro (`Backdrop.oro`), exclusivo de Todo Charadeando: un degradado
   dorado (claro, con los textos oscuros y las tarjetas con borde blanco)

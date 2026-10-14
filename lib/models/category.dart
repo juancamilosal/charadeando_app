@@ -374,15 +374,16 @@ enum GameCategory {
   /// se puede jugar ni combinar. Se cambia a verdadero cuando se carguen.
   final bool available;
 
-  /// Categorías de pago: se juegan con Premium o con un código que las
-  /// abra. Para cambiar cuáles son, basta con cambiar esta lista.
-  static const paid = {
-    GameCategory.anime,
-    GameCategory.footballers,
-    GameCategory.athletes,
-    GameCategory.vacations,
-    GameCategory.halloween,
-    GameCategory.christmas,
+  /// Cuántas categorías de cada sección son gratis: las primeras, en el
+  /// orden de la pantalla. Las demás son de pago.
+  static const freePerSection = 2;
+
+  /// Categorías de pago: se juegan comprándolas, con Todo Charadeando o con
+  /// un código. Son todas menos las [freePerSection] primeras de cada
+  /// sección (Libre siempre es gratis).
+  static final Set<GameCategory> paid = {
+    for (final section in CategorySection.values)
+      ...values.where((c) => c.section == section).skip(freePerSection),
   };
 
   /// Se desbloquea con Premium (o con un código).

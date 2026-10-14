@@ -105,6 +105,9 @@ void main() {
     expect(find.byType(TodoCharadeandoSeal), findsOneWidget);
     expect(container.read(premiumUnlockedProvider), isTrue);
     expect(tester.widget<CategoryCard>(card('Anime')).locked, isFalse);
+    // Con Todo Charadeando brillan todas, también las gratis.
+    expect(tester.widget<CategoryCard>(card('Anime')).shine, isNotNull);
+    expect(tester.widget<CategoryCard>(card('Animales')).shine, isNotNull);
 
     // Ahora sí se juega: se elige cómo jugar.
     await tapCard(tester, 'Anime');
@@ -139,16 +142,16 @@ void main() {
   testWidgets('sin Google Play avisa que no se puede comprar', (tester) async {
     await pump(tester, billing: FakeBilling(available: false));
     await tapCard(tester, 'Futbolistas');
-    expect(find.text('Todas las categorías'), findsOneWidget);
-    await tester.tap(find.text('Todas las categorías'));
+    // Sin Google Play se ven los precios de respaldo.
+    expect(find.text(r'Todas las categorías · $14.900'), findsOneWidget);
+    expect(find.text(r'Solo Futbolistas · $3.900'), findsOneWidget);
+    await tester.tap(find.text(r'Todas las categorías · $14.900'));
     await tester.pump();
     expect(
       find.textContaining('Las compras no están disponibles'),
       findsOneWidget,
     );
     expect(find.text('Desbloquea Futbolistas'), findsOneWidget);
-    // Sin tienda no hay precios.
-    expect(find.text('Solo Futbolistas'), findsOneWidget);
   });
 
   testWidgets('un código abre la categoría y cierra la oferta; uno vencido '
@@ -191,6 +194,31 @@ void main() {
       redeemedMessage(const CodeUnlock(categories: {'ANIME', 'FUTBOLISTAS'})),
       '¡Listo! Desbloqueaste Anime y Futbolistas.',
     );
-    expect(GameCategory.paid, contains(GameCategory.christmas));
+    // Gratis, las dos primeras de cada sección; las demás, de pago.
+    for (final c in [
+      GameCategory.free,
+      GameCategory.animals,
+      GameCategory.food,
+      GameCategory.movies,
+      GameCategory.seriesNovels,
+      GameCategory.geography,
+      GameCategory.places,
+      GameCategory.sports,
+      GameCategory.soccerTeams,
+      GameCategory.vacations,
+      GameCategory.halloween,
+    ]) {
+      expect(c.premium, isFalse, reason: c.label);
+    }
+    for (final c in [
+      GameCategory.objects,
+      GameCategory.characters,
+      GameCategory.anime,
+      GameCategory.historicalFigures,
+      GameCategory.footballers,
+      GameCategory.christmas,
+    ]) {
+      expect(c.premium, isTrue, reason: c.label);
+    }
   });
 }

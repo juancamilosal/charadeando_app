@@ -147,6 +147,7 @@ class CategoryScreen extends ConsumerWidget {
     final today = ref.watch(clockProvider)();
     final locked = ref.watch(lockedCategoriesProvider);
     final paid = ref.watch(premiumCategoriesProvider);
+    final allUnlocked = ref.watch(premiumUnlockedProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -202,9 +203,12 @@ class CategoryScreen extends ConsumerWidget {
                   // Todas las de la sección en tonos del mismo color.
                   color: section.shade(i),
                   locked: locked.contains(category),
-                  // Las de pago que ya son suyas brillan de vez en cuando,
-                  // cada una a su tiempo.
-                  shine: paid.contains(category) && !locked.contains(category)
+                  // Con Todo Charadeando brillan todas; si no, las de pago
+                  // que ya son suyas. Cada una a su tiempo.
+                  shine:
+                      allUnlocked ||
+                          (paid.contains(category) &&
+                              !locked.contains(category))
                       ? i * 0.23
                       : null,
                   onTap: () =>

@@ -10,6 +10,13 @@ import '../services/services.dart';
 import '../theme.dart';
 import 'category_card.dart';
 
+/// Precios que se muestran mientras Google Play no da los suyos (por
+/// ejemplo, si todavía no están creados los productos o el celular no tiene
+/// Play). Deben ser los mismos de Play Console; al comprar, Google cobra el
+/// de Play.
+const fallbackCategoryPrice = r'$3.900';
+const fallbackAllPrice = r'$14.900';
+
 /// Lo que trae Premium, para mostrarlo igual en todas partes.
 const premiumBenefits = [
   'Todas las categorías de pago, también las nuevas que vayan llegando',
@@ -222,9 +229,9 @@ class _PremiumSheetState extends ConsumerState<PremiumSheet> {
                 const SizedBox(height: 14),
                 if (category != null) ...[
                   _BuyButton(
-                    label: prices.category == null
-                        ? 'Solo ${category.label}'
-                        : 'Solo ${category.label} · ${prices.category!.text}',
+                    label:
+                        'Solo ${category.label} · '
+                        '${prices.category?.text ?? fallbackCategoryPrice}',
                     color: AppColors.coral,
                     foreground: Colors.white,
                     busy: _buying == category.code,
@@ -409,9 +416,9 @@ class _PremiumBox extends StatelessWidget {
             ),
           const SizedBox(height: 12),
           _BuyButton(
-            label: price == null
-                ? 'Todas las categorías'
-                : 'Todas las categorías · ${price!.text}',
+            label:
+                'Todas las categorías · '
+                '${price?.text ?? fallbackAllPrice}',
             color: AppColors.yellow,
             foreground: AppColors.ink,
             busy: busy,
