@@ -289,6 +289,12 @@ void main() {
     final first = wheel(tester);
     expect(first, hasLength(6));
     expect(first.every(systemPunishments.contains), isTrue);
+    // "Otros castigos" va justo debajo de la ruleta, antes de la
+    // configuración.
+    expect(
+      tester.getTopLeft(find.text('Otros castigos')).dy,
+      lessThan(tester.getTopLeft(find.text('Campos de la ruleta')).dy),
+    );
     await tester.tap(find.text('Otros castigos'));
     await tester.pump();
     expect(wheel(tester), isNot(first));

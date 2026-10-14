@@ -110,6 +110,15 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
     return null;
   }
 
+  /// Otros castigos de la app, distintos de los que se ven.
+  void _otherPunishments() => _changed(
+    () => _systemPick = Roulette.systemPick(
+      RouletteSetup.maxFields,
+      _random,
+      exclude: _systemPick.take(_fields),
+    ),
+  );
+
   /// Algo cambió en la configuración: la ruleta vuelve a mostrarlo.
   void _changed(VoidCallback change) => setState(change);
 
@@ -176,6 +185,26 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
                       onDone: () {},
                     ),
                   ),
+                  // Con los castigos de la app, "Otros castigos" va justo
+                  // debajo de la ruleta: se cambian sin bajar la pantalla.
+                  if (_source == PunishmentSource.system) ...[
+                    const SizedBox(height: 8),
+                    Center(
+                      child: FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: context.backdrop.light
+                              ? AppColors.purple
+                              : Colors.white,
+                          foregroundColor: context.backdrop.light
+                              ? Colors.white
+                              : AppColors.purple,
+                        ),
+                        icon: const Icon(Icons.shuffle),
+                        label: const Text('Otros castigos'),
+                        onPressed: _otherPunishments,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 20),
                   ..._config(),
                 ],
@@ -235,19 +264,6 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.error,
                 fontWeight: FontWeight.w700,
-              ),
-            ),
-          if (source == PunishmentSource.system)
-            TextButton.icon(
-              style: TextButton.styleFrom(foregroundColor: AppColors.purple),
-              icon: const Icon(Icons.shuffle),
-              label: const Text('Otros castigos'),
-              onPressed: () => _changed(
-                () => _systemPick = Roulette.systemPick(
-                  RouletteSetup.maxFields,
-                  _random,
-                  exclude: _systemPick.take(_fields),
-                ),
               ),
             ),
           if (source != null && source.written)

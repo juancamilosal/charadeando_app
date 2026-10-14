@@ -362,7 +362,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   es una categoría de palabras). Arriba se ve la ruleta con "Girar" y
   debajo su configuración; la ruleta se va armando con lo que se elige: la
   cantidad de campos, lo que se escribe en cada castigo (los vacíos con
-  "?") o los castigos del juego ("Otros castigos" los cambia). Al girar se
+  "?") o los castigos del juego ("Otros castigos", justo debajo de la
+  ruleta, los cambia sin bajar la pantalla). Al girar se
   revisa que esté completa y, en "Jugadores y app", la app llena los vacíos;
   entonces la ruleta se abre a pantalla completa, sin la configuración ni
   la barra de abajo: solo la ruleta girando y "¡Parar!". La ruleta también
