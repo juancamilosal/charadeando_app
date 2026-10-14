@@ -4,6 +4,7 @@ import { test } from 'node:test';
 
 import {
   codeProblem,
+  ensureRedemptions,
   normalizeCode,
   normalizeDevice,
   parseCategorias,
@@ -102,4 +103,36 @@ test('recupera lo que abren los códigos ya canjeados', () => {
     restoredUnlocks([{ desbloquea: 'TODO', activo: true, vence: '2020-01-01' }]),
     { todo: true, categorias: [] },
   );
+});
+
+test('crea la tabla de canjes solo si no existe', async () => {
+  const created = [];
+  const fakeDb = (exists) => ({
+    schema: {
+      hasTable: async () => exists,
+      createTable: async (name, build) => {
+        const columns = [];
+        const col = (kind) => (columnName) => {
+          columns.push(`${kind}:${columnName}`);
+          const chain = { notNullable: () => chain, index: () => chain };
+          return chain;
+        };
+        build({
+          increments: col('id'),
+          string: col('string'),
+          timestamp: col('timestamp'),
+        });
+        created.push({ name, columns });
+      },
+    },
+  });
+  assert.equal(await ensureRedemptions(fakeDb(true)), false);
+  assert.equal(created.length, 0);
+  assert.equal(await ensureRedemptions(fakeDb(false)), true);
+  assert.deepEqual(created, [
+    {
+      name: 'codigos_canjes',
+      columns: ['id:id', 'string:codigo', 'string:dispositivo', 'timestamp:fecha'],
+    },
+  ]);
 });

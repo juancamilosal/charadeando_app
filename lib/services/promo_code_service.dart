@@ -76,6 +76,13 @@ class PromoCodeService {
       if (errors is List && errors.isNotEmpty && errors.first is Map) {
         message = (errors.first as Map)['message'];
       }
+      // Directus responde "Route ... doesn't exist." si la extensión del
+      // servidor todavía no tiene la ruta.
+      if (message is String && message.startsWith('Route ')) {
+        throw const CodeException(
+          'Los códigos todavía no están disponibles. Inténtalo más tarde.',
+        );
+      }
       throw CodeException(
         message is String ? message : 'No se pudo canjear el código.',
       );

@@ -92,9 +92,11 @@ En Directus, **Settings → Data Model → Create Collection**:
    | `vence` | Date (o Datetime), puede ser vacío | Una fecha vale hasta el final de ese día. Vacío es sin vencimiento. |
    | `activo` | Boolean, por defecto `true` | Apágalo si un código se filtra. |
 
-2. `codigos_canjes`, con `id` (número automático) y los campos `codigo`
-   (String), `dispositivo` (String) y `fecha` (Datetime). La llena la
-   extensión: un renglón por cada celular que canjea un código.
+2. `codigos_canjes` (un renglón por cada celular que canjea un código):
+   **no hace falta crearla**. La extensión la crea sola en la base de datos
+   la primera vez que alguien canjea, con `id`, `codigo`, `dispositivo` y
+   `fecha`. Para verla en el panel de Directus, en Settings → Data Model
+   aparece como tabla sin configurar y se puede "configurar" con un clic.
 
 Ninguna de las dos debe ser pública: el rol Public no tiene permisos sobre
 ellas (como `palabras`). Solo la extensión las lee y escribe.

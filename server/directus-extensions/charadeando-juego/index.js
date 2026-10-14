@@ -296,6 +296,20 @@ export function restoredUnlocks(rows) {
   return { todo, categorias: todo ? [] : [...categorias] };
 }
 
+/// Crea la tabla de canjes (un renglón por celular que canjea un código) si
+/// todavía no existe, para que con solo la colección `codigos` ya se pueda
+/// canjear. [database] es el knex de Directus.
+export async function ensureRedemptions(database) {
+  if (await database.schema.hasTable(REDEMPTIONS)) return false;
+  await database.schema.createTable(REDEMPTIONS, (table) => {
+    table.increments('id');
+    table.string('codigo', 100).notNullable().index();
+    table.string('dispositivo', 100).notNullable().index();
+    table.timestamp('fecha').notNullable();
+  });
+  return true;
+}
+
 /// Revisa si un código de la colección se puede canjear hoy. Devuelve null
 /// si sí, o el error (estado HTTP y mensaje) si no. [alreadyHere] es que
 /// este celular ya lo había canjeado: entonces no gasta otro uso.
@@ -323,6 +337,21 @@ export default {
   id: 'juego',
   handler: (router, { database, logger, services, getSchema, env }) => {
     const flowId = env?.CHARADEANDO_GEMINI_FLOW || DEFAULT_GEMINI_FLOW;
+
+    // La tabla de canjes se crea sola la primera vez que se necesita; si
+    // falla, se vuelve a intentar en el siguiente pedido.
+    let redemptionsReady = null;
+    function redemptions() {
+      redemptionsReady ??= ensureRedemptions(database)
+        .then((created) => {
+          if (created) logger.info(`[juego] Tabla ${REDEMPTIONS} creada`);
+        })
+        .catch((e) => {
+          redemptionsReady = null;
+          throw e;
+        });
+      return redemptionsReady;
+    }
     const flowUrl = `http://127.0.0.1:${env?.PORT || 8055}/flows/trigger/${flowId}`;
 
     async function askGeminiOnce(prompt) {
@@ -456,6 +485,7 @@ export default {
       if (!dispositivo) return error(res, 400, '"dispositivo" no es válido.');
 
       try {
+        await redemptions();
         const result = await database.transaction(async (trx) => {
           const row = await trx(CODES)
             .whereRaw('upper(codigo) = ?', [codigo])
@@ -498,6 +528,7 @@ export default {
       const dispositivo = normalizeDevice((req.body ?? {}).dispositivo);
       if (!dispositivo) return error(res, 400, '"dispositivo" no es válido.');
       try {
+        await redemptions();
         const rows = await database(REDEMPTIONS)
           .join(CODES, `${CODES}.codigo`, `${REDEMPTIONS}.codigo`)
           .where(`${REDEMPTIONS}.dispositivo`, dispositivo)

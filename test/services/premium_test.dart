@@ -290,6 +290,23 @@ void main() {
       );
     });
 
+    test('si el servidor no tiene la ruta, lo dice sin tecnicismos', () async {
+      await expectLater(
+        service(404, {
+          'errors': [
+            {'message': "Route /juego/canjear doesn't exist."},
+          ],
+        }).redeem('CODIGO-PRUEBA', device: 'abc12345'),
+        throwsA(
+          isA<CodeException>().having(
+            (e) => e.message,
+            'message',
+            'Los códigos todavía no están disponibles. Inténtalo más tarde.',
+          ),
+        ),
+      );
+    });
+
     test('sin internet avisa', () async {
       final offline = PromoCodeService(
         baseUrl: 'https://directus.test',
