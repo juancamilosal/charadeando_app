@@ -170,6 +170,7 @@ void main() {
       expect(find.textContaining('Flaticon'), findsOneWidget);
       expect(find.textContaining('smalllikeart'), findsOneWidget);
       expect(find.textContaining('justicon'), findsOneWidget);
+      expect(find.textContaining('Magnific'), findsOneWidget);
     },
   );
 

@@ -156,8 +156,7 @@ La colección `palabras` tiene el campo `dificultad` (`FACIL`, `NORMAL`,
 ### Códigos de las categorías
 
 Cada categoría de la app busca sus palabras en `palabras` con su código en
-el campo `categoria`. Todas tienen palabras, menos `FUTBOLISTAS` y
-`DEPORTISTAS_FAMOSOS`. Una categoría nueva sin
+el campo `categoria`. Todas tienen palabras. Una categoría nueva sin
 palabras se marca con `available: false` en `lib/models/category.dart` y sale
 con "Pronto" en la app hasta que se carguen.
 
@@ -183,8 +182,8 @@ con "Pronto" en la app hasta que se carguen.
 | Marcas | `MARCAS` |
 | Deportes | `DEPORTES` |
 | Equipos de fútbol | `EQUIPOS_FUTBOL` |
-| Futbolistas (sale con "Pronto" hasta que tenga palabras) | `FUTBOLISTAS` |
-| Deportistas famosos (sale con "Pronto" hasta que tenga palabras) | `DEPORTISTAS_FAMOSOS` |
+| Futbolistas | `FUTBOLISTAS` |
+| Deportistas famosos | `DEPORTISTAS_FAMOSOS` |
 | Animales | `ANIMALES` |
 | Comida | `COMIDA` |
 | Objetos | `OBJETOS` |

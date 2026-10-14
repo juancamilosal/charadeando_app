@@ -285,8 +285,6 @@ enum GameCategory {
     'FUTBOLISTAS',
     'Futbolista',
     section: CategorySection.sports,
-    // Todavía no hay palabras con el código FUTBOLISTAS en Directus.
-    available: false,
   ),
   athletes(
     'Deportistas famosos',
@@ -296,8 +294,6 @@ enum GameCategory {
     'DEPORTISTAS_FAMOSOS',
     'Deportista',
     section: CategorySection.sports,
-    // Todavía no hay palabras con el código DEPORTISTAS_FAMOSOS en Directus.
-    available: false,
   ),
 
   // Especiales: solo se ven en su temporada.
@@ -346,6 +342,7 @@ enum GameCategory {
     // vengan.
     // ignore: unused_element_parameter
     this.isNew = false,
+    // ignore: unused_element_parameter
     this.available = true,
   });
 

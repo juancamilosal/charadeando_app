@@ -136,13 +136,9 @@ void main() {
     }
   });
 
-  test('ninguna lleva "Nueva" por ahora y todas tienen palabras menos '
-      'Futbolistas y Deportistas famosos', () {
+  test('ninguna lleva "Nueva" por ahora y todas tienen palabras', () {
     expect(GameCategory.values.where((c) => c.isNew), isEmpty);
-    expect(GameCategory.values.where((c) => !c.available), [
-      GameCategory.footballers,
-      GameCategory.athletes,
-    ]);
+    expect(GameCategory.values.where((c) => !c.available), isEmpty);
   });
 
   Future<ProviderContainer> pumpCategories(

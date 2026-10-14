@@ -23,14 +23,8 @@ void main() {
     );
   });
 
-  test('todas las categorías tienen su dibujo, menos las que esperan su '
-      'imagen, que muestran su ícono', () {
-    const waiting = {GameCategory.athletes};
-    expect(
-      CategoryArt.withImage,
-      containsAll(GameCategory.values.where((c) => !waiting.contains(c))),
-    );
-    expect(CategoryArt.withImage.intersection(waiting), isEmpty);
+  test('todas las categorías tienen su dibujo', () {
+    expect(CategoryArt.withImage, containsAll(GameCategory.values));
   });
 
   testWidgets('muestra la imagen quieta', (tester) async {
