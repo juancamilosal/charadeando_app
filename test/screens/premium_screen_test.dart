@@ -129,6 +129,10 @@ void main() {
     expect(find.text('¡Listo! Ya tienes Futbolistas.'), findsOneWidget);
     expect(tester.widget<CategoryCard>(card('Futbolistas')).locked, isFalse);
     expect(tester.widget<CategoryCard>(card('Anime')).locked, isTrue);
+    // La comprada queda con borde dorado; las demás, no.
+    expect(tester.widget<CategoryCard>(card('Futbolistas')).golden, isTrue);
+    expect(tester.widget<CategoryCard>(card('Anime')).golden, isFalse);
+    expect(tester.widget<CategoryCard>(card('Animales')).golden, isFalse);
     expect(container.read(premiumUnlockedProvider), isFalse);
   });
 

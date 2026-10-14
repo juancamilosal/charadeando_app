@@ -83,6 +83,10 @@ la cámara frontal graba a los participantes para revivir las risas.
   reinstaló). Sin Google Play avisa que las compras no están disponibles.
   Los códigos promocionales de Google Play se canjean en Play Store y
   llegan como una compra más.
+- Las categorías de pago que ya son suyas (compradas sueltas, con un
+  código o con Todo Charadeando) pierden el candado y quedan con borde
+  dorado (`CategoryCard.golden`, `goldenCategoriesProvider`), como un
+  trofeo; las gratis siguen con el borde de su fondo.
 - Insignia de Todo Charadeando: quien lo tiene (comprado o con un código
   que abre todo) ve un sello dorado con la medalla (`TodoCharadeandoSeal`)
   a la derecha de "Selección de categoría" (al tocarlo: "Tienes Todo
