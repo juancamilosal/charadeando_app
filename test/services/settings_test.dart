@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:charadeando_app/models/models.dart';
 import 'package:charadeando_app/providers/providers.dart';
 import 'package:charadeando_app/screens/settings_screen.dart';
+import 'package:charadeando_app/widgets/premium_sheet.dart';
 import 'package:charadeando_app/services/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -69,6 +70,28 @@ void main() {
     expect(ScreenOrientation.game, DeviceOrientation.landscapeRight);
   });
 
+  testWidgets('con Todo Charadeando, Ajustes muestra su tarjeta dorada', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          settingsStoreProvider.overrideWithValue(MemorySettingsStore()),
+          premiumUnlockedProvider.overrideWithValue(true),
+        ],
+        child: const MaterialApp(home: SettingsScreen()),
+      ),
+    );
+    expect(find.byType(TodoCharadeandoCard), findsOneWidget);
+    expect(
+      find.text('¡Lo tienes todo! Gracias por apoyar Charadeando.'),
+      findsOneWidget,
+    );
+    expect(find.text('Todas las categorías, pago único'), findsNothing);
+  });
+
   testWidgets('cada ajuste de la pantalla se guarda', (tester) async {
     tester.view.physicalSize = const Size(1080, 2400);
     addTearDown(tester.view.reset);
@@ -79,8 +102,9 @@ void main() {
         child: const MaterialApp(home: SettingsScreen()),
       ),
     );
-    // Premium va arriba: también está.
-    expect(find.text('Charadeando Premium'), findsOneWidget);
+    // Las compras van arriba.
+    expect(find.text('Compras'), findsOneWidget);
+    expect(find.text('Todo Charadeando'), findsOneWidget);
     expect(find.text('Canjear código'), findsOneWidget);
     expect(find.text('Restaurar compras'), findsOneWidget);
     Future<void> tap(String title) async {

@@ -58,7 +58,7 @@ void main() {
       await tapVisible(tester, 'Personalizada');
       expect(find.text('Configuración'), findsOneWidget);
 
-      final premium = find.text('Full HD (1080p) · Premium');
+      final premium = find.text('Full HD (1080p) · Todo Charadeando');
       await tester.scrollUntilVisible(
         premium,
         200,

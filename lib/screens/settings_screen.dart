@@ -29,15 +29,19 @@ class SettingsScreen extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
             children: [
               _Section(
-                title: 'Premium',
+                title: 'Compras',
                 rows: [
-                  _LinkRow(
-                    icon: Icons.workspace_premium,
-                    color: AppColors.orange,
-                    title: 'Charadeando Premium',
-                    subtitle: premium ? 'Activo' : 'Desbloquea todo',
-                    onTap: premium ? null : () => showPremiumSheet(context),
-                  ),
+                  // Quien ya lo tiene ve su tarjeta dorada.
+                  if (premium)
+                    const TodoCharadeandoCard()
+                  else
+                    _LinkRow(
+                      icon: Icons.workspace_premium,
+                      color: AppColors.orange,
+                      title: 'Todo Charadeando',
+                      subtitle: 'Todas las categorías, pago único',
+                      onTap: () => showPremiumSheet(context),
+                    ),
                   _LinkRow(
                     icon: Icons.confirmation_number_outlined,
                     color: AppColors.magenta,

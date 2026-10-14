@@ -60,26 +60,35 @@ la cámara frontal graba a los participantes para revivir las risas.
   Se guardan solo en el celular (`equipos.json`), no en un servidor.
 - Compras de pago único (`lib/widgets/premium_sheet.dart`,
   `PremiumController`): cada categoría de pago se puede comprar suelta, o
-  todo junto con Premium, que además trae el video Full HD y Máxima y las
-  categorías propias sin límite. Las de pago (`GameCategory.paid`: Anime,
-  Futbolistas, Deportistas famosos, Vacaciones, Halloween y Navidad; se
-  cambian en esa lista) llevan un candado amarillo en su tarjeta (con todos
-  sus colores) y en Combinar. Al tocar una se abre "Desbloquea Anime":
-  "Solo Anime · $3.900" y, debajo, "o mejor" el recuadro de Premium con lo
-  que trae (también las categorías nuevas que vayan llegando con las
-  actualizaciones) y "Todas las categorías · $14.900", pago único. No se dice
-  cuánto se ahorra. Los precios y la moneda los da Google Play. Una resolución bloqueada o "Nueva categoría" sin cupo
-  abren solo Premium ("Desbloquea todo"). Abajo, "Restaurar compras" y
-  "Tengo un código". Los productos de Google Play (`PlayBilling`, con
-  `in_app_purchase`; solo en Android) son `charadeando_premium` y
-  `categoria_<código en minúsculas>` (`categoria_anime`). Cada compra se
-  confirma a Google (si no, la devuelve a los 3 días), se guarda en el
-  celular (`premium.json`) y la hoja se cierra con "¡Listo! Ya tienes
-  Anime." (o "…Charadeando Premium."). Al abrir la app, si no tiene
-  Premium, se buscan las compras hechas (por si se reinstaló). Sin Google
-  Play avisa que las compras no están disponibles. Los códigos
-  promocionales de Google Play se canjean en Play Store y llegan como una
-  compra más.
+  todo junto con **Todo Charadeando** (en el código, "premium"), que además
+  trae el video Full HD y Máxima y las categorías propias sin límite. No se
+  llama "Premium" para que no suene a suscripción. Las de pago
+  (`GameCategory.paid`: Anime, Futbolistas, Deportistas famosos,
+  Vacaciones, Halloween y Navidad; se cambian en esa lista) llevan un
+  candado amarillo en su tarjeta (con todos sus colores) y en Combinar. Al
+  tocar una se abre "Desbloquea Anime": "Solo Anime · $3.900" y, debajo, "o
+  mejor" el recuadro de Todo Charadeando con lo que trae (también las
+  categorías nuevas que vayan llegando con las actualizaciones), "Todas las
+  categorías · $14.900" y "Pago único · sin mensualidades". No se dice
+  cuánto se ahorra. Los precios y la moneda los da Google Play. Una
+  resolución bloqueada ("Full HD (1080p) · Todo Charadeando") o "Nueva
+  categoría" sin cupo abren solo Todo Charadeando ("Desbloquea todo").
+  Abajo, "Restaurar compras" y "Tengo un código". Los productos de Google
+  Play (`PlayBilling`, con `in_app_purchase`; solo en Android) son
+  `charadeando_premium` y `categoria_<código en minúsculas>`
+  (`categoria_anime`). Cada compra se confirma a Google (si no, la devuelve
+  a los 3 días), se guarda en el celular (`premium.json`) y la hoja se
+  cierra con "¡Listo! Ya tienes Anime." (o "…Todo Charadeando."). Al abrir
+  la app, si no lo tiene todo, se buscan las compras hechas (por si se
+  reinstaló). Sin Google Play avisa que las compras no están disponibles.
+  Los códigos promocionales de Google Play se canjean en Play Store y
+  llegan como una compra más.
+- Insignia de Todo Charadeando: quien lo tiene (comprado o con un código
+  que abre todo) ve un sello dorado con la medalla (`TodoCharadeandoSeal`)
+  a la derecha de "Selección de categoría" (al tocarlo: "Tienes Todo
+  Charadeando: todas las categorías desbloqueadas.") y, en Ajustes, una
+  tarjeta dorada (`TodoCharadeandoCard`): "¡Lo tienes todo! Gracias por
+  apoyar Charadeando.".
 - Códigos propios ("Canjear código" en Ajustes o "Tengo un código" en la
   hoja): se validan en el servidor (`POST /juego/canjear`, ver
   `server/README.md`) con el código y un identificador al azar del celular
@@ -89,9 +98,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   se suma a lo que ya había. Si se reinstala la app, se vuelve a canjear el
   mismo código.
 - Ajustes (`lib/screens/settings_screen.dart`), en tarjetas con un ícono en
-  cada fila. "Premium" va primero: "Charadeando Premium" ("Desbloquea todo",
-  o "Activo" con un visto verde si ya lo tiene), "Canjear código" y
-  "Restaurar compras". "Preferencias de juego": "Música" (encendida: suena en bucle
+  cada fila. "Compras" va primero: "Todo Charadeando" ("Todas las
+  categorías, pago único"; si ya lo tiene, su tarjeta dorada), "Canjear
+  código" y "Restaurar compras". "Preferencias de juego": "Música" (encendida: suena en bucle
   y bajita la música de la app, `assets/audio/musica.mp3`, con
   `audioplayers`; se detiene en cuanto se apaga el ajuste, se pausa con la
   app en segundo plano y se calla en el turno y al ver los videos, que
@@ -290,7 +299,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   final "Mis categorías" (si hay alguna), cada una con su dibujo o ícono y
   una casilla; se marca o desmarca tocando la fila. Las de "Pronto" llevan
   esa etiqueta en vez de la casilla y no se marcan. Las premium bloqueadas
-  llevan candado y abren la hoja de Premium (si se desbloquean, quedan
+  llevan candado y abren la hoja de compra (si se desbloquean, quedan
   marcadas); las propias con menos de 10 palabras dicen "Faltan palabras" y no se marcan.
   El botón de abajo, "Empezar a jugar · 3 categorías", se activa con 2 o
   más. La app recuerda la última combinación (`combinacion.json`). Al
@@ -445,7 +454,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   puntos es empate.
 - Video de cada turno con la cámara frontal, en 720p por defecto. También se
   puede jugar sin grabar. 1080p y la máxima resolución quedan bloqueadas como
-  premium; al tocarlas se abre la hoja de Premium.
+  de Todo Charadeando; al tocarlas se abre la hoja de compra.
 - El video se puede ver, guardar en la galería o compartir. Al continuar al
   siguiente turno se borra del celular; la app no guarda videos en ningún
   otro lugar.

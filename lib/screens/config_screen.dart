@@ -396,7 +396,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                       selected: _config.resolution,
                       labelOf: (o) => o.label,
                       lockReasonOf: (o) =>
-                          o.premium && !premium ? 'Premium' : null,
+                          o.premium && !premium ? 'Todo Charadeando' : null,
                       onLockedTap: (_) => showPremiumSheet(context),
                       onSelected: (o) =>
                           _update(_config.copyWith(resolution: o)),

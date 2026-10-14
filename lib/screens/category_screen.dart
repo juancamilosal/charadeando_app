@@ -88,6 +88,30 @@ class CategoryScreen extends ConsumerWidget {
           titleSpacing: 20,
           // Es la primera pantalla: no hay a dónde volver.
           automaticallyImplyLeading: false,
+          actions: [
+            // El sello dorado de quien tiene Todo Charadeando.
+            if (ref.watch(premiumUnlockedProvider))
+              Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: Tooltip(
+                  message: 'Tienes Todo Charadeando',
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () => ScaffoldMessenger.of(context)
+                      ..hideCurrentSnackBar()
+                      ..showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Tienes Todo Charadeando: todas las categorías '
+                            'desbloqueadas.',
+                          ),
+                        ),
+                      ),
+                    child: const TodoCharadeandoSeal(),
+                  ),
+                ),
+              ),
+          ],
         ),
         body: SafeArea(
           top: false,

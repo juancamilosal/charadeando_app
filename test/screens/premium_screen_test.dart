@@ -84,6 +84,10 @@ void main() {
     expect(find.text(r'Todas las categorías · $14.900'), findsOneWidget);
     // Sin decir cuánto se ahorra: solo los dos precios.
     expect(find.textContaining('Ahorras'), findsNothing);
+    expect(find.text('Todo Charadeando'), findsOneWidget);
+    expect(find.text('Pago único · sin mensualidades'), findsOneWidget);
+    // Sin el sello: todavía no lo tiene.
+    expect(find.byType(TodoCharadeandoSeal), findsNothing);
     for (final benefit in premiumBenefits) {
       expect(find.text(benefit), findsOneWidget);
     }
@@ -96,7 +100,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('Desbloquea Anime'), findsNothing);
-    expect(find.text('¡Listo! Ya tienes Charadeando Premium.'), findsOneWidget);
+    expect(find.text('¡Listo! Ya tienes Todo Charadeando.'), findsOneWidget);
+    // Ahora lleva el sello dorado en la barra.
+    expect(find.byType(TodoCharadeandoSeal), findsOneWidget);
     expect(container.read(premiumUnlockedProvider), isTrue);
     expect(tester.widget<CategoryCard>(card('Anime')).locked, isFalse);
 

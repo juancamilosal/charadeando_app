@@ -99,7 +99,7 @@ class _PremiumSheetState extends ConsumerState<PremiumSheet> {
     final category = widget.category;
     switch (event.status) {
       case BillingStatus.owned when event.category == null:
-        _done('¡Listo! Ya tienes Charadeando Premium.');
+        _done('¡Listo! Ya tienes Todo Charadeando.');
       case BillingStatus.owned when event.category == category?.code:
         _done('¡Listo! Ya tienes ${category!.label}.');
       case BillingStatus.owned:
@@ -209,7 +209,7 @@ class _PremiumSheetState extends ConsumerState<PremiumSheet> {
                 const SizedBox(height: 4),
                 Text(
                   category != null
-                      ? 'Cómprala sola o llévate todas con Premium.'
+                      ? 'Cómprala sola o llévatelas todas de una vez.'
                       : 'Un solo pago y es tuyo para siempre.',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
@@ -278,7 +278,7 @@ class _PremiumSheetState extends ConsumerState<PremiumSheet> {
                   ],
                 ),
                 const Text(
-                  'Pago único con Google Play: es tuyo para siempre.',
+                  'Los pagos se hacen con Google Play.',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 12, color: Color(0xFF8E80A6)),
                 ),
@@ -369,7 +369,7 @@ class _PremiumBox extends StatelessWidget {
               SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  'Charadeando Premium',
+                  'Todo Charadeando',
                   style: TextStyle(
                     fontFamily: AppFonts.display,
                     fontSize: 20,
@@ -415,6 +415,103 @@ class _PremiumBox extends StatelessWidget {
             foreground: AppColors.ink,
             busy: busy,
             onPressed: onBuy,
+          ),
+          const SizedBox(height: 8),
+          // Que no quede duda de que no es una suscripción.
+          const Text(
+            'Pago único · sin mensualidades',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Sello dorado de quien tiene Todo Charadeando: un círculo dorado con la
+/// medalla, borde blanco y brillo.
+class TodoCharadeandoSeal extends StatelessWidget {
+  const TodoCharadeandoSeal({super.key, this.size = 36});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFFFE680), AppColors.yellow, AppColors.orange],
+        ),
+        border: Border.all(color: Colors.white, width: size * 0.07),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x55000000),
+            offset: Offset(0, 2),
+            blurRadius: 4,
+          ),
+        ],
+      ),
+      child: Icon(
+        Icons.workspace_premium,
+        size: size * 0.6,
+        color: AppColors.ink,
+      ),
+    );
+  }
+}
+
+/// Tarjeta dorada de Ajustes para quien tiene Todo Charadeando.
+class TodoCharadeandoCard extends StatelessWidget {
+  const TodoCharadeandoCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFFFE680), AppColors.yellow, AppColors.orange],
+        ),
+      ),
+      child: const Row(
+        children: [
+          TodoCharadeandoSeal(size: 48),
+          SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Todo Charadeando',
+                  style: TextStyle(
+                    fontFamily: AppFonts.display,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
+                ),
+                Text(
+                  '¡Lo tienes todo! Gracias por apoyar Charadeando.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

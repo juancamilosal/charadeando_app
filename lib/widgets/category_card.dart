@@ -366,8 +366,7 @@ class CategoryBadge extends StatelessWidget {
   }
 }
 
-/// Candado de lo que se desbloquea con Premium: un círculo amarillo con
-/// borde blanco.
+/// Candado de lo que es de pago: un círculo amarillo con borde blanco.
 class LockBadge extends StatelessWidget {
   const LockBadge({super.key, this.size = 28});
 
@@ -376,7 +375,7 @@ class LockBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'Premium',
+      label: 'De pago',
       child: Container(
         width: size,
         height: size,
