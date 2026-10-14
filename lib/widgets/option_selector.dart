@@ -11,6 +11,7 @@ class OptionSelector<T> extends StatelessWidget {
     required this.labelOf,
     required this.onSelected,
     this.lockReasonOf,
+    this.onLockedTap,
     this.description,
     this.errorText,
   });
@@ -24,6 +25,10 @@ class OptionSelector<T> extends StatelessWidget {
 
   /// Devuelve por qué la opción está bloqueada, o null si se puede elegir.
   final String? Function(T option)? lockReasonOf;
+
+  /// Al tocar una bloqueada (por ejemplo, para ofrecer Premium). Si es
+  /// null, las bloqueadas no se pueden tocar.
+  final ValueChanged<T>? onLockedTap;
   final String? description;
 
   /// Mensaje en rojo, por ejemplo si intentan seguir sin elegir.
@@ -72,7 +77,11 @@ class OptionSelector<T> extends StatelessWidget {
       ),
       avatar: locked ? const Icon(Icons.lock_outline, size: 18) : null,
       selected: option == selected,
-      onSelected: locked ? null : (_) => onSelected(option),
+      onSelected: !locked
+          ? (_) => onSelected(option)
+          : onLockedTap == null
+          ? null
+          : (_) => onLockedTap!(option),
     );
   }
 }

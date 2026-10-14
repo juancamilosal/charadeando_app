@@ -11,3 +11,4 @@ export 'saved_video.dart';
 export 'backdrop.dart';
 export 'app_settings.dart';
 export 'saved_team.dart';
+export 'premium_access.dart';

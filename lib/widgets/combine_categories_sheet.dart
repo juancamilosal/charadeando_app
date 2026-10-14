@@ -7,13 +7,7 @@ import '../services/services.dart';
 import '../theme.dart';
 import 'category_art.dart';
 import 'category_card.dart';
-
-/// Aviso de que algo se desbloquea con premium.
-void showPremiumNotice(BuildContext context, String what) {
-  ScaffoldMessenger.of(context)
-    ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(content: Text('Para $what necesitas premium.')));
-}
+import 'premium_sheet.dart';
 
 /// Abre "Combinar categorías" desde abajo. Devuelve verdadero si se eligió
 /// una combinación para jugar (queda configurada).
@@ -58,10 +52,8 @@ class _CombineCategoriesSheetState
     _restore();
   }
 
-  bool get _premium => ref.read(premiumUnlockedProvider);
-
   bool _locked(GameCategory c) =>
-      !_premium && ref.read(premiumCategoriesProvider).contains(c);
+      ref.read(lockedCategoriesProvider).contains(c);
 
   /// Se puede marcar: tiene palabras, está en temporada y no está
   /// bloqueada.
@@ -97,6 +89,12 @@ class _CombineCategoriesSheetState
   }
 
   int get _count => _games.length + _custom.length;
+
+  /// Una de pago: se ofrece Premium y, si queda desbloqueada, se marca.
+  Future<void> _unlock(GameCategory c) async {
+    await showPremiumSheet(context, category: c);
+    if (mounted && !_locked(c)) setState(() => _games.add(c));
+  }
 
   Future<void> _start() async {
     final games = [
@@ -199,7 +197,7 @@ class _CombineCategoriesSheetState
                           soon: !c.available,
                           locked: _locked(c),
                           onTap: () => _locked(c)
-                              ? showPremiumNotice(context, 'jugar ${c.label}')
+                              ? _unlock(c)
                               : setState(
                                   () => _games.contains(c)
                                       ? _games.remove(c)

@@ -106,12 +106,18 @@ void main() {
     await tester.pump();
     expect(find.text('Elige al menos 2 categorías'), findsOneWidget);
 
-    // Marcas es premium y no está desbloqueada: avisa y no se marca.
+    // Marcas es premium y no está desbloqueada: ofrece Premium y no se
+    // marca.
     await showInSheet('Marcas');
     expect(_inSheet(find.byIcon(Icons.lock)), findsOneWidget);
     await tester.tap(_inSheet(find.text('Marcas')));
     await tester.pump();
-    expect(find.text('Para jugar Marcas necesitas premium.'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Marcas es Premium'), findsOneWidget);
+    Navigator.of(tester.element(find.text('Marcas es Premium'))).pop();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Marcas es Premium'), findsNothing);
     expect(find.text('Elige al menos 2 categorías'), findsOneWidget);
 
     // La oficina tiene menos de 10 palabras.

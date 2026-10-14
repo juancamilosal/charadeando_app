@@ -7,6 +7,7 @@ import '../providers/providers.dart';
 import '../router.dart';
 import '../theme.dart';
 import '../widgets/play_background.dart';
+import '../widgets/premium_sheet.dart';
 
 /// "Ajustes": preferencias de juego, apariencia y ayuda. Todo se guarda en
 /// el celular y se aplica desde que abre la app.
@@ -16,6 +17,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
+    final premium = ref.watch(premiumUnlockedProvider);
     void update(AppSettings s) => ref.read(settingsProvider.notifier).update(s);
     return PlayBackground(
       child: Scaffold(
@@ -26,6 +28,50 @@ class SettingsScreen extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
             children: [
+              _Section(
+                title: 'Premium',
+                rows: [
+                  _LinkRow(
+                    icon: Icons.workspace_premium,
+                    color: AppColors.orange,
+                    title: 'Charadeando Premium',
+                    subtitle: premium ? 'Activo' : 'Desbloquea todo',
+                    onTap: premium ? null : () => showPremiumSheet(context),
+                  ),
+                  _LinkRow(
+                    icon: Icons.confirmation_number_outlined,
+                    color: AppColors.magenta,
+                    title: 'Canjear código',
+                    onTap: () async {
+                      final unlock = await showRedeemCodeDialog(context);
+                      if (unlock == null || !context.mounted) return;
+                      ScaffoldMessenger.of(context)
+                        ..hideCurrentSnackBar()
+                        ..showSnackBar(
+                          SnackBar(content: Text(redeemedMessage(unlock))),
+                        );
+                    },
+                  ),
+                  _LinkRow(
+                    icon: Icons.restore,
+                    color: AppColors.teal,
+                    title: 'Restaurar compras',
+                    onTap: () {
+                      ScaffoldMessenger.of(context)
+                        ..hideCurrentSnackBar()
+                        ..showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Buscando tus compras en Google Play…',
+                            ),
+                          ),
+                        );
+                      ref.read(premiumProvider.notifier).restore();
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
               _Section(
                 title: 'Preferencias de juego',
                 rows: [
@@ -210,19 +256,34 @@ class _LinkRow extends StatelessWidget {
     required this.color,
     required this.title,
     required this.onTap,
+    this.subtitle,
   });
 
   final IconData icon;
   final Color color;
   final String title;
-  final VoidCallback onTap;
+  final String? subtitle;
+
+  /// Null: no se puede tocar (por ejemplo, Premium ya activo).
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: _RowIcon(icon: icon, color: color),
       title: Text(title, style: _rowTitle),
-      trailing: const Icon(Icons.chevron_right, color: AppColors.ink),
+      subtitle: subtitle == null
+          ? null
+          : Text(
+              subtitle!,
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF6B5A86),
+              ),
+            ),
+      trailing: onTap == null
+          ? const Icon(Icons.check_circle, color: AppColors.green)
+          : const Icon(Icons.chevron_right, color: AppColors.ink),
       onTap: onTap,
     );
   }

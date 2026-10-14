@@ -11,6 +11,7 @@ import '../widgets/category_card.dart';
 import '../widgets/combine_categories_sheet.dart';
 import '../widgets/play_background.dart';
 import '../widgets/play_choice.dart';
+import '../widgets/premium_sheet.dart';
 
 /// Elección de la categoría. "Todas" muestra Libre como una franja, el
 /// botón "Combinar categorías" y las categorías del juego por secciones
@@ -28,7 +29,16 @@ class CategoryScreen extends ConsumerWidget {
   static const sectionSpacing = 10.0;
   static const sectionAspect = 0.72;
 
-  void _choose(BuildContext context, WidgetRef ref, GameCategory category) {
+  void _choose(
+    BuildContext context,
+    WidgetRef ref,
+    GameCategory category, {
+    Color? color,
+  }) {
+    if (ref.read(lockedCategoriesProvider).contains(category)) {
+      showPremiumSheet(context, category: category, color: color);
+      return;
+    }
     if (!category.available) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
@@ -111,6 +121,7 @@ class CategoryScreen extends ConsumerWidget {
 
   Widget _allCategories(BuildContext context, WidgetRef ref) {
     final today = ref.watch(clockProvider)();
+    final locked = ref.watch(lockedCategoriesProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -165,7 +176,9 @@ class CategoryScreen extends ConsumerWidget {
                   compact: true,
                   // Todas las de la sección en tonos del mismo color.
                   color: section.shade(i),
-                  onTap: () => _choose(context, ref, category),
+                  locked: locked.contains(category),
+                  onTap: () =>
+                      _choose(context, ref, category, color: section.shade(i)),
                 ),
             ],
           ),
@@ -356,13 +369,8 @@ class _MyCategories extends ConsumerWidget {
 
   void _create(BuildContext context, WidgetRef ref) {
     if (!ref.read(customCategoriesProvider.notifier).canCreate) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(
-            content: Text('Para crear más categorías necesitas premium.'),
-          ),
-        );
+      // Con Premium se crean sin límite.
+      showPremiumSheet(context);
       return;
     }
     context.push(Routes.customCategory);

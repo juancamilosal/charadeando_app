@@ -58,8 +58,35 @@ la cámara frontal graba a los participantes para revivir las risas.
   presionado un equipo o su botón de tres puntos: "Editar" y "Borrar" (pide
   confirmación). Sin equipos: "Crea tu primer equipo" con "Crear equipo".
   Se guardan solo en el celular (`equipos.json`), no en un servidor.
+- Premium, pago único (`lib/widgets/premium_sheet.dart`,
+  `PremiumController`): desbloquea las categorías de pago
+  (`GameCategory.paid`: Anime, Futbolistas, Deportistas famosos, Vacaciones,
+  Halloween y Navidad; se cambian en esa lista), el video Full HD y Máxima y
+  las categorías propias sin límite. Las de pago llevan un candado amarillo
+  en su tarjeta (con todos sus colores) y en Combinar; al tocarlas, o una
+  resolución bloqueada, o "Nueva categoría" sin cupo, se abre la hoja
+  "Anime es Premium" con lo que trae, "Desbloquear todo · $precio" (el
+  precio y la moneda los da Google Play), "Restaurar compras" y "Tengo un
+  código". La compra es el producto `charadeando_premium` de Google Play
+  (`PlayBilling`, con `in_app_purchase`; solo en Android): al llegar se
+  confirma a Google (si no, la devuelve a los 3 días), se guarda en el
+  celular (`premium.json`) y la hoja se cierra con "¡Listo! Ya tienes
+  Charadeando Premium.". Al abrir la app, si no hay compra guardada, se
+  buscan las compras hechas (por si se reinstaló). Sin Google Play avisa
+  que las compras no están disponibles. Los códigos promocionales de Google
+  Play se canjean en Play Store y llegan como una compra más.
+- Códigos propios ("Canjear código" en Ajustes o "Tengo un código" en la
+  hoja): se validan en el servidor (`POST /juego/canjear`, ver
+  `server/README.md`) con el código y un identificador al azar del celular
+  (guardado en `premium.json`). Un código abre todo o algunas categorías
+  (por ejemplo, solo Anime); si no sirve, el mensaje del servidor sale bajo
+  el campo ("Este código ya venció."). Lo abierto se guarda en el celular y
+  se suma a lo que ya había. Si se reinstala la app, se vuelve a canjear el
+  mismo código.
 - Ajustes (`lib/screens/settings_screen.dart`), en tarjetas con un ícono en
-  cada fila. "Preferencias de juego": "Música" (encendida: suena en bucle
+  cada fila. "Premium" va primero: "Charadeando Premium" ("Desbloquea todo",
+  o "Activo" con un visto verde si ya lo tiene), "Canjear código" y
+  "Restaurar compras". "Preferencias de juego": "Música" (encendida: suena en bucle
   y bajita la música de la app, `assets/audio/musica.mp3`, con
   `audioplayers`; se detiene en cuanto se apaga el ajuste, se pausa con la
   app en segundo plano y se calla en el turno y al ver los videos, que
@@ -258,7 +285,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   final "Mis categorías" (si hay alguna), cada una con su dibujo o ícono y
   una casilla; se marca o desmarca tocando la fila. Las de "Pronto" llevan
   esa etiqueta en vez de la casilla y no se marcan. Las premium bloqueadas
-  llevan candado y avisan que necesitan premium; las propias con menos de 10 palabras dicen "Faltan palabras" y no se marcan.
+  llevan candado y abren la hoja de Premium (si se desbloquean, quedan
+  marcadas); las propias con menos de 10 palabras dicen "Faltan palabras" y no se marcan.
   El botón de abajo, "Empezar a jugar · 3 categorías", se activa con 2 o
   más. La app recuerda la última combinación (`combinacion.json`). Al
   empezar va a la configuración de siempre, donde la partida se llama
@@ -412,7 +440,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   puntos es empate.
 - Video de cada turno con la cámara frontal, en 720p por defecto. También se
   puede jugar sin grabar. 1080p y la máxima resolución quedan bloqueadas como
-  premium.
+  premium; al tocarlas se abre la hoja de Premium.
 - El video se puede ver, guardar en la galería o compartir. Al continuar al
   siguiente turno se borra del celular; la app no guarda videos en ningún
   otro lugar.

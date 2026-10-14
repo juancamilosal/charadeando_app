@@ -35,6 +35,9 @@ Directus 11 con PostgreSQL y Redis, desplegado con Coolify en el VPS.
     dificultad y `excluir` para cada una; si alguna no alcanza, completa con
     las otras categorías de la lista. Es para "Combinar categorías" en la
     app. 10 peticiones por minuto por IP.
+  - `POST /juego/canjear`: canjea un código promocional (ver "Códigos
+    promocionales" abajo). 5 intentos por minuto por IP, para que no se
+    puedan adivinar códigos probando.
 - El flujo de Gemini se cambia con la variable de entorno
   `CHARADEANDO_GEMINI_FLOW` (id del flujo); por defecto
   `2d91a34a-b82c-4f97-9e2f-12154ba86323`.
@@ -64,6 +67,80 @@ Los topes `MAX_CREATE`, `MAX_COUNT`, `MAX_EXCLUDE` y `MAX_CATEGORIES` de
 
 Pruebas del reparto y de la validación de `categorias`:
 `node --test server/tests/juego.test.mjs`.
+
+## Códigos promocionales
+
+Con un código válido la app desbloquea todo (Premium) o algunas categorías.
+Son para regalar (familia, sorteos, probadores); Google Play no permite
+venderlos por fuera de la tienda.
+
+### Crear las colecciones (una sola vez)
+
+En Directus, **Settings → Data Model → Create Collection**:
+
+1. `codigos`, con la clave primaria `id` (número automático) y estos campos:
+
+   | Campo | Tipo | Notas |
+   |---|---|---|
+   | `codigo` | String, único | El código, por ejemplo `FAMILIA2026`. Letras, números, `-` o `_`, de 3 a 40. No importan mayúsculas ni espacios. |
+   | `desbloquea` | String | `TODO`, o códigos de categorías separados por comas: `ANIME, FUTBOLISTAS`. |
+   | `usos_max` | Integer, puede ser vacío | Cuántas veces se puede canjear. Vacío es sin límite. |
+   | `usos` | Integer, por defecto `0` | Lo suma la extensión. |
+   | `vence` | Date (o Datetime), puede ser vacío | Una fecha vale hasta el final de ese día. Vacío es sin vencimiento. |
+   | `activo` | Boolean, por defecto `true` | Apágalo si un código se filtra. |
+
+2. `codigos_canjes`, con `id` (número automático) y los campos `codigo`
+   (String), `dispositivo` (String) y `fecha` (Datetime). La llena la
+   extensión: un renglón por cada celular que canjea un código.
+
+Ninguna de las dos debe ser pública: el rol Public no tiene permisos sobre
+ellas (como `palabras`). Solo la extensión las lee y escribe.
+
+### Crear un código
+
+En **Content → codigos → Create Item**, por ejemplo:
+
+- `FAMILIA2026`, `desbloquea` = `TODO`, `usos_max` = 20: Premium para 20
+  celulares.
+- `ANIME-AMIGOS`, `desbloquea` = `ANIME`, `vence` = `2026-12-31`, sin
+  `usos_max`: Anime para todos los que lo canjeen hasta fin de año.
+
+Para los personales, usa códigos largos y difíciles de adivinar
+(`PREMIUM-7K2Q-9XWD`). Los fáciles (`CHARADEANDO`) solo con pocos usos.
+
+### Cómo responde
+
+`POST /juego/canjear` con `{ "codigo": "FAMILIA2026", "dispositivo": "..." }`
+(el identificador al azar que guarda la app):
+
+- 200: `{ "data": { "todo": true, "categorias": [] } }`, o con `todo`
+  falso y la lista de categorías que abre.
+- 404 `Código no válido.` (no existe, está apagado o no abre nada), 410
+  `Este código ya venció.`, 409 `Este código ya se usó todas las veces que
+  permite.` La app muestra el mensaje tal cual.
+
+Si el mismo celular canjea otra vez el mismo código (por ejemplo, después
+de reinstalar la app), responde lo mismo sin gastar otro uso, aunque ya no
+queden. Pruebas: `node --test server/tests/juego.test.mjs`.
+
+## Compra en Google Play
+
+La app vende Premium como un producto de pago único con el id
+`charadeando_premium`:
+
+1. Play Console → **Configuración → Perfil de pagos**: tener la cuenta de
+   comerciante.
+2. Subir a **Prueba interna** una versión que ya tenga `in_app_purchase`
+   (Play no deja crear productos antes).
+3. **Monetizar → Productos → Productos integrados en la aplicación →
+   Crear producto**: id `charadeando_premium`, nombre, descripción y
+   precio; activarlo.
+4. Para probar sin que cobre: **Configuración → Prueba de licencias**, con
+   los correos de los probadores, e instalar la app desde la prueba
+   interna (instalada desde Android Studio no puede comprar).
+5. Códigos de Google Play: **Monetizar → Promociones**, para el producto
+   `charadeando_premium`. Se canjean en Play Store y la app los recibe como
+   una compra.
 
 ## Instalar o actualizar la extensión
 

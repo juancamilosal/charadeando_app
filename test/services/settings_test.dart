@@ -79,23 +79,31 @@ void main() {
         child: const MaterialApp(home: SettingsScreen()),
       ),
     );
-    for (final title in ['Música', 'Efectos de sonido', 'Vibración']) {
+    // Premium va arriba: también está.
+    expect(find.text('Charadeando Premium'), findsOneWidget);
+    expect(find.text('Canjear código'), findsOneWidget);
+    expect(find.text('Restaurar compras'), findsOneWidget);
+    Future<void> tap(String title) async {
+      await tester.ensureVisible(find.text(title));
+      await tester.pump();
       await tester.tap(find.text(title));
       await tester.pump();
+    }
+
+    for (final title in ['Música', 'Efectos de sonido', 'Vibración']) {
+      await tap(title);
     }
     expect(store.saved!.music, isFalse);
     expect(store.saved!.sounds, isFalse);
     expect(store.saved!.vibration, isFalse);
 
-    await tester.tap(find.text('Rotación invertida'));
-    await tester.pump();
+    await tap('Rotación invertida');
     expect(store.saved!.invertedRotation, isTrue);
 
-    await tester.tap(find.text('Toque'));
-    await tester.pump();
+    await tap('Toque');
     expect(store.saved!.controller, PlayController.touch);
-    expect(find.text('Fondos'), findsOneWidget);
-    expect(find.text('Cómo se juega'), findsOneWidget);
+    expect(find.text('Fondos', skipOffstage: false), findsOneWidget);
+    expect(find.text('Cómo se juega', skipOffstage: false), findsOneWidget);
   });
 
   group('vibración', () {

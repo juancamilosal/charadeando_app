@@ -5,6 +5,8 @@
 //                         categoría LIBRE y las devuelve.
 //   POST /juego/palabras  Entrega palabras al azar de la colección, de una
 //                         categoría o de varias en partes iguales.
+//   POST /juego/canjear   Canjea un código promocional (colección codigos)
+//                         y dice qué desbloquea: todo o algunas categorías.
 //
 // El rol Public de Directus no tiene permisos sobre la colección, así que
 // estas rutas son la única forma de leer o crear palabras sin iniciar
@@ -81,7 +83,16 @@ const RATE_WINDOW_MS = 60 * 1000;
 const limits = {
   crear: { points: 5, hits: new Map() },
   palabras: { points: 10, hits: new Map() },
+  // Pocos intentos, para que no se puedan adivinar códigos probando.
+  canjear: { points: 5, hits: new Map() },
 };
+
+/// Códigos promocionales y sus canjes. Ninguna de las dos es pública.
+const CODES = 'codigos';
+const REDEMPTIONS = 'codigos_canjes';
+
+/// Valor de `desbloquea` que abre toda la app (Premium).
+const UNLOCK_ALL = 'TODO';
 
 function allowed(route, ip) {
   const { points, hits } = limits[route];
@@ -241,6 +252,55 @@ export function parseGeminiWords(body) {
   return words;
 }
 
+/// Código como lo escribió la persona, en mayúsculas y sin espacios, o
+/// null si no tiene la forma de un código (3 a 40 letras, números, - o _).
+export function normalizeCode(value) {
+  if (typeof value !== 'string') return null;
+  const code = value.replace(/\s+/g, '').toUpperCase();
+  return /^[A-Z0-9_-]{3,40}$/.test(code) ? code : null;
+}
+
+/// Identificador del celular que manda la app (8 a 100 caracteres), o null.
+export function normalizeDevice(value) {
+  if (typeof value !== 'string') return null;
+  const device = value.trim();
+  return /^[A-Za-z0-9_-]{8,100}$/.test(device) ? device : null;
+}
+
+/// Lo que desbloquea un código: `TODO`, o códigos de categorías separados
+/// por comas (`ANIME, FUTBOLISTAS`).
+export function parseUnlocks(value) {
+  const parts = String(value ?? '')
+    .split(',')
+    .map((p) => p.trim().toUpperCase())
+    .filter((p) => p.length > 0);
+  if (parts.includes(UNLOCK_ALL)) return { todo: true, categorias: [] };
+  return { todo: false, categorias: [...new Set(parts)] };
+}
+
+/// Revisa si un código de la colección se puede canjear hoy. Devuelve null
+/// si sí, o el error (estado HTTP y mensaje) si no. [alreadyHere] es que
+/// este celular ya lo había canjeado: entonces no gasta otro uso.
+export function codeProblem(row, now, alreadyHere = false) {
+  if (!row || row.activo === false) return [404, 'Código no válido.'];
+  // Una fecha sola (campo de tipo fecha) vale hasta el final de ese día.
+  const vence = /^\d{4}-\d{2}-\d{2}$/.test(String(row.vence ?? ''))
+    ? `${row.vence}T23:59:59`
+    : row.vence;
+  if (vence && new Date(vence) < now) {
+    return [410, 'Este código ya venció.'];
+  }
+  const max = row.usos_max;
+  if (!alreadyHere && max !== null && max !== undefined && (row.usos ?? 0) >= max) {
+    return [409, 'Este código ya se usó todas las veces que permite.'];
+  }
+  const unlocks = parseUnlocks(row.desbloquea);
+  if (!unlocks.todo && unlocks.categorias.length === 0) {
+    return [404, 'Código no válido.'];
+  }
+  return null;
+}
+
 export default {
   id: 'juego',
   handler: (router, { database, logger, services, getSchema, env }) => {
@@ -361,6 +421,52 @@ export default {
       } catch (e) {
         logger.error(e, '[juego] No se pudieron guardar las palabras de Gemini');
         return error(res, 500, 'No se pudieron guardar las palabras.');
+      }
+    });
+
+    // Canjea un código: { "codigo": "FAMILIA2026", "dispositivo": "..." }.
+    // Si el celular ya lo había canjeado (por ejemplo, después de borrar la
+    // app) responde igual sin gastar otro uso.
+    router.post('/canjear', async (req, res) => {
+      if (!allowed('canjear', clientIp(req))) {
+        return error(res, 429, 'Demasiados intentos. Espera un minuto.');
+      }
+      const body = req.body ?? {};
+      const codigo = normalizeCode(body.codigo);
+      const dispositivo = normalizeDevice(body.dispositivo);
+      if (!codigo) return error(res, 404, 'Código no válido.');
+      if (!dispositivo) return error(res, 400, '"dispositivo" no es válido.');
+
+      try {
+        const result = await database.transaction(async (trx) => {
+          const row = await trx(CODES)
+            .whereRaw('upper(codigo) = ?', [codigo])
+            .forUpdate()
+            .first();
+          const already = row
+            ? await trx(REDEMPTIONS)
+                .where({ codigo: row.codigo, dispositivo })
+                .first()
+            : null;
+          const problem = codeProblem(row, new Date(), Boolean(already));
+          if (problem) return { problem };
+          if (!already) {
+            await trx(CODES)
+              .where('id', row.id)
+              .update({ usos: (row.usos ?? 0) + 1 });
+            await trx(REDEMPTIONS).insert({
+              codigo: row.codigo,
+              dispositivo,
+              fecha: new Date(),
+            });
+          }
+          return { unlocks: parseUnlocks(row.desbloquea) };
+        });
+        if (result.problem) return error(res, ...result.problem);
+        return res.json({ data: result.unlocks });
+      } catch (e) {
+        logger.error(e, '[juego] No se pudo canjear el código');
+        return error(res, 500, 'No se pudo canjear el código.');
       }
     });
 

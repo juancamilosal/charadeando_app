@@ -4,12 +4,14 @@ import '../models/models.dart';
 import '../services/services.dart';
 import 'custom_categories_controller.dart';
 import 'my_videos_controller.dart';
+import 'premium_controller.dart';
 import 'teams_controller.dart';
 import 'game_controller.dart';
 import 'turn_video_controller.dart';
 
 export 'custom_categories_controller.dart';
 export 'my_videos_controller.dart';
+export 'premium_controller.dart';
 export 'teams_controller.dart';
 export 'game_controller.dart';
 export 'turn_video_controller.dart';
@@ -158,12 +160,22 @@ final tvConnectedProvider = StreamProvider<bool>(
 final videoServiceProvider = Provider((ref) => VideoService());
 final videoRendererProvider = Provider((ref) => VideoRenderer());
 
-/// Si el usuario compró las funciones premium. Las compras llegan en una
-/// versión posterior.
-///
-/// TEMPORAL: en true para probar las funciones premium. Volver a false
-/// antes de publicar.
-final premiumUnlockedProvider = Provider((ref) => true);
+final premiumStoreProvider = Provider((ref) => PremiumStore());
+final premiumBillingProvider = Provider<PremiumBilling>(
+  (ref) => defaultPremiumBilling(),
+);
+final promoCodeServiceProvider = Provider((ref) => PromoCodeService());
+
+/// Lo desbloqueado, con la compra de Google Play y los códigos.
+final premiumProvider = NotifierProvider<PremiumController, PremiumAccess>(
+  PremiumController.new,
+);
+
+/// Si tiene Premium (comprado o con un código que abre todo): todas las
+/// categorías, video Full HD y Máxima y categorías propias sin límite.
+final premiumUnlockedProvider = Provider(
+  (ref) => ref.watch(premiumProvider).premium,
+);
 
 /// La fecha de hoy. Las pruebas la cambian para ver las categorías de
 /// temporada (como Navidad) dentro y fuera de sus fechas.
@@ -178,11 +190,19 @@ final allSeasonsProvider = Provider((ref) => true);
 
 /// Categorías del juego que se desbloquean con premium.
 final premiumCategoriesProvider = Provider<Set<GameCategory>>(
-  (ref) => {
-    for (final c in GameCategory.values)
-      if (c.premium) c,
-  },
+  (ref) => GameCategory.paid,
 );
+
+/// Categorías de pago que este usuario todavía no puede jugar: llevan
+/// candado.
+final lockedCategoriesProvider = Provider<Set<GameCategory>>((ref) {
+  if (ref.watch(premiumUnlockedProvider)) return const {};
+  final byCode = ref.watch(premiumProvider).codeCategories;
+  return {
+    for (final c in ref.watch(premiumCategoriesProvider))
+      if (!byCode.contains(c.code)) c,
+  };
+});
 
 final gameControllerProvider = NotifierProvider<GameController, GameState>(
   GameController.new,

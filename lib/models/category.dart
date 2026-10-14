@@ -374,9 +374,19 @@ enum GameCategory {
   /// se puede jugar ni combinar. Se cambia a verdadero cuando se carguen.
   final bool available;
 
-  /// Se desbloquea con premium. Por ahora ninguna lo es; cuando se definan
-  /// las de pago, se marcan aquí.
-  bool get premium => false;
+  /// Categorías de pago: se juegan con Premium o con un código que las
+  /// abra. Para cambiar cuáles son, basta con cambiar esta lista.
+  static const paid = {
+    GameCategory.anime,
+    GameCategory.footballers,
+    GameCategory.athletes,
+    GameCategory.vacations,
+    GameCategory.halloween,
+    GameCategory.christmas,
+  };
+
+  /// Se desbloquea con Premium (o con un código).
+  bool get premium => paid.contains(this);
 
   /// Color del dibujo y del texto sobre el color de la categoría.
   Color get onColor => color == AppColors.yellow ? AppColors.ink : Colors.white;

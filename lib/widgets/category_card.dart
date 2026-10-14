@@ -21,16 +21,19 @@ class CategoryCard extends StatelessWidget {
     this.compact = false,
     this.isNew = false,
     this.soon = false,
+    this.locked = false,
   });
 
   /// Tarjeta de una categoría del juego, con su imagen (o su ícono, si todavía
   /// no tiene), y sus etiquetas "Nueva" y "Pronto". [color] cambia el de la
-  /// categoría (por ejemplo, por el de su sección).
+  /// categoría (por ejemplo, por el de su sección). [locked]: es de pago y
+  /// todavía no se tiene.
   factory CategoryCard.game(
     GameCategory category, {
     VoidCallback? onTap,
     bool compact = false,
     Color? color,
+    bool locked = false,
   }) => CategoryCard(
     title: category.label,
     color: color ?? category.color,
@@ -40,6 +43,7 @@ class CategoryCard extends StatelessWidget {
     compact: compact,
     isNew: category.isNew,
     soon: !category.available,
+    locked: locked,
   );
 
   /// Tarjeta de una categoría propia: su ícono, su color y cuántas palabras
@@ -82,6 +86,10 @@ class CategoryCard extends StatelessWidget {
 
   /// Todavía no tiene palabras: el dibujo se ve apagado, con "Pronto".
   final bool soon;
+
+  /// De pago sin desbloquear: un candado amarillo arriba a la derecha. Se
+  /// ve con todos sus colores, para que den ganas de abrirla.
+  final bool locked;
 
   /// Tamaño de letra más grande, hasta [maxSize], con el que [text] cabe en
   /// [maxLines] renglones de [width] sin partir ninguna palabra. Si ni con
@@ -212,6 +220,12 @@ class CategoryCard extends StatelessWidget {
           ),
           if (isNew)
             const Positioned(top: 6, left: 6, child: CategoryBadge.isNew()),
+          if (locked)
+            Positioned(
+              top: compact ? 6 : 10,
+              right: compact ? 6 : 10,
+              child: const LockBadge(),
+            ),
           if (onMenu != null)
             Positioned(
               top: compact ? 0 : 4,
@@ -347,6 +361,38 @@ class CategoryBadge extends StatelessWidget {
           fontWeight: FontWeight.w600,
           color: foreground,
         ),
+      ),
+    );
+  }
+}
+
+/// Candado de lo que se desbloquea con Premium: un círculo amarillo con
+/// borde blanco.
+class LockBadge extends StatelessWidget {
+  const LockBadge({super.key, this.size = 28});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'Premium',
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: AppColors.yellow,
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 2),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x44000000),
+              offset: Offset(0, 2),
+              blurRadius: 3,
+            ),
+          ],
+        ),
+        child: Icon(Icons.lock, size: size * 0.54, color: AppColors.ink),
       ),
     );
   }
