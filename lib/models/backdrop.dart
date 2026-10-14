@@ -13,9 +13,6 @@ enum CardStyle {
 
   /// De su color, con borde y sombra oscuros, como un cómic.
   comic,
-
-  /// De su color, con borde dorado y sombra oscura: el fondo Oro.
-  gold,
 }
 
 /// Fondo de la app. Lo elige el usuario en "Fondos" y se guarda en el
@@ -34,13 +31,21 @@ enum Backdrop {
   coral('Coral', Color(0xFFFF5A5F), CardStyle.sticker),
   turquesa('Turquesa', Color(0xFF0FA3A3), CardStyle.sticker),
 
-  /// Exclusivo de Todo Charadeando: morado oscuro con dorado.
+  /// Exclusivo de Todo Charadeando: dorado, con un brillo que lo cruza de
+  /// vez en cuando. Aparece en "Fondos" solo después de comprarlo.
   oro(
     'Oro',
-    Color(0xFF2C0E52),
-    CardStyle.gold,
-    gradient: [Color(0xFF14062A), Color(0xFF3A1266), Color(0xFF14062A)],
+    Color(0xFFFFC21A),
+    CardStyle.sticker,
+    light: true,
+    gradient: [
+      Color(0xFFFFE58A),
+      Color(0xFFFFC21A),
+      Color(0xFFF2A100),
+      Color(0xFFFFD45C),
+    ],
     premium: true,
+    shiny: true,
   );
 
   const Backdrop(
@@ -50,10 +55,8 @@ enum Backdrop {
     this.light = false,
     this.gradient,
     this.premium = false,
+    this.shiny = false,
   });
-
-  /// El dorado del fondo Oro (bordes y títulos).
-  static const gold = Color(0xFFFFC21A);
 
   /// El que viene elegido.
   static const standard = clasico;
@@ -73,6 +76,9 @@ enum Backdrop {
 
   /// Solo con Todo Charadeando.
   final bool premium;
+
+  /// Le pasa un brillo de vez en cuando, como al oro.
+  final bool shiny;
 
   /// Color de los textos y los íconos que van directo sobre el fondo.
   Color get onColor => light ? const Color(0xFF2B0A57) : Colors.white;

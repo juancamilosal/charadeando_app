@@ -263,8 +263,7 @@ class CategorySectionHeader extends StatelessWidget {
     // fondos oscuros y morada con el texto blanco sobre los claros, para que
     // se distinga de las tarjetas.
     final light = context.backdrop.light;
-    // En el fondo Oro, los títulos van en píldoras doradas.
-    final gold = context.backdrop == Backdrop.oro;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -272,11 +271,7 @@ class CategorySectionHeader extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.fromLTRB(14, 5, 14, 6),
             decoration: BoxDecoration(
-              color: gold
-                  ? Backdrop.gold
-                  : light
-                  ? AppColors.purple
-                  : Colors.white,
+              color: light ? AppColors.purple : Colors.white,
               borderRadius: BorderRadius.circular(20),
               boxShadow: const [
                 BoxShadow(color: Color(0x33000000), offset: Offset(0, 3)),
@@ -291,11 +286,7 @@ class CategorySectionHeader extends StatelessWidget {
                 fontSize: 23,
                 height: 1.1,
                 fontWeight: FontWeight.w700,
-                color: gold
-                    ? AppColors.ink
-                    : light
-                    ? Colors.white
-                    : AppColors.purple,
+                color: light ? Colors.white : AppColors.purple,
               ),
             ),
           ),

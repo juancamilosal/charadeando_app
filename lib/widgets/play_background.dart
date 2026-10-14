@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../theme.dart';
+import 'shine.dart';
 
 /// Fondo de las pantallas: el que eligió el usuario en "Fondos".
 /// Algunos momentos del juego (la cuenta regresiva) llevan su propio
@@ -30,7 +31,15 @@ class PlayBackground extends StatelessWidget {
                   colors: colors,
                 ),
               ),
-        child: child,
+        // El fondo Oro brilla de vez en cuando, detrás de todo.
+        child: this.colors == null && backdrop.shiny
+            ? Stack(
+                children: [
+                  const Positioned.fill(child: Shine()),
+                  child,
+                ],
+              )
+            : child,
       ),
     );
   }

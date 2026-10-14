@@ -87,13 +87,16 @@ la cámara frontal graba a los participantes para revivir las risas.
   código o con Todo Charadeando) pierden el candado y, cada 6 segundos, les
   pasa un brillo en diagonal (`Shine`), cada una a su tiempo para que no
   brillen todas juntas. Si el celular pide menos animaciones, no brillan.
-- Fondo Oro (`Backdrop.oro`), exclusivo de Todo Charadeando: degradado
-  morado muy oscuro, tarjetas con borde dorado (`CardStyle.gold`) y los
-  títulos de las secciones en píldoras doradas. En "Fondos" va al final, a
-  lo ancho, con "Exclusivo de Todo Charadeando"; sin Todo Charadeando lleva
-  candado y al tocarlo se abre la hoja de compra. Si estaba elegido y ya no
-  lo tiene, la app usa el clásico (`Backdrop.allowedWith`). Está en la
-  lista de lo que trae Todo Charadeando ("Fondo exclusivo Oro").
+- Fondo Oro (`Backdrop.oro`), exclusivo de Todo Charadeando: un degradado
+  dorado (claro, con los textos oscuros y las tarjetas con borde blanco)
+  al que cada 6 segundos le pasa un brillo en diagonal (`shiny`, con
+  `Shine` detrás de todo). No aparece en "Fondos" hasta tener Todo
+  Charadeando; al comprarlo o canjear un código que abre todo, la app se
+  pone sola el fondo Oro (después se puede cambiar por otro en "Fondos",
+  donde va al final, a lo ancho, con "Exclusivo de Todo Charadeando"). Si
+  estaba elegido y ya no lo tiene, la app usa el clásico
+  (`Backdrop.allowedWith`). Está en la lista de lo que trae Todo
+  Charadeando ("Fondo exclusivo Oro").
 - Insignia de Todo Charadeando: quien lo tiene (comprado o con un código
   que abre todo) ve un sello dorado con la medalla (`TodoCharadeandoSeal`)
   a la derecha de "Selección de categoría" (al tocarlo: "Tienes Todo

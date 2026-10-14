@@ -64,6 +64,12 @@ class FakeBilling implements PremiumBilling {
   Future<void> restore() async => restores++;
 }
 
+/// No guarda el fondo en ningún archivo.
+class _NoBackdropFile extends BackdropStore {
+  @override
+  Future<void> save(Backdrop backdrop) async {}
+}
+
 /// Códigos de mentira: FAMILIA abre todo y ANIME2026, Anime.
 class FakeCodes extends PromoCodeService {
   final redeemed = <(String, String)>[];
@@ -220,6 +226,7 @@ void main() {
           premiumBillingProvider.overrideWithValue(billing),
           premiumStoreProvider.overrideWithValue(store ?? MemoryPremiumStore()),
           promoCodeServiceProvider.overrideWithValue(codes ?? FakeCodes()),
+          backdropStoreProvider.overrideWithValue(_NoBackdropFile()),
         ],
       );
       addTearDown(c.dispose);
@@ -261,6 +268,8 @@ void main() {
       expect(c.read(premiumUnlockedProvider), isTrue);
       expect(c.read(lockedCategoriesProvider), isEmpty);
       expect(store.saved.purchased, isTrue);
+      // Y la app se viste de Oro.
+      expect(c.read(backdropProvider), Backdrop.oro);
     });
 
     test('una categoría comprada suelta abre solo esa y se guarda', () async {
@@ -305,6 +314,8 @@ void main() {
       final controller = c.read(premiumProvider.notifier);
 
       await controller.redeem('ANIME2026');
+      // Abrir una sola categoría no cambia el fondo.
+      expect(c.read(backdropProvider), Backdrop.standard);
       expect(codes.redeemed.single, ('ANIME2026', 'celular-de-prueba'));
       expect(c.read(premiumUnlockedProvider), isFalse);
       expect(
@@ -321,6 +332,7 @@ void main() {
 
       await controller.redeem('familia');
       expect(c.read(premiumUnlockedProvider), isTrue);
+      expect(c.read(backdropProvider), Backdrop.oro);
       expect(store.saved.codeAll, isTrue);
       expect(store.saved.codeCategories, {'ANIME'});
     });

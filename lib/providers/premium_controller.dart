@@ -46,6 +46,8 @@ class PremiumController extends Notifier<PremiumAccess> {
           : state.copyWith(
               boughtCategories: {...state.boughtCategories, category},
             );
+      // Al comprar Todo Charadeando, la app se viste de Oro.
+      if (state.purchased && !before.premium) _wearGold();
       if (state.purchased != before.purchased ||
           state.boughtCategories.length != before.boughtCategories.length) {
         await _store.save(state);
@@ -53,6 +55,9 @@ class PremiumController extends Notifier<PremiumAccess> {
     }
     if (!_events.isClosed) _events.add(event);
   }
+
+  /// Pone el fondo Oro, que se acaba de desbloquear.
+  void _wearGold() => ref.read(backdropProvider.notifier).select(Backdrop.oro);
 
   /// Abre la ventana de pago de Google Play: Premium, o la categoría
   /// [category] suelta. Falso si no está disponible.
@@ -68,10 +73,12 @@ class PremiumController extends Notifier<PremiumAccess> {
     final unlock = await ref
         .read(promoCodeServiceProvider)
         .redeem(code, device: device);
+    final before = state;
     state = state.copyWith(
       codeAll: state.codeAll || unlock.all,
       codeCategories: {...state.codeCategories, ...unlock.categories},
     );
+    if (state.premium && !before.premium) _wearGold();
     await _store.save(state);
     return unlock;
   }

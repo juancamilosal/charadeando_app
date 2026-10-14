@@ -6,6 +6,7 @@ import 'package:charadeando_app/router.dart';
 import 'package:charadeando_app/screens/backdrop_screen.dart';
 import 'package:charadeando_app/services/services.dart';
 import 'package:charadeando_app/theme.dart';
+import 'package:charadeando_app/widgets/shine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -106,7 +107,7 @@ void main() {
     required bool premium,
     MemoryBackdropStore? store,
   }) async {
-    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.physicalSize = const Size(1080, 3000);
     addTearDown(tester.view.reset);
     final container = ProviderContainer(
       overrides: [
@@ -127,39 +128,32 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(
-      find.text('Oro'),
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
     return container;
   }
 
-  testWidgets('el fondo Oro es exclusivo de Todo Charadeando: sin él tiene '
-      'candado y ofrece comprarlo', (tester) async {
-    final store = MemoryBackdropStore();
-    final container = await pumpBackdrops(tester, premium: false, store: store);
+  testWidgets('el fondo Oro no aparece hasta tener Todo Charadeando', (
+    tester,
+  ) async {
+    await pumpBackdrops(tester, premium: false);
     expect(Backdrop.oro.premium, isTrue);
-    expect(find.text('Exclusivo de Todo Charadeando'), findsOneWidget);
-    expect(find.byIcon(Icons.lock), findsOneWidget);
-    await tester.tap(find.text('Oro'));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    expect(find.text('Desbloquea todo'), findsOneWidget);
-    expect(find.text('Fondo exclusivo Oro'), findsOneWidget);
-    expect(container.read(backdropProvider), Backdrop.standard);
-    expect(store.saved, isNull);
+    expect(find.text('Turquesa'), findsOneWidget);
+    expect(find.text('Oro', skipOffstage: false), findsNothing);
+    expect(find.text('Exclusivo de Todo Charadeando'), findsNothing);
   });
 
-  testWidgets('con Todo Charadeando se elige el fondo Oro', (tester) async {
+  testWidgets('con Todo Charadeando aparece y se elige el fondo Oro, dorado '
+      'y con brillo', (tester) async {
     final store = MemoryBackdropStore();
     final container = await pumpBackdrops(tester, premium: true, store: store);
-    expect(find.byIcon(Icons.lock), findsNothing);
+    expect(find.text('Exclusivo de Todo Charadeando'), findsOneWidget);
     await tester.tap(find.text('Oro'));
-    await tester.pumpAndSettle();
+    // El fondo Oro brilla sin parar: no se espera a que todo se detenga.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
     expect(container.read(backdropProvider), Backdrop.oro);
     expect(store.saved, Backdrop.oro);
-    expect(Backdrop.oro.cards, CardStyle.gold);
+    expect(Backdrop.oro.light, isTrue);
+    expect(Backdrop.oro.shiny, isTrue);
+    expect(find.byType(Shine), findsOneWidget);
   });
 }

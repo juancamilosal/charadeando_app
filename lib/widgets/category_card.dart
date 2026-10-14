@@ -301,10 +301,6 @@ class CategoryCardFrame extends StatelessWidget {
         AppColors.ink,
         const BoxShadow(color: AppColors.ink, offset: Offset(4, 6)),
       ),
-      CardStyle.gold => (
-        Backdrop.gold,
-        const BoxShadow(color: Color(0x88000000), offset: Offset(0, 6)),
-      ),
       CardStyle.white => (
         color,
         const BoxShadow(
