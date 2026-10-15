@@ -12,12 +12,21 @@
 //   POST /juego/castigos  Castigos al azar de la colección castigos (campo
 //                         nombre) para la ruleta.
 //
+// Al arrancar crea, si falta, el índice de palabras por categoría, idioma
+// y dificultad (WORDS_INDEX).
+//
 // El rol Public de Directus no tiene permisos sobre la colección, así que
 // estas rutas son la única forma de leer o crear palabras sin iniciar
 // sesión. Las instrucciones para Gemini están fijas aquí: la app solo manda
 // la cantidad. Ambas rutas tienen tope y límite de peticiones por IP.
 
 const COLLECTION = 'palabras';
+
+/// Índice de `palabras` por los campos que filtra /juego/palabras, para
+/// que siga rápida cuando crezca la colección. No cambia las palabras: la
+/// base de datos lo mantiene sola al crear, editar o borrar.
+export const WORDS_INDEX = 'palabras_categoria_idioma_dificultad';
+const WORDS_INDEX_COLUMNS = ['categoria', 'idioma', 'dificultad'];
 
 /// Categoría de las palabras que crea Gemini.
 const GEMINI_CATEGORY = 'LIBRE';
@@ -319,6 +328,28 @@ export function restoredUnlocks(rows) {
   return { todo, categorias: todo ? [] : [...categorias] };
 }
 
+/// Crea el índice de `palabras` si todavía no existe. [database] es el knex
+/// de Directus. MySQL no tiene `IF NOT EXISTS` para índices: ahí se crea y,
+/// si ya estaba, no pasa nada.
+export async function ensureWordsIndex(database) {
+  const client = String(database.client?.config?.client ?? '');
+  if (/mysql|maria/i.test(client)) {
+    try {
+      await database.schema.alterTable(COLLECTION, (table) =>
+        table.index(WORDS_INDEX_COLUMNS, WORDS_INDEX),
+      );
+    } catch (e) {
+      if (e?.code !== 'ER_DUP_KEYNAME') throw e;
+    }
+    return;
+  }
+  await database.raw('CREATE INDEX IF NOT EXISTS ?? ON ?? (??, ??, ??)', [
+    WORDS_INDEX,
+    COLLECTION,
+    ...WORDS_INDEX_COLUMNS,
+  ]);
+}
+
 /// Crea la tabla de canjes (un renglón por celular que canjea un código) si
 /// todavía no existe, para que con solo la colección `codigos` ya se pueda
 /// canjear. [database] es el knex de Directus.
@@ -360,6 +391,12 @@ export default {
   id: 'juego',
   handler: (router, { database, logger, services, getSchema, env }) => {
     const flowId = env?.CHARADEANDO_GEMINI_FLOW || DEFAULT_GEMINI_FLOW;
+
+    // El índice de palabras se crea solo al arrancar, si falta. Si falla,
+    // el juego sigue igual, solo que sin el índice.
+    ensureWordsIndex(database)
+      .then(() => logger.info(`[juego] Índice ${WORDS_INDEX} listo`))
+      .catch((e) => logger.warn(e, `[juego] No se pudo crear el índice ${WORDS_INDEX}`));
 
     // La tabla de canjes se crea sola la primera vez que se necesita; si
     // falla, se vuelve a intentar en el siguiente pedido.

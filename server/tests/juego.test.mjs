@@ -5,6 +5,7 @@ import { test } from 'node:test';
 import {
   codeProblem,
   ensureRedemptions,
+  ensureWordsIndex,
   normalizeCode,
   normalizeDevice,
   parseCategorias,
@@ -152,4 +153,47 @@ test('entrega los castigos sin vacíos ni repetidos', () => {
       { id: 'e', texto: 'Bailar' },
     ],
   );
+});
+
+test('crea el índice de palabras sin tocar las palabras', async () => {
+  const raws = [];
+  await ensureWordsIndex({
+    client: { config: { client: 'pg' } },
+    raw: async (sql, bindings) => raws.push({ sql, bindings }),
+  });
+  assert.deepEqual(raws, [
+    {
+      sql: 'CREATE INDEX IF NOT EXISTS ?? ON ?? (??, ??, ??)',
+      bindings: [
+        'palabras_categoria_idioma_dificultad',
+        'palabras',
+        'categoria',
+        'idioma',
+        'dificultad',
+      ],
+    },
+  ]);
+});
+
+test('en MySQL crea el índice y si ya existe no falla', async () => {
+  const made = [];
+  const mysql = (fail) => ({
+    client: { config: { client: 'mysql2' } },
+    schema: {
+      alterTable: async (name, build) => {
+        if (fail) throw Object.assign(new Error('dup'), { code: fail });
+        build({ index: (columns, index) => made.push({ name, columns, index }) });
+      },
+    },
+  });
+  await ensureWordsIndex(mysql(null));
+  assert.deepEqual(made, [
+    {
+      name: 'palabras',
+      columns: ['categoria', 'idioma', 'dificultad'],
+      index: 'palabras_categoria_idioma_dificultad',
+    },
+  ]);
+  await ensureWordsIndex(mysql('ER_DUP_KEYNAME'));
+  await assert.rejects(ensureWordsIndex(mysql('ER_OTRO')));
 });

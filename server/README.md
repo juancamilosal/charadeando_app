@@ -47,6 +47,15 @@ Directus 11 con PostgreSQL y Redis, desplegado con Coolify en el VPS.
     repetidos. La app los trae una vez al abrir y los usa en la ruleta; si
     no llegan (sin internet, el servidor falla o hay menos de 10), usa sus
     20 castigos de respaldo. 10 peticiones por minuto por IP.
+- Al arrancar, la extensión crea (si falta) el índice
+  `palabras_categoria_idioma_dificultad` sobre `palabras (categoria,
+  idioma, dificultad)`, los campos que filtra `/juego/palabras`. No cambia
+  ninguna palabra ni se ve en Directus; la base de datos lo mantiene sola.
+  En el registro de Directus aparece `[juego] Índice ... listo`. Para ver
+  si una consulta lo usa: `EXPLAIN SELECT id FROM palabras WHERE categoria
+  = 'ANIME';` (con pocas palabras PostgreSQL puede preferir recorrerlas
+  todas, y es normal). Se quita con `DROP INDEX
+  palabras_categoria_idioma_dificultad;`.
 - El flujo de Gemini se cambia con la variable de entorno
   `CHARADEANDO_GEMINI_FLOW` (id del flujo); por defecto
   `2d91a34a-b82c-4f97-9e2f-12154ba86323`.
