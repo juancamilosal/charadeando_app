@@ -174,7 +174,7 @@ ids tienen que ser exactamente estos:
 | Dichos y refranes | `categoria_dichos_refranes` |
 | Marcas | `categoria_marcas` |
 | Futbolistas | `categoria_futbolistas` |
-| Deportistas famosos | `categoria_deportistas_famosos` |
+| Deportistas | `categoria_deportistas` |
 | Navidad | `categoria_navidad` |
 
 Son de pago todas menos las dos primeras de cada sección (Animales y
@@ -321,7 +321,7 @@ con "Pronto" en la app hasta que se carguen.
 | Deportes | `DEPORTES` |
 | Equipos de fútbol | `EQUIPOS_FUTBOL` |
 | Futbolistas | `FUTBOLISTAS` |
-| Deportistas famosos | `DEPORTISTAS_FAMOSOS` |
+| Deportistas | `DEPORTISTAS` |
 | Animales | `ANIMALES` |
 | Comida | `COMIDA` |
 | Objetos | `OBJETOS` |
@@ -345,6 +345,6 @@ combinadas, cada persona o personaje se carga en una sola categoría:
   son de la música, en `MUSICA`.
 - Futbolistas (Messi, Cristiano Ronaldo, James Rodríguez): solo en
   `FUTBOLISTAS`. Los de los demás deportes (Michael Jordan, Serena
-  Williams, Usain Bolt, Egan Bernal): solo en `DEPORTISTAS_FAMOSOS`.
+  Williams, Usain Bolt, Egan Bernal): solo en `DEPORTISTAS`.
   Ninguno de los dos va en `CELEBRIDADES`, y los clubes siguen en
   `EQUIPOS_FUTBOL`.

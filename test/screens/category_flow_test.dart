@@ -37,7 +37,7 @@ void main() {
         'DEPORTES',
         'EQUIPOS_FUTBOL',
         'FUTBOLISTAS',
-        'DEPORTISTAS_FAMOSOS',
+        'DEPORTISTAS',
         'VACACIONES',
         'HALLOWEEN',
         'NAVIDAD',
@@ -95,7 +95,7 @@ void main() {
       'Deportes',
       'Equipos de fútbol',
       'Futbolistas',
-      'Deportistas famosos',
+      'Deportistas',
     ]);
     expect(labels(CategorySection.classics), [
       'Animales',

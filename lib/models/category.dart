@@ -287,11 +287,11 @@ enum GameCategory {
     section: CategorySection.sports,
   ),
   athletes(
-    'Deportistas famosos',
+    'Deportistas',
     'Leyendas de todos los deportes',
     Icons.emoji_events,
     AppColors.orange,
-    'DEPORTISTAS_FAMOSOS',
+    'DEPORTISTAS',
     'Deportista',
     section: CategorySection.sports,
   ),

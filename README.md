@@ -164,7 +164,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   marimba del final de universfield y la ruleta de victorabdo, también
   de Pixabay; y las imágenes
   de las categorías, íconos de Flaticon; el de Anime, de smalllikeart; el
-  de Futbolistas, de justicon, y el de Deportistas famosos, de Magnific). Se
+  de Futbolistas, de justicon, y el de Deportistas, de Magnific). Se
   guardan en el celular (`ajustes.json`) y se aplican desde que abre la
   app. La animación de la bienvenida explica el controlador elegido.
 - Pantalla de categorías (`lib/screens/category_screen.dart`), pestaña
@@ -262,7 +262,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   Comida, Profesiones, Acciones, Lugares, Series y novelas, Personajes,
   Superhéroes, Dibujos animados, Anime, Videojuegos, Música y canciones,
   Personajes históricos, Dichos y refranes, Vacaciones, Halloween y
-  Navidad, Futbolistas y Deportistas famosos: todas.
+  Navidad, Futbolistas y Deportistas: todas.
 - Dificultad: Mezcladas (viene elegida: trae de todas, 300 palabras por
   categoría), Fácil (ideal con niños), Normal o Difícil (100 cada una). Se
   elige en la configuración de las palabras automáticas, en Libre y en todas
