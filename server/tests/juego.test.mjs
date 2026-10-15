@@ -11,6 +11,7 @@ import {
   parseUnlocks,
   quotas,
   restoredUnlocks,
+  punishmentsOut,
 } from '../directus-extensions/charadeando-juego/index.js';
 
 test('reparte en partes iguales y el sobrante de a una', () => {
@@ -135,4 +136,20 @@ test('crea la tabla de canjes solo si no existe', async () => {
       columns: ['id:id', 'string:codigo', 'string:dispositivo', 'timestamp:fecha'],
     },
   ]);
+});
+
+test('entrega los castigos sin vacíos ni repetidos', () => {
+  assert.deepEqual(
+    punishmentsOut([
+      { id: 'a', nombre: ' Cantar una canción ' },
+      { id: 'b', nombre: 'cantar una  canción' },
+      { id: 'c', nombre: '' },
+      { id: 'd', nombre: null },
+      { id: 'e', nombre: 'Bailar' },
+    ]),
+    [
+      { id: 'a', texto: 'Cantar una canción' },
+      { id: 'e', texto: 'Bailar' },
+    ],
+  );
 });

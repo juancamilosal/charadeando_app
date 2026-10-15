@@ -101,8 +101,8 @@ void main() {
   });
 
   group('castigos', () {
-    test('el sistema tiene 100 castigos distintos y cortos', () {
-      expect(systemPunishments, hasLength(100));
+    test('la app guarda 20 castigos de respaldo distintos y cortos', () {
+      expect(systemPunishments, hasLength(20));
       // Caben en el campo de la ruleta y en el editor (60 letras).
       expect(systemPunishments.every((p) => p.length <= 60), isTrue);
       expect(systemPunishments.toSet(), hasLength(systemPunishments.length));
@@ -186,5 +186,54 @@ void main() {
     expect(await service.fetchPunishments(8), ['Cantar']);
     expect(sent.url.path, '/juego/castigos');
     expect(jsonDecode(sent.body), {'n': 8});
+  });
+
+  group('castigos de Directus', () {
+    final many = [for (var i = 0; i < 30; i++) 'Castigo $i'];
+
+    test('se usan los de Directus cuando llegan, una sola vez', () async {
+      var calls = 0;
+      final pool = PunishmentPool((count) async {
+        calls++;
+        expect(count, PunishmentService.maxCount);
+        return [...many, 'castigo 0'];
+      });
+      expect(pool.current, systemPunishments);
+      expect(await pool.load(), many);
+      await pool.load();
+      expect(calls, 1);
+      expect(pool.current, many);
+    });
+
+    test('si fallan quedan los de respaldo y se vuelve a intentar', () async {
+      var fail = true;
+      final pool = PunishmentPool((_) async {
+        if (fail) throw DirectusException(null, 'sin internet');
+        return many;
+      });
+      expect(await pool.load(), systemPunishments);
+      fail = false;
+      expect(await pool.load(), many);
+    });
+
+    test('con muy pocos en Directus se quedan los de respaldo', () async {
+      final pool = PunishmentPool((_) async => ['Cantar', 'Bailar']);
+      expect(await pool.load(), systemPunishments);
+    });
+
+    test('si Directus tarda, no hace esperar al girar', () async {
+      final pool = PunishmentPool(
+        (_) => Future.delayed(const Duration(seconds: 1), () => many),
+      );
+      expect(
+        await pool.ready(wait: const Duration(milliseconds: 10)),
+        systemPunishments,
+      );
+      expect(await pool.load(), many);
+    });
+
+    test('sin servidor (en las pruebas) solo hay de respaldo', () async {
+      expect(await PunishmentPool().load(), systemPunishments);
+    });
   });
 }

@@ -390,8 +390,10 @@ la cámara frontal graba a los participantes para revivir las risas.
   "Listo" la deja quieta otra vez para seguir cambiándola. Se elige la
   cantidad de campos (de 2 a 10, la ruleta se divide en partes iguales) y de
   dónde salen los castigos, una opción por línea con lo que significa
-  debajo: "Los escriben los jugadores", "Los pone la app" (100 castigos
-  para todo público, en `services/punishments.dart`) o "Jugadores y app" (el
+  debajo: "Los escriben los jugadores", "Los pone la app" (los castigos
+  familiares de la colección `castigos` de Directus, que la app trae al
+  abrir con `POST /juego/castigos` (`PunishmentPool`); si no llegan, usa 20
+  de respaldo de `services/punishments.dart`) o "Jugadores y app" (el
   equipo escribe algunos y la app completa los vacíos sin repetir). Al girar, la ruleta queda guardada en el celular.
 - Cómo gira: "Girar" la pone a toda velocidad y sigue sola hasta que tocan
   "¡Parar!" (o pasan 30 segundos). Entonces se elige el castigo al azar (el

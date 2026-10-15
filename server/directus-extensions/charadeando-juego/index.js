@@ -9,6 +9,8 @@
 //                         y dice qué desbloquea: todo o algunas categorías.
 //   POST /juego/mis-codigos  Lo que abren los códigos que un celular ya
 //                         canjeó, para recuperarlo al reinstalar la app.
+//   POST /juego/castigos  Castigos al azar de la colección castigos (campo
+//                         nombre) para la ruleta.
 //
 // El rol Public de Directus no tiene permisos sobre la colección, así que
 // estas rutas son la única forma de leer o crear palabras sin iniciar
@@ -88,7 +90,15 @@ const limits = {
   // Pocos intentos, para que no se puedan adivinar códigos probando.
   canjear: { points: 5, hits: new Map() },
   misCodigos: { points: 5, hits: new Map() },
+  castigos: { points: 10, hits: new Map() },
 };
+
+/// Castigos de la ruleta (campo `nombre`). No es pública.
+const PUNISHMENTS = 'castigos';
+
+/// Tope de castigos por petición. Debe coincidir con
+/// PunishmentService.maxCount.
+const MAX_PUNISHMENTS = 200;
 
 /// Códigos promocionales y sus canjes. Ninguna de las dos es pública.
 const CODES = 'codigos';
@@ -130,6 +140,19 @@ function clientIp(req) {
 /// Normaliza para comparar sin importar mayúsculas ni espacios.
 function key(text) {
   return text.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+/// Castigos para la app: `{ id, texto }`, sin vacíos ni repetidos.
+export function punishmentsOut(rows) {
+  const seen = new Set();
+  const out = [];
+  for (const row of rows) {
+    const texto = typeof row?.nombre === 'string' ? row.nombre.trim() : '';
+    if (!texto || seen.has(key(texto))) continue;
+    seen.add(key(texto));
+    out.push({ id: row.id, texto });
+  }
+  return out;
 }
 
 /// Palabras que no cuentan para saber si dos frases son la misma idea.
@@ -537,6 +560,28 @@ export default {
       } catch (e) {
         logger.error(e, '[juego] No se pudieron leer los códigos canjeados');
         return error(res, 500, 'No se pudieron leer los códigos canjeados.');
+      }
+    });
+
+    // Castigos al azar para la ruleta: { "n": 100 }.
+    router.post('/castigos', async (req, res) => {
+      if (!allowed('castigos', clientIp(req))) {
+        return error(res, 429, 'Demasiadas peticiones. Espera un minuto.');
+      }
+      const n = Number((req.body ?? {}).n ?? 10);
+      if (!Number.isInteger(n) || n < 1 || n > MAX_PUNISHMENTS) {
+        return error(res, 400, `"n" debe ser un número entre 1 y ${MAX_PUNISHMENTS}.`);
+      }
+      try {
+        const rows = await database(PUNISHMENTS)
+          .select('id', 'nombre')
+          .whereNotNull('nombre')
+          .orderByRaw('random()')
+          .limit(n);
+        return res.json({ data: punishmentsOut(rows) });
+      } catch (e) {
+        logger.error(e, '[juego] No se pudieron leer los castigos');
+        return error(res, 500, 'No se pudieron leer los castigos.');
       }
     });
 

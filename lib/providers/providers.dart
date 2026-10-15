@@ -24,6 +24,9 @@ final wordBankProvider = Provider(
 final tiltServiceProvider = Provider((ref) => TiltService());
 final tvServiceProvider = Provider((ref) => TvService());
 final punishmentStoreProvider = Provider((ref) => PunishmentStore());
+
+/// Los castigos que pone la app: los de Directus o los de respaldo.
+final punishmentPoolProvider = Provider((ref) => defaultPunishmentPool());
 final configStoreProvider = Provider((ref) => ConfigStore());
 final customCategoryStoreProvider = Provider((ref) => CustomCategoryStore());
 final welcomeStoreProvider = Provider((ref) => WelcomeStore());

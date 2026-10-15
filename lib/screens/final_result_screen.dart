@@ -41,10 +41,17 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
   Future<void> _editPunishments() async {
     final store = ref.read(punishmentStoreProvider);
     final saved = await store.load();
+    final pool = saved == null
+        ? await ref.read(punishmentPoolProvider).ready()
+        : const <String>[];
     if (!mounted) return;
     final current =
         saved?.punishments ??
-        Roulette.systemPick(PunishmentSpinScreen.defaultFields, Random());
+        Roulette.systemPick(
+          PunishmentSpinScreen.defaultFields,
+          Random(),
+          pool: pool,
+        );
     final edited = await showPunishmentEditor(context, current);
     if (edited == null) return;
     await store.save(

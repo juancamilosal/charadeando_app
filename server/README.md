@@ -41,6 +41,12 @@ Directus 11 con PostgreSQL y Redis, desplegado con Coolify en el VPS.
   - `POST /juego/mis-codigos`: lo que abren los códigos que un celular ya
     canjeó, para recuperarlos al reinstalar la app (ver abajo). 5 intentos
     por minuto por IP.
+  - `POST /juego/castigos` con `{ "n": 200 }` (de 1 a 200): castigos al
+    azar de la colección `castigos` (campos `id` y `nombre`), como
+    `{ "data": [{ "id": "...", "texto": "..." }] }`, sin vacíos ni
+    repetidos. La app los trae una vez al abrir y los usa en la ruleta; si
+    no llegan (sin internet, el servidor falla o hay menos de 10), usa sus
+    20 castigos de respaldo. 10 peticiones por minuto por IP.
 - El flujo de Gemini se cambia con la variable de entorno
   `CHARADEANDO_GEMINI_FLOW` (id del flujo); por defecto
   `2d91a34a-b82c-4f97-9e2f-12154ba86323`.

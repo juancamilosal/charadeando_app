@@ -42,12 +42,33 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
   late List<String> _systemPick = Roulette.systemPick(
     RouletteSetup.maxFields,
     _random,
+    pool: _pool,
   );
+
+  /// Los castigos que pone la app: los de Directus o los de respaldo.
+  List<String> get _pool => ref.read(punishmentPoolProvider).current;
 
   @override
   void initState() {
     super.initState();
     _loadSaved();
+    _loadPool();
+  }
+
+  /// Cuando llegan los castigos de Directus, la vista previa los usa, si
+  /// no se está viendo ya una ruleta de la app.
+  Future<void> _loadPool() async {
+    final before = _pool;
+    final pool = await ref.read(punishmentPoolProvider).load();
+    if (!mounted || identical(pool, before)) return;
+    if (_source == PunishmentSource.system) return;
+    setState(
+      () => _systemPick = Roulette.systemPick(
+        RouletteSetup.maxFields,
+        _random,
+        pool: pool,
+      ),
+    );
   }
 
   Future<void> _loadSaved() async {
@@ -74,6 +95,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
             RouletteSetup.maxFields,
             _random,
             exclude: saved.punishments,
+            pool: _pool,
           ),
         ].take(RouletteSetup.maxFields).toList();
       }
@@ -116,6 +138,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
       RouletteSetup.maxFields,
       _random,
       exclude: _systemPick.take(_fields),
+      pool: _pool,
     ),
   );
 
@@ -147,6 +170,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
           written,
           _fields,
           _random,
+          pool: _pool,
         ),
       },
     );
@@ -338,11 +362,18 @@ class _PunishmentSpinScreenState extends ConsumerState<PunishmentSpinScreen> {
       return;
     }
     final saved = await ref.read(punishmentStoreProvider).load();
+    final pool = saved == null
+        ? await ref.read(punishmentPoolProvider).ready()
+        : const <String>[];
     if (!mounted) return;
     setState(() {
       _punishments =
           saved?.punishments ??
-          Roulette.systemPick(PunishmentSpinScreen.defaultFields, _random);
+          Roulette.systemPick(
+            PunishmentSpinScreen.defaultFields,
+            _random,
+            pool: pool,
+          );
     });
   }
 

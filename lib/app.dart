@@ -26,6 +26,9 @@ class _CharadeandoAppState extends ConsumerState<CharadeandoApp>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // Los castigos de Directus se traen al abrir, para tenerlos listos en
+    // la ruleta.
+    ref.read(punishmentPoolProvider).load().ignore();
     // La música de fondo suena según el ajuste "Música" y se apaga en
     // cuanto lo desactivan.
     ref.read(backgroundMusicProvider).enabled = ref

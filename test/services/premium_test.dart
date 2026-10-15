@@ -494,10 +494,7 @@ void main() {
 
   test('los productos de Google Play', () {
     expect(PlayBilling.productId(null), 'charadeando_premium');
-    expect(
-      PlayBilling.productId('DEPORTISTAS'),
-      'categoria_deportistas',
-    );
+    expect(PlayBilling.productId('DEPORTISTAS'), 'categoria_deportistas');
     expect(PlayBilling.categoryOf('charadeando_premium'), isNull);
     expect(PlayBilling.categoryOf('categoria_anime'), 'ANIME');
     expect(PlayBilling.categoryOf('otra_cosa'), '');
