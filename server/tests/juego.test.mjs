@@ -4,10 +4,12 @@ import { test } from 'node:test';
 
 import {
   codeProblem,
+  cpuPercent,
   ensureRedemptions,
   ensureWordsIndex,
   normalizeCode,
   normalizeDevice,
+  parseMeminfo,
   parseCategorias,
   parseUnlocks,
   quotas,
@@ -196,4 +198,29 @@ test('en MySQL crea el índice y si ya existe no falla', async () => {
   ]);
   await ensureWordsIndex(mysql('ER_DUP_KEYNAME'));
   await assert.rejects(ensureWordsIndex(mysql('ER_OTRO')));
+});
+
+test('lee la memoria del servidor de /proc/meminfo', () => {
+  const text = [
+    'MemTotal:        4000000 kB',
+    'MemFree:          500000 kB',
+    'MemAvailable:    2500000 kB',
+    'SwapTotal:       1000000 kB',
+    'SwapFree:         800000 kB',
+  ].join('\n');
+  assert.deepEqual(parseMeminfo(text), {
+    total: 4000000 * 1024,
+    disponible: 2500000 * 1024,
+    swapTotal: 1000000 * 1024,
+    swapUsada: 200000 * 1024,
+  });
+  assert.equal(parseMeminfo(''), null);
+  assert.equal(parseMeminfo('MemTotal: 10 kB'), null);
+});
+
+test('calcula el uso de CPU entre dos lecturas', () => {
+  const cpu = (user, idle) => ({ times: { user, nice: 0, sys: 0, idle, irq: 0 } });
+  // Un núcleo trabajó 30 de 100 y el otro 70 de 100: 50 % en total.
+  assert.equal(cpuPercent([cpu(0, 0), cpu(0, 0)], [cpu(30, 70), cpu(70, 30)]), 50);
+  assert.equal(cpuPercent([cpu(5, 5)], [cpu(5, 5)]), 0);
 });

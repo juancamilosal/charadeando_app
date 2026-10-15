@@ -47,6 +47,16 @@ Directus 11 con PostgreSQL y Redis, desplegado con Coolify en el VPS.
     repetidos. La app los trae una vez al abrir y los usa en la ruleta; si
     no llegan (sin internet, el servidor falla o hay menos de 10), usa sus
     20 castigos de respaldo. 10 peticiones por minuto por IP.
+- `GET /juego/estado`: uso del servidor para revisarlo sin entrar a la
+  terminal: núcleos, % de CPU (medido en medio segundo), carga (1, 5 y 15
+  min), RAM (total, disponible y swap, de `/proc/meminfo`), disco de `/`,
+  cuánto lleva encendido, memoria del contenedor de Directus y tamaño de la
+  base de datos (PostgreSQL). Solo responde a un administrador de Directus
+  (`Authorization: Bearer <token>`); a los demás, 403. Solo lee. Directus
+  corre en Docker, pero la RAM, la CPU, la carga y el disco son los del
+  servidor completo; el consumo de cada contenedor por separado no está
+  (haría falta darle a Directus el control de Docker): para eso,
+  `sudo docker stats --no-stream` en la terminal.
 - Al arrancar, la extensión crea (si falta) el índice
   `palabras_categoria_idioma_dificultad` sobre `palabras (categoria,
   idioma, dificultad)`, los campos que filtra `/juego/palabras`. No cambia

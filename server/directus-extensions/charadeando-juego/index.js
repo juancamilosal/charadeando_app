@@ -11,6 +11,8 @@
 //                         canjeó, para recuperarlo al reinstalar la app.
 //   POST /juego/castigos  Castigos al azar de la colección castigos (campo
 //                         nombre) para la ruleta.
+//   GET  /juego/estado    Uso del servidor (RAM, CPU, carga, disco). Solo
+//                         para administradores de Directus; solo lee.
 //
 // Al arrancar crea, si falta, el índice de palabras por categoría, idioma
 // y dificultad (WORDS_INDEX).
@@ -19,6 +21,9 @@
 // estas rutas son la única forma de leer o crear palabras sin iniciar
 // sesión. Las instrucciones para Gemini están fijas aquí: la app solo manda
 // la cantidad. Ambas rutas tienen tope y límite de peticiones por IP.
+
+import os from 'node:os';
+import { readFile, statfs } from 'node:fs/promises';
 
 const COLLECTION = 'palabras';
 
@@ -162,6 +167,44 @@ export function punishmentsOut(rows) {
     out.push({ id: row.id, texto });
   }
   return out;
+}
+
+/// Lee `/proc/meminfo` (en kB) y devuelve bytes: total, disponible (lo que
+/// de verdad queda, contando la caché que Linux suelta cuando hace falta)
+/// y swap. null si no se puede leer.
+export function parseMeminfo(text) {
+  const kb = {};
+  for (const line of String(text ?? '').split('\n')) {
+    const match = /^(\w+):\s+(\d+)\s*kB/.exec(line);
+    if (match) kb[match[1]] = Number(match[2]) * 1024;
+  }
+  if (kb.MemTotal === undefined || kb.MemAvailable === undefined) return null;
+  return {
+    total: kb.MemTotal,
+    disponible: kb.MemAvailable,
+    swapTotal: kb.SwapTotal ?? 0,
+    swapUsada: (kb.SwapTotal ?? 0) - (kb.SwapFree ?? 0),
+  };
+}
+
+/// Porcentaje de CPU usado entre dos lecturas de `os.cpus()`: lo que no
+/// fue tiempo libre (idle), sumando todos los núcleos.
+export function cpuPercent(before, after) {
+  let busy = 0;
+  let total = 0;
+  for (let i = 0; i < Math.min(before.length, after.length); i++) {
+    const a = before[i].times;
+    const b = after[i].times;
+    const spent = Object.keys(b).reduce((sum, k) => sum + (b[k] - (a[k] ?? 0)), 0);
+    total += spent;
+    busy += spent - (b.idle - a.idle);
+  }
+  return total > 0 ? Math.round((busy / total) * 1000) / 10 : 0;
+}
+
+/// Porcentaje con un decimal.
+function percent(part, whole) {
+  return whole > 0 ? Math.round((part / whole) * 1000) / 10 : 0;
 }
 
 /// Palabras que no cuentan para saber si dos frases son la misma idea.
@@ -601,6 +644,78 @@ export default {
     });
 
     // Castigos al azar para la ruleta: { "n": 100 }.
+    // Uso del servidor para revisarlo sin entrar a la terminal. Solo un
+    // administrador de Directus (con su token); no cambia nada. Directus
+    // corre en Docker, pero la RAM, la CPU, la carga y el disco que ve son
+    // los del servidor completo; `directus` es solo lo de este contenedor.
+    router.get('/estado', async (req, res) => {
+      if (req.accountability?.admin !== true) {
+        return error(res, 403, 'Solo para administradores.');
+      }
+      try {
+        const before = os.cpus();
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        const after = os.cpus();
+
+        const memoria =
+          parseMeminfo(await readFile('/proc/meminfo', 'utf8').catch(() => '')) ?? {
+            total: os.totalmem(),
+            disponible: os.freemem(),
+            swapTotal: 0,
+            swapUsada: 0,
+          };
+        const fsInfo = await statfs('/').catch(() => null);
+        const disco = fsInfo
+          ? {
+              total: fsInfo.blocks * fsInfo.bsize,
+              libre: fsInfo.bavail * fsInfo.bsize,
+            }
+          : null;
+        // Memoria del contenedor de Directus (cgroup v2), si se puede leer.
+        const contenedor = Number(
+          (await readFile('/sys/fs/cgroup/memory.current', 'utf8').catch(() => '')).trim(),
+        );
+        let baseDeDatos = null;
+        if (/pg|postgres/i.test(String(database.client?.config?.client ?? ''))) {
+          const result = await database
+            .raw('SELECT pg_database_size(current_database()) AS bytes')
+            .catch(() => null);
+          const bytes = Number(result?.rows?.[0]?.bytes);
+          if (Number.isFinite(bytes)) baseDeDatos = { bytes };
+        }
+
+        const [carga1, carga5, carga15] = os.loadavg();
+        return res.json({
+          data: {
+            fecha: new Date().toISOString(),
+            encendidoSegundos: Math.round(os.uptime()),
+            nucleos: after.length,
+            cpu: { usoPorcentaje: cpuPercent(before, after) },
+            carga: { '1min': carga1, '5min': carga5, '15min': carga15 },
+            memoria: {
+              ...memoria,
+              usada: memoria.total - memoria.disponible,
+              usoPorcentaje: percent(memoria.total - memoria.disponible, memoria.total),
+            },
+            disco: disco && {
+              ...disco,
+              usado: disco.total - disco.libre,
+              usoPorcentaje: percent(disco.total - disco.libre, disco.total),
+            },
+            directus: {
+              memoriaContenedor: Number.isFinite(contenedor) && contenedor > 0 ? contenedor : null,
+              memoriaProceso: process.memoryUsage().rss,
+              node: process.version,
+            },
+            baseDeDatos,
+          },
+        });
+      } catch (e) {
+        logger.error(e, '[juego] No se pudo leer el estado del servidor');
+        return error(res, 500, 'No se pudo leer el estado del servidor.');
+      }
+    });
+
     router.post('/castigos', async (req, res) => {
       if (!allowed('castigos', clientIp(req))) {
         return error(res, 429, 'Demasiadas peticiones. Espera un minuto.');
