@@ -101,8 +101,10 @@ void main() {
   });
 
   group('castigos', () {
-    test('el sistema tiene unos 30 castigos distintos', () {
-      expect(systemPunishments.length, greaterThanOrEqualTo(30));
+    test('el sistema tiene 100 castigos distintos y cortos', () {
+      expect(systemPunishments, hasLength(100));
+      // Caben en el campo de la ruleta y en el editor (60 letras).
+      expect(systemPunishments.every((p) => p.length <= 60), isTrue);
       expect(systemPunishments.toSet(), hasLength(systemPunishments.length));
     });
 
