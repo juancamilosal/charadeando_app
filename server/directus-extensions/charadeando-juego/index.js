@@ -11,6 +11,9 @@
 //                         canjeó, para recuperarlo al reinstalar la app.
 //   POST /juego/castigos  Castigos al azar de la colección castigos (campo
 //                         nombre) para la ruleta.
+//   POST /juego/fotomimica  Objetos al azar de la colección fotomimica
+//                         (publicados) con el id de su imagen, para la
+//                         sección Fotomímica.
 //   GET  /juego/estado    Uso del servidor (RAM, CPU, carga, disco). Solo
 //                         para administradores de Directus; solo lee.
 //
@@ -105,7 +108,17 @@ const limits = {
   canjear: { points: 5, hits: new Map() },
   misCodigos: { points: 5, hits: new Map() },
   castigos: { points: 10, hits: new Map() },
+  fotomimica: { points: 10, hits: new Map() },
 };
+
+/// Objetos de Fotomímica (nombre, imagen en directus_files, status y
+/// premium). No es pública; sus imágenes sí (solo las de la carpeta
+/// Fotomímica), para que la app las descargue de /assets.
+const PHOTO_MIME = 'fotomimica';
+
+/// Tope de objetos por petición. Debe coincidir con
+/// DirectusService.maxPhotoMime.
+const MAX_PHOTO_MIME = 100;
 
 /// Castigos de la ruleta (campo `nombre`). No es pública.
 const PUNISHMENTS = 'castigos';
@@ -154,6 +167,60 @@ function clientIp(req) {
 /// Normaliza para comparar sin importar mayúsculas ni espacios.
 function key(text) {
   return text.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+/// Valida el cuerpo de /juego/fotomimica: `{ n, excluir?, incluir_premium? }`.
+/// Devuelve `{ n, excluir, incluirPremium }` o `{ error }`.
+export function parsePhotoMimeBody(body) {
+  const b = body ?? {};
+  const n = Number(b.n ?? 10);
+  if (!Number.isInteger(n) || n < 1 || n > MAX_PHOTO_MIME) {
+    return { error: `"n" debe ser un número entre 1 y ${MAX_PHOTO_MIME}.` };
+  }
+  const excluir = b.excluir ?? [];
+  if (
+    !Array.isArray(excluir) ||
+    excluir.length > MAX_EXCLUDE ||
+    !excluir.every((id) => Number.isInteger(id) || (typeof id === 'string' && /^\d{1,12}$/.test(id)))
+  ) {
+    return { error: `"excluir" debe ser una lista de hasta ${MAX_EXCLUDE} ids.` };
+  }
+  const incluir = b.incluir_premium ?? false;
+  if (typeof incluir !== 'boolean') {
+    return { error: '"incluir_premium" debe ser true o false.' };
+  }
+  return { n, excluir: excluir.map(Number), incluirPremium: incluir };
+}
+
+/// Toma [n] filas al azar con [query]: primero sin las de [excluir] (ya
+/// jugadas) y, si no alcanzan, completa con esas. [query] recibe
+/// `{ excluir, tomadas, limit }` y devuelve filas con `id`.
+export async function pickAvoiding(query, n, excluir) {
+  const data = [];
+  for (const evitar of [excluir, []]) {
+    if (data.length >= n) break;
+    const rows = await query({
+      excluir: evitar,
+      tomadas: data.map((r) => r.id),
+      limit: n - data.length,
+    });
+    data.push(...rows);
+    if (evitar.length === 0) break;
+  }
+  return data;
+}
+
+/// Objetos de Fotomímica para la app: `{ id, nombre, imagen, premium }`,
+/// sin los que no tienen nombre o imagen.
+export function photoMimeOut(rows) {
+  const out = [];
+  for (const row of rows ?? []) {
+    const nombre = typeof row?.nombre === 'string' ? row.nombre.trim() : '';
+    const imagen = row?.imagen ? String(row.imagen) : '';
+    if (!nombre || !imagen) continue;
+    out.push({ id: row.id, nombre, imagen, premium: row.premium === true || row.premium === 1 });
+  }
+  return out;
 }
 
 /// Castigos para la app: `{ id, texto }`, sin vacíos ni repetidos.
@@ -713,6 +780,41 @@ export default {
       } catch (e) {
         logger.error(e, '[juego] No se pudo leer el estado del servidor');
         return error(res, 500, 'No se pudo leer el estado del servidor.');
+      }
+    });
+
+    // Objetos al azar para Fotomímica: { "n": 40, "excluir": [ids],
+    // "incluir_premium": false }. Solo los publicados; sin Premium, solo los
+    // gratis. Los de "excluir" (ya jugados) solo se repiten si no alcanzan.
+    router.post('/fotomimica', async (req, res) => {
+      if (!allowed('fotomimica', clientIp(req))) {
+        return error(res, 429, 'Demasiadas peticiones. Espera un minuto.');
+      }
+      const body = parsePhotoMimeBody(req.body);
+      if (body.error) return error(res, 400, body.error);
+      try {
+        const rows = await pickAvoiding(
+          ({ excluir, tomadas, limit }) => {
+            const q = database(PHOTO_MIME)
+              .select('id', 'nombre', 'imagen', 'premium')
+              .where('status', 'published')
+              .whereNotNull('imagen')
+              .orderByRaw('random()')
+              .limit(limit);
+            if (!body.incluirPremium) {
+              q.where((w) => w.where('premium', false).orWhereNull('premium'));
+            }
+            const fuera = [...excluir, ...tomadas];
+            if (fuera.length > 0) q.whereNotIn('id', fuera);
+            return q;
+          },
+          body.n,
+          body.excluir,
+        );
+        return res.json({ data: photoMimeOut(rows) });
+      } catch (e) {
+        logger.error(e, '[juego] No se pudieron leer los objetos de Fotomímica');
+        return error(res, 500, 'No se pudieron leer los objetos de Fotomímica.');
       }
     });
 

@@ -14,7 +14,8 @@ import '../widgets/play_background.dart';
 
 /// Trae de Directus las palabras automáticas de toda la partida, espera a
 /// que estén listas y empieza el primer turno. Durante el juego no se usa
-/// internet.
+/// internet. En Fotomímica descarga antes todas las fotos ("Preparando
+/// imágenes…"): sin internet no se puede empezar.
 class AutoWordsScreen extends ConsumerStatefulWidget {
   const AutoWordsScreen({super.key});
 
@@ -35,6 +36,12 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
   /// Lote guardado que se usará porque no hubo internet.
   WordBatch? _offline;
 
+  /// Fotomímica: fotos listas de cuántas.
+  int _photosReady = 0;
+  int _photosTotal = 0;
+
+  bool get _photos => ref.read(gameControllerProvider).config.photoMime;
+
   @override
   void initState() {
     super.initState();
@@ -47,6 +54,7 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
       _error = null;
     });
     final config = ref.read(gameControllerProvider).config;
+    if (config.photoMime) return _loadPhotos(config);
     if (config.isMix) return _loadMix(config);
     final custom = config.customCategory;
     if (custom != null) {
@@ -84,6 +92,39 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
       } else {
         _play(batch);
       }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = e;
+      });
+    }
+  }
+
+  /// Fotomímica: pide los objetos y descarga todas sus fotos antes de
+  /// empezar. Con Todo Charadeando también salen los de Premium.
+  Future<void> _loadPhotos(GameConfig config) async {
+    setState(() {
+      _photosReady = 0;
+      _photosTotal = 0;
+    });
+    try {
+      final words = await ref
+          .read(photoMimeBankProvider)
+          .prepare(
+            min(config.autoWordsNeeded, PhotoMimeBank.maxPerGame),
+            includePremium: ref.read(premiumUnlockedProvider),
+            minimum: config.groupCount,
+            onProgress: (ready, total) {
+              if (!mounted) return;
+              setState(() {
+                _photosReady = ready;
+                _photosTotal = total;
+              });
+            },
+          );
+      if (!mounted) return;
+      _play(WordBatch(words, offline: false));
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -168,7 +209,7 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text('Palabras automáticas'),
+          title: Text(_photos ? 'Fotomímica' : 'Palabras automáticas'),
           leading: BackButton(
             onPressed: () => context.go(
               ref.read(gameControllerProvider).config.quick
@@ -189,6 +230,7 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
   }
 
   Widget _content() {
+    if (_loading && _photos) return _preparingPhotos();
     if (_loading) {
       return Column(
         mainAxisSize: MainAxisSize.min,
@@ -221,9 +263,22 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
       );
     }
     final error = _error;
+    if (error is PhotoMimeException) {
+      return _Message(
+        icon: error.offline ? Icons.wifi_off : Icons.image_not_supported,
+        title: error.offline
+            ? 'Sin conexión'
+            : 'No se pudieron preparar las imágenes',
+        text: error.message,
+        action: 'Reintentar',
+        onAction: _load,
+      );
+    }
     return _Message(
       icon: Icons.cloud_off,
-      title: 'No se pudieron traer las palabras',
+      title: _photos
+          ? 'No se pudieron traer los objetos'
+          : 'No se pudieron traer las palabras',
       text: switch (error) {
         DirectusException() => error.userMessage,
         String() => error,
@@ -231,6 +286,50 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
       },
       action: 'Reintentar',
       onAction: _load,
+    );
+  }
+}
+
+extension on _AutoWordsScreenState {
+  /// "Preparando imágenes…" con una barra de cuántas fotos están listas.
+  Widget _preparingPhotos() {
+    final total = _photosTotal;
+    final onBackdrop = context.onBackdrop;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.photo_camera, size: 56, color: onBackdrop),
+        const SizedBox(height: 16),
+        Text(
+          'Preparando imágenes…',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: AppFonts.display,
+            fontSize: 26,
+            fontWeight: FontWeight.w600,
+            color: onBackdrop,
+          ),
+        ),
+        const SizedBox(height: 20),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: LinearProgressIndicator(
+            minHeight: 12,
+            value: total == 0 ? null : _photosReady / total,
+            color: onBackdrop,
+            backgroundColor: onBackdrop.withValues(alpha: 0.25),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          total == 0 ? 'Buscando objetos…' : '$_photosReady de $total',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: onBackdrop.withValues(alpha: 0.85),
+          ),
+        ),
+      ],
     );
   }
 }

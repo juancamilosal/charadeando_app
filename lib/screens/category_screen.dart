@@ -14,7 +14,8 @@ import '../widgets/play_choice.dart';
 import '../widgets/premium_sheet.dart';
 
 /// Elección de la categoría. "Todas" muestra Libre como una franja, el
-/// botón "Combinar categorías" y las categorías del juego por secciones
+/// botón "Combinar categorías", la sección Fotomímica y las categorías del
+/// juego por secciones
 /// (Especiales, Entretenimiento, Cultura general, Deportes y Clásicos);
 /// "Mías", las categorías que creó el usuario. Libre deja elegir entre
 /// palabras manuales y automáticas; las demás preguntan si se juega una
@@ -180,6 +181,23 @@ class CategoryScreen extends ConsumerWidget {
               await choosePlay(context, ref);
             }
           },
+        ),
+        // Fotomímica: fotos de objetos en vez de palabras.
+        const SizedBox(height: 44),
+        CategorySectionHeader(
+          title: GameCategory.photoMime.label,
+          trailing: allUnlocked ? 'Todos los objetos' : 'Nueva',
+        ),
+        const SizedBox(height: 18),
+        PhotoMimeSection(
+          premium: allUnlocked,
+          onPlay: () => _choose(
+            context,
+            ref,
+            GameCategory.photoMime,
+            color: GameCategory.photoMime.color,
+          ),
+          onMore: () => showPremiumSheet(context),
         ),
         for (final (section, categories) in GameCategory.sectionsOn(
           today,
@@ -695,6 +713,117 @@ class _CombineButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Sección Fotomímica: su tarjeta, del mismo tamaño que las de las demás
+/// secciones, y al lado qué es. Sin Todo Charadeando, avisa que hay más
+/// objetos con Premium (cuáles son de pago se marca en Directus).
+class PhotoMimeSection extends StatelessWidget {
+  const PhotoMimeSection({
+    super.key,
+    required this.premium,
+    required this.onPlay,
+    required this.onMore,
+  });
+
+  /// Tiene Todo Charadeando: juega con todos los objetos.
+  final bool premium;
+  final VoidCallback onPlay;
+
+  /// "Más objetos con Premium".
+  final VoidCallback onMore;
+
+  @override
+  Widget build(BuildContext context) {
+    final onBackdrop = context.onBackdrop;
+    return LayoutBuilder(
+      builder: (context, box) {
+        final width = (box.maxWidth - 2 * CategoryScreen.sectionSpacing) / 3;
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: width,
+              height: width / CategoryScreen.sectionAspect,
+              child: CategoryCard.game(
+                GameCategory.photoMime,
+                compact: true,
+                shine: premium ? 0.5 : null,
+                onTap: onPlay,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Mira la foto y conviértete en ese objeto. ¡Sin hablar!',
+                    style: TextStyle(
+                      color: onBackdrop,
+                      fontSize: 16,
+                      height: 1.25,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Un taladro gira y vibra; unas llaves se agitan y '
+                    'tintinean. Tu equipo adivina.',
+                    style: TextStyle(
+                      color: onBackdrop.withValues(alpha: 0.85),
+                      fontSize: 14,
+                      height: 1.25,
+                    ),
+                  ),
+                  if (!premium) ...[
+                    const SizedBox(height: 10),
+                    Material(
+                      color: onBackdrop.withValues(alpha: 0.16),
+                      borderRadius: BorderRadius.circular(20),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        onTap: onMore,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 7,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.lock,
+                                size: 16,
+                                color: context.backdrop.light
+                                    ? AppColors.orange
+                                    : AppColors.yellow,
+                              ),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  'Más objetos con Premium',
+                                  style: TextStyle(
+                                    color: onBackdrop,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

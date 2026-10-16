@@ -10,6 +10,9 @@ import {
   normalizeCode,
   normalizeDevice,
   parseMeminfo,
+  parsePhotoMimeBody,
+  photoMimeOut,
+  pickAvoiding,
   parseCategorias,
   parseUnlocks,
   quotas,
@@ -223,4 +226,50 @@ test('calcula el uso de CPU entre dos lecturas', () => {
   // Un núcleo trabajó 30 de 100 y el otro 70 de 100: 50 % en total.
   assert.equal(cpuPercent([cpu(0, 0), cpu(0, 0)], [cpu(30, 70), cpu(70, 30)]), 50);
   assert.equal(cpuPercent([cpu(5, 5)], [cpu(5, 5)]), 0);
+});
+
+test('valida el pedido de Fotomímica', () => {
+  assert.deepEqual(parsePhotoMimeBody({ n: 5 }), { n: 5, excluir: [], incluirPremium: false });
+  assert.deepEqual(parsePhotoMimeBody({}), { n: 10, excluir: [], incluirPremium: false });
+  assert.deepEqual(parsePhotoMimeBody({ n: 100, excluir: [1, '2'], incluir_premium: true }), {
+    n: 100,
+    excluir: [1, 2],
+    incluirPremium: true,
+  });
+  assert.ok(parsePhotoMimeBody({ n: 0 }).error);
+  assert.ok(parsePhotoMimeBody({ n: 101 }).error);
+  assert.ok(parsePhotoMimeBody({ n: 2.5 }).error);
+  assert.ok(parsePhotoMimeBody({ n: 5, excluir: 'x' }).error);
+  assert.ok(parsePhotoMimeBody({ n: 5, excluir: ['abc'] }).error);
+  assert.ok(parsePhotoMimeBody({ n: 5, excluir: Array.from({ length: 501 }, (_, i) => i) }).error);
+  assert.ok(parsePhotoMimeBody({ n: 5, incluir_premium: 'si' }).error);
+});
+
+test('Fotomímica: primero las no jugadas y solo repite si no alcanzan', async () => {
+  const all = [1, 2, 3, 4, 5].map((id) => ({ id }));
+  const query = async ({ excluir, tomadas, limit }) =>
+    all.filter((r) => !excluir.includes(r.id) && !tomadas.includes(r.id)).slice(0, limit);
+  // Alcanzan las no jugadas: no vuelve ninguna jugada.
+  assert.deepEqual((await pickAvoiding(query, 3, [1, 2])).map((r) => r.id), [3, 4, 5]);
+  // No alcanzan: se completa con las jugadas, sin repetir dentro del lote.
+  assert.deepEqual((await pickAvoiding(query, 5, [1, 2])).map((r) => r.id), [3, 4, 5, 1, 2]);
+  // Pide más de las que hay: entrega todas una sola vez.
+  assert.deepEqual((await pickAvoiding(query, 9, [5])).map((r) => r.id), [1, 2, 3, 4, 5]);
+});
+
+test('Fotomímica: entrega id, nombre, imagen y premium', () => {
+  assert.deepEqual(
+    photoMimeOut([
+      { id: 1, nombre: ' Taladro ', imagen: 'f1', premium: false },
+      { id: 2, nombre: 'Llaves', imagen: 'f2', premium: true },
+      { id: 3, nombre: '', imagen: 'f3', premium: false },
+      { id: 4, nombre: 'Sin foto', imagen: null, premium: false },
+      { id: 5, nombre: 'Peine', imagen: 'f5', premium: null },
+    ]),
+    [
+      { id: 1, nombre: 'Taladro', imagen: 'f1', premium: false },
+      { id: 2, nombre: 'Llaves', imagen: 'f2', premium: true },
+      { id: 5, nombre: 'Peine', imagen: 'f5', premium: false },
+    ],
+  );
 });

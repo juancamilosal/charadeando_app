@@ -319,6 +319,34 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Con las palabras escritas por los equipos, en el turno se ve cuántas
   faltan de toda la partida. Con las automáticas no se muestra, porque el
   turno dura hasta que se acabe el tiempo.
+- Fotomímica: sección propia en Categorías, debajo de "Combinar
+  categorías" (`PhotoMimeSection`): su tarjeta (`GameCategory.photoMime`,
+  ícono de cámara, sin sección ni candado) y al lado qué es ("Mira la foto
+  y conviértete en ese objeto. ¡Sin hablar!"). Sin Todo Charadeando dice
+  "Nueva" y lleva el botón "Más objetos con Premium", que abre la hoja de
+  compra; con Todo Charadeando dice "Todos los objetos". Se juega como una
+  partida normal (equipos, turnos, aciertos, pasar, marcador y ruleta al
+  final, partida rápida o personalizada, el mismo tiempo de turno), pero
+  en vez de la palabra se ve la foto del objeto lo más grande posible, sin
+  deformarla, sobre fondo oscuro, y debajo su nombre en letra pequeña para
+  quien actúa (`PhotoMimeView`, en `WordCard` y en el Modo TV). No tiene
+  dificultad ni se combina con otras categorías (no sale en "Combinar
+  categorías"). Antes de empezar, "Preparando imágenes…" con una barra y
+  "27 de 60": `PhotoMimeBank` pide los objetos a `POST /juego/fotomimica`
+  (hasta 90 por partida, más 10 de repuesto) y descarga TODAS las fotos al
+  celular (`<cache>/fotomimica/<id>.webp`, de
+  `/assets/<id>?width=720&quality=80&format=webp`), de a 4 a la vez; las
+  que fallan o están dañadas se reemplazan por otro objeto. Así en el turno
+  nunca se queda cargando una foto (además, mientras se ve "¡Correcto!" o
+  "Paso", la siguiente queda lista en memoria). Sin internet dice "Sin
+  conexión" y no deja empezar; con menos objetos que equipos, que todavía
+  no hay suficientes. Las fotos ya descargadas no se vuelven a bajar (se
+  guardan las 300 más recientes) y los ids jugados se recuerdan
+  (`fotomimica_vistas.json`) para no repetirlos en las partidas siguientes.
+  Sin Premium solo salen los objetos gratis; con Todo Charadeando (compra o
+  código), también los de pago. Cuáles son de pago se decide en Directus
+  con el campo `premium` de cada objeto. La tarjeta usa el ícono hasta que
+  tenga su dibujo en `assets/img/categorias/fotomimica.png`.
 - Combinar categorías: debajo de Libre, el botón "Combinar categorías"
   abre desde abajo una ventana con las categorías del juego (sin Libre) con
   los mismos títulos de sección y en el mismo orden que la pantalla, y al

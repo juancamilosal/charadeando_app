@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../theme.dart';
 import 'end_game_dialog.dart';
+import 'photo_mime_view.dart';
 
 /// Lo que ven los demás mientras el jugador tiene el celular en la frente:
 /// la palabra en grande, el tiempo restante y el resultado de cada palabra.
@@ -51,43 +52,61 @@ class WordCard extends StatelessWidget {
       WordOutcome.pass => (_passColors, 'Paso'),
       null => (AppColors.word, word.text),
     };
+    // Fotomímica: la foto grande sobre fondo oscuro, en vez de la palabra.
+    final photo = feedback == null && word.image != null;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: colors,
-        ),
+        color: photo ? photoMimeBackground : null,
+        gradient: photo
+            ? null
+            : LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: colors,
+              ),
       ),
       child: SafeArea(
         child: Stack(
           children: [
-            Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: sideMargin),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    text,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontFamily: AppFonts.display,
-                      fontSize: 100,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black26,
-                          blurRadius: 12,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
+            if (photo)
+              Positioned.fill(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    sideMargin,
+                    8,
+                    sideMargin,
+                    wordsLeft != null ? 44 : 8,
+                  ),
+                  child: PhotoMimeView(word: word),
+                ),
+              )
+            else
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: sideMargin),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      text,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontFamily: AppFonts.display,
+                        fontSize: 100,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black26,
+                            blurRadius: 12,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
             Positioned(
               top: 12,
               right: 16,

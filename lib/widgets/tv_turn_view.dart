@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../theme.dart';
 import 'end_game_dialog.dart';
+import 'photo_mime_view.dart';
 
 /// Turno del Modo TV. El celular se duplica en el televisor, así que esta
 /// vista es la que ve todo el grupo. Es sencilla a propósito: el turno del
@@ -43,14 +44,19 @@ class TvTurnView extends StatelessWidget {
       null => (AppColors.word, word.text),
     };
     final marking = feedback == null;
+    // Fotomímica: la foto grande sobre fondo oscuro, en vez de la palabra.
+    final photo = marking && word.image != null;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: colors,
-        ),
+        color: photo ? photoMimeBackground : null,
+        gradient: photo
+            ? null
+            : LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: colors,
+              ),
       ),
       child: SafeArea(
         child: Padding(
@@ -89,30 +95,38 @@ class TvTurnView extends StatelessWidget {
                   _Timer(remaining: remaining),
                 ],
               ),
-              Expanded(
-                child: Center(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      text,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontFamily: AppFonts.display,
-                        fontSize: 96,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black26,
-                            blurRadius: 12,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
+              if (photo)
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: PhotoMimeView(word: word, nameSize: 20),
+                  ),
+                )
+              else
+                Expanded(
+                  child: Center(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        text,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontFamily: AppFonts.display,
+                          fontSize: 96,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black26,
+                              blurRadius: 12,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
               Row(
                 children: [
                   Expanded(

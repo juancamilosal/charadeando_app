@@ -197,7 +197,12 @@ class GameConfig {
   /// Directus. Las categorías propias no tienen dificultad.
   bool get usesDifficulty =>
       wordSource == WordSource.random &&
-      (isMix ? mixCategories.isNotEmpty : customCategory == null);
+      (isMix ? mixCategories.isNotEmpty : customCategory == null && !photoMime);
+
+  /// Se juega Fotomímica: fotos de objetos en vez de palabras. No tiene
+  /// dificultad ni se combina con otras categorías.
+  bool get photoMime =>
+      !isMix && customCategory == null && category == GameCategory.photoMime;
 
   /// Nombre de la categoría que se juega, propia o del juego. En una mezcla,
   /// "Mezcla: Animales, Películas y Mi familia", o "Mezcla de 5 categorías"

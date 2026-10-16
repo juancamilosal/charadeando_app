@@ -68,8 +68,8 @@ class Season {
 
 /// Categorías de palabras. En "Libre" los grupos escriben las palabras o
 /// se descargan frases de la categoría LIBRE; las demás descargan palabras
-/// de su categoría en Directus. Van en el orden de la pantalla: Libre y
-/// después cada sección (Clásicos, Entretenimiento, Cultura general,
+/// de su categoría en Directus; Fotomímica, fotos de objetos. Van en el
+/// orden de la pantalla: Libre, Fotomímica y después cada sección (Clásicos, Entretenimiento, Cultura general,
 /// Deportes y Especiales).
 enum GameCategory {
   free(
@@ -79,6 +79,17 @@ enum GameCategory {
     AppColors.blue,
     'LIBRE',
     'Palabra',
+  ),
+
+  // Fotomímica: fotos de objetos en vez de palabras. Va aparte, en su
+  // propia sección, y no se combina con otras.
+  photoMime(
+    'Fotomímica',
+    'Conviértete en el objeto de la foto',
+    Icons.photo_camera,
+    AppColors.pink,
+    'FOTOMIMICA',
+    'Objeto',
   ),
 
   // Clásicos.
@@ -360,8 +371,8 @@ enum GameCategory {
   /// arriba de la palabra en una partida con varias categorías.
   final String singular;
 
-  /// Sección de la pantalla de categorías; null solo en Libre, que va
-  /// arriba, aparte.
+  /// Sección de la pantalla de categorías; null en Libre y en Fotomímica,
+  /// que van aparte.
   final CategorySection? section;
 
   /// Las especiales solo se ven en su temporada; las demás, siempre.
@@ -404,9 +415,14 @@ enum GameCategory {
     return null;
   }
 
-  /// Categorías con palabras del backend, sin contar "Libre".
-  static List<GameCategory> get themed =>
-      values.where((c) => c != GameCategory.free).toList();
+  /// Categorías con palabras del backend, sin contar "Libre" ni
+  /// Fotomímica (que tiene fotos, no palabras).
+  static List<GameCategory> get themed => values
+      .where((c) => c != GameCategory.free && c != GameCategory.photoMime)
+      .toList();
+
+  /// Fotomímica: se juega con fotos de objetos en vez de palabras.
+  bool get photos => this == GameCategory.photoMime;
 
   /// Las categorías de [section] que se ven en [date], en su orden.
   static List<GameCategory> inSection(

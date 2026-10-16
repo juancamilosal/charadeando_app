@@ -47,6 +47,8 @@ Directus 11 con PostgreSQL y Redis, desplegado con Coolify en el VPS.
     repetidos. La app los trae una vez al abrir y los usa en la ruleta; si
     no llegan (sin internet, el servidor falla o hay menos de 10), usa sus
     20 castigos de respaldo. 10 peticiones por minuto por IP.
+  - `POST /juego/fotomimica`: objetos de Fotomímica al azar (ver
+    "Fotomímica" abajo). 10 peticiones por minuto por IP.
 - `GET /juego/estado`: uso del servidor para revisarlo sin entrar a la
   terminal: núcleos, % de CPU (medido en medio segundo), carga (1, 5 y 15
   min), RAM (total, disponible y swap, de `/proc/meminfo`), disco de `/`,
@@ -95,6 +97,84 @@ Los topes `MAX_CREATE`, `MAX_COUNT`, `MAX_EXCLUDE` y `MAX_CATEGORIES` de
 
 Pruebas del reparto y de la validación de `categorias`:
 `node --test server/tests/juego.test.mjs`.
+
+## Fotomímica
+
+Objetos para actuar: la app muestra la foto y quien tiene el turno se
+convierte en ese objeto. Colección `fotomimica` (no pública) y sus fotos en
+la carpeta de archivos **Fotomímica** (esas sí públicas, solo esas, para
+que la app las descargue de `/assets/<id>`).
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `id` | Integer, automático | |
+| `status` | String: `published` / `draft` | Por defecto `draft`. Solo los publicados salen en el juego. Es el campo de archivo de la colección. |
+| `nombre` | String, máx. 60 | "Taladro". Se ve en letra pequeña debajo de la foto. |
+| `imagen` | Archivo (M2O a `directus_files`) | Se guarda en la carpeta Fotomímica. |
+| `premium` | Boolean, por defecto `false` | Si está activo, solo sale con Todo Charadeando. Así se decide desde Directus cuántos objetos son gratis. |
+
+`POST /juego/fotomimica` con `{ "n": 40, "excluir": [ids], "incluir_premium": false }`
+(`n` de 1 a 100) devuelve objetos publicados al azar como
+`{ "data": [{ "id", "nombre", "imagen", "premium" }] }` (`imagen` es el id
+del archivo). Sin `incluir_premium` solo los gratis. Los de `excluir` (ya
+jugados) solo se repiten si no alcanzan los demás. 10 peticiones por
+minuto por IP.
+
+### 1. Crear el token del administrador
+
+Los scripts usan un token estático de un usuario **administrador**. El
+token da acceso total a Directus: no lo pegues en chats, no lo subas al
+repositorio y bórralo cuando termines.
+
+1. En Directus, **Directorio de usuarios** (ícono de personas) → abre tu
+   usuario administrador.
+2. Baja hasta el campo **Token**, toca el botón para generarlo y cópialo:
+   después de guardar ya no se vuelve a ver.
+3. Toca **Guardar** (el check de arriba).
+4. Cuando termines de importar, vuelve al usuario, borra el token y guarda:
+   así deja de funcionar.
+
+### 2. Crear la colección, la carpeta y el permiso (una vez)
+
+Desde la carpeta del repositorio, en un computador con Node 22:
+
+```sh
+read -rs DIRECTUS_TOKEN && export DIRECTUS_TOKEN   # pega el token y Enter (no se ve ni queda en el historial)
+node server/scripts/crear-fotomimica.mjs
+```
+
+(o en una sola línea: `DIRECTUS_TOKEN=xxx node server/scripts/crear-fotomimica.mjs`,
+aunque así el token queda en el historial de la terminal.)
+
+Crea la carpeta **Fotomímica**, la colección `fotomimica` con sus campos
+(ícono de cámara, `nombre` como plantilla, `status` como campo de archivo)
+y, en la política **Public**, el permiso de **leer** `directus_files` solo
+para los archivos de esa carpeta. Se puede correr varias veces: lo que ya
+existe lo deja igual y lo dice. No borra ni cambia nada que ya exista; si
+encuentra que `fotomimica` u otros archivos ya son públicos, lo avisa para
+que lo revises a mano. `DIRECTUS_URL` cambia el servidor (por defecto
+`https://charadeando-api.valkiriacode.com`).
+
+### 3. Importar las fotos
+
+```sh
+node server/scripts/importar-fotomimica.mjs /ruta/a/las/fotos
+```
+
+- Lee los `.jpg`, `.jpeg`, `.png` y `.webp` de la carpeta (no las
+  subcarpetas). Máximo 5 MB cada una.
+- El nombre sale del archivo: `secador-de-pelo.jpg` → "Secador de pelo"
+  (guiones y guiones bajos a espacios, primera letra en mayúscula; respeta
+  tildes y ñ). Nombra los archivos con cuidado: así se verá en el juego.
+- Sube cada foto a la carpeta Fotomímica y crea su objeto como **borrador**
+  y gratis. Si ya hay uno con el mismo nombre (sin importar mayúsculas ni
+  tildes), lo salta. Si no se puede crear el objeto, borra la foto subida.
+- Al final: cuántas se subieron, cuántas se saltaron y los errores.
+
+Después revisa los objetos en Directus, marca `premium` en los que quieras
+de pago y cámbialos a **Publicado** para que salgan en el juego. Fotos
+recomendadas: el objeto solo, centrado, con fondo liso y horizontales; la
+app las pide a 720 px de ancho en WebP.
 
 ## Códigos promocionales
 

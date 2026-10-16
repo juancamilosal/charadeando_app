@@ -21,6 +21,11 @@ final directusServiceProvider = Provider((ref) => DirectusService());
 final wordBankProvider = Provider(
   (ref) => WordBank(ref.watch(directusServiceProvider)),
 );
+
+/// Fotomímica: los objetos y sus fotos, descargadas antes de jugar.
+final photoMimeBankProvider = Provider(
+  (ref) => PhotoMimeBank(ref.watch(directusServiceProvider)),
+);
 final tiltServiceProvider = Provider((ref) => TiltService());
 final tvServiceProvider = Provider((ref) => TvService());
 final punishmentStoreProvider = Provider((ref) => PunishmentStore());

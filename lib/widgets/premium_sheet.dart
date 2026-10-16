@@ -19,7 +19,7 @@ const fallbackAllPrice = r'$14.900';
 
 /// Lo que trae Premium, para mostrarlo igual en todas partes.
 const premiumBenefits = [
-  'Todas las categorías de pago, también las nuevas que vayan llegando',
+  'Todas las categorías y objetos de pago, también los nuevos',
   'Videos en Full HD y calidad máxima',
   'Categorías propias sin límite',
   'Fondo exclusivo Oro',

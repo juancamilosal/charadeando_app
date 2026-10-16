@@ -24,7 +24,23 @@ void main() {
   });
 
   test('todas las categorías tienen su dibujo', () {
-    expect(CategoryArt.withImage, containsAll(GameCategory.values));
+    // Fotomímica usa su ícono (una cámara) hasta que tenga su imagen.
+    expect(
+      CategoryArt.withImage,
+      containsAll(GameCategory.values.where((c) => !c.photos)),
+    );
+  });
+
+  testWidgets('Fotomímica, sin imagen todavía, muestra su ícono', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: CategoryArt(category: GameCategory.photoMime, size: 80),
+      ),
+    );
+    expect(find.byIcon(Icons.photo_camera), findsOneWidget);
   });
 
   testWidgets('muestra la imagen quieta', (tester) async {

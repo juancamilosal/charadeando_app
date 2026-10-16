@@ -6,8 +6,10 @@ import 'package:http/http.dart' as http;
 import '../models/models.dart';
 
 /// Habla con la ruta del juego en Directus (extensión en
-/// `server/directus-extensions`). La colección no es pública: la app pide
-/// palabras al azar con `POST /juego/palabras`.
+/// `server/directus-extensions`). Las colecciones no son públicas: la app
+/// pide palabras al azar con `POST /juego/palabras` y objetos de
+/// Fotomímica con `POST /juego/fotomimica` (sus fotos sí son públicas, en
+/// `/assets/<id>`).
 class DirectusService {
   DirectusService({http.Client? client, String? baseUrl})
     : _client = client ?? http.Client(),
@@ -32,12 +34,17 @@ class DirectusService {
   /// `MAX_CATEGORIES` de la extensión.
   static const maxCategories = 20;
 
+  /// Máximo de objetos de Fotomímica por petición. Debe coincidir con
+  /// `MAX_PHOTO_MIME` de la extensión.
+  static const maxPhotoMime = 100;
+
   static const _timeout = Duration(seconds: 15);
 
   final http.Client _client;
   final String baseUrl;
 
   Uri get wordsUri => Uri.parse('$baseUrl/juego/palabras');
+  Uri get photoMimeUri => Uri.parse('$baseUrl/juego/fotomimica');
 
   /// Trae [count] palabras al azar, de [category] y [difficulty] si se
   /// indican (códigos de Directus, como `ANIMALES` y `FACIL`). Con
@@ -51,19 +58,50 @@ class DirectusService {
     String? difficulty,
     Iterable<String> exclude = const [],
   }) async {
-    final excluded = exclude.toList();
-    return _post(wordsUri, {
+    final data = await _post(wordsUri, {
       'n': count.clamp(1, maxCount),
       'categoria': ?category,
       'categorias': ?categories?.take(maxCategories).toList(),
       'dificultad': ?difficulty,
-      'excluir': excluded.sublist(
-        excluded.length > maxExclude ? excluded.length - maxExclude : 0,
-      ),
+      'excluir': _lastExcluded(exclude),
     });
+    return [
+      for (final item in data)
+        if (item is Map<String, dynamic>) RemoteWord.fromJson(item),
+    ];
   }
 
-  Future<List<RemoteWord>> _post(Uri uri, Map<String, Object> body) async {
+  /// Trae [count] objetos de Fotomímica al azar (solo los publicados). Los
+  /// de [exclude] (ids ya jugados) solo se repiten si no alcanzan los
+  /// demás. Sin [includePremium] solo llegan los gratis.
+  Future<List<PhotoMimeItem>> fetchPhotoMime({
+    required int count,
+    Iterable<String> exclude = const [],
+    bool includePremium = false,
+  }) async {
+    final data = await _post(photoMimeUri, {
+      'n': count.clamp(1, maxPhotoMime),
+      'excluir': [for (final id in _lastExcluded(exclude)) ?int.tryParse(id)],
+      'incluir_premium': includePremium,
+    });
+    return [
+      for (final item in data)
+        if (item is Map<String, dynamic>)
+          if (PhotoMimeItem.fromJson(item, baseUrl: baseUrl) case final p
+              when p.valid)
+            p,
+    ];
+  }
+
+  /// Los últimos [maxExclude] ids de [exclude].
+  static List<String> _lastExcluded(Iterable<String> exclude) {
+    final excluded = exclude.toList();
+    return excluded.sublist(
+      excluded.length > maxExclude ? excluded.length - maxExclude : 0,
+    );
+  }
+
+  Future<List<Object?>> _post(Uri uri, Map<String, Object> body) async {
     final payload = jsonEncode(body);
     debugPrint('[Directus] POST $uri $payload');
     final http.Response response;
@@ -101,10 +139,7 @@ class DirectusService {
         'Respuesta inesperada: falta la lista "data".',
       );
     }
-    return [
-      for (final item in data)
-        if (item is Map<String, dynamic>) RemoteWord.fromJson(item),
-    ];
+    return data;
   }
 }
 

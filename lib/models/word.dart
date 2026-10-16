@@ -1,6 +1,7 @@
 /// Una palabra o frase que el jugador debe adivinar.
 class Word {
-  Word(String text, {this.category, this.id}) : text = _normalize(text);
+  Word(String text, {this.category, this.id, this.image})
+    : text = _normalize(text);
 
   final String text;
   final String? category;
@@ -8,6 +9,11 @@ class Word {
   /// Id en Directus de las palabras automáticas. No cuenta para comparar
   /// palabras.
   final String? id;
+
+  /// En Fotomímica, la foto del objeto ya descargada en el celular (ruta
+  /// del archivo). En el turno se muestra la foto y el texto, pequeño,
+  /// debajo. Null en las palabras.
+  final String? image;
 
   /// Cantidad de palabras de la frase. Cuentan también artículos y
   /// conectores: "El Rey León" tiene 3.

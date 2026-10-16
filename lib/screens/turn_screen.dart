@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
@@ -88,6 +89,11 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     _deck = [...game.currentDeck];
     _remaining = game.config.turnDuration;
     WakelockPlus.enable();
+    // Fotomímica: las dos primeras fotos se dejan listas para mostrar.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _precachePhoto(0);
+      _precachePhoto(1);
+    });
     // La pantalla de antes del turno ya va en horizontal, con la cámara.
     ScreenOrientation.landscape();
     _initCamera();
@@ -327,6 +333,8 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   void _mark(WordOutcome outcome) {
     if (_phase != _Phase.playing || _feedback != null) return;
     _entries.add(TurnEntry(_deck[_wordIndex], outcome));
+    // Mientras se ve "¡Correcto!" o "Paso", se prepara la foto siguiente.
+    _precachePhoto(_wordIndex + 2);
     final haptics = ref.read(hapticsProvider);
     outcome == WordOutcome.hit ? haptics.heavy() : haptics.light();
     ref
@@ -340,6 +348,16 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     Future.delayed(_feedbackDuration, () {
       if (mounted && _phase == _Phase.playing) _nextWord();
     });
+  }
+
+  /// En Fotomímica, deja la foto del objeto [index] lista en memoria para
+  /// que se vea al instante. La foto ya está en el celular.
+  void _precachePhoto(int index) {
+    if (!mounted || index >= _deck.length) return;
+    final image = _deck[index].image;
+    if (image == null) return;
+    // Si falla, la foto se carga al mostrarla (o se ve su nombre).
+    precacheImage(FileImage(File(image)), context, onError: (_, _) {}).ignore();
   }
 
   void _nextWord() {
