@@ -11,6 +11,7 @@ import '../widgets/category_card.dart';
 import '../widgets/combine_categories_sheet.dart';
 import '../widgets/play_background.dart';
 import '../widgets/play_choice.dart';
+import '../widgets/photo_mime_view.dart';
 import '../widgets/premium_sheet.dart';
 
 /// Elección de la categoría. "Todas" muestra Libre como una franja, el
@@ -182,23 +183,6 @@ class CategoryScreen extends ConsumerWidget {
             }
           },
         ),
-        // Fotomímica: fotos de objetos en vez de palabras.
-        const SizedBox(height: 44),
-        CategorySectionHeader(
-          title: GameCategory.photoMime.label,
-          trailing: allUnlocked ? 'Todos los objetos' : 'Nueva',
-        ),
-        const SizedBox(height: 18),
-        PhotoMimeSection(
-          premium: allUnlocked,
-          onPlay: () => _choose(
-            context,
-            ref,
-            GameCategory.photoMime,
-            color: GameCategory.photoMime.color,
-          ),
-          onMore: () => showPremiumSheet(context),
-        ),
         for (final (section, categories) in GameCategory.sectionsOn(
           today,
           allSeasons: ref.watch(allSeasonsProvider),
@@ -235,6 +219,22 @@ class CategoryScreen extends ConsumerWidget {
             ],
           ),
         ],
+        // Fotomímica: otro juego, con fotos de objetos en vez de palabras.
+        // Antes de "Mis categorías" y con otro aspecto, para que no parezca
+        // una categoría más.
+        const SizedBox(height: 44),
+        const CategorySectionHeader(title: 'Más juegos', trailing: '1 juego'),
+        const SizedBox(height: 18),
+        PhotoMimeSection(
+          premium: allUnlocked,
+          onPlay: () => _choose(
+            context,
+            ref,
+            GameCategory.photoMime,
+            color: GameCategory.photoMime.color,
+          ),
+          onMore: () => showPremiumSheet(context),
+        ),
         // Al final, las que creó el usuario.
         const SizedBox(height: 44),
         CategorySectionHeader(
@@ -717,8 +717,9 @@ class _CombineButton extends StatelessWidget {
   }
 }
 
-/// Sección Fotomímica: su tarjeta, del mismo tamaño que las de las demás
-/// secciones, y al lado qué es. Sin Todo Charadeando, avisa que hay más
+/// Fotomímica en Categorías: un cartel ancho y oscuro (no una tarjeta de
+/// categoría, porque es otro juego) con su nombre, qué es, fotos de
+/// ejemplo y "Jugar". Sin Todo Charadeando, debajo avisa que hay más
 /// objetos con Premium (cuáles son de pago se marca en Directus).
 class PhotoMimeSection extends StatelessWidget {
   const PhotoMimeSection({
@@ -738,92 +739,215 @@ class PhotoMimeSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final onBackdrop = context.onBackdrop;
-    return LayoutBuilder(
-      builder: (context, box) {
-        final width = (box.maxWidth - 2 * CategoryScreen.sectionSpacing) / 3;
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: width,
-              height: width / CategoryScreen.sectionAspect,
-              child: CategoryCard.game(
-                GameCategory.photoMime,
-                compact: true,
-                shine: premium ? 0.5 : null,
-                onTap: onPlay,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Material(
+          color: photoMimeBackground,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+            side: const BorderSide(color: Colors.white, width: 3),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onPlay,
+            child: SizedBox(
+              height: 190,
+              child: Stack(
                 children: [
-                  Text(
-                    'Mira la foto y conviértete en ese objeto. ¡Sin hablar!',
-                    style: TextStyle(
-                      color: onBackdrop,
-                      fontSize: 16,
-                      height: 1.25,
-                      fontWeight: FontWeight.w800,
+                  // Fotos de ejemplo, como recién tomadas.
+                  const Positioned(
+                    right: -6,
+                    top: 12,
+                    child: _Snapshot(
+                      icon: Icons.vpn_key,
+                      color: AppColors.yellow,
+                      angle: 0.16,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Un taladro gira y vibra; unas llaves se agitan y '
-                    'tintinean. Tu equipo adivina.',
-                    style: TextStyle(
-                      color: onBackdrop.withValues(alpha: 0.85),
-                      fontSize: 14,
-                      height: 1.25,
+                  const Positioned(
+                    right: 50,
+                    top: 82,
+                    child: _Snapshot(
+                      icon: Icons.handyman,
+                      color: AppColors.turquoise,
+                      angle: -0.12,
                     ),
                   ),
-                  if (!premium) ...[
-                    const SizedBox(height: 10),
-                    Material(
-                      color: onBackdrop.withValues(alpha: 0.16),
-                      borderRadius: BorderRadius.circular(20),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(20),
-                        onTap: onMore,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 7,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.lock,
-                                size: 16,
-                                color: context.backdrop.light
-                                    ? AppColors.orange
-                                    : AppColors.yellow,
-                              ),
-                              const SizedBox(width: 6),
-                              Flexible(
-                                child: Text(
-                                  'Más objetos con Premium',
-                                  style: TextStyle(
-                                    color: onBackdrop,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w800,
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(18, 16, 150, 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.photo_camera,
+                              color: AppColors.pink,
+                              size: 22,
+                            ),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.yellow,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Text(
+                                    'NUEVO JUEGO',
+                                    style: TextStyle(
+                                      color: AppColors.ink,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 0.5,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        const FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Fotomímica',
+                            style: TextStyle(
+                              fontFamily: AppFonts.display,
+                              fontSize: 32,
+                              height: 1.1,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      ),
+                        const SizedBox(height: 4),
+                        const Expanded(
+                          child: Text(
+                            'Mira la foto y conviértete en ese objeto. '
+                            '¡Sin hablar!',
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                              height: 1.25,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 7,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.pink,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.play_arrow_rounded,
+                                  color: Colors.white,
+                                  size: 22,
+                                ),
+                                SizedBox(width: 2),
+                                Text(
+                                  'Jugar',
+                                  style: TextStyle(
+                                    fontFamily: AppFonts.display,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ],
               ),
             ),
+          ),
+        ),
+        if (!premium) ...[
+          const SizedBox(height: 10),
+          Center(
+            child: TextButton.icon(
+              style: TextButton.styleFrom(foregroundColor: onBackdrop),
+              icon: Icon(
+                Icons.lock,
+                size: 16,
+                color: context.backdrop.light
+                    ? AppColors.orange
+                    : AppColors.yellow,
+              ),
+              label: const Text(
+                'Más objetos con Premium',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
+              onPressed: onMore,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// Una foto de ejemplo de Fotomímica: un marco blanco, un poco girado, con
+/// un objeto dibujado.
+class _Snapshot extends StatelessWidget {
+  const _Snapshot({
+    required this.icon,
+    required this.color,
+    required this.angle,
+  });
+
+  final IconData icon;
+  final Color color;
+  final double angle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.rotate(
+      angle: angle,
+      child: Container(
+        width: 84,
+        height: 96,
+        padding: const EdgeInsets.fromLTRB(7, 7, 7, 20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(6),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x66000000),
+              blurRadius: 8,
+              offset: Offset(0, 4),
+            ),
           ],
-        );
-      },
+        ),
+        child: ColoredBox(
+          color: const Color(0xFFECE8E2),
+          child: Center(child: Icon(icon, size: 40, color: color)),
+        ),
+      ),
     );
   }
 }

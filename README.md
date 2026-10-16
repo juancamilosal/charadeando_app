@@ -319,13 +319,17 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Con las palabras escritas por los equipos, en el turno se ve cuántas
   faltan de toda la partida. Con las automáticas no se muestra, porque el
   turno dura hasta que se acabe el tiempo.
-- Fotomímica: sección propia en Categorías, debajo de "Combinar
-  categorías" (`PhotoMimeSection`): su tarjeta (`GameCategory.photoMime`,
-  ícono de cámara, sin sección ni candado) y al lado qué es ("Mira la foto
-  y conviértete en ese objeto. ¡Sin hablar!"). Sin Todo Charadeando dice
-  "Nueva" y lleva el botón "Más objetos con Premium", que abre la hoja de
-  compra; con Todo Charadeando dice "Todos los objetos". Se juega como una
-  partida normal (equipos, turnos, aciertos, pasar, marcador y ruleta al
+- Fotomímica: otro juego, con fotos de objetos en vez de palabras. En
+  Categorías va en su propia sección, "Más juegos", después de las
+  categorías y antes de "Mis categorías" (Libre y "Combinar categorías"
+  quedan arriba como siempre). No es una tarjeta de categoría sino un
+  cartel ancho y oscuro (`PhotoMimeSection`): "NUEVO JUEGO", el nombre en
+  grande, "Mira la foto y conviértete en ese objeto. ¡Sin hablar!", el
+  botón "Jugar" y a la derecha dos fotos de ejemplo tipo polaroid. Sin Todo
+  Charadeando, debajo va "Más objetos con Premium", que abre la hoja de
+  compra. Por dentro es `GameCategory.photoMime` (sin sección ni candado).
+  Se juega como una partida normal (equipos, turnos, aciertos, pasar,
+  marcador y ruleta al
   final, partida rápida o personalizada, el mismo tiempo de turno), pero
   en vez de la palabra se ve la foto del objeto lo más grande posible, sin
   deformarla, sobre fondo oscuro, y debajo su nombre en letra pequeña para
@@ -345,8 +349,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   (`fotomimica_vistas.json`) para no repetirlos en las partidas siguientes.
   Sin Premium solo salen los objetos gratis; con Todo Charadeando (compra o
   código), también los de pago. Cuáles son de pago se decide en Directus
-  con el campo `premium` de cada objeto. La tarjeta usa el ícono hasta que
-  tenga su dibujo en `assets/img/categorias/fotomimica.png`.
+  con el campo `premium` de cada objeto. En la cabecera de la
+  configuración usa su ícono (cámara) hasta que tenga su dibujo en
+  `assets/img/categorias/fotomimica.png`.
 - Combinar categorías: debajo de Libre, el botón "Combinar categorías"
   abre desde abajo una ventana con las categorías del juego (sin Libre) con
   los mismos títulos de sección y en el mismo orden que la pantalla, y al

@@ -121,6 +121,17 @@ void main() {
       await pump(tester);
       expect(find.byType(PhotoMimeSection), findsOneWidget);
       expect(find.text('Fotomímica'), findsWidgets);
+      expect(find.text('Más juegos'), findsOneWidget);
+      expect(find.text('NUEVO JUEGO'), findsOneWidget);
+      // Va después de las categorías, justo antes de "Mis categorías".
+      expect(
+        tester.getTopLeft(find.byType(PhotoMimeSection)).dy,
+        greaterThan(tester.getTopLeft(find.text('Especiales')).dy),
+      );
+      expect(
+        tester.getTopLeft(find.byType(PhotoMimeSection)).dy,
+        lessThan(tester.getTopLeft(find.text('Mis categorías')).dy),
+      );
       final more = find.text('Más objetos con Premium');
       expect(more, findsOneWidget);
       await tester.ensureVisible(more);
@@ -136,10 +147,10 @@ void main() {
     ) async {
       await pump(tester, access: const PremiumAccess(purchased: true));
       expect(find.text('Más objetos con Premium'), findsNothing);
-      expect(find.text('Todos los objetos'), findsOneWidget);
+
       final card = find.descendant(
         of: find.byType(PhotoMimeSection),
-        matching: find.text('Fotomímica'),
+        matching: find.text('Jugar'),
       );
       await tester.ensureVisible(card);
       await tester.pump();
