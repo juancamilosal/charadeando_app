@@ -26,6 +26,21 @@ final wordBankProvider = Provider(
 final photoMimeBankProvider = Provider(
   (ref) => PhotoMimeBank(ref.watch(directusServiceProvider)),
 );
+
+/// Celular juez: crea las salas en el Worker.
+final judgeServiceProvider = Provider((ref) => JudgeService());
+
+/// La sala del celular juez de la partida, o nada si no se usa.
+final judgeProvider = NotifierProvider<JudgeController, JudgeSetup>(
+  JudgeController.new,
+);
+
+/// Si puede usar el celular juez (es de pago; ver
+/// [PremiumAccess.canUseJudge]).
+final judgeUnlockedProvider = Provider(
+  (ref) => ref.watch(premiumProvider).canUseJudge(ref.watch(clockProvider)()),
+);
+
 final tiltServiceProvider = Provider((ref) => TiltService());
 final tvServiceProvider = Provider((ref) => TvService());
 final punishmentStoreProvider = Provider((ref) => PunishmentStore());
@@ -219,3 +234,67 @@ final gameControllerProvider = NotifierProvider<GameController, GameState>(
 final turnVideoProvider = NotifierProvider<TurnVideoController, TurnVideoState>(
   TurnVideoController.new,
 );
+
+/// Cómo está el celular juez: apagado, creando la sala, con un error o con
+/// la sala lista.
+class JudgeSetup {
+  const JudgeSetup({this.room, this.creating = false, this.error});
+
+  final JudgeRoom? room;
+  final bool creating;
+  final String? error;
+
+  /// Encendido: con la sala o creándola.
+  bool get on => room != null || creating;
+}
+
+class JudgeController extends Notifier<JudgeSetup> {
+  /// La sala abierta, para cerrarla al final (al cerrar no se puede leer
+  /// el estado).
+  JudgeRoom? _open;
+
+  @override
+  set state(JudgeSetup value) {
+    super.state = value;
+    _open = value.room;
+  }
+
+  @override
+  JudgeSetup get state => super.state;
+
+  @override
+  JudgeSetup build() {
+    ref.onDispose(() => _open?.close());
+    return const JudgeSetup();
+  }
+
+  /// La sala, si está lista y sigue existiendo.
+  JudgeRoom? get room {
+    final room = state.room;
+    return room == null || room.gone.value ? null : room;
+  }
+
+  /// Crea la sala (si no hay una que sirva) y se conecta.
+  Future<void> start() async {
+    if (state.creating || room != null) return;
+    await state.room?.close();
+    state = const JudgeSetup(creating: true);
+    try {
+      final created = await ref.read(judgeServiceProvider).create();
+      if (!ref.mounted) {
+        await created.close();
+        return;
+      }
+      state = JudgeSetup(room: created);
+    } on JudgeException catch (e) {
+      if (ref.mounted) state = JudgeSetup(error: e.message);
+    }
+  }
+
+  /// Apaga el celular juez y cierra la sala.
+  Future<void> stop() async {
+    final old = state.room;
+    state = const JudgeSetup();
+    await old?.close();
+  }
+}

@@ -17,6 +17,7 @@ import '../widgets/premium_sheet.dart';
 import '../widgets/tv_connect.dart';
 import '../widgets/team_badge.dart';
 import '../widgets/words_reminder.dart';
+import '../widgets/judge_setup.dart';
 
 class ConfigScreen extends ConsumerStatefulWidget {
   const ConfigScreen({super.key});
@@ -230,6 +231,9 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
             scoringMode: _scoring,
             // Inclinación o toque se elige en Ajustes > Controlador.
             hitMode: _tvMode ? HitMode.tv : HitMode.tilt,
+            // En el Modo TV el juez ya marca con los botones del celular.
+            judgePhone:
+                !_tvMode && ref.read(judgeProvider.notifier).room != null,
             difficulty: _automatic && !_noDifficulty ? _difficulty : null,
             clearDifficulty: _noDifficulty,
           ),
@@ -404,8 +408,16 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                   ],
                 ),
               ],
-              // El Modo TV va al final, después del video.
-              if (!_tvMode) gap,
+              // El celular juez y el Modo TV van al final, después del video.
+              if (!_tvMode) ...[
+                gap,
+                const ConfigSection(
+                  icon: Icons.gavel_rounded,
+                  title: 'Celular juez',
+                  children: [JudgeSetupView()],
+                ),
+                gap,
+              ],
               _tvSection(),
               const SizedBox(height: 24),
               FilledButton.icon(

@@ -142,6 +142,7 @@ class GameConfig {
     this.hitMode = HitMode.tilt,
     this.resolution = VideoResolution.hd,
     this.quick = false,
+    this.judgePhone = false,
   });
 
   static const minGroups = 2;
@@ -164,6 +165,11 @@ class GameConfig {
   /// "Partida rápida": sin grupos, un solo turno de un minuto, sin pasar
   /// por la configuración. No cambia la última configuración guardada.
   final bool quick;
+
+  /// "Celular juez": otra persona marca los aciertos desde su celular (con
+  /// la página que abre el QR). Mientras el juez está conectado, la
+  /// inclinación no marca.
+  final bool judgePhone;
   final Duration turnDuration;
   final int rounds;
   final List<Group> groups;
@@ -305,6 +311,7 @@ class GameConfig {
     HitMode? hitMode,
     VideoResolution? resolution,
     bool? quick,
+    bool? judgePhone,
   }) {
     return GameConfig(
       turnDuration: turnDuration ?? this.turnDuration,
@@ -324,6 +331,7 @@ class GameConfig {
       hitMode: hitMode ?? this.hitMode,
       resolution: resolution ?? this.resolution,
       quick: quick ?? this.quick,
+      judgePhone: judgePhone ?? this.judgePhone,
     );
   }
 }

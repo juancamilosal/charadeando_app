@@ -8,6 +8,7 @@ export 'video_renderer.dart';
 export 'video_service.dart';
 export 'word_bank.dart';
 export 'photo_mime_bank.dart';
+export 'judge_service.dart';
 export 'word_service.dart';
 export 'punishment_service.dart';
 export 'punishment_store.dart';

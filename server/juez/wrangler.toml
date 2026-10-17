@@ -1,0 +1,25 @@
+# Worker del modo "Celular juez" de Charadeando. Se publica con Workers
+# Builds desde la rama main, carpeta raíz /server/juez.
+name = "charadeando-juez"
+main = "src/index.js"
+compatibility_date = "2026-09-15"
+workers_dev = false
+
+# valkiriacode.com/juez y todo lo que cuelga de ahí.
+routes = [
+  { pattern = "valkiriacode.com/juez", zone_name = "valkiriacode.com" },
+  { pattern = "valkiriacode.com/juez/*", zone_name = "valkiriacode.com" },
+]
+
+# Una sala = un Durable Object con almacenamiento SQLite (sirve en el plan
+# gratis).
+[[durable_objects.bindings]]
+name = "SALAS"
+class_name = "Sala"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Sala"]
+
+[observability]
+enabled = true

@@ -35,6 +35,24 @@ la cámara frontal graba a los participantes para revivir las risas.
   mostrarlas. A los 1,8 s (o al tocarla) pasa con un fundido a Categorías,
   o a la bienvenida la primera vez. Con "Reducir animaciones" el logo
   aparece sin rebote y los destellos quedan quietos.
+- Celular juez (de pago; el acceso pasa solo por
+  `PremiumAccess.canUseJudge`, para poder darlo por un tiempo sin tocar lo
+  demás): en la configuración, la sección "Celular juez" (no sale en el
+  Modo TV) con el interruptor "Usar celular juez". Sin Premium lleva
+  candado y abre la compra. Al encenderlo la app crea una sala en el Worker
+  `server/juez` (`JudgeService`, `POST <JUEZ_URL>/api/salas`; `JUEZ_URL` se
+  cambia con `--dart-define`, por defecto `https://valkiriacode.com/juez`),
+  muestra el QR (`qr_flutter`) con `https://valkiriacode.com/juez/<CÓDIGO>`
+  y el código en grande, y dice "Esperando al juez…" o "Juez conectado ✓".
+  Se puede seguir sin juez. Sin internet dice "El celular juez necesita
+  internet en los dos celulares." (el juego normal sigue sin internet). La
+  app manda: se conecta por WebSocket (`web_socket_channel`, `JudgeRoom`,
+  que se reconecta sola) y le envía a la sala el estado en cada cambio
+  (palabra, categoría, segundos, equipo y puntos; `esperando`, `jugando`,
+  `fin_turno` con aciertos y pasadas, `fin_partida`). Lo que marca el juez
+  llama a lo mismo que inclinar el celular (con sus sonidos y animaciones).
+  Con el juez conectado, la inclinación (y el toque) no marcan; si se
+  desconecta en pleno turno, un aviso lo dice y la inclinación vuelve.
 - Al cambiar de pestaña en la barra de abajo, la que se deja se borra: al
   volver empieza de nuevo, arriba del todo, sin lo escrito y sin ventanas
   abiertas (como "Combinar categorías"). Lo que se guarda en el celular
@@ -606,6 +624,7 @@ lib/
 ├── router.dart  rutas (go_router)
 └── main.dart
 server/          extensión de Directus con la ruta del juego
+server/juez/     Worker del celular juez (Cloudflare)
 ```
 
 ## Desarrollo

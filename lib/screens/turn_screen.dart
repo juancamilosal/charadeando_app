@@ -15,6 +15,7 @@ import '../services/services.dart';
 import '../theme.dart';
 import '../widgets/countdown_view.dart';
 import '../widgets/end_game_dialog.dart';
+import '../widgets/judge_setup.dart' show judgeStatus;
 import '../widgets/play_background.dart';
 import '../widgets/tv_connect.dart';
 import '../widgets/tv_turn_view.dart';
@@ -70,6 +71,15 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   /// Verdadero si el turno se pausó porque se desconectó el televisor.
   bool _tvLost = false;
 
+  /// Celular juez: la sala, si se juega con él. Lo que marca el juez cuenta
+  /// igual que inclinar el celular; mientras hay un juez conectado, la
+  /// inclinación (y el toque) no marcan.
+  JudgeRoom? _judge;
+  StreamSubscription<WordOutcome>? _judgeActions;
+  int _judges = 0;
+
+  bool get _judgeConnected => _judges > 0;
+
   // Grabación: una parte de video por cada tramo sin pausas, y los textos
   // que se escriben encima, medidos en el tiempo total grabado.
   final List<String> _segments = [];
@@ -88,6 +98,18 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     final game = ref.read(gameControllerProvider);
     _deck = [...game.currentDeck];
     _remaining = game.config.turnDuration;
+    final judge = game.config.judgePhone
+        ? ref.read(judgeProvider.notifier).room
+        : null;
+    _judge = judge;
+    if (judge != null) {
+      _judges = judge.judges.value;
+      judge.judges.addListener(_onJudgesChanged);
+      _judgeActions = judge.actions.listen((outcome) {
+        if (_phase == _Phase.playing) _mark(outcome);
+      });
+      _syncJudge();
+    }
     WakelockPlus.enable();
     // Fotomímica: las dos primeras fotos se dejan listas para mostrar.
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -186,8 +208,89 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     }
   }
 
+  /// Cambió cuántos jueces hay. Si el juez se va en pleno turno, se avisa
+  /// y la inclinación vuelve a marcar.
+  void _onJudgesChanged() {
+    final was = _judges;
+    final now = _judge?.judges.value ?? 0;
+    if (!mounted || was == now) return;
+    setState(() => _judges = now);
+    final inTurn = _phase == _Phase.playing || _phase == _Phase.countdown;
+    if (!inTurn) return;
+    final text = was > 0 && now == 0
+        ? (_touch
+              ? 'Se desconectó el celular juez: marquen tocando la pantalla.'
+              : 'Se desconectó el celular juez: marquen inclinando el '
+                    'celular.')
+        : was == 0 && now > 0
+        ? 'Juez conectado ✓'
+        : null;
+    if (text == null) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(content: Text(text), duration: const Duration(seconds: 3)),
+      );
+  }
+
+  /// Le cuenta al juez cómo va el turno: la palabra, el tiempo, el equipo y
+  /// sus puntos. Solo manda si algo cambió.
+  void _syncJudge() {
+    final judge = _judge;
+    if (judge == null || _phase == _Phase.saving) return;
+    final game = ref.read(gameControllerProvider);
+    final config = game.config;
+    final playing = _phase == _Phase.playing && _wordIndex < _deck.length;
+    final word = playing ? _deck[_wordIndex] : null;
+    final turn = Turn(
+      round: game.round,
+      groupIndex: game.groupIndex,
+      entries: _entries,
+    );
+    judge.send(
+      JudgeState(
+        phase: playing ? JudgeState.playing : JudgeState.waiting,
+        word: word?.text,
+        category: word == null
+            ? config.categoryLabel
+            : config.wordCategoryLabel(word) ?? config.categoryLabel,
+        seconds: _remaining.inSeconds,
+        team: game.inGroups ? game.currentGroup.name : null,
+        points: game.scores[game.groupIndex] + turn.points(config.scoringMode),
+      ),
+    );
+  }
+
+  /// Al terminar el turno (o la partida), el juez ve el resumen.
+  void _judgeTurnOver({required bool gameOver}) {
+    final judge = _judge;
+    if (judge == null) return;
+    final game = ref.read(gameControllerProvider);
+    final group = game.groupIndex;
+    judge.send(
+      JudgeState(
+        phase: gameOver ? JudgeState.gameOver : JudgeState.turnOver,
+        category: game.config.categoryLabel,
+        team: game.inGroups ? game.currentGroup.name : null,
+        points: game.scores[group],
+        hits: _entries.where((e) => e.outcome == WordOutcome.hit).length,
+        passes: _entries.where((e) => e.outcome == WordOutcome.pass).length,
+      ),
+    );
+  }
+
+  // Cada cambio en pantalla (el tiempo, la palabra, el resultado) también le
+  // llega al juez.
+  @override
+  void setState(VoidCallback fn) {
+    super.setState(fn);
+    _syncJudge();
+  }
+
   @override
   void dispose() {
+    _judge?.judges.removeListener(_onJudgesChanged);
+    _judgeActions?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     _tilt?.cancel();
@@ -307,14 +410,11 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     // En el Modo TV el juez marca con los botones, y con el controlador
     // Toque se marca tocando la pantalla.
     if (!_tvMode && !_touch) {
-      _tilt = ref
-          .read(tiltServiceProvider)
-          .actions()
-          .listen(
-            (action) => _mark(
-              action == TiltAction.hit ? WordOutcome.hit : WordOutcome.pass,
-            ),
-          );
+      _tilt = ref.read(tiltServiceProvider).actions().listen((action) {
+        // Con el juez conectado, inclinar no marca.
+        if (_judgeConnected) return;
+        _mark(action == TiltAction.hit ? WordOutcome.hit : WordOutcome.pass);
+      });
     }
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       final remaining = _remaining - const Duration(seconds: 1);
@@ -404,15 +504,15 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     await ScreenOrientation.portrait();
 
     final game = ref.read(gameControllerProvider);
-    ref
-        .read(gameControllerProvider.notifier)
-        .finishTurn(
-          Turn(
-            round: game.round,
-            groupIndex: game.groupIndex,
-            entries: List.unmodifiable(_entries),
-          ),
-        );
+    final controller = ref.read(gameControllerProvider.notifier);
+    controller.finishTurn(
+      Turn(
+        round: game.round,
+        groupIndex: game.groupIndex,
+        entries: List.unmodifiable(_entries),
+      ),
+    );
+    _judgeTurnOver(gameOver: controller.afterAdvance.finished);
     // El video con las palabras se arma mientras se ven los resultados.
     ref
         .read(turnVideoProvider.notifier)
@@ -491,6 +591,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
       );
     }
     controller.endGame();
+    _judgeTurnOver(gameOver: true);
     if (!mounted) return;
     // La partida rápida no tiene resultado final: muestra el del turno.
     final quick = game.config.quick;
@@ -566,7 +667,24 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
           ),
           const SizedBox(height: 10),
         ],
-        _HowToHint(tv: config.tvMode, touch: _touch),
+        // Con el juez conectado, él marca: no hace falta inclinar.
+        if (_judgeConnected)
+          Text(
+            '${judgeStatus(_judges)} · El juez marca desde su celular.',
+            textAlign: TextAlign.center,
+            style: small,
+          )
+        else ...[
+          _HowToHint(tv: config.tvMode, touch: _touch),
+          if (_judge != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              'Celular juez: ${judgeStatus(0)}',
+              textAlign: TextAlign.center,
+              style: small,
+            ),
+          ],
+        ],
         // Sin televisor no se puede empezar: se ve cómo conectarlo.
         if (tvMissing) ...[
           const SizedBox(height: 8),
@@ -799,6 +917,8 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTapUp: (details) {
+        // Con el juez conectado, tocar no marca.
+        if (_judgeConnected) return;
         final width = MediaQuery.sizeOf(context).width;
         _mark(
           details.localPosition.dx < width / 2
