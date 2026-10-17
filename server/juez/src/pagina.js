@@ -79,9 +79,10 @@ button:disabled{opacity:.45;transform:none}
 .fila .marca{font-size:20px}
 .vacia{padding:12px;text-align:center;color:#2B0A57}
 .pista{font-size:15px!important;opacity:.85}
-.toque{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .25s}
-.toque.si{background:rgba(24,168,92,.35);opacity:1;transition:none}
-.toque.no{background:rgba(255,138,0,.35);opacity:1;transition:none}
+/* Al tocar, solo el botón tocado se hunde un instante: sin destellos en
+   toda la pantalla. */
+button.marcado{animation:marcado .22s ease-out}
+@keyframes marcado{from{transform:scale(.95)}to{transform:scale(1)}}
 </style>
 </head>
 <body>
@@ -113,7 +114,6 @@ button:disabled{opacity:.45;transform:none}
   <div class="lista" id="lista" hidden></div>
   <p class="descarga"><a href="${DESCARGA}" target="_blank" rel="noopener">¿Quieres jugar? Descarga Charadeando</a></p>
 </div>
-<div class="toque" id="toque"></div>
 
 <script>
 (() => {
@@ -235,9 +235,10 @@ button:disabled{opacity:.45;transform:none}
     setTimeout(() => { bloqueado = false; }, 700);
     if (navigator.vibrate) navigator.vibrate(35);
     ws.send(JSON.stringify({ tipo: 'accion', accion: nombre, id: id() }));
-    const t = $('toque');
-    t.className = 'toque ' + (nombre === 'acierto' ? 'si' : 'no');
-    requestAnimationFrame(() => requestAnimationFrame(() => { t.className = 'toque'; }));
+    const boton = $(nombre);
+    boton.classList.remove('marcado');
+    void boton.offsetWidth;
+    boton.classList.add('marcado');
   }
 
   function corregir(indice, acierto, fila) {
