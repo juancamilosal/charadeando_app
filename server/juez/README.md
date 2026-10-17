@@ -19,7 +19,7 @@ SQLite, que sirve en el plan gratis) y la API de **WebSocket Hibernation**
 | `GET /juez/<CODIGO>` | La página del juez (HTML, CSS, JS y fuentes en un solo archivo, sin pedir nada a otros servidores). |
 | `GET /juez` | Página para escribir el código si no se puede escanear el QR. |
 | `GET /juez/api/salas/<CODIGO>/ws?rol=anfitrion&token=…` | WebSocket de la app. |
-| `GET /juez/api/salas/<CODIGO>/ws?rol=juez` | WebSocket de la página del juez. |
+| `GET /juez/api/salas/<CODIGO>/ws?rol=juez&juez=<id>` | WebSocket de la página del juez. `id` (8 a 40 letras, números, `-` o `_`) lo guarda el navegador para reconocer al mismo celular. |
 
 ## Mensajes (JSON)
 
@@ -30,10 +30,15 @@ SQLite, que sirve en el plan gratis) y la API de **WebSocket Hibernation**
   `editable` dice si el juez todavía puede corregirla (mientras la app está
   en el resultado de ese turno). Hasta 16 KB por mensaje. Mientras se
   juega, `marca` (`"acierto"`, `"pasar"` o `null`) dice lo que el celular
-  acaba de marcar: la página del juez muestra debajo de la palabra
+  acaba de marcar: la página del juez muestra debajo del tiempo
   "✓ ¡Correcto!" o "→ Paso" (también si se marcó inclinando el celular). Si
   el juez toca y en 2 segundos no llega esa confirmación, dice "No llegó,
-  toca otra vez".
+  toca otra vez". Al final de la partida van también `posiciones`
+  (`[{ "nombre", "puntos" }]`, hasta 20 equipos, de más a menos puntos): la
+  página muestra "¡Ganó …!" o "¡Empate entre …!" y la tabla; sin equipos va
+  `total` (los puntos de toda la partida). En `fin_turno` y `fin_partida`
+  la página tiene "Cerrar", que sale de la sala y abre
+  `https://valkiriacode.com/charadeando`.
 - **Juez → sala → anfitrión:** `{ "tipo": "accion", "accion": "acierto" | "pasar", "id" }`.
   El `id` (único) evita que una acción reenviada cuente dos veces.
 - **Juez → sala → anfitrión, al final del turno:** `{ "tipo": "accion", "accion": "corregir", "id", "indice", "acierto" }`
@@ -42,12 +47,12 @@ SQLite, que sirve en el plan gratis) y la API de **WebSocket Hibernation**
   responde al juez `{ "tipo": "error", "codigo": "no_editable" }`. La app la
   aplica y manda el resumen nuevo, así el juez ve el cambio confirmado.
 - **Sala → anfitrión:** `{ "tipo": "jueces", "cantidad" }` cada vez que entra o sale un juez.
-- **Sala → cualquiera:** `{ "tipo": "bienvenida", "rol" }` al conectarse, `{ "tipo": "error", "codigo" }` (`mensaje_invalido`, `sala_no_existe`, `token_invalido`, `sala_llena`, `otro_anfitrion`, `sala_cerrada`) y `{ "tipo": "aviso", "codigo": "sin_anfitrion" }`.
+- **Sala → cualquiera:** `{ "tipo": "bienvenida", "rol" }` al conectarse, `{ "tipo": "error", "codigo" }` (`mensaje_invalido`, `sala_no_existe`, `token_invalido`, `sala_llena`, `otro_anfitrion`, `juez_reconectado`, `sala_cerrada`) y `{ "tipo": "aviso", "codigo": "sin_anfitrion" }`.
 
 ## Reglas
 
 - Solo el anfitrión con su token envía `estado`; el juez solo `acierto` o `pasar`.
-- Un anfitrión por sala (si el celular se reconecta, el anterior se cierra) y máximo **2 jueces**.
+- Un anfitrión por sala (si el celular se reconecta, el anterior se cierra) y **un solo juez**. Mientras hay juez, otro celular no entra (`sala_llena`: "La sala ya tiene juez"); el mismo (con el mismo `juez=<id>`) sí, y su conexión anterior se cierra (`juez_reconectado`: "Se abrió en otra ventana").
 - Se ignoran más de **4 acciones por segundo** de cada juez (20 estados por segundo del anfitrión).
 - Cada mensaje se valida: texto, máximo 2 KB, JSON, solo los campos conocidos y con su tipo y largo.
 - La sala se **borra sola tras 3 horas sin actividad** (alarma del Durable Object).
@@ -55,7 +60,7 @@ SQLite, que sirve en el plan gratis) y la API de **WebSocket Hibernation**
 
 Los WebSockets rechazados se aceptan y se cierran enseguida con su motivo
 (`4401` token, `4404` no existe, `4409` llena, `4400` rol, `4000`
-reemplazado, `4410` cerrada), para que la página pueda decir por qué.
+reemplazado, `4001` el mismo juez entró de nuevo, `4410` cerrada), para que la página pueda decir por qué.
 
 ## Archivos
 
@@ -75,8 +80,8 @@ npx wrangler dev    # en http://localhost:8787/juez
 ```
 
 Con `wrangler dev`: `curl -X POST localhost:8787/juez/api/salas` crea una
-sala; abre `localhost:8787/juez/<CODIGO>` en dos navegadores (máximo 2
-jueces) y conecta la app con
+sala; abre `localhost:8787/juez/<CODIGO>` en un navegador (en otro dice
+"La sala ya tiene juez") y conecta la app con
 `flutter run --dart-define=JUEZ_URL=http://<IP-del-computador>:8787/juez`
 (el celular y el computador en la misma red; `wrangler dev --ip 0.0.0.0`).
 

@@ -55,6 +55,19 @@ class JudgeWord {
   };
 }
 
+/// Un equipo en la tabla de posiciones del final, con sus puntos.
+class JudgeStanding {
+  const JudgeStanding(this.name, this.points);
+
+  final String name;
+  final int points;
+
+  Map<String, Object?> toJson() => {
+    'nombre': JudgeState._cut(name, 60),
+    'puntos': points.clamp(-9999, 99999),
+  };
+}
+
 /// El juez corrigió la palabra [index] del resumen: ahora es acierto
 /// ([hit]) o pasada.
 class JudgeCorrection {
@@ -79,6 +92,8 @@ class JudgeState {
     this.words,
     this.editable = false,
     this.mark,
+    this.standings,
+    this.total,
   });
 
   /// `esperando`, `jugando`, `fin_turno` o `fin_partida`.
@@ -102,6 +117,13 @@ class JudgeState {
   /// Lo que se acaba de marcar en el turno ("¡Correcto!" o "Paso"), para
   /// que el juez vea que llegó; null mientras no hay marca.
   final WordOutcome? mark;
+
+  /// Al final de la partida: los equipos de más a menos puntos (el juez ve
+  /// quién ganó).
+  final List<JudgeStanding>? standings;
+
+  /// Al final de la partida sin equipos: los puntos de toda la partida.
+  final int? total;
 
   static const waiting = 'esperando';
   static const playing = 'jugando';
@@ -130,6 +152,9 @@ class JudgeState {
         WordOutcome.pass => 'pasar',
         null => null,
       },
+    if (standings != null)
+      'posiciones': [for (final s in standings!.take(20)) s.toJson()],
+    if (total != null) 'total': total!.clamp(-9999, 99999),
   };
 
   /// El mismo estado, pero ya sin poder corregir.
@@ -143,6 +168,8 @@ class JudgeState {
     hits: hits,
     passes: passes,
     words: words,
+    standings: standings,
+    total: total,
   );
 }
 

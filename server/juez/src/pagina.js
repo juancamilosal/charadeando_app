@@ -88,6 +88,10 @@ button:disabled{opacity:.45;transform:none}
 /* Al tocar, solo el botón tocado se hunde un instante: sin destellos en
    toda la pantalla. */
 button.marcado{animation:marcado .22s ease-out}
+.posiciones .fila{cursor:default}
+.posiciones .fila.gana{background:#FFD23F}
+.posiciones .lugar{font-family:Fredoka,system-ui,sans-serif;font-weight:600;min-width:1.6em;text-align:center}
+.aviso .cerrar{min-height:0;font-size:22px;padding:12px 44px;margin-top:6px;background:#fff;color:#4B10B0}
 @keyframes marcado{from{transform:scale(.95)}to{transform:scale(1)}}
 </style>
 </head>
@@ -99,8 +103,8 @@ button.marcado{animation:marcado .22s ease-out}
 <main class="centro">
   <div class="categoria" id="categoria"></div>
   <div class="palabra" id="palabra">…</div>
-  <div class="marca" id="marca" role="status" aria-live="polite" hidden></div>
   <div class="tiempo" id="tiempo">--</div>
+  <div class="marca" id="marca" role="status" aria-live="polite" hidden></div>
 </main>
 <section class="botones">
   <button class="acierto" id="acierto" disabled>✓ Acierto</button>
@@ -112,6 +116,8 @@ button.marcado{animation:marcado .22s ease-out}
   <div class="punto" id="aviso-punto"></div>
   <h1 id="aviso-titulo">Conectando…</h1>
   <p id="aviso-texto">Sala <span class="codigo">${c}</span></p>
+  <div class="lista posiciones" id="posiciones" hidden></div>
+  <p class="pista" id="ultimo" hidden>Último turno</p>
   <div class="resumen" id="resumen" hidden>
     <div><b id="r-aciertos">0</b>aciertos</div>
     <div><b id="r-pasadas">0</b>pasadas</div>
@@ -119,6 +125,7 @@ button.marcado{animation:marcado .22s ease-out}
   </div>
   <p class="pista" id="pista" hidden>Toca una palabra si se marcó mal: cambia entre ✅ y ⏭️.</p>
   <div class="lista" id="lista" hidden></div>
+  <button type="button" class="cerrar" id="cerrar" hidden>Cerrar</button>
   <p class="descarga"><a href="${DESCARGA}" target="_blank" rel="noopener">¿Quieres jugar? Descarga Charadeando</a></p>
 </div>
 
@@ -171,9 +178,47 @@ button.marcado{animation:marcado .22s ease-out}
     });
   }
 
+  // Al final de la partida: los equipos de más a menos puntos, con el
+  // ganador (o los empatados) resaltado.
+  function posiciones(lugares) {
+    const caja = $('posiciones');
+    caja.hidden = !lugares;
+    $('ultimo').hidden = !lugares;
+    caja.replaceChildren();
+    if (!lugares) return;
+    const mejor = lugares[0].puntos;
+    const medallas = ['🥇', '🥈', '🥉'];
+    lugares.forEach((p, i) => {
+      // Empatados, el mismo lugar.
+      const lugar = lugares.findIndex((o) => o.puntos === p.puntos);
+      const fila = document.createElement('div');
+      fila.className = 'fila' + (p.puntos === mejor ? ' gana' : '');
+      const l = document.createElement('span');
+      l.className = 'lugar';
+      l.textContent = medallas[lugar] || lugar + 1 + '.';
+      const t = document.createElement('span');
+      t.className = 'texto';
+      t.textContent = p.nombre;
+      const pts = document.createElement('span');
+      pts.className = 'pts';
+      pts.textContent = p.puntos + (p.puntos === 1 ? ' punto' : ' puntos');
+      fila.append(l, t, pts);
+      caja.append(fila);
+    });
+  }
+
+  // Título del final: quién ganó, o el empate.
+  function ganador(lugares) {
+    const primeros = lugares.filter((p) => p.puntos === lugares[0].puntos).map((p) => p.nombre);
+    if (primeros.length === 1) return '¡Ganó ' + primeros[0] + '!';
+    return '¡Empate entre ' + primeros.slice(0, -1).join(', ') + ' y ' + primeros[primeros.length - 1] + '!';
+  }
+
   function aviso(titulo, texto, { punto = false, resumen = null } = {}) {
     $('aviso').classList.toggle('visible', titulo !== null);
     if (!resumen) lista(null);
+    if (!resumen) posiciones(null);
+    $('cerrar').hidden = !resumen;
     if (titulo === null) return;
     $('aviso-titulo').textContent = titulo;
     $('aviso-texto').textContent = texto;
@@ -186,7 +231,7 @@ button.marcado{animation:marcado .22s ease-out}
     }
   }
 
-  // "✓ ¡Correcto!" o "→ Paso" debajo de la palabra cuando el celular de la
+  // "✓ ¡Correcto!" o "→ Paso" debajo del tiempo cuando el celular de la
   // frente confirma la marca (la haga el juez o el celular). Si el juez
   // toca y en 2 segundos no llega la confirmación, se le pide tocar otra
   // vez.
@@ -230,12 +275,20 @@ button.marcado{animation:marcado .22s ease-out}
     if (jugando) aviso(null);
     else if (e.estado === 'esperando') aviso('Esperando a que empiece el turno…', e.equipo ? 'Turno de ' + e.equipo : 'Prepárate para juzgar.', { punto: true });
     else if (e.estado === 'fin_turno') { aviso('Fin del turno', e.equipo ? 'Turno de ' + e.equipo : '', { resumen: e }); lista(e); }
-    else if (e.estado === 'fin_partida') { aviso('¡Fin de la partida!', 'Gracias por ser el juez.', { resumen: e }); lista(e); }
+    else if (e.estado === 'fin_partida') {
+      const lugares = Array.isArray(e.posiciones) && e.posiciones.length ? [...e.posiciones].sort((a, b) => b.puntos - a.puntos) : null;
+      const texto = lugares ? 'Gracias por ser el juez.'
+        : typeof e.total === 'number' ? 'Total de la partida: ' + e.total + (e.total === 1 ? ' punto.' : ' puntos.')
+        : 'Gracias por ser el juez.';
+      aviso(lugares ? ganador(lugares) : '¡Fin de la partida!', texto, { resumen: e });
+      posiciones(lugares);
+      lista(e);
+    }
   }
 
   function conectar() {
     const protocolo = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    ws = new WebSocket(protocolo + '//' + location.host + '/juez/api/salas/' + CODIGO + '/ws?rol=juez');
+    ws = new WebSocket(protocolo + '//' + location.host + '/juez/api/salas/' + CODIGO + '/ws?rol=juez&juez=' + ID_JUEZ);
     ws.onopen = () => { espera = 1000; };
     ws.onmessage = (m) => {
       let msg;
@@ -244,13 +297,16 @@ button.marcado{animation:marcado .22s ease-out}
       else if (msg.tipo === 'bienvenida' && !estado) aviso('Esperando a que empiece el turno…', 'Ya estás conectado como juez.', { punto: true });
       // Ya no se podía corregir (el celular pasó al siguiente turno).
       else if (msg.tipo === 'error' && msg.codigo === 'no_editable') { if (estado) mostrar(estado); }
-      else if (msg.tipo === 'error' && msg.codigo === 'sala_llena') { final = true; aviso('La sala ya tiene 2 jueces', 'Pídele a alguien que salga para poder entrar.'); }
+      else if (msg.tipo === 'error' && msg.codigo === 'sala_llena') { final = true; aviso('La sala ya tiene juez', 'Solo un celular puede ser el juez.'); }
+      else if (msg.tipo === 'error' && msg.codigo === 'juez_reconectado') { final = true; aviso('Se abrió en otra ventana', 'Este celular ya es el juez en otra pestaña.'); }
       else if (msg.tipo === 'error' && (msg.codigo === 'sala_no_existe' || msg.codigo === 'sala_cerrada')) { final = true; aviso('Esta sala ya no existe', 'Pide en el celular de la frente un código nuevo.'); }
     };
     ws.onclose = (e) => {
       for (const b of botones) b.disabled = true;
-      if (final || e.code === 4404 || e.code === 4410 || e.code === 4409) {
-        if (!final) aviso('Esta sala ya no existe', 'Pide en el celular de la frente un código nuevo.');
+      if (final || e.code === 4404 || e.code === 4410 || e.code === 4409 || e.code === 4001) {
+        if (!final && e.code === 4001) aviso('Se abrió en otra ventana', 'Este celular ya es el juez en otra pestaña.');
+        else if (!final && e.code === 4409) aviso('La sala ya tiene juez', 'Solo un celular puede ser el juez.');
+        else if (!final) aviso('Esta sala ya no existe', 'Pide en el celular de la frente un código nuevo.');
         final = true;
         return;
       }
@@ -259,6 +315,18 @@ button.marcado{animation:marcado .22s ease-out}
       espera = Math.min(espera * 2, 8000);
     };
   }
+
+  // Con este id la sala reconoce a este celular si se reconecta (y no deja
+  // entrar a otro mientras él es el juez). Se guarda en el navegador; si no
+  // se puede, vale para esta página.
+  const ID_JUEZ = (() => {
+    let guardado = null;
+    try { guardado = localStorage.getItem('charadeando-juez'); } catch {}
+    if (guardado && /^[A-Za-z0-9_-]{8,40}$/.test(guardado)) return guardado;
+    const nuevo = id();
+    try { localStorage.setItem('charadeando-juez', nuevo); } catch {}
+    return nuevo;
+  })();
 
   function id() {
     const b = new Uint8Array(12);
@@ -296,6 +364,12 @@ button.marcado{animation:marcado .22s ease-out}
 
   $('acierto').addEventListener('click', () => accion('acierto'));
   $('pasar').addEventListener('click', () => accion('pasar'));
+  // "Cerrar": el juez sale de la sala y va a la página de Charadeando.
+  $('cerrar').addEventListener('click', () => {
+    final = true;
+    try { if (ws) ws.close(1000, 'cerrar'); } catch {}
+    location.href = ${JSON.stringify(DESCARGA)};
+  });
   document.addEventListener('dblclick', (e) => e.preventDefault());
 
   // Que la pantalla no se apague mientras se juzga.

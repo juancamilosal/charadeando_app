@@ -4,7 +4,8 @@
 //   GET  /juez/api/salud                  { ok: true, servicio }: si el Worker está.
 //   GET  /juez/<CODIGO>                    La página del juez.
 //   GET  /juez/api/salas/<CODIGO>/ws       WebSocket: ?rol=anfitrion&token=… (la
-//                                          app) o ?rol=juez (la página).
+//                                          app) o ?rol=juez&juez=<id> (la página;
+//                                          un solo juez por sala).
 //
 // Cada sala es un Durable Object (con SQLite) que usa la API de WebSocket
 // Hibernation: mientras nadie manda nada, no cobra tiempo. No se guarda
@@ -142,15 +143,16 @@ export class Sala extends DurableObject {
     const url = new URL(request.url);
     const rol = url.searchParams.get('rol');
     const token = url.searchParams.get('token');
+    const idJuez = url.searchParams.get('juez');
     const { 0: cliente, 1: servidor } = new WebSocketPair();
-    const rechazo = await this.core.admitir(rol, token);
+    const rechazo = await this.core.admitir(rol, token, idJuez);
     if (rechazo) {
       // Se acepta para poder decir por qué se cierra.
       this.ctx.acceptWebSocket(servidor, ['rechazado']);
       this.core.rechazar(servidor, rechazo);
     } else {
       this.ctx.acceptWebSocket(servidor, [rol]);
-      await this.core.conectado(servidor, rol);
+      await this.core.conectado(servidor, rol, idJuez);
     }
     return new Response(null, { status: 101, webSocket: cliente });
   }

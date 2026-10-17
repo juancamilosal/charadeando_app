@@ -256,7 +256,10 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
             : config.wordCategoryLabel(word) ?? config.categoryLabel,
         seconds: _remaining.inSeconds,
         team: game.inGroups ? game.currentGroup.name : null,
-        points: game.scores[game.groupIndex] + turn.points(config.scoringMode),
+        // Sin equipos, solo los puntos de este turno.
+        points:
+            (game.inGroups ? game.scores[game.groupIndex] : 0) +
+            turn.points(config.scoringMode),
         // Mientras se ve "¡Correcto!" o "Paso", el juez también lo ve: así
         // sabe que la marca llegó.
         mark: playing ? _feedback : null,

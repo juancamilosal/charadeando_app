@@ -241,7 +241,6 @@ void main() {
     test('el texto del estado del juez', () {
       expect(judgeStatus(0), 'Esperando al juez…');
       expect(judgeStatus(1), 'Juez conectado ✓');
-      expect(judgeStatus(2), '2 jueces conectados ✓');
     });
   });
 
@@ -546,6 +545,104 @@ void main() {
       await tester.pump();
       expect(channel.states.last['editable'], isFalse);
       expect(channel.states.last['palabras'], hasLength(2));
+    });
+
+    testWidgets('"QR Juez" muestra solo el QR; sin juez no está', (
+      tester,
+    ) async {
+      await show(tester);
+      await tester.tap(find.text('QR Juez'));
+      await tester.pumpAndSettle();
+      final qr = find.descendant(
+        of: find.byType(Dialog),
+        matching: find.byType(QrImageView),
+      );
+      expect(qr, findsOneWidget);
+      expect(
+        find.descendant(of: find.byType(Dialog), matching: find.byType(Text)),
+        findsNothing,
+      );
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+      expect(find.byType(Dialog), findsNothing);
+    });
+
+    testWidgets('sin juez no hay botón "QR Juez"', (tester) async {
+      await show(tester, judge: false);
+      expect(find.text('QR Juez'), findsNothing);
+    });
+
+    test('al final, el juez recibe las posiciones; sin equipos, el total y '
+        'los puntos de cada turno', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final game = container.read(gameControllerProvider.notifier);
+      game.configure(
+        const GameConfig(groups: [Group('A'), Group('B'), Group('C')]),
+      );
+      game.startWithDecks([
+        [Word('Pizza')],
+        [Word('Sol')],
+        [Word('Luna')],
+      ]);
+      game.finishTurn(
+        Turn(
+          round: 1,
+          groupIndex: 1,
+          entries: [TurnEntry(Word('Sol'), WordOutcome.hit)],
+        ),
+      );
+      final fin = judgeTurnSummary(
+        container.read(gameControllerProvider),
+        gameOver: true,
+      ).toJson();
+      expect(fin['estado'], 'fin_partida');
+      expect(fin['posiciones'], [
+        {'nombre': 'B', 'puntos': 1},
+        {'nombre': 'A', 'puntos': 0},
+        {'nombre': 'C', 'puntos': 0},
+      ]);
+      expect(fin.containsKey('total'), isFalse);
+      // A mitad de la partida, sin posiciones.
+      expect(
+        judgeTurnSummary(
+          container.read(gameControllerProvider),
+          gameOver: false,
+        ).toJson().containsKey('posiciones'),
+        isFalse,
+      );
+
+      // Sin equipos: cada turno muestra solo sus puntos.
+      game.configure(const GameConfig(groups: [Group('')], inGroups: false));
+      game.startWithDecks([
+        [Word('Pizza'), Word('Sol'), Word('Luna')],
+      ]);
+      game.finishTurn(
+        Turn(
+          round: 1,
+          groupIndex: 0,
+          entries: [
+            TurnEntry(Word('Pizza'), WordOutcome.hit),
+            TurnEntry(Word('Sol'), WordOutcome.hit),
+          ],
+        ),
+      );
+      game.advance();
+      game.finishTurn(
+        Turn(
+          round: 2,
+          groupIndex: 0,
+          entries: [TurnEntry(Word('Luna'), WordOutcome.hit)],
+        ),
+      );
+      final solo = judgeTurnSummary(
+        container.read(gameControllerProvider),
+        gameOver: true,
+      ).toJson();
+      expect(solo['puntos'], 1);
+      expect(solo['total'], 3);
+      expect(solo.containsKey('posiciones'), isFalse);
+      expect(solo['equipo'], isNull);
     });
 
     test('corregir el último turno recalcula los puntos', () {

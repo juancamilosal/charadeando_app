@@ -59,7 +59,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   Con el juez conectado, la inclinación (y el toque) no marcan; si se
   desconecta en pleno turno, un aviso lo dice y la inclinación vuelve.
   Cada marca se confirma en la página del juez: mientras el celular de la
-  frente muestra "¡Correcto!" o "Paso", el juez ve debajo de la palabra
+  frente muestra "¡Correcto!" o "Paso", el juez ve debajo del tiempo
   "✓ ¡Correcto!" o "→ Paso" (también si se marcó inclinando); si tocó y en
   2 segundos no llegó la confirmación, dice "No llegó, toca otra vez".
   Al final del turno el juez ve el resumen como en la app (aciertos,
@@ -67,7 +67,16 @@ la cámara frontal graba a los participantes para revivir las risas.
   está en el resultado de ese turno, puede tocar una palabra para
   corregirla: el cambio llega al celular (con el aviso "El juez cambió
   "Pizza" a ✅ acertada.") y se recalculan los puntos. Al seguir, el resumen
-  queda fijo en los dos lados.
+  queda fijo en los dos lados. Los puntos que ve el juez son los del equipo
+  en la partida; sin equipos, solo los de ese turno. Al final de la partida
+  ve el ganador ("¡Ganó Los Tigres!" o "¡Empate entre…!") y las posiciones
+  de los equipos con sus puntos (sin equipos, el total de la partida), y
+  además el resumen del último turno. Al final de un turno o de la partida
+  tiene "Cerrar": sale de la sala y va a valkiriacode.com/charadeando.
+  Solo un celular puede ser el juez: otro que escanee dice "La sala ya
+  tiene juez" (el mismo celular sí puede volver a entrar, por ejemplo si se
+  le fue la señal). En el resultado de cada turno, "QR Juez" muestra solo
+  el QR en grande, para que el juez entre o vuelva a entrar.
 - Corregir el turno: en el resultado de cada turno, "Toca una palabra si se
   marcó mal." Tocar una palabra la cambia entre ✅ acertada y ⏭️ pasada
   (`GameController.correctLastTurn`) y se recalculan los aciertos, los

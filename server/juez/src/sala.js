@@ -13,6 +13,7 @@ import {
   iguales,
   leerMensaje,
   limitar,
+  normalizarIdJuez,
 } from './logica.js';
 
 /// Códigos de cierre de los WebSockets (el juez los muestra en español).
@@ -22,6 +23,8 @@ export const CIERRES = {
   llena: { codigo: 4409, razon: 'sala_llena' },
   rol: { codigo: 4400, razon: 'rol_invalido' },
   reemplazado: { codigo: 4000, razon: 'otro_anfitrion' },
+  // El mismo juez entró de nuevo (otra pestaña o se reconectó).
+  mismoJuez: { codigo: 4001, razon: 'juez_reconectado' },
   cerrada: { codigo: 4410, razon: 'sala_cerrada' },
 };
 
@@ -62,9 +65,10 @@ export class SalaCore {
     return true;
   }
 
-  /// Si se acepta una conexión con [rol] y [token]. Devuelve null si sí, o el
-  /// cierre con que se rechaza.
-  async admitir(rol, token) {
+  /// Si se acepta una conexión con [rol] y [token] (el anfitrión) o
+  /// [idJuez] (el juez). Devuelve null si sí, o el cierre con que se
+  /// rechaza.
+  async admitir(rol, token, idJuez = null) {
     const guardada = await this.storage.get('huella');
     if (!guardada) return CIERRES.noExiste;
     if (rol === 'anfitrion') {
@@ -72,8 +76,13 @@ export class SalaCore {
       return null;
     }
     if (rol === 'juez') {
-      if (this.e.sockets('juez').length >= MAX_JUECES) return CIERRES.llena;
-      return null;
+      const jueces = this.e.sockets('juez');
+      if (jueces.length < MAX_JUECES) return null;
+      // Ya hay juez: solo entra si es el mismo celular que vuelve (por
+      // ejemplo, se le fue la señal y la sala todavía no lo notó).
+      const id = normalizarIdJuez(idJuez);
+      if (id && jueces.every((w) => this.e.adjunto(w)?.idJuez === id)) return null;
+      return CIERRES.llena;
     }
     return CIERRES.rol;
   }
@@ -89,8 +98,9 @@ export class SalaCore {
   }
 
   /// Recién conectado [ws] con [rol]: le manda lo que necesita.
-  async conectado(ws, rol) {
-    this.e.guardarAdjunto(ws, { rol, ventana: null });
+  async conectado(ws, rol, idJuez = null) {
+    const id = rol === 'juez' ? normalizarIdJuez(idJuez) : null;
+    this.e.guardarAdjunto(ws, { rol, ventana: null, idJuez: id });
     await this.tocar();
     if (rol === 'anfitrion') {
       // Solo un anfitrión: si el celular se reconecta, el anterior sobra.
@@ -101,6 +111,9 @@ export class SalaCore {
       this.avisarJueces();
       return;
     }
+    // El mismo juez que vuelve reemplaza su conexión anterior.
+    const viejas = this.e.sockets('juez').filter((w) => w !== ws);
+    for (const vieja of viejas) this.rechazar(vieja, CIERRES.mismoJuez);
     enviar(ws, { tipo: 'bienvenida', rol });
     const estado = await this.storage.get('estado');
     if (estado) enviar(ws, estado);

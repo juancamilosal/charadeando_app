@@ -306,8 +306,10 @@ class JudgeController extends Notifier<JudgeSetup> {
 }
 
 /// El resumen del último turno para el juez: las palabras (acertadas y
-/// pasadas), los aciertos y los puntos del equipo. Con [editable] el juez
-/// todavía puede corregirlas.
+/// pasadas), los aciertos y los puntos del equipo (sin equipos, los de ese
+/// turno). Con [editable] el juez todavía puede corregirlas. Al final de la
+/// partida van también las posiciones de los equipos, o el total sin
+/// equipos.
 JudgeState judgeTurnSummary(
   GameState game, {
   required bool gameOver,
@@ -320,7 +322,7 @@ JudgeState judgeTurnSummary(
     phase: gameOver ? JudgeState.gameOver : JudgeState.turnOver,
     category: game.config.categoryLabel,
     team: game.inGroups ? game.groups[group].name : null,
-    points: game.scores[group],
+    points: game.inGroups ? game.scores[group] : turn?.points(mode) ?? 0,
     hits: turn?.hits.length ?? 0,
     passes: turn?.passed.length ?? 0,
     words: [
@@ -332,5 +334,18 @@ JudgeState judgeTurnSummary(
         ),
     ],
     editable: editable && turn != null,
+    standings: gameOver && game.inGroups ? judgeStandings(game) : null,
+    total: gameOver && !game.inGroups ? game.totalScore : null,
   );
+}
+
+/// Los equipos de más a menos puntos (los empatados, en su orden).
+List<JudgeStanding> judgeStandings(GameState game) {
+  final scores = game.scores;
+  final order = [for (var i = 0; i < game.groups.length; i++) i]
+    ..sort((a, b) {
+      final byPoints = scores[b].compareTo(scores[a]);
+      return byPoints != 0 ? byPoints : a.compareTo(b);
+    });
+  return [for (final i in order) JudgeStanding(game.groups[i].name, scores[i])];
 }

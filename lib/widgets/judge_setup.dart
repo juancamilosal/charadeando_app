@@ -173,20 +173,7 @@ class _RoomView extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: const Color(0xFFEDE7F6), width: 2),
                 ),
-                child: QrImageView(
-                  data: room.judgeUrl,
-                  size: 190,
-                  backgroundColor: Colors.white,
-                  eyeStyle: const QrEyeStyle(
-                    eyeShape: QrEyeShape.square,
-                    color: AppColors.ink,
-                  ),
-                  dataModuleStyle: const QrDataModuleStyle(
-                    dataModuleShape: QrDataModuleShape.square,
-                    color: AppColors.ink,
-                  ),
-                  semanticsLabel: 'Código QR del celular juez',
-                ),
+                child: JudgeQr(url: room.judgeUrl, size: 190),
               ),
               const SizedBox(height: 10),
               const Text(
@@ -258,9 +245,44 @@ class _RoomView extends ConsumerWidget {
   }
 }
 
-/// "Esperando al juez…", "Juez conectado ✓" o "2 jueces conectados ✓".
-String judgeStatus(int judges) => switch (judges) {
-  0 => 'Esperando al juez…',
-  1 => 'Juez conectado ✓',
-  _ => '$judges jueces conectados ✓',
-};
+/// El código QR que abre la página del juez.
+class JudgeQr extends StatelessWidget {
+  const JudgeQr({super.key, required this.url, this.size = 190});
+
+  final String url;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => QrImageView(
+    data: url,
+    size: size,
+    backgroundColor: Colors.white,
+    eyeStyle: const QrEyeStyle(
+      eyeShape: QrEyeShape.square,
+      color: AppColors.ink,
+    ),
+    dataModuleStyle: const QrDataModuleStyle(
+      dataModuleShape: QrDataModuleShape.square,
+      color: AppColors.ink,
+    ),
+    semanticsLabel: 'Código QR del celular juez',
+  );
+}
+
+/// Solo el QR del juez, en grande (para que entre o vuelva a entrar). Se
+/// cierra tocando afuera.
+Future<void> showJudgeQr(BuildContext context, JudgeRoom room) => showDialog(
+  context: context,
+  builder: (context) => Dialog(
+    backgroundColor: Colors.white,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+    child: Padding(
+      padding: const EdgeInsets.all(18),
+      child: JudgeQr(url: room.judgeUrl, size: 260),
+    ),
+  ),
+);
+
+/// "Esperando al juez…" o "Juez conectado ✓" (la sala tiene un solo juez).
+String judgeStatus(int judges) =>
+    judges == 0 ? 'Esperando al juez…' : 'Juez conectado ✓';

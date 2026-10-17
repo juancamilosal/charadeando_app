@@ -5,8 +5,16 @@
 export const ALFABETO = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
 export const LARGO_CODIGO = 6;
 
-/// Máximo de jueces conectados a una sala.
-export const MAX_JUECES = 2;
+/// Máximo de jueces conectados a una sala: uno. Si ya hay juez, otro
+/// celular no puede entrar (el mismo sí, para reconectarse).
+export const MAX_JUECES = 1;
+
+/// Id con que la página del juez se presenta (lo guarda el navegador),
+/// para reconocer al mismo celular cuando se reconecta.
+export function normalizarIdJuez(texto) {
+  const id = String(texto ?? '');
+  return /^[A-Za-z0-9_-]{8,40}$/.test(id) ? id : null;
+}
 
 /// Acciones por segundo que se aceptan de cada juez; las demás se ignoran.
 export const ACCIONES_POR_SEGUNDO = 4;
@@ -24,6 +32,9 @@ export const MAX_MENSAJE_ANFITRION = 16384;
 
 /// Palabras que puede tener el resumen de un turno.
 export const MAX_PALABRAS = 100;
+
+/// Equipos que puede tener la tabla de posiciones del final.
+export const MAX_POSICIONES = 20;
 
 /// La sala se borra sola tras este tiempo sin actividad.
 export const INACTIVIDAD_MS = 3 * 60 * 60 * 1000;
@@ -122,6 +133,21 @@ const CAMPOS_ESTADO = {
   // Lo que el celular de la frente acaba de marcar ("¡Correcto!" o
   // "Paso"), para que el juez vea que llegó.
   marca: (v) => v === null || v === 'acierto' || v === 'pasar',
+  // Al final de la partida: los equipos de más a menos puntos (el juez ve
+  // el ganador o el empate) o, sin equipos, el total.
+  posiciones: (v) =>
+    Array.isArray(v) &&
+    v.length <= MAX_POSICIONES &&
+    v.every(
+      (p) =>
+        p &&
+        typeof p === 'object' &&
+        !Array.isArray(p) &&
+        Object.keys(p).every((k) => k === 'nombre' || k === 'puntos') &&
+        texto(p.nombre, 60) &&
+        entero(p.puntos, -9999, 99999),
+    ),
+  total: (v) => entero(v, -9999, 99999),
 };
 const OBLIGATORIOS_ESTADO = ['segundos', 'puntos', 'estado'];
 

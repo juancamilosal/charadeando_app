@@ -54,7 +54,7 @@ function salaDePrueba() {
     ahora: () => ahora,
   });
   /// Conecta como [rol]; devuelve el socket (aceptado o rechazado).
-  async function conectar(rol, token) {
+  async function conectar(rol, token, idJuez = null) {
     const ws = {
       rol,
       abierto: true,
@@ -72,13 +72,13 @@ function salaDePrueba() {
         return [...this.enviados].reverse().find((m) => !tipo || m.tipo === tipo);
       },
     };
-    const rechazo = await core.admitir(rol, token);
+    const rechazo = await core.admitir(rol, token, idJuez);
     if (rechazo) {
       ws.rol = 'rechazado';
       core.rechazar(ws, rechazo);
     } else {
       conexiones.push(ws);
-      await core.conectado(ws, rol);
+      await core.conectado(ws, rol, idJuez);
     }
     return ws;
   }
@@ -173,39 +173,58 @@ test('una sala que no existe se cierra con su motivo', async () => {
   assert.equal(juez.cierre.codigo, 4404);
 });
 
-test('máximo 2 jueces, y el anfitrión sabe cuántos hay', async () => {
+test('un solo juez por sala, y el anfitrión sabe si está', async () => {
   const { conectar, cerrar, token } = await salaCreada();
   const anfitrion = await conectar('anfitrion', token);
   assert.deepEqual(anfitrion.ultimo('jueces'), { tipo: 'jueces', cantidad: 0 });
-  const j1 = await conectar('juez');
+  const j1 = await conectar('juez', null, 'celular-uno');
   assert.deepEqual(anfitrion.ultimo('jueces'), { tipo: 'jueces', cantidad: 1 });
-  await conectar('juez');
-  assert.deepEqual(anfitrion.ultimo('jueces'), { tipo: 'jueces', cantidad: 2 });
-  const tercero = await conectar('juez');
-  assert.equal(tercero.cierre.codigo, CIERRES.llena.codigo);
-  assert.deepEqual(tercero.enviados, [{ tipo: 'error', codigo: 'sala_llena' }]);
+  // Otro celular (u otro sin id) no entra.
+  const otro = await conectar('juez', null, 'celular-dos');
+  assert.equal(otro.cierre.codigo, CIERRES.llena.codigo);
+  assert.deepEqual(otro.enviados, [{ tipo: 'error', codigo: 'sala_llena' }]);
+  assert.equal((await conectar('juez')).cierre.codigo, CIERRES.llena.codigo);
+  assert.equal(j1.abierto, true);
   cerrar(j1);
+  assert.deepEqual(anfitrion.ultimo('jueces'), { tipo: 'jueces', cantidad: 0 });
+  // Sin juez, entra cualquiera.
+  assert.equal((await conectar('juez', null, 'celular-dos')).cierre, null);
   assert.deepEqual(anfitrion.ultimo('jueces'), { tipo: 'jueces', cantidad: 1 });
-  // Con un lugar libre, entra otro.
-  assert.equal((await conectar('juez')).cierre, null);
+});
+
+test('el mismo juez que vuelve reemplaza su conexión anterior', async () => {
+  const { core, conectar, token } = await salaCreada();
+  const anfitrion = await conectar('anfitrion', token);
+  const viejo = await conectar('juez', null, 'celular-uno');
+  await core.mensaje(anfitrion, estado());
+  const nuevo = await conectar('juez', null, 'celular-uno');
+  assert.equal(nuevo.cierre, null);
+  assert.deepEqual(viejo.cierre, { codigo: CIERRES.mismoJuez.codigo, razon: 'juez_reconectado' });
+  assert.deepEqual(viejo.ultimo(), { tipo: 'error', codigo: 'juez_reconectado' });
+  assert.equal(nuevo.ultimo('estado').palabra, 'Jirafa');
+  assert.deepEqual(anfitrion.ultimo('jueces'), { tipo: 'jueces', cantidad: 1 });
+  // Un id inválido no sirve para reconectarse.
+  const raro = await conectar('juez', null, 'x');
+  assert.equal(raro.cierre.codigo, CIERRES.llena.codigo);
+  assert.equal(nuevo.abierto, true);
 });
 
 test('estado y acciones de punta a punta', async () => {
   const { core, conectar, token } = await salaCreada();
   const anfitrion = await conectar('anfitrion', token);
-  const j1 = await conectar('juez');
+  const j1 = await conectar('juez', null, 'celular-uno');
   await core.mensaje(anfitrion, estado());
   assert.equal(j1.ultimo().palabra, 'Jirafa');
   assert.equal(j1.ultimo().estado, 'jugando');
-  // Uno que entra después recibe el último estado.
-  const j2 = await conectar('juez');
+  // Si vuelve a entrar, recibe el último estado.
+  const j2 = await conectar('juez', null, 'celular-uno');
   assert.equal(j2.ultimo('estado').segundos, 42);
 
-  await core.mensaje(j1, accion('acierto', 'a1'));
+  await core.mensaje(j2, accion('acierto', 'a1'));
   assert.deepEqual(anfitrion.ultimo(), { tipo: 'accion', accion: 'acierto', id: 'a1' });
   // Reenviada con el mismo id: no se repite.
   const antes = anfitrion.enviados.length;
-  await core.mensaje(j1, accion('acierto', 'a1'));
+  await core.mensaje(j2, accion('acierto', 'a1'));
   assert.equal(anfitrion.enviados.length, antes);
   await core.mensaje(j2, accion('pasar', 'p1'));
   assert.deepEqual(anfitrion.ultimo(), { tipo: 'accion', accion: 'pasar', id: 'p1' });
@@ -436,4 +455,33 @@ test('el estado puede decir lo que se acaba de marcar', () => {
   assert.match(html, /✓ ¡Correcto!/);
   assert.match(html, /→ Paso/);
   assert.match(html, /No llegó, toca otra vez/);
+});
+
+test('al final, las posiciones de los equipos o el total', () => {
+  const fin = (extra) => estado({ estado: 'fin_partida', ...extra });
+  const bien = leerMensaje(
+    fin({ posiciones: [{ nombre: 'Los Tigres', puntos: 7 }, { nombre: 'Leones', puntos: 4 }] }),
+    'anfitrion',
+  );
+  assert.equal(bien.posiciones.length, 2);
+  assert.equal(leerMensaje(fin({ total: 12 }), 'anfitrion').total, 12);
+  assert.ok(leerMensaje(fin({ posiciones: [{ nombre: 'X', puntos: 1, edad: 9 }] }), 'anfitrion').error);
+  assert.ok(leerMensaje(fin({ posiciones: [{ nombre: 'X', puntos: 1.5 }] }), 'anfitrion').error);
+  const muchos = Array.from({ length: 21 }, (_, i) => ({ nombre: 'E' + i, puntos: i }));
+  assert.ok(leerMensaje(fin({ posiciones: muchos }), 'anfitrion').error);
+  const html = paginaJuez('ABC234');
+  assert.match(html, /¡Ganó /);
+  assert.match(html, /¡Empate entre /);
+  assert.match(html, /Total de la partida: /);
+  assert.match(html, />Cerrar</);
+  assert.match(html, /https:\/\/valkiriacode\.com\/charadeando/);
+});
+
+test('la página del juez se presenta con su id y avisa si hay otro juez', () => {
+  const html = paginaJuez('ABC234');
+  assert.match(html, /rol=juez&juez=/);
+  assert.match(html, /La sala ya tiene juez/);
+  assert.match(html, /Se abrió en otra ventana/);
+  // El tiempo va arriba y la marca debajo.
+  assert.ok(html.indexOf('id="tiempo"') < html.indexOf('id="marca"'));
 });

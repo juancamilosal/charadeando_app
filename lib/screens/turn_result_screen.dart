@@ -11,6 +11,7 @@ import '../theme.dart';
 import '../services/services.dart';
 import '../widgets/backdrop_tile.dart';
 import '../widgets/end_game_dialog.dart';
+import '../widgets/judge_setup.dart' show showJudgeQr;
 import '../widgets/play_background.dart';
 import '../widgets/result_parts.dart';
 
@@ -312,6 +313,14 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
                     ),
                     EndGameButton(onPressed: _leaving ? null : _endGame),
                   ],
+                  // Para que el juez entre (o vuelva a entrar) sin ir a la
+                  // configuración.
+                  if (_judge case final judge?)
+                    QuietButton(
+                      icon: Icons.qr_code_2,
+                      label: 'QR Juez',
+                      onPressed: () => showJudgeQr(context, judge),
+                    ),
                 ],
               ),
             ),
