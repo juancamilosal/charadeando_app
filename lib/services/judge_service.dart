@@ -78,6 +78,7 @@ class JudgeState {
     this.passes,
     this.words,
     this.editable = false,
+    this.mark,
   });
 
   /// `esperando`, `jugando`, `fin_turno` o `fin_partida`.
@@ -97,6 +98,10 @@ class JudgeState {
 
   /// Si el juez todavía puede corregirlas.
   final bool editable;
+
+  /// Lo que se acaba de marcar en el turno ("¡Correcto!" o "Paso"), para
+  /// que el juez vea que llegó; null mientras no hay marca.
+  final WordOutcome? mark;
 
   static const waiting = 'esperando';
   static const playing = 'jugando';
@@ -119,6 +124,12 @@ class JudgeState {
     if (words != null)
       'palabras': [for (final w in words!.take(100)) w.toJson()],
     if (words != null) 'editable': editable,
+    if (phase == playing)
+      'marca': switch (mark) {
+        WordOutcome.hit => 'acierto',
+        WordOutcome.pass => 'pasar',
+        null => null,
+      },
   };
 
   /// El mismo estado, pero ya sin poder corregir.

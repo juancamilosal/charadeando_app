@@ -348,9 +348,13 @@ void main() {
       await tester.pump();
       await tester.pump();
       expect(find.text('¡Correcto!'), findsOneWidget);
+      // El juez ve que llegó: la palabra marcada con "¡Correcto!".
+      expect(channel.states.last['marca'], 'acierto');
+      expect(channel.states.last['palabra'], 'Pizza');
       await tester.pump(const Duration(seconds: 1));
       expect(find.text('Jirafa'), findsOneWidget);
       expect(channel.states.last['palabra'], 'Jirafa');
+      expect(channel.states.last['marca'], isNull);
       expect(channel.states.last['puntos'], 1);
 
       // Se va el juez: aviso discreto y la inclinación vuelve a marcar.
@@ -366,6 +370,8 @@ void main() {
       tilt.controller.add(TiltAction.pass);
       await tester.pump();
       expect(find.text('Paso'), findsOneWidget);
+      // También cuando marca el celular (inclinando).
+      expect(channel.states.last['marca'], 'pasar');
       await tester.pump(const Duration(seconds: 1));
 
       // Al acabar el tiempo, el juez ve el resumen.

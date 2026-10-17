@@ -28,7 +28,12 @@ SQLite, que sirve en el plan gratis) y la API de **WebSocket Hibernation**
   final del turno, `palabras` es la lista del turno en orden
   (`[{ "texto", "acierto": true|false, "puntos"? }]`, hasta 100) y
   `editable` dice si el juez todavía puede corregirla (mientras la app está
-  en el resultado de ese turno). Hasta 16 KB por mensaje.
+  en el resultado de ese turno). Hasta 16 KB por mensaje. Mientras se
+  juega, `marca` (`"acierto"`, `"pasar"` o `null`) dice lo que el celular
+  acaba de marcar: la página del juez muestra debajo de la palabra
+  "✓ ¡Correcto!" o "→ Paso" (también si se marcó inclinando el celular). Si
+  el juez toca y en 2 segundos no llega esa confirmación, dice "No llegó,
+  toca otra vez".
 - **Juez → sala → anfitrión:** `{ "tipo": "accion", "accion": "acierto" | "pasar", "id" }`.
   El `id` (único) evita que una acción reenviada cuente dos veces.
 - **Juez → sala → anfitrión, al final del turno:** `{ "tipo": "accion", "accion": "corregir", "id", "indice", "acierto" }`

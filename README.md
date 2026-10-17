@@ -58,6 +58,10 @@ la cámara frontal graba a los participantes para revivir las risas.
   llama a lo mismo que inclinar el celular (con sus sonidos y animaciones).
   Con el juez conectado, la inclinación (y el toque) no marcan; si se
   desconecta en pleno turno, un aviso lo dice y la inclinación vuelve.
+  Cada marca se confirma en la página del juez: mientras el celular de la
+  frente muestra "¡Correcto!" o "Paso", el juez ve debajo de la palabra
+  "✓ ¡Correcto!" o "→ Paso" (también si se marcó inclinando); si tocó y en
+  2 segundos no llegó la confirmación, dice "No llegó, toca otra vez".
   Al final del turno el juez ve el resumen como en la app (aciertos,
   pasadas, puntos y la lista de palabras con ✅ o ⏭️) y, mientras la app
   está en el resultado de ese turno, puede tocar una palabra para

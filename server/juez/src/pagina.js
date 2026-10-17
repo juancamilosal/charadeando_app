@@ -79,6 +79,12 @@ button:disabled{opacity:.45;transform:none}
 .fila .marca{font-size:20px}
 .vacia{padding:12px;text-align:center;color:#2B0A57}
 .pista{font-size:15px!important;opacity:.85}
+.marca{font-family:Fredoka,system-ui,sans-serif;font-weight:600;font-size:clamp(22px,7vw,30px);border-radius:999px;
+  padding:6px 20px;animation:aparecer .18s ease-out}
+.marca.si{background:#18A85C}
+.marca.no{background:#FF8A00}
+.marca.falla{background:rgba(0,0,0,.28);font-size:18px}
+@keyframes aparecer{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
 /* Al tocar, solo el botón tocado se hunde un instante: sin destellos en
    toda la pantalla. */
 button.marcado{animation:marcado .22s ease-out}
@@ -93,6 +99,7 @@ button.marcado{animation:marcado .22s ease-out}
 <main class="centro">
   <div class="categoria" id="categoria"></div>
   <div class="palabra" id="palabra">…</div>
+  <div class="marca" id="marca" role="status" aria-live="polite" hidden></div>
   <div class="tiempo" id="tiempo">--</div>
 </main>
 <section class="botones">
@@ -179,8 +186,39 @@ button.marcado{animation:marcado .22s ease-out}
     }
   }
 
+  // "✓ ¡Correcto!" o "→ Paso" debajo de la palabra cuando el celular de la
+  // frente confirma la marca (la haga el juez o el celular). Si el juez
+  // toca y en 2 segundos no llega la confirmación, se le pide tocar otra
+  // vez.
+  let sinConfirmar = null;
+  function marca(texto, clase) {
+    const m = $('marca');
+    if (!texto) {
+      m.hidden = true;
+      return;
+    }
+    m.textContent = texto;
+    m.className = 'marca ' + clase;
+    m.hidden = false;
+  }
+
   function mostrar(e) {
+    const antes = estado;
     estado = e;
+    if (e.estado === 'jugando' && e.marca) {
+      clearTimeout(sinConfirmar);
+      sinConfirmar = null;
+      marca(e.marca === 'acierto' ? '✓ ¡Correcto!' : '→ Paso', e.marca === 'acierto' ? 'si' : 'no');
+    } else if (e.estado !== 'jugando' || (antes && antes.palabra !== e.palabra)) {
+      // Palabra nueva (o fuera del turno): se borra la marca anterior.
+      if (!sinConfirmar) marca(null);
+    } else if (antes && antes.marca && !e.marca) {
+      marca(null);
+    }
+    if (e.estado !== 'jugando') {
+      clearTimeout(sinConfirmar);
+      sinConfirmar = null;
+    }
     $('equipo').textContent = e.equipo || 'Juez';
     $('puntos').textContent = e.puntos ?? 0;
     $('categoria').textContent = e.categoria || '';
@@ -235,6 +273,11 @@ button.marcado{animation:marcado .22s ease-out}
     setTimeout(() => { bloqueado = false; }, 700);
     if (navigator.vibrate) navigator.vibrate(35);
     ws.send(JSON.stringify({ tipo: 'accion', accion: nombre, id: id() }));
+    clearTimeout(sinConfirmar);
+    sinConfirmar = setTimeout(() => {
+      sinConfirmar = null;
+      if (estado && estado.estado === 'jugando') marca('No llegó, toca otra vez', 'falla');
+    }, 2000);
     const boton = $(nombre);
     boton.classList.remove('marcado');
     void boton.offsetWidth;

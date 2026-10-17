@@ -426,3 +426,14 @@ test('la página del juez muestra la lista y deja corregir', () => {
   assert.match(html, /No se marcó ninguna palabra\./);
   assert.match(html, /'✅' : '⏭️'/);
 });
+
+test('el estado puede decir lo que se acaba de marcar', () => {
+  assert.equal(leerMensaje(estado({ marca: 'acierto' }), 'anfitrion').marca, 'acierto');
+  assert.equal(leerMensaje(estado({ marca: 'pasar' }), 'anfitrion').marca, 'pasar');
+  assert.equal(leerMensaje(estado({ marca: null }), 'anfitrion').marca, null);
+  assert.ok(leerMensaje(estado({ marca: 'ganar' }), 'anfitrion').error);
+  const html = paginaJuez('ABC234');
+  assert.match(html, /✓ ¡Correcto!/);
+  assert.match(html, /→ Paso/);
+  assert.match(html, /No llegó, toca otra vez/);
+});

@@ -133,6 +133,7 @@ void main() {
       'equipo': 'Los Tigres',
       'puntos': 3,
       'estado': 'jugando',
+      'marca': null,
     });
     r.send(
       const JudgeState(

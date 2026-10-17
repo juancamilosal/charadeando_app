@@ -119,6 +119,9 @@ const CAMPOS_ESTADO = {
         (p.puntos === undefined || entero(p.puntos, 0, 99)),
     ),
   editable: (v) => typeof v === 'boolean',
+  // Lo que el celular de la frente acaba de marcar ("¡Correcto!" o
+  // "Paso"), para que el juez vea que llegó.
+  marca: (v) => v === null || v === 'acierto' || v === 'pasar',
 };
 const OBLIGATORIOS_ESTADO = ['segundos', 'puntos', 'estado'];
 

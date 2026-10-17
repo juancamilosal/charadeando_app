@@ -257,6 +257,9 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
         seconds: _remaining.inSeconds,
         team: game.inGroups ? game.currentGroup.name : null,
         points: game.scores[game.groupIndex] + turn.points(config.scoringMode),
+        // Mientras se ve "¡Correcto!" o "Paso", el juez también lo ve: así
+        // sabe que la marca llegó.
+        mark: playing ? _feedback : null,
       ),
     );
   }
