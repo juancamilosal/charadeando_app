@@ -128,3 +128,5 @@ Worker (por ejemplo, la web devuelve 404), la sección "Celular juez" no se
 muestra en la configuración; y si falla al crear la sala, dice que el
 celular juez no está disponible por ahora y se sigue jugando inclinando el
 celular.
+
+> Estado: Worker `charadeando-juez` creado en Cloudflare el 17 de octubre de 2026, publicando desde `develop` (carpeta raíz `/server/juez`). Al lanzar en Play Store se cambia la rama de producción a `main`.
