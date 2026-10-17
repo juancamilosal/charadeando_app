@@ -364,11 +364,12 @@ button.marcado{animation:marcado .22s ease-out}
 
   $('acierto').addEventListener('click', () => accion('acierto'));
   $('pasar').addEventListener('click', () => accion('pasar'));
-  // "Cerrar": el juez sale de la sala y va a la página de Charadeando.
+  // "Cerrar": el juez sale de la sala y vuelve a la página donde se
+  // escribe el código.
   $('cerrar').addEventListener('click', () => {
     final = true;
     try { if (ws) ws.close(1000, 'cerrar'); } catch {}
-    location.href = ${JSON.stringify(DESCARGA)};
+    location.href = '/juez';
   });
   document.addEventListener('dblclick', (e) => e.preventDefault());
 

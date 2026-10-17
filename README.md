@@ -72,7 +72,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   ve el ganador ("¡Ganó Los Tigres!" o "¡Empate entre…!") y las posiciones
   de los equipos con sus puntos (sin equipos, el total de la partida), y
   además el resumen del último turno. Al final de un turno o de la partida
-  tiene "Cerrar": sale de la sala y va a valkiriacode.com/charadeando.
+  tiene "Cerrar": sale de la sala y vuelve a valkiriacode.com/juez, la
+  página donde se escribe el código.
   Solo un celular puede ser el juez: otro que escanee dice "La sala ya
   tiene juez" (el mismo celular sí puede volver a entrar, por ejemplo si se
   le fue la señal). En el resultado de cada turno, "QR Juez" muestra solo

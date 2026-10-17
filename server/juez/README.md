@@ -37,8 +37,8 @@ SQLite, que sirve en el plan gratis) y la API de **WebSocket Hibernation**
   (`[{ "nombre", "puntos" }]`, hasta 20 equipos, de más a menos puntos): la
   página muestra "¡Ganó …!" o "¡Empate entre …!" y la tabla; sin equipos va
   `total` (los puntos de toda la partida). En `fin_turno` y `fin_partida`
-  la página tiene "Cerrar", que sale de la sala y abre
-  `https://valkiriacode.com/charadeando`.
+  la página tiene "Cerrar", que sale de la sala y vuelve a `/juez` (la
+  página donde se escribe el código).
 - **Juez → sala → anfitrión:** `{ "tipo": "accion", "accion": "acierto" | "pasar", "id" }`.
   El `id` (único) evita que una acción reenviada cuente dos veces.
 - **Juez → sala → anfitrión, al final del turno:** `{ "tipo": "accion", "accion": "corregir", "id", "indice", "acierto" }`

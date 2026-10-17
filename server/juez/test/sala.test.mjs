@@ -474,7 +474,7 @@ test('al final, las posiciones de los equipos o el total', () => {
   assert.match(html, /¡Empate entre /);
   assert.match(html, /Total de la partida: /);
   assert.match(html, />Cerrar</);
-  assert.match(html, /https:\/\/valkiriacode\.com\/charadeando/);
+  assert.match(html, /location\.href = '\/juez'/);
 });
 
 test('la página del juez se presenta con su id y avisa si hay otro juez', () => {
