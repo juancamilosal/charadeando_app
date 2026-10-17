@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fondo de la pantalla de carga (splash nativo y SplashScreen de
+         Flutter). También va detrás de Flutter mientras arranca, para que
+         no se vea un destello blanco entre las dos. -->
+    <color name="fondo_carga">#1F0252</color>
+	<color name="ic_launcher_background">#1B024A</color>
+</resources>

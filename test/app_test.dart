@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'screens/welcome_test.dart' show MemoryWelcomeStore;
+import 'pass_splash.dart';
 
 /// Varias pantallas tienen animaciones que se repiten, así que se avanza el
 /// tiempo a mano en vez de esperar a que todo se detenga.
@@ -42,6 +43,7 @@ void main() {
           child: const CharadeandoApp(),
         ),
       );
+      await passSplash(tester);
       // "Cómo se juega" empieza por las categorías.
       expect(find.text('Muchas categorías para jugar'), findsOneWidget);
 

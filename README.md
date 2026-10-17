@@ -6,6 +6,38 @@ la cámara frontal graba a los participantes para revivir las risas.
 
 ## Versión 0.1
 
+- Ícono de la app (`branding/icono.png`, generado con
+  `dart run flutter_launcher_icons`): en Android 8+ es adaptativo, el ícono
+  completo achicado (`branding/icono-adaptativo-app.png`) sobre `#1B024A`,
+  con margen para que el recorte de cada celular (círculo, cuadrado
+  redondeado…) no corte el dibujo.
+- Splash nativo de Android (`flutter_native_splash`, también Android 12+;
+  se regenera con `dart run flutter_native_splash:create`): fondo
+  `#1F0252`, el ícono sin texto en el centro (Android 12+ lo recorta en
+  círculo; `branding/splash/icono-android12.png` y `icono-splash.png`) y
+  "by ValkiriaCode" abajo (`branding/splash/firma.png`), a pantalla
+  completa. El tema normal de Android también usa `#1F0252`
+  (`@color/fondo_carga`), así que entre el splash nativo y Flutter no se ve
+  un destello blanco.
+- Pantalla de carga (`SplashScreen`, ruta `/carga`, la primera de la app):
+  armada por partes para cualquier tamaño. Fondo `#1F0252` con un brillo
+  radial `#6E28E6` detrás del logo; el logo
+  (`assets/img/marca/splash_logo.webp`) centrado al 72% del ancho, que
+  entra en 600 ms con escala de 0.85 a 1 con un leve rebote y opacidad; 20
+  destellos (`assets/img/marca/destello.webp`) repartidos como en
+  `branding/splash/referencia.png`, de 8% a 30% del ancho, detrás del logo
+  y lejos de la firma, la mayoría lilas y 6 teñidos de amarillo `#FFD23F`,
+  turquesa `#1FC8B4` y magenta `#E5197E` (un filtro que toma el brillo del
+  destello y lo pinta de ese color), cada uno titilando (opacidad y un poco
+  de escala) con su ritmo y retraso; y "by ValkiriaCode" abajo, en el área
+  segura (Nunito Bold 14, blanco al 70%). Precarga sus imágenes antes de
+  mostrarlas. A los 1,8 s (o al tocarla) pasa con un fundido a Categorías,
+  o a la bienvenida la primera vez. Con "Reducir animaciones" el logo
+  aparece sin rebote y los destellos quedan quietos.
+- Al cambiar de pestaña en la barra de abajo, la que se deja se borra: al
+  volver empieza de nuevo, arriba del todo, sin lo escrito y sin ventanas
+  abiertas (como "Combinar categorías"). Lo que se guarda en el celular
+  (equipos, ruleta, categorías propias…) sigue ahí.
 - Diseño colorido con las fuentes Fredoka y Nunito (licencia OFL, en
   `assets/fonts`). Los colores no cambian con el modo oscuro del celular.
 - Fondos (en Ajustes > Apariencia): el usuario elige el fondo de

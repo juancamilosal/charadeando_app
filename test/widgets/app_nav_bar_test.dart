@@ -13,6 +13,7 @@ import '../screens/config_screen_test.dart'
     show MemoryConfigStore, MemoryTeamStore;
 import '../screens/my_categories_test.dart' show MemoryCustomStore;
 import '../screens/roulette_screen_test.dart' show MemoryStore;
+import '../pass_splash.dart';
 import '../services/settings_test.dart'
     show FakeMusicPlayer, MemorySettingsStore;
 
@@ -53,6 +54,7 @@ Future<void> _open(
       child: const CharadeandoApp(),
     ),
   );
+  await passSplash(tester);
   await _settle(tester);
 }
 
@@ -92,6 +94,43 @@ void main() {
       expect(find.text(entry.value), findsOneWidget);
       expect(find.byType(AppNavBar), findsOneWidget);
     }
+  });
+
+  testWidgets('al cambiar de pestaña, la que se deja se borra: no quedan '
+      'ventanas abiertas ni lo que se había bajado', (tester) async {
+    await _open(tester);
+    Future<void> tab(String label) async {
+      await tester.tap(
+        find.descendant(of: find.byType(AppNavBar), matching: find.text(label)),
+      );
+      await _settle(tester);
+    }
+
+    // Se abre "Combinar categorías" y se cambia de pestaña.
+    await tester.tap(find.text('Combinar categorías'));
+    await _settle(tester);
+    expect(find.byType(BottomSheet), findsOneWidget);
+    await tab('Equipos');
+    await tab('Categorías');
+    expect(find.byType(BottomSheet), findsNothing);
+
+    // Se baja en Categorías y al volver está arriba del todo.
+    await tester.drag(find.byType(ListView).first, const Offset(0, -600));
+    await _settle(tester);
+    final scrollable = find.byType(Scrollable).first;
+    expect(
+      tester.state<ScrollableState>(scrollable).position.pixels,
+      greaterThan(0),
+    );
+    await tab('Ajustes');
+    await tab('Categorías');
+    expect(
+      tester
+          .state<ScrollableState>(find.byType(Scrollable).first)
+          .position
+          .pixels,
+      0,
+    );
   });
 
   testWidgets('la barra no se ve en la bienvenida, la configuración, las '

@@ -59,6 +59,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_native_splash: ^2.4.7
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -75,6 +77,8 @@ flutter:
   assets:
     - assets/img/categorias/
     - assets/img/inicio/
+    # Logo y destello de la pantalla de carga.
+    - assets/img/marca/
     # Música de fondo de la app.
     - assets/audio/
 
@@ -128,3 +132,36 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Splash nativo de Android (antes de que arranque Flutter). Se regenera con
+# `dart run flutter_native_splash:create`. Mismo fondo que la pantalla de
+# carga de Flutter (`SplashScreen`), para que el paso no se note.
+flutter_native_splash:
+  color: "#1F0252"
+  # Solo el ícono (sin texto): Android 12+ lo recorta en círculo.
+  image: branding/splash/icono-splash.png
+  branding: branding/splash/firma.png
+  branding_bottom_padding: 24
+  fullscreen: true
+  android: true
+  ios: false
+  web: false
+  android_12:
+    color: "#1F0252"
+    icon_background_color: "#1F0252"
+    image: branding/splash/icono-android12.png
+    branding: branding/splash/firma.png
+
+# Ícono de la app en el celular. Se regenera con
+# `dart run flutter_launcher_icons`. En Android 8+ es adaptativo: el frente
+# (celular y destellos) sobre el morado del ícono, y Android lo recorta con
+# la forma de cada celular.
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: branding/icono.png
+  adaptive_icon_background: "#1B024A"
+  # El ícono completo (icono.png) achicado sobre su mismo fondo, con margen
+  # para que el recorte de cada celular no corte el dibujo.
+  adaptive_icon_foreground: branding/icono-adaptativo-app.png
+  adaptive_icon_foreground_inset: 0

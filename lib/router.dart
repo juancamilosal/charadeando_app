@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'models/models.dart';
@@ -12,6 +13,7 @@ import 'screens/free_mode_screen.dart';
 import 'screens/my_videos_screen.dart';
 import 'screens/roulette_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/splash_screen.dart';
 import 'screens/team_editor_screen.dart';
 import 'screens/teams_screen.dart';
 import 'screens/turn_result_screen.dart';
@@ -24,6 +26,9 @@ import 'widgets/music_silence.dart';
 import 'widgets/punishment_roulette.dart';
 
 abstract final class Routes {
+  /// Pantalla de carga: la primera de la app, siempre.
+  static const splash = '/carga';
+
   /// Solo se ve la primera vez que se abre la app, o con el botón "i" de
   /// Categorías.
   static const welcome = '/bienvenida';
@@ -66,17 +71,22 @@ abstract final class Routes {
   static const punishmentSpin = '/castigo';
 }
 
-/// Las rutas de la app. La primera vez abre en la bienvenida y no deja ir
-/// a otra pantalla hasta tocar "Listo"; después, abre directo en Categorías.
+/// Las rutas de la app. Siempre abre en la pantalla de carga; de ahí pasa a
+/// la bienvenida la primera vez (y no deja ir a otra pantalla hasta tocar
+/// "Listo") y, después, directo a Categorías.
 ///
 /// Ruleta, Equipos, Categorías, Videos y Ajustes son las pestañas de la
-/// barra de abajo: cada una conserva su estado. Las demás pantallas (la
+/// barra de abajo. Al cambiar de pestaña, la que se deja se borra: al volver
+/// empieza de nuevo (sin lo que se había escrito, arriba del todo y sin
+/// ventanas abiertas). Las demás pantallas (la
 /// configuración, las palabras, el turno, los resultados, el video, la
 /// bienvenida…) se abren encima, sin la barra.
 GoRouter createRouter({required bool Function() welcomeSeen}) => GoRouter(
-  initialLocation: welcomeSeen() ? Routes.categories : Routes.welcome,
+  initialLocation: Routes.splash,
   redirect: (_, state) =>
-      !welcomeSeen() && state.matchedLocation != Routes.welcome
+      !welcomeSeen() &&
+          state.matchedLocation != Routes.welcome &&
+          state.matchedLocation != Routes.splash
       ? Routes.welcome
       : null,
   routes: appRoutes,
@@ -84,8 +94,12 @@ GoRouter createRouter({required bool Function() welcomeSeen}) => GoRouter(
 
 /// Todas las rutas, también para las pruebas.
 final List<RouteBase> appRoutes = [
-  StatefulShellRoute.indexedStack(
-    builder: (context, state, shell) => AppNavShell(shell: shell),
+  StatefulShellRoute(
+    pageBuilder: (context, state, shell) =>
+        _page(state, AppNavShell(shell: shell)),
+    // Solo la pestaña que se ve está armada: las demás se borran.
+    navigatorContainerBuilder: (context, shell, children) =>
+        children[shell.currentIndex],
     branches: [
       StatefulShellBranch(
         routes: [
@@ -126,7 +140,11 @@ final List<RouteBase> appRoutes = [
       ),
     ],
   ),
-  GoRoute(path: Routes.welcome, builder: (_, _) => const WelcomeScreen()),
+  GoRoute(path: Routes.splash, builder: (_, _) => const SplashScreen()),
+  GoRoute(
+    path: Routes.welcome,
+    pageBuilder: (_, state) => _page(state, const WelcomeScreen()),
+  ),
   GoRoute(path: Routes.freeMode, builder: (_, _) => const FreeModeScreen()),
   GoRoute(path: Routes.config, builder: (_, _) => const ConfigScreen()),
   GoRoute(path: Routes.words, builder: (_, _) => const WordEntryScreen()),
@@ -179,3 +197,18 @@ final List<RouteBase> appRoutes = [
     builder: (_, _) => const FinalResultScreen(),
   ),
 ];
+
+/// La página de [child], que entra con un fundido: así se pasa de la
+/// pantalla de carga a Categorías o a la bienvenida. Siempre es el mismo
+/// tipo de página (si cambiara, Flutter armaría la barra dos veces).
+Page<void> _page(GoRouterState state, Widget child) =>
+    CustomTransitionPage<void>(
+      key: state.pageKey,
+      child: child,
+      transitionDuration: const Duration(milliseconds: 450),
+      reverseTransitionDuration: const Duration(milliseconds: 250),
+      transitionsBuilder: (_, animation, _, child) => FadeTransition(
+        opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+        child: child,
+      ),
+    );

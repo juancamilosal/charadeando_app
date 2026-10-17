@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'my_categories_test.dart' show MemoryCustomStore;
+import '../pass_splash.dart';
 
 /// Recuerda en memoria si ya se vio la bienvenida, sin archivos.
 class MemoryWelcomeStore extends WelcomeStore {
@@ -35,6 +36,7 @@ Future<void> _open(WidgetTester tester, MemoryWelcomeStore store) async {
       child: const CharadeandoApp(),
     ),
   );
+  await passSplash(tester);
   await _settle(tester);
 }
 
