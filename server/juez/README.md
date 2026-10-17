@@ -15,6 +15,7 @@ SQLite, que sirve en el plan gratis) y la API de **WebSocket Hibernation**
 | Ruta | Qué hace |
 |---|---|
 | `POST /juez/api/salas` | Crea una sala: `{ "codigo": "K7M2PQ", "tokenAnfitrion": "…" }` (201). Código de 6 letras sin las que se confunden (sin 0/O/1/I/L). El token (32 bytes al azar) solo lo tiene el celular de la frente; la sala guarda su huella SHA-256, no el token. Freno de 10 salas por minuto por IP. |
+| `GET /juez/api/salud` | `{ "ok": true, "servicio": "charadeando-juez" }`: la app lo pregunta para saber si mostrar la opción. |
 | `GET /juez/<CODIGO>` | La página del juez (HTML, CSS, JS y fuentes en un solo archivo, sin pedir nada a otros servidores). |
 | `GET /juez` | Página para escribir el código si no se puede escanear el QR. |
 | `GET /juez/api/salas/<CODIGO>/ws?rol=anfitrion&token=…` | WebSocket de la app. |
@@ -65,9 +66,56 @@ jueces) y conecta la app con
 `flutter run --dart-define=JUEZ_URL=http://<IP-del-computador>:8787/juez`
 (el celular y el computador en la misma red; `wrangler dev --ip 0.0.0.0`).
 
-## Publicar
+## Publicar en Cloudflare
 
-Se publica con **Workers Builds** desde la rama `main`, carpeta raíz
-`/server/juez` (como el Worker del formulario de contacto de la web). El
-comando de build es `npx wrangler deploy` (lo pone Cloudflare). La ruta y el
-Durable Object están en `wrangler.toml`.
+Se publica con **Workers Builds**, carpeta raíz `/server/juez`.
+**Por ahora desde la rama `develop`**: `main` queda para cuando se publique
+la app en Play Store. Ese día se cambia la rama de producción a `main` en
+**Workers & Pages → charadeando-juez → Settings → Builds**.
+
+### Configuración (una sola vez)
+
+1. **Crear el Worker desde el repositorio.** En el panel de Cloudflare:
+   **Workers & Pages → Create → Import a repository** y elige
+   `juancamilosal/charadeando_app` (si no aparece, conecta GitHub y dale
+   acceso a ese repositorio).
+2. **Datos del proyecto:**
+   - **Project name:** `charadeando-juez` (igual que `name` en `wrangler.toml`).
+   - **Production branch:** `develop`.
+   - **Root directory:** `/server/juez`.
+   - **Build command:** vacío.
+   - **Deploy command:** `npx wrangler deploy`.
+3. **Save and Deploy.** La primera publicación crea las rutas
+   `valkiriacode.com/juez` y `valkiriacode.com/juez/*` y el Durable Object
+   `Sala` (migración `v1`, con SQLite, que sirve en el plan gratis). Todo
+   eso sale de `wrangler.toml`: no hay que crearlo a mano.
+4. **Revisar la zona `valkiriacode.com`:** debe estar en la misma cuenta de
+   Cloudflare y su registro DNS con la nube naranja (proxied); si no, la
+   ruta no funciona. Si la web ya tiene una ruta como `valkiriacode.com/*`,
+   la de `/juez` es más específica y gana.
+5. **Comprobar:**
+   ```sh
+   curl https://valkiriacode.com/juez/api/salud
+   # {"ok":true,"servicio":"charadeando-juez"}
+   curl -X POST https://valkiriacode.com/juez/api/salas
+   # {"codigo":"K7M2PQ","tokenAnfitrion":"…"}
+   ```
+   y abrir `https://valkiriacode.com/juez` (debe decir "Celular juez").
+6. Desde ahí, cada `git push` a `develop` que cambie `server/juez` vuelve a
+   publicar el Worker. En **Settings → Builds → Build watch paths** se
+   puede poner `server/juez/*` para que no se publique con cambios de la
+   app.
+
+### Al lanzar en Play Store
+
+En **Workers & Pages → charadeando-juez → Settings → Builds**, cambiar
+**Production branch** de `develop` a `main` y guardar. La próxima
+publicación sale de `main`.
+
+### Si el Worker no está publicado
+
+La app pregunta primero a `GET /juez/api/salud`. Si no responde como el
+Worker (por ejemplo, la web devuelve 404), la sección "Celular juez" no se
+muestra en la configuración; y si falla al crear la sala, dice que el
+celular juez no está disponible por ahora y se sigue jugando inclinando el
+celular.

@@ -1,6 +1,7 @@
 // Worker "charadeando-juez": el modo "Celular juez" de Charadeando.
 //
 //   POST /juez/api/salas                  Crea una sala: { codigo, tokenAnfitrion }.
+//   GET  /juez/api/salud                  { ok: true, servicio }: si el Worker está.
 //   GET  /juez/<CODIGO>                    La página del juez.
 //   GET  /juez/api/salas/<CODIGO>/ws       WebSocket: ?rol=anfitrion&token=… (la
 //                                          app) o ?rol=juez (la página).
@@ -15,9 +16,13 @@ import { DurableObject } from 'cloudflare:workers';
 
 import { huella, normalizarCodigo, nuevoCodigo, nuevoToken } from './logica.js';
 import { paginaInicio, paginaJuez } from './pagina.js';
-import { CIERRES, SalaCore } from './sala.js';
+import { SalaCore } from './sala.js';
 
 const BASE = '/juez';
+
+/// Nombre con que responde /juez/api/salud, para que la app sepa que es
+/// este Worker y no otra página del sitio.
+const SERVICIO = 'charadeando-juez';
 
 /// Salas que se pueden crear por minuto desde una misma IP (en cada
 /// instancia del Worker; es solo un freno contra abusos).
@@ -80,6 +85,9 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, '');
+
+    // La app pregunta esto antes de mostrar la opción "Celular juez".
+    if (path === `${BASE}/api/salud`) return json({ ok: true, servicio: SERVICIO });
 
     if (path === `${BASE}/api/salas`) {
       if (request.method !== 'POST') return json({ error: 'Usa POST.' }, 405);
@@ -170,4 +178,3 @@ export class Sala extends DurableObject {
   }
 }
 
-export { CIERRES };

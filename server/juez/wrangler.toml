@@ -1,5 +1,8 @@
 # Worker del modo "Celular juez" de Charadeando. Se publica con Workers
-# Builds desde la rama main, carpeta raíz /server/juez.
+# Builds, carpeta raíz /server/juez. Por ahora desde la rama develop; al
+# lanzar en Play Store se cambia la rama de producción a main en Cloudflare
+# (Workers & Pages → charadeando-juez → Settings → Builds). Pasos completos
+# en README.md.
 name = "charadeando-juez"
 main = "src/index.js"
 compatibility_date = "2026-09-15"

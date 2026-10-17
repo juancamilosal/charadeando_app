@@ -138,6 +138,15 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   /// se muestra.
   bool get _tvMode => ref.read(tvConnectedProvider).value ?? false;
 
+  /// Si se muestra el celular juez: no, si su servidor respondió que no
+  /// está disponible (salvo que ya esté encendido o diciendo por qué no).
+  bool get _judgeShown {
+    final setup = ref.watch(judgeProvider);
+    if (setup.on || setup.error != null) return true;
+    return ref.watch(judgeAvailabilityProvider).value !=
+        JudgeAvailability.unavailable;
+  }
+
   /// Lo que falta elegir, para el aviso al tocar "Continuar".
   List<String> get _missingChoices => [
     if (_automatic && !_noDifficulty && _difficulty == null) 'la dificultad',
@@ -409,7 +418,8 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                 ),
               ],
               // El celular juez y el Modo TV van al final, después del video.
-              if (!_tvMode) ...[
+              // Si su servidor no responde, la opción no se muestra.
+              if (!_tvMode && _judgeShown) ...[
                 gap,
                 const ConfigSection(
                   icon: Icons.gavel_rounded,

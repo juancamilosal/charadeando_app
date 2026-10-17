@@ -100,7 +100,7 @@ class JudgeSetupView extends ConsumerWidget {
             padding: const EdgeInsets.only(top: 12),
             child: Row(
               children: [
-                const Icon(Icons.wifi_off, color: AppColors.coral),
+                const Icon(Icons.cloud_off, color: AppColors.coral),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(

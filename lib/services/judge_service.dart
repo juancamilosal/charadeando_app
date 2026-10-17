@@ -10,14 +10,28 @@ import '../models/models.dart';
 /// No se pudo crear la sala del celular juez. [offline] si fue por falta de
 /// internet.
 class JudgeException implements Exception {
-  const JudgeException(this.message, {this.offline = false});
+  const JudgeException(
+    this.message, {
+    this.offline = false,
+    this.unavailable = false,
+  });
 
   final String message;
   final bool offline;
 
+  /// El servidor del juez no responde como debe (por ejemplo, todavía no
+  /// está publicado): por ahora no se puede usar.
+  final bool unavailable;
+
   static const noInternet = JudgeException(
     'El celular juez necesita internet en los dos celulares.',
     offline: true,
+  );
+
+  static const notAvailable = JudgeException(
+    'El celular juez no está disponible por ahora. Pueden jugar inclinando '
+    'el celular.',
+    unavailable: true,
   );
 
   @override
@@ -222,6 +236,19 @@ class JudgeRoom {
   }
 }
 
+/// Si se puede usar el celular juez.
+enum JudgeAvailability {
+  /// El Worker responde: se muestra la opción.
+  available,
+
+  /// Sin internet: se muestra, y al encenderla dice que necesita internet.
+  offline,
+
+  /// Hay internet pero el Worker no responde como debe (por ejemplo, no
+  /// está publicado): la opción no se muestra.
+  unavailable,
+}
+
 /// Crea salas del celular juez en el Worker (`server/juez`).
 class JudgeService {
   JudgeService({http.Client? client, String? baseUrl, this.connect})
@@ -234,11 +261,44 @@ class JudgeService {
     defaultValue: 'https://valkiriacode.com/juez',
   );
 
-  static const _timeout = Duration(seconds: 12);
+  static const _timeout = Duration(seconds: 10);
+  static const _checkTimeout = Duration(seconds: 6);
+
+  /// Lo que responde `/api/salud` el Worker del juez (y no otra página del
+  /// sitio).
+  static const service = 'charadeando-juez';
 
   final http.Client _client;
   final String baseUrl;
   final WebSocketChannel Function(Uri uri)? connect;
+
+  /// Pregunta si el Worker del juez está publicado y responde.
+  Future<JudgeAvailability> check() async {
+    final http.Response response;
+    try {
+      response = await _client
+          .get(Uri.parse('$baseUrl/api/salud'))
+          .timeout(_checkTimeout);
+    } on Exception catch (e) {
+      debugPrint('[Juez] Sin respuesta al revisar: $e');
+      return JudgeAvailability.offline;
+    }
+    try {
+      final body = jsonDecode(utf8.decode(response.bodyBytes));
+      if (response.statusCode == 200 &&
+          body is Map<String, dynamic> &&
+          body['ok'] == true &&
+          body['servicio'] == service) {
+        return JudgeAvailability.available;
+      }
+    } on FormatException {
+      // No es el Worker: por ejemplo, una página de la web.
+    }
+    debugPrint(
+      '[Juez] El servidor no está disponible (${response.statusCode}).',
+    );
+    return JudgeAvailability.unavailable;
+  }
 
   /// Crea una sala nueva y se conecta con ella.
   Future<JudgeRoom> create() async {
@@ -257,21 +317,19 @@ class JudgeService {
     } on FormatException {
       body = null;
     }
-    if (response.statusCode != 201 && response.statusCode != 200) {
-      debugPrint('[Juez] ${response.statusCode} $body');
-      throw JudgeException(
-        response.statusCode == 429
-            ? 'Se crearon muchas salas seguidas. Espera un minuto.'
-            : 'No se pudo crear la sala. Inténtalo otra vez.',
+    if (response.statusCode == 429) {
+      throw const JudgeException(
+        'Se crearon muchas salas seguidas. Espera un minuto.',
       );
     }
     final data = body is Map<String, dynamic> ? body : const {};
     final code = data['codigo'];
     final token = data['tokenAnfitrion'];
-    if (code is! String || token is! String) {
-      throw const JudgeException(
-        'No se pudo crear la sala. Inténtalo otra vez.',
-      );
+    // Cualquier otra respuesta (404 de la web, un error del servidor o algo
+    // que no es la sala) es que el juez no está disponible.
+    if (response.statusCode != 201 || code is! String || token is! String) {
+      debugPrint('[Juez] ${response.statusCode} $body');
+      throw JudgeException.notAvailable;
     }
     return JudgeRoom(
       code: code,

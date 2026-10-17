@@ -45,7 +45,12 @@ la cámara frontal graba a los participantes para revivir las risas.
   muestra el QR (`qr_flutter`) con `https://valkiriacode.com/juez/<CÓDIGO>`
   y el código en grande, y dice "Esperando al juez…" o "Juez conectado ✓".
   Se puede seguir sin juez. Sin internet dice "El celular juez necesita
-  internet en los dos celulares." (el juego normal sigue sin internet). La
+  internet en los dos celulares." (el juego normal sigue sin internet). Al
+  abrir la configuración la app pregunta a `<JUEZ_URL>/api/salud`: si hay
+  internet pero el Worker no responde como tal (por ejemplo, todavía no está
+  publicado y la web devuelve 404), la sección no se muestra; y si falla al
+  crear la sala, dice "El celular juez no está disponible por ahora. Pueden
+  jugar inclinando el celular." y queda apagado. La
   app manda: se conecta por WebSocket (`web_socket_channel`, `JudgeRoom`,
   que se reconecta sola) y le envía a la sala el estado en cada cambio
   (palabra, categoría, segundos, equipo y puntos; `esperando`, `jugando`,

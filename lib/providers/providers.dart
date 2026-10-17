@@ -30,6 +30,12 @@ final photoMimeBankProvider = Provider(
 /// Celular juez: crea las salas en el Worker.
 final judgeServiceProvider = Provider((ref) => JudgeService());
 
+/// Si el servidor del juez responde. Se vuelve a preguntar cada vez que se
+/// abre la configuración.
+final judgeAvailabilityProvider = FutureProvider.autoDispose(
+  (ref) => ref.watch(judgeServiceProvider).check(),
+);
+
 /// La sala del celular juez de la partida, o nada si no se usa.
 final judgeProvider = NotifierProvider<JudgeController, JudgeSetup>(
   JudgeController.new,

@@ -257,20 +257,73 @@ void main() {
       );
     });
 
-    test('si el Worker falla, lo dice sin detalles técnicos', () async {
-      final service = JudgeService(
-        client: MockClient((_) async => http.Response('{}', 500)),
-      );
-      await expectLater(
-        service.create(),
-        throwsA(
-          isA<JudgeException>().having(
-            (e) => e.message,
-            'message',
-            'No se pudo crear la sala. Inténtalo otra vez.',
+    for (final (status, body) in [
+      (500, '{}'),
+      (404, '<html>No existe</html>'),
+      (201, '{"otra": "cosa"}'),
+    ]) {
+      test('si el Worker no responde como debe ($status), dice que no está '
+          'disponible', () async {
+        final service = JudgeService(
+          client: MockClient((_) async => http.Response(body, status)),
+        );
+        await expectLater(
+          service.create(),
+          throwsA(
+            isA<JudgeException>()
+                .having((e) => e.unavailable, 'unavailable', isTrue)
+                .having(
+                  (e) => e.message,
+                  'message',
+                  'El celular juez no está disponible por ahora. Pueden '
+                      'jugar inclinando el celular.',
+                ),
           ),
-        ),
+        );
+      });
+    }
+  });
+
+  group('revisar si el juez está', () {
+    JudgeService answering(http.Response Function() reply) => JudgeService(
+      baseUrl: 'https://valkiriacode.com/juez',
+      client: MockClient((request) async {
+        expect(request.url.path, '/juez/api/salud');
+        return reply();
+      }),
+    );
+
+    test('responde el Worker: disponible', () async {
+      expect(
+        await answering(
+          () => http.Response(
+            '{"ok": true, "servicio": "charadeando-juez"}',
+            200,
+          ),
+        ).check(),
+        JudgeAvailability.available,
       );
+    });
+
+    test(
+      'la web responde otra cosa (no está publicado): no disponible',
+      () async {
+        for (final reply in [
+          () => http.Response('<html>No existe</html>', 404),
+          () => http.Response('<html>Hola</html>', 200),
+          () => http.Response('{"ok": true}', 200),
+          () => http.Response('{}', 502),
+        ]) {
+          expect(await answering(reply).check(), JudgeAvailability.unavailable);
+        }
+      },
+    );
+
+    test('sin internet: lo dice al encenderlo', () async {
+      final service = JudgeService(
+        client: MockClient((_) async => throw const SocketException('sin red')),
+      );
+      expect(await service.check(), JudgeAvailability.offline);
     });
   });
 

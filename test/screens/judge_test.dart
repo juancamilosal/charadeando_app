@@ -20,14 +20,24 @@ import 'config_screen_test.dart' show pumpConfig;
 /// Crea salas sin internet, con WebSockets de mentira; o falla como sin
 /// internet.
 class FakeJudgeService extends JudgeService {
-  FakeJudgeService({this.offline = false});
+  FakeJudgeService({
+    this.offline = false,
+    this.availability = JudgeAvailability.available,
+  });
 
   final bool offline;
+  final JudgeAvailability availability;
   final connections = FakeConnections();
+
+  @override
+  Future<JudgeAvailability> check() async => availability;
 
   @override
   Future<JudgeRoom> create() async {
     if (offline) throw JudgeException.noInternet;
+    if (availability == JudgeAvailability.unavailable) {
+      throw JudgeException.notAvailable;
+    }
     return JudgeRoom(
       code: 'K7M2PQ',
       token: 'secreto',
@@ -136,7 +146,10 @@ void main() {
     testWidgets('la configuración tiene la sección, salvo en el Modo TV', (
       tester,
     ) async {
-      await pumpConfig(tester);
+      await pumpConfig(
+        tester,
+        overrides: [judgeServiceProvider.overrideWithValue(FakeJudgeService())],
+      );
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
         find.text('Celular juez'),
@@ -145,7 +158,11 @@ void main() {
       );
       expect(find.text('Celular juez'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
-      await pumpConfig(tester, tv: Stream.value(true));
+      await pumpConfig(
+        tester,
+        tv: Stream.value(true),
+        overrides: [judgeServiceProvider.overrideWithValue(FakeJudgeService())],
+      );
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
         find.text('Continuar'),
@@ -153,6 +170,71 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       expect(find.text('Celular juez'), findsNothing);
+    });
+
+    testWidgets('si el servidor del juez no responde, la opción no se ve', (
+      tester,
+    ) async {
+      await pumpConfig(
+        tester,
+        overrides: [
+          judgeServiceProvider.overrideWithValue(
+            FakeJudgeService(availability: JudgeAvailability.unavailable),
+          ),
+        ],
+      );
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Continuar'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Celular juez'), findsNothing);
+      // El Modo TV sigue.
+      expect(find.text('Modo TV'), findsOneWidget);
+    });
+
+    testWidgets('sin internet sí se ve, y al encenderla dice por qué', (
+      tester,
+    ) async {
+      await pumpConfig(
+        tester,
+        overrides: [
+          judgeServiceProvider.overrideWithValue(
+            FakeJudgeService(
+              offline: true,
+              availability: JudgeAvailability.offline,
+            ),
+          ),
+        ],
+      );
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Celular juez'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Celular juez'), findsOneWidget);
+    });
+
+    testWidgets('si falla al crear la sala, lo dice claro y sigue apagada', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        service: FakeJudgeService(availability: JudgeAvailability.unavailable),
+      );
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+      expect(
+        find.text(
+          'El celular juez no está disponible por ahora. Pueden jugar '
+          'inclinando el celular.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.byType(QrImageView), findsNothing);
+      expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
     });
 
     test('el texto del estado del juez', () {

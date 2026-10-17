@@ -10,6 +10,7 @@ import 'package:charadeando_app/widgets/category_art.dart';
 import 'package:charadeando_app/widgets/config_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
@@ -71,6 +72,7 @@ Future<ProviderContainer> pumpConfig(
   Stream<bool>? tv,
   ConfigStore? store,
   TeamStore? teams,
+  List<Override> overrides = const [],
 }) async {
   tester.view.physicalSize = const Size(1080, 2400);
   addTearDown(tester.view.reset);
@@ -79,6 +81,7 @@ Future<ProviderContainer> pumpConfig(
       tvConnectedProvider.overrideWith((ref) => tv ?? Stream.value(false)),
       configStoreProvider.overrideWithValue(store ?? MemoryConfigStore()),
       teamStoreProvider.overrideWithValue(teams ?? MemoryTeamStore()),
+      ...overrides,
     ],
   );
   addTearDown(container.dispose);

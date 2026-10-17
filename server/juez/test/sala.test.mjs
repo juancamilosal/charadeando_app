@@ -337,3 +337,14 @@ test('la página del juez escapa el código y no pide nada afuera', () => {
   assert.deepEqual([...new Set(externos)], ['https://valkiriacode.com/charadeando']);
   assert.doesNotMatch(paginaInicio('<b>'), /<b>/);
 });
+
+test('index.js solo exporta el Worker y el Durable Object', async () => {
+  // Cloudflare no arranca si el módulo principal exporta otra cosa (por
+  // ejemplo, una constante de texto).
+  const { readFile } = await import('node:fs/promises');
+  const codigo = await readFile(new URL('../src/index.js', import.meta.url), 'utf8');
+  const exportados = [...codigo.matchAll(/^export\s+(default|class\s+\w+|const\s+\w+|function\s+\w+|\{[^}]*\})/gm)].map(
+    (m) => m[1].replace(/\s+/g, ' '),
+  );
+  assert.deepEqual(exportados, ['default', 'class Sala']);
+});
