@@ -20,8 +20,7 @@ Colores del fondo: `#1B024A` (ícono) y `#190442` (logo).
 | `referencia.png` | Cómo debe verse la pantalla (1080x1920). Solo referencia: la pantalla se arma por partes. |
 | `logo.png` | Logo en alta resolución (sin fondo), para el centro de la pantalla. |
 | `destello.png` | Destello lila con transparencia. Se usa varias veces, en distintos tamaños, y algunos teñidos de amarillo `#FFD23F`, turquesa `#1FC8B4` y magenta `#E5197E`. |
-| `icono-android12.png` | Generado: el ícono sin texto en 1152x1152 dentro del círculo de 768 del splash de Android 12+. |
-| `icono-splash.png` | Generado: el ícono sin texto a 640 px de ancho (160 dp) para el splash de Android 11 o anterior. |
+| `vacio-android12.png` | Generado: imagen transparente de 1152x1152 para el splash nativo de Android 12+, que siempre lleva un ícono; así solo se ve el fondo. |
 | `firma.png` | "by ValkiriaCode" en blanco al 70% (600x240, fondo transparente), para la imagen de marca del splash nativo. |
 
 Fondo: `#1F0252`, con un brillo radial `#6E28E6` detrás del logo.

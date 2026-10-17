@@ -134,23 +134,21 @@ flutter:
   # see https://flutter.dev/to/font-from-package
 
 # Splash nativo de Android (antes de que arranque Flutter). Se regenera con
-# `dart run flutter_native_splash:create`. Mismo fondo que la pantalla de
-# carga de Flutter (`SplashScreen`), para que el paso no se note.
+# `dart run flutter_native_splash:create`. Solo el fondo, sin ícono ni
+# firma: así lo primero que se ve con dibujo es la pantalla de carga de
+# Flutter (`SplashScreen`), con el mismo fondo, y el paso no se nota.
 flutter_native_splash:
   color: "#1F0252"
-  # Solo el ícono (sin texto): Android 12+ lo recorta en círculo.
-  image: branding/splash/icono-splash.png
-  branding: branding/splash/firma.png
-  branding_bottom_padding: 24
   fullscreen: true
   android: true
   ios: false
   web: false
   android_12:
     color: "#1F0252"
+    # Android 12+ siempre muestra un ícono: va uno transparente para que
+    # no se vea (si no, pondría el de la app).
+    image: branding/splash/vacio-android12.png
     icon_background_color: "#1F0252"
-    image: branding/splash/icono-android12.png
-    branding: branding/splash/firma.png
 
 # Ícono de la app en el celular. Se regenera con
 # `dart run flutter_launcher_icons`. En Android 8+ es adaptativo: el frente

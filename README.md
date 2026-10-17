@@ -12,13 +12,14 @@ la cámara frontal graba a los participantes para revivir las risas.
   con margen para que el recorte de cada celular (círculo, cuadrado
   redondeado…) no corte el dibujo.
 - Splash nativo de Android (`flutter_native_splash`, también Android 12+;
-  se regenera con `dart run flutter_native_splash:create`): fondo
-  `#1F0252`, el ícono sin texto en el centro (Android 12+ lo recorta en
-  círculo; `branding/splash/icono-android12.png` y `icono-splash.png`) y
-  "by ValkiriaCode" abajo (`branding/splash/firma.png`), a pantalla
-  completa. El tema normal de Android también usa `#1F0252`
-  (`@color/fondo_carga`), así que entre el splash nativo y Flutter no se ve
-  un destello blanco.
+  se regenera con `dart run flutter_native_splash:create`): solo el fondo
+  `#1F0252`, a pantalla completa, sin ícono ni firma (en Android 12+, que
+  siempre muestra un ícono, va uno transparente:
+  `branding/splash/vacio-android12.png`). Así lo primero que se ve con
+  dibujo es la pantalla de carga de Flutter, con los destellos, sin ver
+  antes el logo solo. El tema normal de Android también usa `#1F0252`
+  (`@color/fondo_carga`), así que entre las dos no se ve un destello
+  blanco.
 - Pantalla de carga (`SplashScreen`, ruta `/carga`, la primera de la app):
   armada por partes para cualquier tamaño. Fondo `#1F0252` con un brillo
   radial `#6E28E6` detrás del logo; el logo
