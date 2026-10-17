@@ -161,6 +161,60 @@ void main() {
     expect(got, [WordOutcome.hit, WordOutcome.pass]);
   });
 
+  test('las correcciones del juez llegan aparte, una sola vez', () async {
+    final c = FakeConnections();
+    final r = room(c);
+    final got = <(int, bool)>[];
+    final actions = <WordOutcome>[];
+    r.corrections.listen((x) => got.add((x.index, x.hit)));
+    r.actions.listen(actions.add);
+    await Future<void>.delayed(Duration.zero);
+    c.last.receive({
+      'tipo': 'accion',
+      'accion': 'corregir',
+      'id': 'c1',
+      'indice': 2,
+      'acierto': false,
+    });
+    c.last.receive({
+      'tipo': 'accion',
+      'accion': 'corregir',
+      'id': 'c1',
+      'indice': 2,
+      'acierto': false,
+    });
+    await Future<void>.delayed(Duration.zero);
+    expect(got, [(2, false)]);
+    expect(actions, isEmpty);
+  });
+
+  test('el resumen lleva las palabras y si se pueden corregir', () {
+    const s = JudgeState(
+      phase: JudgeState.turnOver,
+      points: 3,
+      hits: 1,
+      passes: 1,
+      words: [
+        JudgeWord('El Rey León', hit: true, points: 3),
+        JudgeWord('Pizza', hit: false),
+      ],
+      editable: true,
+    );
+    final json = s.toJson();
+    expect(json['palabras'], [
+      {'texto': 'El Rey León', 'acierto': true, 'puntos': 3},
+      {'texto': 'Pizza', 'acierto': false, 'puntos': 1},
+    ]);
+    expect(json['editable'], isTrue);
+    expect(s.locked().toJson()['editable'], isFalse);
+    expect(s.locked().toJson()['palabras'], json['palabras']);
+    // Sin palabras no se manda ni la lista ni "editable".
+    expect(
+      const JudgeState(phase: JudgeState.playing).toJson().keys,
+      isNot(contains('palabras')),
+    );
+  });
+
   test('sabe cuántos jueces hay', () async {
     final c = FakeConnections();
     final r = room(c);

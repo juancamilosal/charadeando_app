@@ -54,7 +54,7 @@ button:disabled{opacity:.45;transform:none}
 .pasar{background:#FF8A00}
 .descarga{text-align:center;font-size:13px;opacity:.8;margin-top:12px}
 .aviso{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;
-  text-align:center;padding:28px;background:linear-gradient(160deg,rgba(75,16,176,.96),rgba(200,40,140,.96))}
+  text-align:center;padding:28px;background:linear-gradient(160deg,#4B10B0,#C8288C)}
 .aviso.visible{display:flex}
 .aviso h1{font-family:Fredoka,system-ui,sans-serif;font-weight:600;font-size:32px;line-height:1.1}
 .aviso p{font-size:18px;opacity:.9;max-width:22em}
@@ -64,6 +64,21 @@ button:disabled{opacity:.45;transform:none}
 .codigo{font-family:Fredoka,system-ui,sans-serif;letter-spacing:.15em;opacity:.8}
 .punto{width:14px;height:14px;border-radius:50%;background:#fff;animation:latir 1s infinite alternate}
 @keyframes latir{from{opacity:.3}to{opacity:1}}
+.aviso.con-lista{justify-content:flex-start;overflow-y:auto;padding-top:max(28px,env(safe-area-inset-top))}
+.lista{width:100%;max-width:420px;background:#fff;border-radius:24px;padding:10px;display:flex;flex-direction:column;gap:8px;
+  box-shadow:0 4px 10px rgba(0,0,0,.13);margin-top:4px}
+.lista .fila{display:flex;align-items:center;gap:10px;width:100%;min-height:0;padding:12px 16px;border-radius:16px;
+  background:#F4EEFD;color:#2B0A57;box-shadow:none;font-family:Nunito,system-ui,sans-serif;font-weight:800;font-size:17px;text-align:left}
+.lista .fila:active{transform:none;box-shadow:none}
+.lista .fila:disabled{opacity:1}
+.lista .fila.editable{cursor:pointer;outline:2px dashed rgba(91,33,214,.25);outline-offset:-2px}
+.lista .fila.cambiando{opacity:.5}
+.fila .texto{flex:1;word-break:break-word}
+.fila .pts{font-family:Fredoka,system-ui,sans-serif;font-weight:600;font-size:17px;border-radius:12px;padding:2px 10px;background:rgba(43,10,87,.12);color:rgba(43,10,87,.7)}
+.fila.si .pts{background:#18A85C;color:#fff}
+.fila .marca{font-size:20px}
+.vacia{padding:12px;text-align:center;color:#2B0A57}
+.pista{font-size:15px!important;opacity:.85}
 .toque{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .25s}
 .toque.si{background:rgba(24,168,92,.35);opacity:1;transition:none}
 .toque.no{background:rgba(255,138,0,.35);opacity:1;transition:none}
@@ -94,6 +109,8 @@ button:disabled{opacity:.45;transform:none}
     <div><b id="r-pasadas">0</b>pasadas</div>
     <div><b id="r-puntos">0</b>puntos</div>
   </div>
+  <p class="pista" id="pista" hidden>Toca una palabra si se marcó mal: cambia entre ✅ y ⏭️.</p>
+  <div class="lista" id="lista" hidden></div>
   <p class="descarga"><a href="${DESCARGA}" target="_blank" rel="noopener">¿Quieres jugar? Descarga Charadeando</a></p>
 </div>
 <div class="toque" id="toque"></div>
@@ -109,8 +126,47 @@ button:disabled{opacity:.45;transform:none}
   let final = false;
   let bloqueado = false;
 
+  // Las palabras del turno, como en la app: ✅ si se acertó, ⏭️ si se pasó.
+  // Si todavía se puede, al tocar una se corrige (en el celular también).
+  function lista(e) {
+    const palabras = Array.isArray(e && e.palabras) ? e.palabras : null;
+    const caja = $('lista');
+    caja.hidden = !palabras;
+    $('pista').hidden = !(palabras && palabras.length && e.editable);
+    $('aviso').classList.toggle('con-lista', !!palabras);
+    caja.replaceChildren();
+    if (!palabras) return;
+    if (palabras.length === 0) {
+      const v = document.createElement('div');
+      v.className = 'vacia';
+      v.textContent = 'No se marcó ninguna palabra.';
+      caja.append(v);
+      return;
+    }
+    palabras.forEach((p, i) => {
+      const fila = document.createElement('button');
+      fila.type = 'button';
+      fila.className = 'fila' + (p.acierto ? ' si' : '') + (e.editable ? ' editable' : '');
+      fila.disabled = !e.editable;
+      const t = document.createElement('span');
+      t.className = 'texto';
+      t.textContent = p.texto;
+      const pts = document.createElement('span');
+      pts.className = 'pts';
+      pts.textContent = p.acierto ? '+' + (p.puntos ?? 1) : '0';
+      const m = document.createElement('span');
+      m.className = 'marca';
+      m.textContent = p.acierto ? '✅' : '⏭️';
+      m.setAttribute('aria-label', p.acierto ? 'acierto' : 'pasada');
+      fila.append(t, pts, m);
+      fila.addEventListener('click', () => corregir(i, !p.acierto, fila));
+      caja.append(fila);
+    });
+  }
+
   function aviso(titulo, texto, { punto = false, resumen = null } = {}) {
     $('aviso').classList.toggle('visible', titulo !== null);
+    if (!resumen) lista(null);
     if (titulo === null) return;
     $('aviso-titulo').textContent = titulo;
     $('aviso-texto').textContent = texto;
@@ -135,8 +191,8 @@ button:disabled{opacity:.45;transform:none}
     for (const b of botones) b.disabled = !jugando;
     if (jugando) aviso(null);
     else if (e.estado === 'esperando') aviso('Esperando a que empiece el turno…', e.equipo ? 'Turno de ' + e.equipo : 'Prepárate para juzgar.', { punto: true });
-    else if (e.estado === 'fin_turno') aviso('Fin del turno', e.equipo ? 'Turno de ' + e.equipo : '', { resumen: e });
-    else if (e.estado === 'fin_partida') aviso('¡Fin de la partida!', 'Gracias por ser el juez.', { resumen: e });
+    else if (e.estado === 'fin_turno') { aviso('Fin del turno', e.equipo ? 'Turno de ' + e.equipo : '', { resumen: e }); lista(e); }
+    else if (e.estado === 'fin_partida') { aviso('¡Fin de la partida!', 'Gracias por ser el juez.', { resumen: e }); lista(e); }
   }
 
   function conectar() {
@@ -148,6 +204,8 @@ button:disabled{opacity:.45;transform:none}
       try { msg = JSON.parse(m.data); } catch { return; }
       if (msg.tipo === 'estado') mostrar(msg);
       else if (msg.tipo === 'bienvenida' && !estado) aviso('Esperando a que empiece el turno…', 'Ya estás conectado como juez.', { punto: true });
+      // Ya no se podía corregir (el celular pasó al siguiente turno).
+      else if (msg.tipo === 'error' && msg.codigo === 'no_editable') { if (estado) mostrar(estado); }
       else if (msg.tipo === 'error' && msg.codigo === 'sala_llena') { final = true; aviso('La sala ya tiene 2 jueces', 'Pídele a alguien que salga para poder entrar.'); }
       else if (msg.tipo === 'error' && (msg.codigo === 'sala_no_existe' || msg.codigo === 'sala_cerrada')) { final = true; aviso('Esta sala ya no existe', 'Pide en el celular de la frente un código nuevo.'); }
     };
@@ -180,6 +238,16 @@ button:disabled{opacity:.45;transform:none}
     const t = $('toque');
     t.className = 'toque ' + (nombre === 'acierto' ? 'si' : 'no');
     requestAnimationFrame(() => requestAnimationFrame(() => { t.className = 'toque'; }));
+  }
+
+  function corregir(indice, acierto, fila) {
+    if (bloqueado || !estado || !estado.editable || !ws || ws.readyState !== 1) return;
+    bloqueado = true;
+    setTimeout(() => { bloqueado = false; }, 500);
+    if (navigator.vibrate) navigator.vibrate(25);
+    // Se ve el cambio cuando el celular de la frente lo confirma.
+    fila.classList.add('cambiando');
+    ws.send(JSON.stringify({ tipo: 'accion', accion: 'corregir', id: id(), indice, acierto }));
   }
 
   $('acierto').addEventListener('click', () => accion('acierto'));

@@ -23,10 +23,19 @@ SQLite, que sirve en el plan gratis) y la API de **WebSocket Hibernation**
 
 ## Mensajes (JSON)
 
-- **Anfitrión → sala:** `{ "tipo": "estado", "palabra", "categoria", "segundos", "equipo", "puntos", "estado": "esperando" | "jugando" | "fin_turno" | "fin_partida", "aciertos"?, "pasadas"? }`.
-  La sala guarda el último y se lo manda a cada juez que se conecta.
+- **Anfitrión → sala:** `{ "tipo": "estado", "palabra", "categoria", "segundos", "equipo", "puntos", "estado": "esperando" | "jugando" | "fin_turno" | "fin_partida", "aciertos"?, "pasadas"?, "palabras"?, "editable"? }`.
+  La sala guarda el último y se lo manda a cada juez que se conecta. Al
+  final del turno, `palabras` es la lista del turno en orden
+  (`[{ "texto", "acierto": true|false, "puntos"? }]`, hasta 100) y
+  `editable` dice si el juez todavía puede corregirla (mientras la app está
+  en el resultado de ese turno). Hasta 16 KB por mensaje.
 - **Juez → sala → anfitrión:** `{ "tipo": "accion", "accion": "acierto" | "pasar", "id" }`.
   El `id` (único) evita que una acción reenviada cuente dos veces.
+- **Juez → sala → anfitrión, al final del turno:** `{ "tipo": "accion", "accion": "corregir", "id", "indice", "acierto" }`
+  cambia una palabra del resumen (se marcó mal). La sala solo la pasa si el
+  último estado tiene `editable: true` y esa palabra existe; si no, le
+  responde al juez `{ "tipo": "error", "codigo": "no_editable" }`. La app la
+  aplica y manda el resumen nuevo, así el juez ve el cambio confirmado.
 - **Sala → anfitrión:** `{ "tipo": "jueces", "cantidad" }` cada vez que entra o sale un juez.
 - **Sala → cualquiera:** `{ "tipo": "bienvenida", "rol" }` al conectarse, `{ "tipo": "error", "codigo" }` (`mensaje_invalido`, `sala_no_existe`, `token_invalido`, `sala_llena`, `otro_anfitrion`, `sala_cerrada`) y `{ "tipo": "aviso", "codigo": "sin_anfitrion" }`.
 

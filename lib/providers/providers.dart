@@ -304,3 +304,33 @@ class JudgeController extends Notifier<JudgeSetup> {
     await old?.close();
   }
 }
+
+/// El resumen del último turno para el juez: las palabras (acertadas y
+/// pasadas), los aciertos y los puntos del equipo. Con [editable] el juez
+/// todavía puede corregirlas.
+JudgeState judgeTurnSummary(
+  GameState game, {
+  required bool gameOver,
+  bool editable = false,
+}) {
+  final turn = game.lastTurn;
+  final mode = game.config.scoringMode;
+  final group = turn?.groupIndex ?? game.groupIndex;
+  return JudgeState(
+    phase: gameOver ? JudgeState.gameOver : JudgeState.turnOver,
+    category: game.config.categoryLabel,
+    team: game.inGroups ? game.groups[group].name : null,
+    points: game.scores[group],
+    hits: turn?.hits.length ?? 0,
+    passes: turn?.passed.length ?? 0,
+    words: [
+      for (final e in turn?.entries ?? const <TurnEntry>[])
+        JudgeWord(
+          e.word.text,
+          hit: e.outcome == WordOutcome.hit,
+          points: mode.pointsFor(e.word.wordCount),
+        ),
+    ],
+    editable: editable && turn != null,
+  );
+}

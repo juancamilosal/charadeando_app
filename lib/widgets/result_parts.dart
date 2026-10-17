@@ -137,11 +137,20 @@ class HitPassPills extends StatelessWidget {
 }
 
 /// Las palabras del turno en un panel: ✅ si se acertó o ⏭️ si se pasó,
-/// con los puntos de cada una si [mode] no es null.
+/// con los puntos de cada una si [mode] no es null. Con [onToggle], tocar
+/// una palabra la cambia (si se marcó mal).
 class TurnWordsPanel extends StatelessWidget {
-  const TurnWordsPanel({super.key, required this.entries, this.mode});
+  const TurnWordsPanel({
+    super.key,
+    required this.entries,
+    this.mode,
+    this.onToggle,
+  });
 
   final List<TurnEntry> entries;
+
+  /// Se tocó la palabra de esa posición, para cambiarla.
+  final ValueChanged<int>? onToggle;
 
   /// Puntuación para mostrar "+2" en las acertadas, o null para no
   /// mostrar puntos.
@@ -179,7 +188,11 @@ class TurnWordsPanel extends StatelessWidget {
               children: [
                 for (var i = 0; i < entries.length; i++) ...[
                   if (i > 0) const SizedBox(height: 8),
-                  _EntryRow(entry: entries[i], mode: mode),
+                  _EntryRow(
+                    entry: entries[i],
+                    mode: mode,
+                    onTap: onToggle == null ? null : () => onToggle!(i),
+                  ),
                 ],
               ],
             ),
@@ -188,17 +201,20 @@ class TurnWordsPanel extends StatelessWidget {
 }
 
 class _EntryRow extends StatelessWidget {
-  const _EntryRow({required this.entry, required this.mode});
+  const _EntryRow({required this.entry, required this.mode, this.onTap});
 
   final TurnEntry entry;
   final ScoringMode? mode;
+
+  /// Tocar la fila cambia la palabra entre acertada y pasada.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     const on = AppColors.ink;
     final hit = entry.outcome == WordOutcome.hit;
     final mode = this.mode;
-    return Container(
+    final row = Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: const Color(0xFFF4EEFD),
@@ -238,7 +254,25 @@ class _EntryRow extends StatelessWidget {
             const SizedBox(width: 10),
           ],
           Text(hit ? '✅' : '⏭️', style: const TextStyle(fontSize: 20)),
+          if (this.onTap != null) ...[
+            const SizedBox(width: 6),
+            Icon(Icons.swap_horiz, size: 20, color: on.withValues(alpha: 0.4)),
+          ],
         ],
+      ),
+    );
+    final onTap = this.onTap;
+    if (onTap == null) return row;
+    return Semantics(
+      button: true,
+      label: hit ? 'Cambiar a pasada' : 'Cambiar a acertada',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: row,
+        ),
       ),
     );
   }

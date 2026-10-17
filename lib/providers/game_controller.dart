@@ -156,6 +156,26 @@ class GameController extends Notifier<GameState> {
     state = state.copyWith(decks: decks, turns: [...state.turns, turn]);
   }
 
+  /// Corrige una palabra del último turno (se marcó mal): la [index] queda
+  /// como [outcome] y los puntos se recalculan solos.
+  void correctLastTurn(int index, WordOutcome outcome) {
+    final turn = state.lastTurn;
+    if (turn == null || index < 0 || index >= turn.entries.length) return;
+    final entries = [...turn.entries];
+    if (entries[index].outcome == outcome) return;
+    entries[index] = TurnEntry(entries[index].word, outcome);
+    state = state.copyWith(
+      turns: [
+        ...state.turns.sublist(0, state.turns.length - 1),
+        Turn(
+          round: turn.round,
+          groupIndex: turn.groupIndex,
+          entries: List.unmodifiable(entries),
+        ),
+      ],
+    );
+  }
+
   /// Termina la partida antes de tiempo ("Finalizar juego"): cuentan los
   /// turnos jugados hasta ahora.
   void endGame() {

@@ -261,20 +261,17 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     );
   }
 
-  /// Al terminar el turno (o la partida), el juez ve el resumen.
-  void _judgeTurnOver({required bool gameOver}) {
+  /// Al terminar el turno (o la partida), el juez ve el resumen con las
+  /// palabras. Si sigue la pantalla de resultados del turno, todavía las
+  /// puede corregir.
+  void _judgeTurnOver({required bool gameOver, bool editable = true}) {
     final judge = _judge;
     if (judge == null) return;
-    final game = ref.read(gameControllerProvider);
-    final group = game.groupIndex;
     judge.send(
-      JudgeState(
-        phase: gameOver ? JudgeState.gameOver : JudgeState.turnOver,
-        category: game.config.categoryLabel,
-        team: game.inGroups ? game.currentGroup.name : null,
-        points: game.scores[group],
-        hits: _entries.where((e) => e.outcome == WordOutcome.hit).length,
-        passes: _entries.where((e) => e.outcome == WordOutcome.pass).length,
+      judgeTurnSummary(
+        ref.read(gameControllerProvider),
+        gameOver: gameOver,
+        editable: editable,
       ),
     );
   }
@@ -591,10 +588,12 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
       );
     }
     controller.endGame();
-    _judgeTurnOver(gameOver: true);
-    if (!mounted) return;
     // La partida rápida no tiene resultado final: muestra el del turno.
     final quick = game.config.quick;
+    // Si sigue la pantalla de resultados del turno (partida rápida), allí
+    // todavía se corrige; si no, el resumen queda fijo.
+    _judgeTurnOver(gameOver: true, editable: quick && _entries.isNotEmpty);
+    if (!mounted) return;
     context.go(
       !played || (quick && _entries.isEmpty)
           ? Routes.categories

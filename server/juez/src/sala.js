@@ -141,6 +141,17 @@ export class SalaCore {
       return;
     }
 
+    // Corregir solo se puede con el resumen del turno abierto para
+    // editar, y en una palabra que exista.
+    if (msg.accion === 'corregir') {
+      const estado = await this.storage.get('estado');
+      const palabras = estado?.palabras ?? [];
+      if (!estado?.editable || msg.indice >= palabras.length) {
+        enviar(ws, { tipo: 'error', codigo: 'no_editable' });
+        return;
+      }
+    }
+
     // Una acción del juez: una sola vez por id, aunque llegue repetida.
     const recientes = (await this.storage.get('acciones')) ?? [];
     if (recientes.includes(msg.id)) return;

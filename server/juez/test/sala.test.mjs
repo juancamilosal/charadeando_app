@@ -348,3 +348,81 @@ test('index.js solo exporta el Worker y el Durable Object', async () => {
   );
   assert.deepEqual(exportados, ['default', 'class Sala']);
 });
+
+test('al final del turno el juez puede corregir una palabra, y solo entonces', async () => {
+  const { core, conectar, token } = await salaCreada();
+  const anfitrion = await conectar('anfitrion', token);
+  const juez = await conectar('juez');
+  const corregir = (indice, acierto, id) =>
+    JSON.stringify({ tipo: 'accion', accion: 'corregir', id, indice, acierto });
+
+  // Jugando no se corrige.
+  await core.mensaje(anfitrion, estado());
+  await core.mensaje(juez, corregir(0, false, 'c0'));
+  assert.deepEqual(juez.ultimo(), { tipo: 'error', codigo: 'no_editable' });
+
+  // Fin del turno con la lista: el juez la ve y puede corregir.
+  const resumen = {
+    estado: 'fin_turno',
+    palabra: null,
+    segundos: 0,
+    aciertos: 1,
+    pasadas: 1,
+    palabras: [
+      { texto: 'Jirafa', acierto: true, puntos: 1 },
+      { texto: 'Pizza', acierto: false },
+    ],
+    editable: true,
+  };
+  await core.mensaje(anfitrion, estado(resumen));
+  assert.deepEqual(juez.ultimo('estado').palabras, resumen.palabras);
+  await core.mensaje(juez, corregir(1, true, 'c1'));
+  assert.deepEqual(anfitrion.ultimo(), {
+    tipo: 'accion',
+    accion: 'corregir',
+    id: 'c1',
+    indice: 1,
+    acierto: true,
+  });
+  // Una palabra que no existe.
+  await core.mensaje(juez, corregir(5, true, 'c2'));
+  assert.equal(juez.ultimo().codigo, 'no_editable');
+  // Al pasar al siguiente turno, ya no.
+  await core.mensaje(anfitrion, estado({ ...resumen, editable: false }));
+  await core.mensaje(juez, corregir(0, false, 'c3'));
+  assert.equal(juez.ultimo().codigo, 'no_editable');
+});
+
+test('valida la lista de palabras y la corrección', () => {
+  const lista = (palabras) => leerMensaje(estado({ estado: 'fin_turno', palabras }), 'anfitrion');
+  assert.equal(lista([{ texto: 'Jirafa', acierto: true }]).tipo, 'estado');
+  assert.ok(lista('Jirafa').error);
+  assert.ok(lista([{ texto: 'Jirafa' }]).error);
+  assert.ok(lista([{ texto: 'x'.repeat(121), acierto: true }]).error);
+  assert.ok(lista([{ texto: 'Jirafa', acierto: true, nombre: 'Ana' }]).error);
+  assert.ok(lista(Array.from({ length: 101 }, () => ({ texto: 'a', acierto: true }))).error);
+  // 100 palabras largas caben en el mensaje del anfitrión.
+  const larga = Array.from({ length: 100 }, () => ({ texto: 'x'.repeat(60), acierto: true, puntos: 9 }));
+  assert.equal(lista(larga).tipo, 'estado');
+  assert.ok(leerMensaje(estado({ editable: 'si' }), 'anfitrion').error);
+  const c = (extra) => leerMensaje(JSON.stringify({ tipo: 'accion', accion: 'corregir', id: 'c', ...extra }), 'juez');
+  assert.deepEqual(c({ indice: 2, acierto: false }), {
+    tipo: 'accion',
+    accion: 'corregir',
+    id: 'c',
+    indice: 2,
+    acierto: false,
+  });
+  assert.ok(c({ acierto: true }).error);
+  assert.ok(c({ indice: -1, acierto: true }).error);
+  assert.ok(c({ indice: 0 }).error);
+  assert.ok(c({ indice: 0, acierto: true, palabra: 'x' }).error);
+});
+
+test('la página del juez muestra la lista y deja corregir', () => {
+  const html = paginaJuez('ABC234');
+  assert.match(html, /Toca una palabra si se marcó mal/);
+  assert.match(html, /accion: 'corregir'/);
+  assert.match(html, /No se marcó ninguna palabra\./);
+  assert.match(html, /'✅' : '⏭️'/);
+});

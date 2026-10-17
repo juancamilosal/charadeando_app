@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:charadeando_app/models/models.dart';
 import 'package:charadeando_app/providers/providers.dart';
 import 'package:charadeando_app/router.dart';
+import 'package:charadeando_app/screens/turn_result_screen.dart';
 import 'package:charadeando_app/screens/turn_screen.dart';
 import 'package:charadeando_app/services/services.dart';
 import 'package:charadeando_app/widgets/judge_setup.dart';
@@ -413,6 +414,156 @@ void main() {
         await tester.pump(const Duration(seconds: 1));
       }
       await tester.pumpAndSettle();
+    });
+  });
+
+  group('al final del turno', () {
+    Future<(ProviderContainer, FakeChannel)> show(
+      WidgetTester tester, {
+      bool judge = true,
+    }) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      addTearDown(tester.view.reset);
+      final service = FakeJudgeService();
+      final container = ProviderContainer(
+        overrides: [judgeServiceProvider.overrideWithValue(service)],
+      );
+      addTearDown(container.dispose);
+      if (judge) await container.read(judgeProvider.notifier).start();
+      final game = container.read(gameControllerProvider.notifier);
+      game.configure(
+        GameConfig(
+          groups: const [Group('Tigres'), Group('Águilas')],
+          resolution: VideoResolution.off,
+          judgePhone: judge,
+          category: GameCategory.animals,
+          scoringMode: ScoringMode.perWord,
+        ),
+      );
+      game.startWithDecks([
+        [Word('El Rey León'), Word('Pizza'), Word('Jirafa')],
+        [Word('Shakira')],
+      ]);
+      game.finishTurn(
+        Turn(
+          round: 1,
+          groupIndex: 0,
+          entries: [
+            TurnEntry(Word('El Rey León'), WordOutcome.hit),
+            TurnEntry(Word('Pizza'), WordOutcome.pass),
+          ],
+        ),
+      );
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(
+            routerConfig: GoRouter(
+              initialLocation: Routes.turnResult,
+              routes: [
+                GoRoute(
+                  path: Routes.turnResult,
+                  builder: (_, _) => const TurnResultScreen(),
+                ),
+                GoRoute(
+                  path: Routes.turn,
+                  builder: (_, _) => const Text('Siguiente turno'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return (container, judge ? service.connections.last : FakeChannel(Uri()));
+    }
+
+    testWidgets('sin juez, tocar una palabra la corrige y cambia los puntos', (
+      tester,
+    ) async {
+      final (container, _) = await show(tester, judge: false);
+      expect(find.text('Toca una palabra si se marcó mal.'), findsOneWidget);
+      expect(container.read(gameControllerProvider).scores, [3, 0]);
+      await tester.tap(find.text('Pizza'));
+      await tester.pumpAndSettle();
+      expect(container.read(gameControllerProvider).scores, [4, 0]);
+      expect(
+        container
+            .read(gameControllerProvider)
+            .lastTurn!
+            .hits
+            .map((w) => w.text),
+        ['El Rey León', 'Pizza'],
+      );
+      // Y de vuelta.
+      await tester.tap(find.text('El Rey León'));
+      await tester.pumpAndSettle();
+      expect(container.read(gameControllerProvider).scores, [1, 0]);
+    });
+
+    testWidgets('el juez corrige desde su página y se ve en el celular; al '
+        'seguir, ya no puede', (tester) async {
+      final (container, channel) = await show(tester);
+      channel.receive({
+        'tipo': 'accion',
+        'accion': 'corregir',
+        'id': 'c1',
+        'indice': 0,
+        'acierto': false,
+      });
+      await tester.pump();
+      await tester.pump();
+      expect(container.read(gameControllerProvider).scores, [0, 0]);
+      expect(
+        find.text('El juez cambió "El Rey León" a ⏭️ pasada.'),
+        findsOneWidget,
+      );
+      // El juez ve la lista corregida, todavía editable.
+      final summary = channel.states.last;
+      expect(summary['estado'], 'fin_turno');
+      expect(summary['editable'], isTrue);
+      expect(summary['palabras'], [
+        {'texto': 'El Rey León', 'acierto': false, 'puntos': 3},
+        {'texto': 'Pizza', 'acierto': false, 'puntos': 1},
+      ]);
+      expect(summary['aciertos'], 0);
+      expect(summary['pasadas'], 2);
+
+      // Una corrección del celular también le llega al juez.
+      await tester.tap(find.text('Pizza'));
+      await tester.pumpAndSettle();
+      expect(channel.states.last['palabras'][1]['acierto'], isTrue);
+      expect(channel.states.last['puntos'], 1);
+
+      // Al seguir al siguiente turno, el resumen queda fijo.
+      await tester.tap(find.text('Turno de Águilas'));
+      await tester.pump();
+      expect(channel.states.last['editable'], isFalse);
+      expect(channel.states.last['palabras'], hasLength(2));
+    });
+
+    test('corregir el último turno recalcula los puntos', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final game = container.read(gameControllerProvider.notifier);
+      game.configure(const GameConfig(groups: [Group('A'), Group('B')]));
+      game.startWithDecks([
+        [Word('Pizza'), Word('Jirafa')],
+        [Word('Sol')],
+      ]);
+      game.finishTurn(
+        Turn(
+          round: 1,
+          groupIndex: 0,
+          entries: [TurnEntry(Word('Pizza'), WordOutcome.pass)],
+        ),
+      );
+      expect(container.read(gameControllerProvider).scores, [0, 0]);
+      game.correctLastTurn(0, WordOutcome.hit);
+      expect(container.read(gameControllerProvider).scores, [1, 0]);
+      // Fuera de rango no hace nada.
+      game.correctLastTurn(5, WordOutcome.pass);
+      expect(container.read(gameControllerProvider).scores, [1, 0]);
     });
   });
 }

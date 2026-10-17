@@ -15,14 +15,24 @@ export const ACCIONES_POR_SEGUNDO = 4;
 /// segundo y la palabra con cada acierto).
 export const ESTADOS_POR_SEGUNDO = 20;
 
-/// Tamaño máximo de un mensaje, en caracteres.
+/// Tamaño máximo de un mensaje del juez, en caracteres.
 export const MAX_MENSAJE = 2048;
+
+/// Tamaño máximo de un mensaje del anfitrión: el resumen del turno lleva
+/// la lista de palabras.
+export const MAX_MENSAJE_ANFITRION = 16384;
+
+/// Palabras que puede tener el resumen de un turno.
+export const MAX_PALABRAS = 100;
 
 /// La sala se borra sola tras este tiempo sin actividad.
 export const INACTIVIDAD_MS = 3 * 60 * 60 * 1000;
 
 export const ESTADOS = ['esperando', 'jugando', 'fin_turno', 'fin_partida'];
 export const ACCIONES = ['acierto', 'pasar'];
+
+/// Al final del turno el juez puede corregir una palabra: "corregir".
+export const CORREGIR = 'corregir';
 
 /// Código de sala al azar, de [LARGO_CODIGO] letras de [ALFABETO].
 export function nuevoCodigo(random = crypto) {
@@ -93,6 +103,22 @@ const CAMPOS_ESTADO = {
   // Resumen del turno ("Fin del turno"): opcionales.
   aciertos: (v) => entero(v, 0, 9999),
   pasadas: (v) => entero(v, 0, 9999),
+  // Las palabras del turno, en orden, y si el juez todavía puede
+  // corregirlas.
+  palabras: (v) =>
+    Array.isArray(v) &&
+    v.length <= MAX_PALABRAS &&
+    v.every(
+      (p) =>
+        p &&
+        typeof p === 'object' &&
+        !Array.isArray(p) &&
+        Object.keys(p).every((k) => k === 'texto' || k === 'acierto' || k === 'puntos') &&
+        texto(p.texto, 120) &&
+        typeof p.acierto === 'boolean' &&
+        (p.puntos === undefined || entero(p.puntos, 0, 99)),
+    ),
+  editable: (v) => typeof v === 'boolean',
 };
 const OBLIGATORIOS_ESTADO = ['segundos', 'puntos', 'estado'];
 
@@ -100,7 +126,9 @@ const OBLIGATORIOS_ESTADO = ['segundos', 'puntos', 'estado'];
 /// ('anfitrion' o 'juez'), o `{ error }` si no.
 export function leerMensaje(crudo, rol) {
   if (typeof crudo !== 'string') return { error: 'El mensaje debe ser texto.' };
-  if (crudo.length > MAX_MENSAJE) return { error: 'El mensaje es muy largo.' };
+  if (crudo.length > (rol === 'anfitrion' ? MAX_MENSAJE_ANFITRION : MAX_MENSAJE)) {
+    return { error: 'El mensaje es muy largo.' };
+  }
   let msg;
   try {
     msg = JSON.parse(crudo);
@@ -127,9 +155,22 @@ export function leerMensaje(crudo, rol) {
   }
   if (rol === 'juez') {
     if (msg.tipo !== 'accion') return { error: 'El juez solo envía "accion".' };
-    if (!ACCIONES.includes(msg.accion)) return { error: 'La acción es "acierto" o "pasar".' };
     if (typeof msg.id !== 'string' || !/^[A-Za-z0-9_-]{1,40}$/.test(msg.id)) {
       return { error: 'Falta el id de la acción.' };
+    }
+    if (msg.accion === CORREGIR) {
+      // { accion: "corregir", indice, acierto }: cambia una palabra del
+      // resumen del turno.
+      const extra = Object.keys(msg).filter(
+        (k) => !['tipo', 'accion', 'id', 'indice', 'acierto'].includes(k),
+      );
+      if (extra.length > 0) return { error: `Campo desconocido: ${extra[0]}.` };
+      if (!entero(msg.indice, 0, MAX_PALABRAS - 1)) return { error: 'Falta el índice de la palabra.' };
+      if (typeof msg.acierto !== 'boolean') return { error: 'Falta si es acierto.' };
+      return { tipo: 'accion', accion: CORREGIR, id: msg.id, indice: msg.indice, acierto: msg.acierto };
+    }
+    if (!ACCIONES.includes(msg.accion)) {
+      return { error: 'La acción es "acierto", "pasar" o "corregir".' };
     }
     const extra = Object.keys(msg).filter((k) => !['tipo', 'accion', 'id'].includes(k));
     if (extra.length > 0) return { error: `Campo desconocido: ${extra[0]}.` };

@@ -58,6 +58,16 @@ la cámara frontal graba a los participantes para revivir las risas.
   llama a lo mismo que inclinar el celular (con sus sonidos y animaciones).
   Con el juez conectado, la inclinación (y el toque) no marcan; si se
   desconecta en pleno turno, un aviso lo dice y la inclinación vuelve.
+  Al final del turno el juez ve el resumen como en la app (aciertos,
+  pasadas, puntos y la lista de palabras con ✅ o ⏭️) y, mientras la app
+  está en el resultado de ese turno, puede tocar una palabra para
+  corregirla: el cambio llega al celular (con el aviso "El juez cambió
+  "Pizza" a ✅ acertada.") y se recalculan los puntos. Al seguir, el resumen
+  queda fijo en los dos lados.
+- Corregir el turno: en el resultado de cada turno, "Toca una palabra si se
+  marcó mal." Tocar una palabra la cambia entre ✅ acertada y ⏭️ pasada
+  (`GameController.correctLastTurn`) y se recalculan los aciertos, los
+  puntos y el marcador. Solo el último turno, antes de pasar al siguiente.
 - Al cambiar de pestaña en la barra de abajo, la que se deja se borra: al
   volver empieza de nuevo, arriba del todo, sin lo escrito y sin ventanas
   abiertas (como "Combinar categorías"). Lo que se guarda en el celular

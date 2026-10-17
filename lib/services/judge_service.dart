@@ -38,6 +38,32 @@ class JudgeException implements Exception {
   String toString() => 'JudgeException($message)';
 }
 
+/// Una palabra del resumen del turno que ve el juez.
+class JudgeWord {
+  const JudgeWord(this.text, {required this.hit, this.points = 1});
+
+  final String text;
+  final bool hit;
+
+  /// Puntos que da si se acertó.
+  final int points;
+
+  Map<String, Object?> toJson() => {
+    'texto': JudgeState._cut(text, 120),
+    'acierto': hit,
+    'puntos': points.clamp(0, 99),
+  };
+}
+
+/// El juez corrigió la palabra [index] del resumen: ahora es acierto
+/// ([hit]) o pasada.
+class JudgeCorrection {
+  const JudgeCorrection(this.index, {required this.hit});
+
+  final int index;
+  final bool hit;
+}
+
 /// Lo que el celular de la frente le cuenta al juez: el estado del turno.
 /// Solo datos del juego (palabra, tiempo, equipo y puntos), nada personal.
 class JudgeState {
@@ -50,6 +76,8 @@ class JudgeState {
     this.points = 0,
     this.hits,
     this.passes,
+    this.words,
+    this.editable = false,
   });
 
   /// `esperando`, `jugando`, `fin_turno` o `fin_partida`.
@@ -63,6 +91,12 @@ class JudgeState {
   /// Resumen del turno, al terminar.
   final int? hits;
   final int? passes;
+
+  /// Las palabras del turno, en orden, para el resumen.
+  final List<JudgeWord>? words;
+
+  /// Si el juez todavía puede corregirlas.
+  final bool editable;
 
   static const waiting = 'esperando';
   static const playing = 'jugando';
@@ -82,7 +116,23 @@ class JudgeState {
     'estado': phase,
     'aciertos': ?hits,
     'pasadas': ?passes,
+    if (words != null)
+      'palabras': [for (final w in words!.take(100)) w.toJson()],
+    if (words != null) 'editable': editable,
   };
+
+  /// El mismo estado, pero ya sin poder corregir.
+  JudgeState locked() => JudgeState(
+    phase: phase,
+    word: word,
+    category: category,
+    seconds: seconds,
+    team: team,
+    points: points,
+    hits: hits,
+    passes: passes,
+    words: words,
+  );
 }
 
 /// Una sala del celular juez, del lado del celular de la frente (el
@@ -118,6 +168,11 @@ class JudgeRoom {
 
   /// Lo que marca el juez: acierto o pasar.
   Stream<WordOutcome> get actions => _actions.stream;
+
+  final _corrections = StreamController<JudgeCorrection>.broadcast();
+
+  /// Lo que corrige el juez en el resumen del turno.
+  Stream<JudgeCorrection> get corrections => _corrections.stream;
 
   WebSocketChannel? _channel;
   StreamSubscription<dynamic>? _sub;
@@ -175,6 +230,14 @@ class JudgeRoom {
         // Una acción reenviada no cuenta dos veces.
         if (!_seen.add(id)) return;
         if (_seen.length > 200) _seen.remove(_seen.first);
+        if (msg['accion'] == 'corregir') {
+          final index = msg['indice'];
+          final hit = msg['acierto'];
+          if (index is int && hit is bool) {
+            _corrections.add(JudgeCorrection(index, hit: hit));
+          }
+          return;
+        }
         final outcome = switch (msg['accion']) {
           'acierto' => WordOutcome.hit,
           'pasar' => WordOutcome.pass,
@@ -233,6 +296,7 @@ class JudgeRoom {
     judges.value = 0;
     await closing;
     await _actions.close();
+    await _corrections.close();
   }
 }
 

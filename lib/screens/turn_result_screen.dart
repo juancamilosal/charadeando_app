@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,7 +15,9 @@ import '../widgets/play_background.dart';
 import '../widgets/result_parts.dart';
 
 /// Resultado de un turno: aciertos o puntos en grande, las palabras
-/// acertadas y pasadas, el marcador y el video. En la partida rápida, que
+/// acertadas y pasadas, el marcador y el video. Si una palabra se marcó
+/// mal, se toca para cambiarla (y con el celular juez, él también puede
+/// corregirlas desde su página; los cambios se ven en los dos lados). En la partida rápida, que
 /// tiene un solo turno, es el resultado de la partida: sin ganador ni
 /// ruleta, con "Otra rápida", "Personalizada" y "Salir de la categoría".
 class TurnResultScreen extends ConsumerStatefulWidget {
@@ -26,11 +30,109 @@ class TurnResultScreen extends ConsumerStatefulWidget {
 class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
   bool _leaving = false;
 
+  /// Celular juez: la sala, si se juega con él, y lo último que se le
+  /// mandó (para cerrarle las correcciones al salir).
+  JudgeRoom? _judge;
+  StreamSubscription<JudgeCorrection>? _corrections;
+  JudgeState? _sent;
+
+  @override
+  void initState() {
+    super.initState();
+    final game = ref.read(gameControllerProvider);
+    final judge = game.config.judgePhone
+        ? ref.read(judgeProvider.notifier).room
+        : null;
+    _judge = judge;
+    if (judge != null) {
+      _corrections = judge.corrections.listen(
+        (c) => _correct(
+          c.index,
+          c.hit ? WordOutcome.hit : WordOutcome.pass,
+          byJudge: true,
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _corrections?.cancel();
+    // Al salir de aquí, el juez ya no puede corregir.
+    final sent = _sent;
+    if (sent != null && sent.editable) _judge?.send(sent.locked());
+    super.dispose();
+  }
+
+  /// Si con este turno termina la partida.
+  bool get _gameOver =>
+      ref.read(gameControllerProvider).finished ||
+      ref.read(gameControllerProvider.notifier).afterAdvance.finished;
+
+  /// Le manda al juez el resumen del turno; con [editable], todavía puede
+  /// corregirlo.
+  void _syncJudge({required bool editable}) {
+    final judge = _judge;
+    if (judge == null) return;
+    final summary = judgeTurnSummary(
+      ref.read(gameControllerProvider),
+      gameOver: _gameOver,
+      editable: editable,
+    );
+    _sent = summary;
+    judge.send(summary);
+  }
+
+  /// La palabra [index] se marcó mal: queda como [outcome]. Si la cambió
+  /// el juez, se avisa.
+  void _correct(int index, WordOutcome outcome, {bool byJudge = false}) {
+    if (_leaving || !mounted) return;
+    final turn = ref.read(gameControllerProvider).lastTurn;
+    if (turn == null || index < 0 || index >= turn.entries.length) return;
+    final word = turn.entries[index].word.text;
+    ref.read(gameControllerProvider.notifier).correctLastTurn(index, outcome);
+    _syncJudge(editable: true);
+    if (byJudge) {
+      final hit = outcome == WordOutcome.hit;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              'El juez cambió "$word" a ${hit ? '✅ acertada' : '⏭️ pasada'}.',
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+    }
+  }
+
+  /// Tocar una palabra la cambia entre acertada y pasada.
+  void _toggle(int index) {
+    final turn = ref.read(gameControllerProvider).lastTurn;
+    if (turn == null || index >= turn.entries.length) return;
+    final hit = turn.entries[index].outcome == WordOutcome.hit;
+    _correct(index, hit ? WordOutcome.pass : WordOutcome.hit);
+  }
+
+  /// Al salir del resultado, el resumen del juez queda fijo.
+  void _lockJudge({bool? gameOver}) {
+    final judge = _judge;
+    if (judge == null) return;
+    final summary = judgeTurnSummary(
+      ref.read(gameControllerProvider),
+      gameOver: gameOver ?? _gameOver,
+    );
+    _sent = summary;
+    judge.send(summary);
+  }
+
   /// El video del turno se borra al continuar, salvo que el usuario lo haya
   /// guardado en la galería.
   Future<void> _continue() async {
     if (_leaving) return;
     setState(() => _leaving = true);
+    _lockJudge();
     await ref.read(turnVideoProvider.notifier).discard();
     ref.read(gameControllerProvider.notifier).advance();
     if (!mounted) return;
@@ -46,6 +148,7 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
     if (_leaving) return;
     if (!await confirmEndGame(context, played: true) || !mounted) return;
     setState(() => _leaving = true);
+    _lockJudge(gameOver: true);
     await ref.read(turnVideoProvider.notifier).discard();
     ref.read(gameControllerProvider.notifier).endGame();
     if (mounted) context.go(Routes.finalResult);
@@ -55,6 +158,7 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
   Future<void> _quickAgain() async {
     if (_leaving) return;
     setState(() => _leaving = true);
+    _lockJudge();
     await ref.read(turnVideoProvider.notifier).discard();
     if (!mounted) return;
     final config = ref.read(gameControllerProvider).config;
@@ -68,6 +172,7 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
   Future<void> _custom() async {
     if (_leaving) return;
     setState(() => _leaving = true);
+    _lockJudge();
     await ref.read(turnVideoProvider.notifier).discard();
     if (!mounted) return;
     final config = ref.read(gameControllerProvider).config;
@@ -81,6 +186,7 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
   Future<void> _exit() async {
     if (_leaving) return;
     setState(() => _leaving = true);
+    _lockJudge();
     await ref.read(turnVideoProvider.notifier).discard();
     if (mounted) context.go(Routes.categories);
   }
@@ -138,7 +244,19 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
                         const SizedBox(height: 12),
                         HitPassPills(hits: hits, passes: passes),
                         const SizedBox(height: 16),
-                        TurnWordsPanel(entries: turn.entries, mode: mode),
+                        if (turn.entries.isNotEmpty) ...[
+                          Text(
+                            'Toca una palabra si se marcó mal.',
+                            textAlign: TextAlign.center,
+                            style: muted,
+                          ),
+                          const SizedBox(height: 6),
+                        ],
+                        TurnWordsPanel(
+                          entries: turn.entries,
+                          mode: mode,
+                          onToggle: _leaving ? null : _toggle,
+                        ),
                         if (!quick && game.inGroups) ...[
                           const SizedBox(height: 14),
                           MiniScoreboard(
