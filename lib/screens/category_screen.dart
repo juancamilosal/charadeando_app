@@ -7,6 +7,7 @@ import '../providers/providers.dart';
 import '../router.dart';
 import '../services/services.dart';
 import '../theme.dart';
+import '../widgets/category_art.dart';
 import '../widgets/category_card.dart';
 import '../widgets/combine_categories_sheet.dart';
 import '../widgets/play_background.dart';
@@ -760,8 +761,7 @@ class PhotoMimeSection extends StatelessWidget {
                     right: -6,
                     top: 12,
                     child: _Snapshot(
-                      icon: Icons.vpn_key,
-                      color: AppColors.yellow,
+                      photo: 'assets/img/fotomimica/maracas.webp',
                       angle: 0.16,
                     ),
                   ),
@@ -769,8 +769,7 @@ class PhotoMimeSection extends StatelessWidget {
                     right: 50,
                     top: 82,
                     child: _Snapshot(
-                      icon: Icons.handyman,
-                      color: AppColors.turquoise,
+                      photo: 'assets/img/fotomimica/helicoptero.webp',
                       angle: -0.12,
                     ),
                   ),
@@ -781,10 +780,10 @@ class PhotoMimeSection extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            const Icon(
-                              Icons.photo_camera,
+                            const CategoryArt(
+                              category: GameCategory.photoMime,
+                              size: 26,
                               color: AppColors.pink,
-                              size: 22,
                             ),
                             const SizedBox(width: 6),
                             Flexible(
@@ -912,16 +911,12 @@ class PhotoMimeSection extends StatelessWidget {
 }
 
 /// Una foto de ejemplo de Fotomímica: un marco blanco, un poco girado, con
-/// un objeto dibujado.
+/// la foto de un objeto.
 class _Snapshot extends StatelessWidget {
-  const _Snapshot({
-    required this.icon,
-    required this.color,
-    required this.angle,
-  });
+  const _Snapshot({required this.photo, required this.angle});
 
-  final IconData icon;
-  final Color color;
+  /// Foto de `assets/img/fotomimica/`.
+  final String photo;
   final double angle;
 
   @override
@@ -945,7 +940,7 @@ class _Snapshot extends StatelessWidget {
         ),
         child: ColoredBox(
           color: const Color(0xFFECE8E2),
-          child: Center(child: Icon(icon, size: 40, color: color)),
+          child: Image.asset(photo, fit: BoxFit.cover),
         ),
       ),
     );

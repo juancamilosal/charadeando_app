@@ -403,9 +403,11 @@ la cámara frontal graba a los participantes para revivir las risas.
   Categorías va en su propia sección, "Más juegos", después de las
   categorías y antes de "Mis categorías" (Libre y "Combinar categorías"
   quedan arriba como siempre). No es una tarjeta de categoría sino un
-  cartel ancho y oscuro (`PhotoMimeSection`): "NUEVO JUEGO", el nombre en
-  grande, "Mira la foto y conviértete en ese objeto. ¡Sin hablar!", el
-  botón "Jugar" y a la derecha dos fotos de ejemplo tipo polaroid. Sin Todo
+  cartel ancho y oscuro (`PhotoMimeSection`): su logo (el mimo),
+  "NUEVO JUEGO", el nombre en grande, "Mira la foto y conviértete en ese
+  objeto. ¡Sin hablar!", el botón "Jugar" y a la derecha dos fotos de
+  ejemplo tipo polaroid (unas maracas y un helicóptero, en
+  `assets/img/fotomimica/`, de 240 px en WebP). Sin Todo
   Charadeando, debajo va "Más objetos con Premium", que abre la hoja de
   compra. Por dentro es `GameCategory.photoMime` (sin sección ni candado).
   Se juega como una partida normal (equipos, turnos, aciertos, pasar,
@@ -432,9 +434,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   (`fotomimica_vistas.json`) para no repetirlos en las partidas siguientes.
   Sin Premium solo salen los objetos gratis; con Todo Charadeando (compra o
   código), también los de pago. Cuáles son de pago se decide en Directus
-  con el campo `premium` de cada objeto. En la cabecera de la
-  configuración usa su ícono (cámara) hasta que tenga su dibujo en
-  `assets/img/categorias/fotomimica.png`.
+  con el campo `premium` de cada objeto. Su logo, el mimo, está en
+  `assets/img/categorias/fotomimica.png` (como el dibujo de las demás
+  categorías) y se ve en el cartel y en la cabecera de la configuración.
 - Combinar categorías: debajo de Libre, el botón "Combinar categorías"
   abre desde abajo una ventana con las categorías del juego (sin Libre) con
   los mismos títulos de sección y en el mismo orden que la pantalla, y al

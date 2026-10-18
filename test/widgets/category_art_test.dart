@@ -24,23 +24,21 @@ void main() {
   });
 
   test('todas las categorías tienen su dibujo', () {
-    // Fotomímica usa su ícono (una cámara) hasta que tenga su imagen.
-    expect(
-      CategoryArt.withImage,
-      containsAll(GameCategory.values.where((c) => !c.photos)),
-    );
+    expect(CategoryArt.withImage, containsAll(GameCategory.values));
   });
 
-  testWidgets('Fotomímica, sin imagen todavía, muestra su ícono', (
-    tester,
-  ) async {
+  testWidgets('Fotomímica muestra su logo (el mimo)', (tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
         child: CategoryArt(category: GameCategory.photoMime, size: 80),
       ),
     );
-    expect(find.byIcon(Icons.photo_camera), findsOneWidget);
+    final image = tester.widget<Image>(find.byType(Image));
+    expect(
+      (image.image as AssetImage).assetName,
+      'assets/img/categorias/fotomimica.png',
+    );
   });
 
   testWidgets('muestra la imagen quieta', (tester) async {

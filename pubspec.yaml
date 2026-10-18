@@ -83,6 +83,8 @@ flutter:
   assets:
     - assets/img/categorias/
     - assets/img/inicio/
+    # Fotos de ejemplo del cartel de Fotomímica.
+    - assets/img/fotomimica/
     # Logo y destello de la pantalla de carga.
     - assets/img/marca/
     # Música de fondo de la app.
