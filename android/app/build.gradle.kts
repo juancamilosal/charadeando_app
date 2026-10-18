@@ -72,3 +72,9 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+// Firebase Crashlytics: google-services.json no está en el repositorio
+// (ver README.md). Sin él la app compila igual y no envía reportes.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}

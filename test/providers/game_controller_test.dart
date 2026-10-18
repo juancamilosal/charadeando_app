@@ -1,5 +1,6 @@
 import 'package:charadeando_app/models/models.dart';
 import 'package:charadeando_app/providers/providers.dart';
+import 'package:charadeando_app/services/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -165,4 +166,63 @@ void main() {
     expect(GameConfig.maxPhotoMimeRounds, 5);
     expect(const GameConfig().roundsMax, GameConfig.maxRounds);
   });
+
+  group('estadísticas anónimas', () {
+    late _RecordingStats stats;
+
+    setUp(() {
+      container.dispose();
+      stats = _RecordingStats();
+      container = ProviderContainer(
+        overrides: [statsServiceProvider.overrideWithValue(stats)],
+      );
+      controller().configure(
+        const GameConfig(rounds: 2, groups: [Group('A'), Group('B')]),
+      );
+      controller().setWrittenWords(0, words('a', 10));
+      controller().setWrittenWords(1, words('b', 10));
+      controller().start();
+    });
+
+    test('al terminar se registra una sola vez, como terminada', () {
+      for (var i = 0; i < 4; i++) {
+        play(hits: 2, passes: 1);
+      }
+      expect(state().finished, isTrue);
+      controller()
+        ..recordStats()
+        ..recordStats();
+      expect(stats.records, [(true, 4)]);
+      // Jugar otra vez no la vuelve a registrar.
+      controller().configure(state().config);
+      expect(stats.records, hasLength(1));
+    });
+
+    test('si empiezan otra partida a la mitad, la anterior cuenta como '
+        'abandonada', () {
+      play(hits: 2);
+      controller().configure(const GameConfig());
+      expect(stats.records, [(false, 1)]);
+    });
+
+    test('sin ningún turno jugado no se registra nada', () {
+      controller()
+        ..recordStats()
+        ..configure(const GameConfig());
+      expect(stats.records, isEmpty);
+    });
+  });
+}
+
+/// Guarda qué se registró: (terminada, turnos).
+class _RecordingStats extends NoStatsService {
+  final records = <(bool, int)>[];
+
+  @override
+  Future<void> record({
+    required GameConfig config,
+    required List<Turn> turns,
+    required bool finished,
+    required PlayController controller,
+  }) async => records.add((finished, turns.length));
 }

@@ -236,7 +236,12 @@ la cámara frontal graba a los participantes para revivir las risas.
   "Inclinación" (por defecto: abajo es acierto y arriba, pasar) o "Toque"
   (la mitad derecha de la pantalla es acierto y la izquierda, pasar, con
   una marca suave en cada borde durante el turno; en Modo TV el juez sigue
-  con sus botones). "Apariencia": "Fondos". "Ayuda": "Cómo se juega" y "Créditos"
+  con sus botones). "Apariencia": "Fondos". "Privacidad": un solo
+  interruptor, "Enviar reportes y estadísticas anónimas" (encendido por
+  defecto, `AppSettings.shareData`), que controla los reportes de errores y
+  las estadísticas de las partidas (ver "Reportes, reseña y estadísticas").
+  "Ayuda": "Cómo se juega", "Califica Charadeando" (abre la ficha de Play
+  Store con `in_app_review`) y "Créditos"
   (abre desde abajo de dónde salen la música, "Comedy" de nastelbom en
   Pixabay; los efectos de sonido, el toque de vadim_makes_sound y
   "¡Correcto!" de freesound_gamestudio, "Paso" de soynoviembre y la
@@ -717,6 +722,49 @@ depuración (sirve para probar, pero Google Play no la acepta). Con la firma
 de apps de Google Play activada, Google firma lo que llega a los celulares;
 el ANDROID_ID depende de esa firma, así que los códigos canjeados con una
 versión de depuración no aparecen en la de Play Store.
+
+### Reportes, reseña y estadísticas
+
+**Reportes de errores (Firebase Crashlytics, solo Android por ahora).**
+`lib/services/crash_reporting.dart` arranca Firebase en `main.dart` y
+manda como fatales los errores de Flutter (`FlutterError.onError`) y los
+asíncronos que nadie atrapó (`PlatformDispatcher.instance.onError`). Los
+errores que la app ya maneja y le muestra al jugador se mandan como no
+fatales con `ErrorReporter.instance.report` (`error_reporter.dart`): abrir
+la cámara (salvo el permiso negado), empezar o guardar una grabación, armar
+el video con FFmpeg, una compra fallida y Directus sin respuesta o con
+error (palabras, Fotomímica y castigos). Cada reporte lleva las claves
+`pantalla` (la ruta), `modo_juego` (`normal`, `fotomimica`, `tv` o
+`juez`), `grabando` y `resolucion`; nada personal. En modo debug nunca se
+envía nada (`crashReportsAllowed`), y el interruptor de Privacidad lo
+apaga.
+
+`android/app/google-services.json` **no va en el repositorio**
+(`android/.gitignore`), como `key.properties`: se descarga de la consola de
+Firebase y se guarda solo en el computador de quien compila. Sin él la app
+compila y funciona igual, sin enviar reportes (el plugin
+`com.google.gms.google-services` solo se aplica si el archivo existe).
+
+**Reseña (`in_app_review`).** En el resultado final, unos 2 segundos
+después de ver al ganador, se pide la reseña de Play Store si se cumple
+todo: es la 3.ª partida terminada o más, hubo ganador (con equipos y sin
+empate), no hubo errores durante la partida y no se pidió en los últimos 30
+días (`ReviewPolicy`). Las partidas terminadas y la fecha se guardan en
+`resena.json`. Si ya abrieron la ruleta, no se pide encima. Google decide
+si la ventana de verdad aparece.
+
+**Estadísticas anónimas.** Al llegar al resultado final (o al salir de una
+partida rápida) se envía `POST /juego/partida` con el modo, las categorías
+(las propias solo como `MIS_CATEGORIAS`), la dificultad, cuántos equipos,
+rondas y segundos por turno, palabras, aciertos y pases, cómo se marcaron
+los aciertos, si se grabó video, la versión de la app y si terminó. Si
+abandonan después de al menos un turno ("Abandonar" en el turno, o empezar
+otra partida), va con `terminada: false`. Nada identifica a la persona ni
+al celular (`GameStats.build`). Sin internet se guardan en
+`estadisticas_pendientes.json` (como mucho 50) y se mandan después (al
+abrir la app y con la siguiente partida); los errores al enviar nunca se
+muestran ni demoran el juego. Con el interruptor apagado no se envía nada
+y se borra lo pendiente.
 
 La app habla con el servidor del juego en
 `https://charadeando-api.valkiriacode.com` (`DirectusService.defaultBaseUrl`).

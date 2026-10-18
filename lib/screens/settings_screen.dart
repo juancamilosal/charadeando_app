@@ -128,6 +128,22 @@ class SettingsScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 18),
               _Section(
+                title: 'Privacidad',
+                rows: [
+                  _SwitchRow(
+                    icon: Icons.shield_outlined,
+                    color: AppColors.teal,
+                    title: 'Enviar reportes y estadísticas anónimas',
+                    subtitle:
+                        'Errores de la app y qué se juega. Nada que te '
+                        'identifique.',
+                    value: settings.shareData,
+                    onChanged: (v) => update(settings.copyWith(shareData: v)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              _Section(
                 title: 'Ayuda',
                 rows: [
                   _LinkRow(
@@ -141,6 +157,12 @@ class SettingsScreen extends ConsumerWidget {
                     color: AppColors.coral,
                     title: 'Créditos',
                     onTap: () => showCredits(context),
+                  ),
+                  _LinkRow(
+                    icon: Icons.star_rate_rounded,
+                    color: AppColors.yellow,
+                    title: 'Califica Charadeando',
+                    onTap: () => ref.read(reviewServiceProvider).openStore(),
                   ),
                 ],
               ),
@@ -233,11 +255,13 @@ class _SwitchRow extends StatelessWidget {
     required this.title,
     required this.value,
     required this.onChanged,
+    this.subtitle,
   });
 
   final IconData icon;
   final Color color;
   final String title;
+  final String? subtitle;
   final bool value;
   final ValueChanged<bool> onChanged;
 
@@ -246,6 +270,15 @@ class _SwitchRow extends StatelessWidget {
     return SwitchListTile(
       secondary: _RowIcon(icon: icon, color: color),
       title: Text(title, style: _rowTitle),
+      subtitle: subtitle == null
+          ? null
+          : Text(
+              subtitle!,
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF6B5A86),
+              ),
+            ),
       value: value,
       activeThumbColor: Colors.white,
       activeTrackColor: AppColors.green,

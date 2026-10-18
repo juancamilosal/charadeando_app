@@ -25,6 +25,9 @@ class FinalResultScreen extends ConsumerStatefulWidget {
   ConsumerState<FinalResultScreen> createState() => _FinalResultScreenState();
 }
 
+/// Cuánto se espera después de mostrar al ganador para pedir la reseña.
+const reviewDelay = Duration(seconds: 2);
+
 class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
   /// Cuántos de los grupos con menos puntos ya giraron (o saltaron) su
   /// ruleta de castigo. Giran uno después del otro.
@@ -76,6 +79,30 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
     ref.read(videoServiceProvider).deleteAll().ignore();
     // La partida se suma al historial de los equipos guardados.
     ref.read(gameControllerProvider.notifier).saveHistory().ignore();
+    // Y a las estadísticas anónimas, como terminada. Después de construir
+    // la pantalla, porque cambia el estado de la partida.
+    Future(() {
+      if (!mounted) return;
+      final controller = ref.read(gameControllerProvider.notifier)
+        ..recordStats();
+      _maybeAskReview(controller.hadErrors).ignore();
+    });
+  }
+
+  /// Desde la 3.ª partida terminada, con ganador y sin errores, se pide la
+  /// reseña de Play Store unos segundos después de ver al ganador. Nunca
+  /// encima de la ruleta: si ya la abrieron, no se pide.
+  Future<void> _maybeAskReview(bool hadErrors) async {
+    final game = ref.read(gameControllerProvider);
+    final review = ref.read(reviewServiceProvider);
+    final ask = await review.gameFinished(
+      hasWinner: game.inGroups && !game.isTie,
+      hadErrors: hadErrors,
+    );
+    if (!ask) return;
+    await Future<void>.delayed(reviewDelay);
+    if (!mounted || !(ModalRoute.of(context)?.isCurrent ?? false)) return;
+    await review.ask();
   }
 
   /// Otra partida con la misma configuración: las palabras se vuelven a

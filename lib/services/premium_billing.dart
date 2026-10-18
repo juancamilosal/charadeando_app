@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
+import 'error_reporter.dart';
+
 /// Cómo terminó una compra.
 enum BillingStatus {
   /// Quedó comprado (una compra nueva, restaurada o un código de Google
@@ -114,6 +116,13 @@ class PlayBilling implements PremiumBilling {
           // Google devuelve las compras que no se confirman en 3 días.
           if (purchase.pendingCompletePurchase) {
             await _store.completePurchase(purchase);
+          }
+          if (purchase.status == PurchaseStatus.error) {
+            ErrorReporter.instance.report(
+              purchase.error ?? 'Compra fallida',
+              null,
+              reason: 'Compra ${purchase.productID}',
+            );
           }
           final status = switch (purchase.status) {
             PurchaseStatus.purchased ||

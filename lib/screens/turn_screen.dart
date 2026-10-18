@@ -167,8 +167,13 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
       await _camera.initialize(
         ref.read(gameControllerProvider).config.resolution,
       );
-    } on Exception catch (e) {
-      _cameraError = e is CameraException && e.code.contains('Access')
+    } on Exception catch (e, stack) {
+      final denied = e is CameraException && e.code.contains('Access');
+      // Negar el permiso es decisión del jugador, no un error.
+      if (!denied) {
+        ErrorReporter.instance.report(e, stack, reason: 'Abrir la cámara');
+      }
+      _cameraError = denied
           ? 'Sin permiso de cámara: el turno se jugará sin video.'
           : 'No se pudo abrir la cámara: el turno se jugará sin video.';
     }
@@ -313,7 +318,9 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
         ..reset()
         ..start();
       _recording = true;
-    } on CameraException {
+      ErrorReporter.instance.setKey(CrashKeys.recording, true);
+    } on CameraException catch (e, stack) {
+      ErrorReporter.instance.report(e, stack, reason: 'Empezar a grabar');
       _cameraError = 'No se pudo grabar esta parte del turno.';
     }
   }
@@ -321,6 +328,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   Future<void> _stopSegment() async {
     if (!_recording) return;
     _recording = false;
+    ErrorReporter.instance.setKey(CrashKeys.recording, false);
     _segmentClock.stop();
     var saved = false;
     try {
@@ -330,7 +338,8 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
         _recorded += _segmentClock.elapsed;
         saved = true;
       }
-    } on Exception {
+    } on Exception catch (e, stack) {
+      ErrorReporter.instance.report(e, stack, reason: 'Guardar la grabación');
       saved = false;
     }
     // Si se perdió esta parte, sus textos tampoco van en el video.
@@ -559,6 +568,8 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     await _stopSegment();
     await ref.read(videoServiceProvider).deleteAll();
     await ScreenOrientation.portrait();
+    // Se abandona después de al menos un turno: cuenta como no terminada.
+    ref.read(gameControllerProvider.notifier).recordStats();
     if (mounted) context.go(Routes.categories);
   }
 

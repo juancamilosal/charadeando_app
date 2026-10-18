@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
 import 'providers/providers.dart';
+import 'services/crash_reporting.dart';
 import 'services/services.dart';
 
 Future<void> main() async {
@@ -16,6 +17,9 @@ Future<void> main() async {
   final backdrop = await BackdropStore().load();
   final settings = await SettingsStore().load();
   ScreenOrientation.inverted = settings.invertedRotation;
+  // Reportes de errores (Firebase Crashlytics), según el ajuste de
+  // Privacidad. Nunca en modo debug.
+  await startCrashReporting(enabled: settings.shareData);
   runApp(
     ProviderScope(
       overrides: [

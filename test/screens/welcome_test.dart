@@ -116,7 +116,8 @@ void main() {
     await tester.tap(find.text('Omitir'));
     await _settle(tester);
     expect(_welcome, findsNothing);
-    expect(find.text('Preferencias de juego'), findsOneWidget);
+    // De vuelta en Ajustes, donde quedó la lista.
+    expect(find.text('Cómo se juega'), findsOneWidget);
   });
 
   testWidgets('con el controlador Toque, explica que se toca la pantalla', (

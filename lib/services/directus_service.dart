@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/models.dart';
+import 'error_reporter.dart';
 
 /// Habla con la ruta del juego en Directus (extensión en
 /// `server/directus-extensions`). Las colecciones no son públicas: la app
@@ -113,15 +114,22 @@ class DirectusService {
             body: payload,
           )
           .timeout(_timeout);
-    } on Exception catch (e) {
+    } on Exception catch (e, stack) {
       debugPrint('[Directus] Sin respuesta: $e');
+      ErrorReporter.instance.report(e, stack, reason: 'Directus sin respuesta');
       throw DirectusException(null, 'No se pudo conectar con el servidor: $e');
     }
     final text = utf8.decode(response.bodyBytes);
     debugPrint('[Directus] ${response.statusCode} $text');
 
     if (response.statusCode != 200) {
-      throw DirectusException(response.statusCode, text);
+      final error = DirectusException(response.statusCode, text);
+      ErrorReporter.instance.report(
+        error,
+        StackTrace.current,
+        reason: 'Directus respondió ${response.statusCode}',
+      );
+      throw error;
     }
     final Object? decoded;
     try {

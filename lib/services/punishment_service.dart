@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import '../models/models.dart';
 import 'directus_service.dart';
 import 'punishments.dart';
+import 'error_reporter.dart';
 
 /// Castigos de la colección `castigos` de Directus (campo `nombre`), por
 /// una ruta del juego (`POST /juego/castigos`) como la de las palabras.
@@ -38,7 +39,8 @@ class PunishmentService {
             body: jsonEncode({'n': count}),
           )
           .timeout(_timeout);
-    } on Exception catch (e) {
+    } on Exception catch (e, stack) {
+      ErrorReporter.instance.report(e, stack, reason: 'Castigos sin respuesta');
       throw DirectusException(null, 'No se pudo conectar con el servidor: $e');
     }
     final text = utf8.decode(response.bodyBytes);

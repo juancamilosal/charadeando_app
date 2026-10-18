@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/models.dart';
@@ -194,6 +196,23 @@ final premiumBillingProvider = Provider<PremiumBilling>(
   (ref) => defaultPremiumBilling([for (final c in GameCategory.paid) c.code]),
 );
 final promoCodeServiceProvider = Provider((ref) => PromoCodeService());
+
+/// Estadísticas anónimas de las partidas; en las pruebas no se envía nada.
+final statsServiceProvider = Provider<StatsService>(
+  (ref) => Platform.environment.containsKey('FLUTTER_TEST')
+      ? NoStatsService()
+      : StatsService(),
+);
+
+/// La reseña de Play Store; en las pruebas no hay tienda.
+final reviewServiceProvider = Provider(
+  (ref) => ReviewService(
+    store: ReviewStore(),
+    prompt: Platform.environment.containsKey('FLUTTER_TEST')
+        ? NoReviewPrompt()
+        : PlayReviewPrompt(),
+  ),
+);
 
 /// Lo desbloqueado, con la compra de Google Play y los códigos.
 final premiumProvider = NotifierProvider<PremiumController, PremiumAccess>(

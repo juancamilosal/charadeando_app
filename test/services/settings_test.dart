@@ -32,6 +32,8 @@ void main() {
     expect(s.vibration, isTrue);
     expect(s.invertedRotation, isFalse);
     expect(s.controller, PlayController.tilt);
+    // Los reportes y las estadísticas anónimas vienen encendidos.
+    expect(s.shareData, isTrue);
   });
 
   test('los ajustes se guardan en el celular y se recuperan', () async {
@@ -46,9 +48,11 @@ void main() {
         vibration: false,
         invertedRotation: true,
         controller: PlayController.touch,
+        shareData: false,
       ),
     );
     final loaded = await store.load();
+    expect(loaded.shareData, isFalse);
     expect(loaded.music, isFalse);
     expect(loaded.sounds, isFalse);
     expect(loaded.vibration, isFalse);
@@ -126,8 +130,42 @@ void main() {
 
     await tap('Toque');
     expect(store.saved!.controller, PlayController.touch);
+
+    // Privacidad: un solo interruptor para reportes y estadísticas.
+    expect(find.text('Privacidad', skipOffstage: false), findsOneWidget);
+    await tap('Enviar reportes y estadísticas anónimas');
+    expect(store.saved!.shareData, isFalse);
     expect(find.text('Fondos', skipOffstage: false), findsOneWidget);
     expect(find.text('Cómo se juega', skipOffstage: false), findsOneWidget);
+  });
+
+  testWidgets('"Califica Charadeando" abre la ficha de Play Store', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    addTearDown(tester.view.reset);
+    final prompt = _FakePrompt();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          settingsStoreProvider.overrideWithValue(MemorySettingsStore()),
+          reviewServiceProvider.overrideWithValue(
+            ReviewService(store: ReviewStore(), prompt: prompt),
+          ),
+        ],
+        child: const MaterialApp(home: SettingsScreen()),
+      ),
+    );
+    final rate = find.text('Califica Charadeando');
+    await tester.scrollUntilVisible(
+      rate,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump();
+    await tester.tap(rate);
+    await tester.pump();
+    expect(prompt.storeOpened, 1);
   });
 
   group('vibración', () {
@@ -284,4 +322,17 @@ class RecordingEffectPlayer implements EffectPlayer {
 
   @override
   Future<void> play(SoundEffect effect) async => played.add(effect);
+}
+
+class _FakePrompt implements ReviewPrompt {
+  int storeOpened = 0;
+
+  @override
+  Future<bool> isAvailable() async => true;
+
+  @override
+  Future<void> request() async {}
+
+  @override
+  Future<void> openStore() async => storeOpened++;
 }

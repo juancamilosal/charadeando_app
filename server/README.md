@@ -49,6 +49,8 @@ Directus 11 con PostgreSQL y Redis, desplegado con Coolify en el VPS.
     20 castigos de respaldo. 10 peticiones por minuto por IP.
   - `POST /juego/fotomimica`: objetos de Fotomímica al azar (ver
     "Fotomímica" abajo). 10 peticiones por minuto por IP.
+  - `POST /juego/partida`: estadísticas anónimas de una partida (ver
+    "Estadísticas de las partidas" abajo). 20 peticiones por minuto por IP.
 - `GET /juego/estado`: uso del servidor para revisarlo sin entrar a la
   terminal: núcleos, % de CPU (medido en medio segundo), carga (1, 5 y 15
   min), RAM (total, disponible y swap, de `/proc/meminfo`), disco de `/`,
@@ -97,6 +99,69 @@ Los topes `MAX_CREATE`, `MAX_COUNT`, `MAX_EXCLUDE` y `MAX_CATEGORIES` de
 
 Pruebas del reparto y de la validación de `categorias`:
 `node --test server/tests/juego.test.mjs`.
+
+## Estadísticas de las partidas
+
+Para saber qué categorías y modos se juegan más, sin nada que identifique a
+una persona o a un celular. Colección `partidas` (no pública): la escribe
+solo la ruta `POST /juego/partida`, directo en la tabla (sin pasar por los
+servicios de Directus, así no queda en la actividad), y se mira en
+Insights. **No se guarda la IP** (solo se usa en memoria para el límite de
+peticiones), ni el ANDROID_ID, ni nombres de equipos o jugadores.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `id` | Integer, automático | |
+| `fecha` | Timestamp | La pone el servidor. |
+| `modo` | String | `NORMAL`, `LIBRE`, `COMBINADA`, `MIS_CATEGORIAS` o `FOTOMIMICA`. |
+| `categoria` | String | La categoría jugada, o `COMBINADA` si fueron varias. La calcula el servidor para poder agrupar en Insights. |
+| `categorias` | JSON | Lista de códigos. Las categorías propias llegan solo como `MIS_CATEGORIAS`. |
+| `dificultad` | String o null | `MEZCLADA`, `FACIL`, `NORMAL` o `DIFICIL`; null si las palabras no tienen dificultad. |
+| `equipos` | Integer | 0 = sin equipos. |
+| `rondas`, `duracion_turno` | Integer | Rondas y segundos por turno. |
+| `palabras_jugadas`, `aciertos`, `pases` | Integer | De todos los turnos. |
+| `modo_acierto` | String | `INCLINACION`, `TOQUE`, `JUEZ` o `TV`. |
+| `terminada` | Boolean | Llegaron al resultado final; si no, la abandonaron después de al menos un turno. |
+| `video` | Boolean | Se grabó el video de los turnos. |
+| `version_app` | String | `1.0.0+1`. |
+
+La ruta valida todo (`parsePartidaBody`) y responde 400 si sobra algún
+campo, falta uno, un valor no es de los permitidos, un código de categoría
+no es `A-Z0-9_` (así nunca llega el nombre de una categoría propia), las
+categorías no corresponden al modo, o un número está fuera de rango
+(equipos 0–10, rondas 1–20, turno 10–600 s, palabras 0–2000, y aciertos +
+pases no más que las palabras). Si guarda, responde 201. La app reintenta
+más tarde con 429 o 5xx y descarta con otro 4xx.
+
+```json
+{ "modo": "NORMAL", "categorias": ["ANIMALES"], "dificultad": "MEZCLADA",
+  "equipos": 2, "rondas": 3, "duracion_turno": 60, "palabras_jugadas": 30,
+  "aciertos": 20, "pases": 8, "modo_acierto": "INCLINACION",
+  "terminada": true, "video": true, "version_app": "1.0.0+1" }
+```
+
+La colección y el tablero de Insights **"Estadísticas de Charadeando"** se
+crean con:
+
+```sh
+node server/scripts/crear-partidas.mjs --mostrar   # solo dice qué crearía
+DIRECTUS_TOKEN=xxx node server/scripts/crear-partidas.mjs
+```
+
+Se puede correr varias veces: lo que ya existe no lo toca, y avisa si la
+colección tiene permisos públicos (no los borra). El tablero trae: partidas
+de los últimos 30 días, terminadas y abandonadas (torta: el porcentaje),
+partidas por modo, partidas por día (último mes), partidas por categoría
+(últimos 30 días) y promedio de aciertos por categoría. Si algún panel no
+se ve bien, se arma a mano en Insights → "Estadísticas de Charadeando" →
+editar → agregar panel: "Gráfico de barras" con colección `partidas`, eje
+X `categoria`, eje Y `id` y función Contar (o `aciertos` y Promedio), y
+para los últimos 30 días el filtro `fecha` mayor o igual a `$NOW(-30 days)`;
+"Serie temporal" con campo de fecha `fecha`, valor `id`, Contar y
+precisión Día; "Gráfico circular" con columna `modo` o `terminada`.
+
+Pruebas: `node --test server/tests/partida.test.mjs` (validación) y
+`node --test server/tests/partidas-script.test.mjs` (script).
 
 ## Fotomímica
 

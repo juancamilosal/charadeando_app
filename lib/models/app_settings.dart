@@ -20,6 +20,7 @@ class AppSettings {
     this.vibration = true,
     this.invertedRotation = false,
     this.controller = PlayController.tilt,
+    this.shareData = true,
   });
 
   factory AppSettings.fromJson(Map<String, dynamic> json) => AppSettings(
@@ -31,6 +32,7 @@ class AppSettings {
       (c) => c.name == json['controlador'],
       orElse: () => PlayController.tilt,
     ),
+    shareData: json['compartirDatos'] as bool? ?? true,
   );
 
   final bool music;
@@ -44,18 +46,24 @@ class AppSettings {
   final bool invertedRotation;
   final PlayController controller;
 
+  /// "Enviar reportes y estadísticas anónimas": los errores a Crashlytics y
+  /// las estadísticas de las partidas a Directus.
+  final bool shareData;
+
   AppSettings copyWith({
     bool? music,
     bool? sounds,
     bool? vibration,
     bool? invertedRotation,
     PlayController? controller,
+    bool? shareData,
   }) => AppSettings(
     music: music ?? this.music,
     sounds: sounds ?? this.sounds,
     vibration: vibration ?? this.vibration,
     invertedRotation: invertedRotation ?? this.invertedRotation,
     controller: controller ?? this.controller,
+    shareData: shareData ?? this.shareData,
   );
 
   Map<String, dynamic> toJson() => {
@@ -64,5 +72,6 @@ class AppSettings {
     'vibracion': vibration,
     'rotacionInvertida': invertedRotation,
     'controlador': controller.name,
+    'compartirDatos': shareData,
   };
 }

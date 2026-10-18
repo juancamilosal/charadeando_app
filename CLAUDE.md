@@ -49,6 +49,9 @@ detalles de cada parte están en `README.md`, `server/README.md` y
     100 cargados). La app tiene 20 de respaldo.
   - `POST /juego/fotomimica`: objetos con foto (colección Fotomímica, ya
     creada; scripts en `server/scripts/`).
+  - `POST /juego/partida`: estadísticas anónimas de cada partida
+    (colección `partidas`, sin IP ni datos del celular; panel de Insights
+    "Estadísticas de Charadeando"; script `server/scripts/crear-partidas.mjs`).
   - `GET /juego/estado`: solo administradores; RAM, CPU, carga, disco y
     tamaño de la base.
 - Al arrancar, la extensión crea el índice de palabras por categoría, idioma
@@ -77,6 +80,11 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   sección son gratis. El fondo Oro es exclusivo de quien compra todo.
 - **Fotomímica:** cartel "Más juegos" antes de Mis categorías, con fotos
   precargadas.
+- **Reportes, reseña y estadísticas:** Firebase Crashlytics solo en Android
+  (`google-services.json` fuera del repo; sin él compila igual), reseña con
+  `in_app_review` (`ReviewPolicy`) y estadísticas a `/juego/partida` con
+  cola en el celular. Ajustes > Privacidad tiene un solo interruptor para
+  reportes y estadísticas.
 - **Marca y arranque:** splash nativo solo con el fondo y luego pantalla
   Flutter animada con destellos. Ícono y gráficos de Play en `branding/`.
 

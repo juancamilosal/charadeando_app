@@ -38,6 +38,23 @@ class _CharadeandoAppState extends ConsumerState<CharadeandoApp>
       settingsProvider.select((s) => s.music),
       (_, on) => ref.read(backgroundMusicProvider).enabled = on,
     );
+    // Estadísticas anónimas: se envían las que quedaron pendientes y se
+    // dejan de enviar (y se borran) si apagan el ajuste de Privacidad.
+    final stats = ref.read(statsServiceProvider)
+      ..enabled = ref.read(settingsProvider).shareData;
+    stats.flush().ignore();
+    ref.listenManual(settingsProvider.select((s) => s.shareData), (_, on) {
+      stats.enabled = on;
+      if (!on) stats.clear().ignore();
+      ErrorReporter.instance.setEnabled(on).ignore();
+    });
+    // La pantalla actual acompaña cada reporte de error.
+    _router.routerDelegate.addListener(_reportScreen);
+  }
+
+  void _reportScreen() {
+    final path = _router.routerDelegate.currentConfiguration.uri.path;
+    ErrorReporter.instance.setKey(CrashKeys.screen, path);
   }
 
   /// En segundo plano (o con el celular bloqueado) la música se pausa.
@@ -57,6 +74,7 @@ class _CharadeandoAppState extends ConsumerState<CharadeandoApp>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _router.routerDelegate.removeListener(_reportScreen);
     _router.dispose();
     super.dispose();
   }

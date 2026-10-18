@@ -109,6 +109,9 @@ const limits = {
   misCodigos: { points: 5, hits: new Map() },
   castigos: { points: 10, hits: new Map() },
   fotomimica: { points: 10, hits: new Map() },
+  // Una partida manda uno al terminar (y la app reintenta los que no
+  // llegaron, de a uno), así que 20 por minuto sobra.
+  partida: { points: 20, hits: new Map() },
 };
 
 /// Objetos de Fotomímica (nombre, imagen en directus_files, status y
@@ -126,6 +129,141 @@ const PUNISHMENTS = 'castigos';
 /// Tope de castigos por petición. Debe coincidir con
 /// PunishmentService.maxCount.
 const MAX_PUNISHMENTS = 200;
+
+/// Estadísticas anónimas de las partidas. No es pública: solo la escribe
+/// /juego/partida y se ve en Insights.
+const GAMES = 'partidas';
+
+/// Modos de juego y cómo se marcan los aciertos, como los manda la app.
+export const MODOS_PARTIDA = ['NORMAL', 'LIBRE', 'COMBINADA', 'MIS_CATEGORIAS', 'FOTOMIMICA'];
+export const MODOS_ACIERTO = ['INCLINACION', 'TOQUE', 'JUEZ', 'TV'];
+
+/// Dificultades de una partida con palabras automáticas (MEZCLADA es la que
+/// viene elegida). Sin dificultad (palabras escritas, Fotomímica,
+/// Mis categorías) llega null.
+export const DIFICULTADES_PARTIDA = ['MEZCLADA', ...DIFICULTADES];
+
+/// Campos que acepta /juego/partida; cualquier otro se rechaza.
+const CAMPOS_PARTIDA = [
+  'modo',
+  'categorias',
+  'dificultad',
+  'equipos',
+  'rondas',
+  'duracion_turno',
+  'palabras_jugadas',
+  'aciertos',
+  'pases',
+  'modo_acierto',
+  'terminada',
+  'video',
+  'version_app',
+];
+
+/// Topes razonables de una partida. Los de la app son menores (4 equipos,
+/// 10 rondas, turnos de 30 a 90 s); estos dejan margen para versiones
+/// futuras sin aceptar cualquier cosa.
+const PARTIDA_MAX = {
+  equipos: 10,
+  rondas: 20,
+  duracionMin: 10,
+  duracionMax: 600,
+  palabras: 2000,
+};
+
+/// Código de categoría: mayúsculas, números y guion bajo. Así nunca llega
+/// el nombre de una categoría propia ("Mi familia").
+const CATEGORY_CODE = /^[A-Z0-9_]{1,40}$/;
+
+/// Valida el cuerpo de /juego/partida. Devuelve la fila lista para guardar
+/// (sin `id` ni `fecha`, que pone el servidor) o `{ error }`. `categoria`
+/// es la única categoría jugada, o COMBINADA si fueron varias, para poder
+/// agrupar en Insights.
+export function parsePartidaBody(body) {
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) {
+    return { error: 'El cuerpo debe ser un objeto JSON.' };
+  }
+  const extra = Object.keys(body).filter((k) => !CAMPOS_PARTIDA.includes(k));
+  if (extra.length > 0) return { error: `Campos no permitidos: ${extra.join(', ')}.` };
+  const faltan = CAMPOS_PARTIDA.filter((k) => !(k in body) && k !== 'dificultad');
+  if (faltan.length > 0) return { error: `Faltan campos: ${faltan.join(', ')}.` };
+
+  const b = body;
+  if (!MODOS_PARTIDA.includes(b.modo)) {
+    return { error: `"modo" debe ser uno de ${MODOS_PARTIDA.join(', ')}.` };
+  }
+  const categorias = b.categorias;
+  if (
+    !Array.isArray(categorias) ||
+    categorias.length === 0 ||
+    categorias.length > MAX_CATEGORIES ||
+    !categorias.every((c) => typeof c === 'string' && CATEGORY_CODE.test(c)) ||
+    new Set(categorias).size !== categorias.length
+  ) {
+    return {
+      error: `"categorias" debe ser una lista de 1 a ${MAX_CATEGORIES} códigos distintos (A-Z, 0-9, _).`,
+    };
+  }
+  const solo = (codigo) => categorias.length === 1 && categorias[0] === codigo;
+  const modoOk = {
+    NORMAL: categorias.length === 1 && !['LIBRE', 'FOTOMIMICA', 'MIS_CATEGORIAS'].includes(categorias[0]),
+    LIBRE: solo('LIBRE'),
+    FOTOMIMICA: solo('FOTOMIMICA'),
+    MIS_CATEGORIAS: solo('MIS_CATEGORIAS'),
+    COMBINADA:
+      categorias.length >= 2 && !categorias.includes('LIBRE') && !categorias.includes('FOTOMIMICA'),
+  }[b.modo];
+  if (!modoOk) return { error: `"categorias" no corresponde al modo ${b.modo}.` };
+
+  const dificultad = b.dificultad ?? null;
+  if (dificultad !== null && !DIFICULTADES_PARTIDA.includes(dificultad)) {
+    return { error: `"dificultad" debe ser null o uno de ${DIFICULTADES_PARTIDA.join(', ')}.` };
+  }
+
+  const entero = (campo, min, max) =>
+    Number.isInteger(b[campo]) && b[campo] >= min && b[campo] <= max
+      ? null
+      : `"${campo}" debe ser un entero entre ${min} y ${max}.`;
+  const rangos = [
+    entero('equipos', 0, PARTIDA_MAX.equipos),
+    entero('rondas', 1, PARTIDA_MAX.rondas),
+    entero('duracion_turno', PARTIDA_MAX.duracionMin, PARTIDA_MAX.duracionMax),
+    entero('palabras_jugadas', 0, PARTIDA_MAX.palabras),
+    entero('aciertos', 0, PARTIDA_MAX.palabras),
+    entero('pases', 0, PARTIDA_MAX.palabras),
+  ].filter(Boolean);
+  if (rangos.length > 0) return { error: rangos[0] };
+  if (b.aciertos + b.pases > b.palabras_jugadas) {
+    return { error: '"aciertos" más "pases" no puede ser mayor que "palabras_jugadas".' };
+  }
+
+  if (!MODOS_ACIERTO.includes(b.modo_acierto)) {
+    return { error: `"modo_acierto" debe ser uno de ${MODOS_ACIERTO.join(', ')}.` };
+  }
+  for (const campo of ['terminada', 'video']) {
+    if (typeof b[campo] !== 'boolean') return { error: `"${campo}" debe ser true o false.` };
+  }
+  if (typeof b.version_app !== 'string' || !/^\d{1,4}\.\d{1,4}\.\d{1,4}(\+\d{1,6})?$/.test(b.version_app)) {
+    return { error: '"version_app" debe ser como 1.0.0+1.' };
+  }
+
+  return {
+    modo: b.modo,
+    categoria: categorias.length === 1 ? categorias[0] : 'COMBINADA',
+    categorias,
+    dificultad,
+    equipos: b.equipos,
+    rondas: b.rondas,
+    duracion_turno: b.duracion_turno,
+    palabras_jugadas: b.palabras_jugadas,
+    aciertos: b.aciertos,
+    pases: b.pases,
+    modo_acierto: b.modo_acierto,
+    terminada: b.terminada,
+    video: b.video,
+    version_app: b.version_app,
+  };
+}
 
 /// Códigos promocionales y sus canjes. Ninguna de las dos es pública.
 const CODES = 'codigos';
@@ -815,6 +953,29 @@ export default {
       } catch (e) {
         logger.error(e, '[juego] No se pudieron leer los objetos de Fotomímica');
         return error(res, 500, 'No se pudieron leer los objetos de Fotomímica.');
+      }
+    });
+
+    // Estadísticas anónimas de una partida (ver parsePartidaBody). No se
+    // guarda la IP ni nada del celular: la IP solo se usa en memoria para el
+    // límite de peticiones. Se escribe directo en la tabla, sin pasar por
+    // los servicios de Directus, para que tampoco quede en la actividad.
+    router.post('/partida', async (req, res) => {
+      if (!allowed('partida', clientIp(req))) {
+        return error(res, 429, 'Demasiadas peticiones. Espera un minuto.');
+      }
+      const row = parsePartidaBody(req.body);
+      if (row.error) return error(res, 400, row.error);
+      try {
+        await database(GAMES).insert({
+          ...row,
+          categorias: JSON.stringify(row.categorias),
+          fecha: new Date(),
+        });
+        return res.status(201).json({ data: { ok: true } });
+      } catch (e) {
+        logger.error(e, '[juego] No se pudo guardar la partida');
+        return error(res, 500, 'No se pudo guardar la partida.');
       }
     });
 

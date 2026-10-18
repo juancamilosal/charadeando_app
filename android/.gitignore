@@ -12,3 +12,7 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# Configuración de Firebase: queda solo en el computador de quien compila
+# (ver README.md, "Reportes de errores").
+app/google-services.json

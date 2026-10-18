@@ -189,6 +189,8 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
     setState(() => _leaving = true);
     _lockJudge();
     await ref.read(turnVideoProvider.notifier).discard();
+    // La partida rápida termina con su único turno.
+    ref.read(gameControllerProvider.notifier).recordStats();
     if (mounted) context.go(Routes.categories);
   }
 

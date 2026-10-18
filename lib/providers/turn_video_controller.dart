@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/models.dart';
 import 'providers.dart';
+import '../services/error_reporter.dart';
 
 enum TurnVideoStatus { none, rendering, ready }
 
@@ -75,8 +76,13 @@ class TurnVideoController extends Notifier<TurnVideoState> {
         await videos.delete(segment);
       }
       state = TurnVideoState(TurnVideoStatus.ready, path: output);
-    } on Exception {
+    } on Exception catch (e, stack) {
       if (generation != _generation) return;
+      ErrorReporter.instance.report(
+        e,
+        stack,
+        reason: 'Armar el video (FFmpeg)',
+      );
       // Sin palabras, al menos queda la primera parte tal como se grabó.
       await _deleteIfExists(output);
       state = TurnVideoState(

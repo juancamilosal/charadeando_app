@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/models.dart';
+import '../services/error_reporter.dart';
 import '../services/punishments.dart';
 import 'providers.dart';
 
@@ -16,6 +17,8 @@ class GameState {
     this.groupIndex = 0,
     this.finished = false,
     this.historySaved = false,
+    this.statsSent = false,
+    this.errorsAtStart = 0,
   });
 
   factory GameState.fromConfig(GameConfig config) => GameState(
@@ -43,6 +46,13 @@ class GameState {
 
   /// Ya se sumó esta partida al historial de los equipos guardados.
   final bool historySaved;
+
+  /// Ya se registraron sus estadísticas anónimas.
+  final bool statsSent;
+
+  /// Errores reportados en la app cuando empezó la partida
+  /// ([ErrorReporter.errorCount]), para saber si hubo alguno durante ella.
+  final int errorsAtStart;
 
   List<Group> get groups => config.groups;
   Group get currentGroup => groups[groupIndex];
@@ -93,6 +103,8 @@ class GameState {
     int? groupIndex,
     bool? finished,
     bool? historySaved,
+    bool? statsSent,
+    int? errorsAtStart,
   }) {
     return GameState(
       config: config,
@@ -103,6 +115,8 @@ class GameState {
       groupIndex: groupIndex ?? this.groupIndex,
       finished: finished ?? this.finished,
       historySaved: historySaved ?? this.historySaved,
+      statsSent: statsSent ?? this.statsSent,
+      errorsAtStart: errorsAtStart ?? this.errorsAtStart,
     );
   }
 }
@@ -113,10 +127,34 @@ class GameController extends Notifier<GameState> {
   @override
   GameState build() => GameState.fromConfig(const GameConfig());
 
-  /// Empieza a preparar una partida nueva con [config].
+  /// Empieza a preparar una partida nueva con [config]. Si la anterior se
+  /// quedó a la mitad, se registra como abandonada.
   void configure(GameConfig config) {
+    recordStats();
     state = GameState.fromConfig(config);
   }
+
+  /// Registra las estadísticas anónimas de la partida, una sola vez y solo
+  /// si se jugó al menos un turno: terminada si llegó al resultado final (o
+  /// es una partida rápida, que termina con su único turno), abandonada si
+  /// no. Se envía por detrás y nunca demora el juego.
+  void recordStats() {
+    final game = state;
+    if (game.turns.isEmpty || game.statsSent) return;
+    state = game.copyWith(statsSent: true);
+    ref
+        .read(statsServiceProvider)
+        .record(
+          config: game.config,
+          turns: game.turns,
+          finished: game.finished || game.config.quick,
+          controller: ref.read(settingsProvider).controller,
+        )
+        .ignore();
+  }
+
+  /// Si hubo algún error en la app desde que empezó la partida.
+  bool get hadErrors => ErrorReporter.instance.errorCount > state.errorsAtStart;
 
   void setWrittenWords(int author, List<Word> words) {
     final written = [...state.writtenWords];
@@ -147,8 +185,23 @@ class GameController extends Notifier<GameState> {
   }
 
   void startWithDecks(List<List<Word>> decks) {
+    final config = state.config;
+    final reporter = ErrorReporter.instance
+      ..setKey(CrashKeys.gameMode, switch (config) {
+        GameConfig(hitMode: HitMode.tv) => 'tv',
+        GameConfig(judgePhone: true) => 'juez',
+        GameConfig(photoMime: true) => 'fotomimica',
+        _ => 'normal',
+      })
+      ..setKey(CrashKeys.resolution, config.resolution.name);
     state = _firstPlayableFrom(
-      state.copyWith(decks: decks, turns: const [], round: 1, groupIndex: 0),
+      state.copyWith(
+        decks: decks,
+        turns: const [],
+        round: 1,
+        groupIndex: 0,
+        errorsAtStart: reporter.errorCount,
+      ),
     );
   }
 
