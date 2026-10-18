@@ -113,7 +113,8 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
           .read(photoMimeBankProvider)
           .prepare(
             min(config.autoWordsNeeded, PhotoMimeBank.maxPerGame),
-            includePremium: ref.read(premiumUnlockedProvider),
+            includePremium:
+                PhotoMimeBank.freeForNow || ref.read(premiumUnlockedProvider),
             minimum: config.groupCount,
             onProgress: (ready, total) {
               if (!mounted) return;

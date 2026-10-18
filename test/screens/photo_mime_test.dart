@@ -8,7 +8,6 @@ import 'package:charadeando_app/screens/auto_words_screen.dart';
 import 'package:charadeando_app/screens/category_screen.dart';
 import 'package:charadeando_app/services/services.dart';
 import 'package:charadeando_app/widgets/photo_mime_view.dart';
-import 'package:charadeando_app/widgets/premium_sheet.dart';
 import 'package:charadeando_app/widgets/tv_turn_view.dart';
 import 'package:charadeando_app/widgets/word_card.dart';
 import 'package:flutter/material.dart';
@@ -116,8 +115,8 @@ void main() {
       await tester.pump();
     }
 
-    testWidgets('sin Premium avisa que hay más objetos y al tocar ofrece '
-        'Todo Charadeando', (tester) async {
+    testWidgets('va antes de Mis categorías y, gratis por ahora, sin aviso '
+        'de Premium', (tester) async {
       await pump(tester);
       expect(find.byType(PhotoMimeSection), findsOneWidget);
       expect(find.text('Fotomímica'), findsWidgets);
@@ -132,14 +131,8 @@ void main() {
         tester.getTopLeft(find.byType(PhotoMimeSection)).dy,
         lessThan(tester.getTopLeft(find.text('Mis categorías')).dy),
       );
-      final more = find.text('Más objetos con Premium');
-      expect(more, findsOneWidget);
-      await tester.ensureVisible(more);
-      await tester.pump();
-      await tester.tap(more);
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
-      expect(find.byType(PremiumSheet), findsOneWidget);
+      expect(PhotoMimeBank.freeForNow, isTrue);
+      expect(find.text('Más objetos con Premium'), findsNothing);
     });
 
     testWidgets('con Premium no hay aviso y la tarjeta abre cómo jugar', (
@@ -218,8 +211,9 @@ void main() {
       final (container, bank) = await pump(tester);
       expect(find.text('Fotomímica'), findsOneWidget);
       expect(find.text('Preparando imágenes…'), findsOneWidget);
-      // 2 equipos × 1 ronda × (30 s / 3) = 20 objetos, sin Premium.
-      expect(bank.requests.single, (20, false, 2));
+      // 2 equipos × 1 ronda × (30 s / 3) = 20 objetos; por ahora, todos
+      // gratis, también los de Premium.
+      expect(bank.requests.single, (20, true, 2));
 
       bank.progress!(3, 20);
       await tester.pump();

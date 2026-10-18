@@ -57,6 +57,11 @@ class PhotoMimeBank {
   /// el juego, vuelven los ya jugados (como con las palabras).
   static const maxPerGame = 90;
 
+  /// Por ahora Fotomímica es gratis y completa: salen todos los objetos
+  /// (también los marcados `premium` en Directus) y no se muestra "Más
+  /// objetos con Premium". Más adelante todo el juego será Premium.
+  static const freeForNow = true;
+
   /// Objetos de más que se piden, por si alguna foto falla.
   static const spare = 10;
 

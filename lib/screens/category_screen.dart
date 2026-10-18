@@ -227,7 +227,8 @@ class CategoryScreen extends ConsumerWidget {
         const CategorySectionHeader(title: 'Más juegos', trailing: '1 juego'),
         const SizedBox(height: 18),
         PhotoMimeSection(
-          premium: allUnlocked,
+          // Por ahora es gratis para todos: sin "Más objetos con Premium".
+          premium: PhotoMimeBank.freeForNow || allUnlocked,
           onPlay: () => _choose(
             context,
             ref,
