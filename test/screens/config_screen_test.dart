@@ -8,6 +8,7 @@ import 'package:charadeando_app/screens/team_editor_screen.dart';
 import 'package:charadeando_app/services/services.dart';
 import 'package:charadeando_app/widgets/category_art.dart';
 import 'package:charadeando_app/widgets/config_section.dart';
+import 'package:charadeando_app/widgets/number_stepper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
@@ -559,12 +560,13 @@ void main() {
     expect(config.customCategory?.name, 'Mi familia');
   });
 
-  testWidgets('en Fotomímica no se ve la Puntuación y se juega por frase', (
-    tester,
-  ) async {
+  testWidgets('en Fotomímica no se ve la Puntuación, se juega por frase y '
+      'como mucho 5 rondas', (tester) async {
     final container = await pumpConfig(
       tester,
       config: const GameConfig(
+        // Viene de una partida de 8 rondas.
+        rounds: 8,
         wordSource: WordSource.random,
         groups: [Group('A'), Group('B')],
         category: GameCategory.photoMime,
@@ -590,11 +592,19 @@ void main() {
     );
     expect(find.text('Puntuación'), findsNothing);
     expect(find.text('Cómo se cuentan los puntos'), findsNothing);
+    final rounds = tester.widget<NumberStepper>(
+      find.descendant(
+        of: find.widgetWithText(ConfigRow, 'Rondas'),
+        matching: find.byType(NumberStepper),
+      ),
+    );
+    expect((rounds.value, rounds.max), (5, 5));
     await tapContinue(tester);
     expect(find.text('Descargando'), findsOneWidget);
     final config = container.read(gameControllerProvider).config;
     expect(config.photoMime, isTrue);
     expect(config.scoringMode, ScoringMode.perPhrase);
+    expect(config.rounds, GameConfig.maxPhotoMimeRounds);
   });
 
   testWidgets('sin equipos no se ven Equipos ni Palabras por equipo', (

@@ -422,7 +422,12 @@ la cámara frontal graba a los participantes para revivir las risas.
   debajo su nombre en letra pequeña (blanca) para quien actúa (`PhotoMimeView`, en `WordCard` y en el Modo TV). En su
   configuración no se ve la sección "Puntuación": se cuenta siempre un
   punto por acierto ("Por frase"), aunque la última partida fuera "Por
-  palabra". No tiene
+  palabra". Como todavía hay pocos objetos, se juegan como mucho 5 rondas
+  (`GameConfig.maxPhotoMimeRounds`) y las fotos se repiten dentro de la
+  partida: cada mazo se completa hasta lo que alcanzaría un grupo rápido
+  (primero con los objetos que no tiene, después repitiendo, nunca la
+  misma foto dos veces seguidas), y al terminar cada turno se rellena
+  igual, mejor con fotos que ese grupo no acaba de ver. No tiene
   dificultad ni se combina con otras categorías (no sale en "Combinar
   categorías"). Antes de empezar, "Preparando imágenes…" con una barra y
   "27 de 60": `PhotoMimeBank` pide los objetos a `POST /juego/fotomimica`

@@ -149,6 +149,9 @@ class GameConfig {
   static const maxGroups = 4;
   static const minRounds = 1;
   static const maxRounds = 10;
+
+  /// Fotomímica tiene pocos objetos por ahora: como mucho 5 rondas.
+  static const maxPhotoMimeRounds = 5;
   static const minTurnSeconds = 30;
   static const maxTurnSeconds = 90;
   static const minWordsPerGroup = 5;
@@ -209,6 +212,10 @@ class GameConfig {
   /// dificultad ni se combina con otras categorías.
   bool get photoMime =>
       !isMix && customCategory == null && category == GameCategory.photoMime;
+
+  /// Rondas que se pueden elegir: [maxPhotoMimeRounds] en Fotomímica y
+  /// [maxRounds] en lo demás.
+  int get roundsMax => photoMime ? maxPhotoMimeRounds : maxRounds;
 
   /// Nombre de la categoría que se juega, propia o del juego. En una mezcla,
   /// "Mezcla: Animales, Películas y Mi familia", o "Mezcla de 5 categorías"

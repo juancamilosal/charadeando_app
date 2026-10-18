@@ -121,4 +121,48 @@ void main() {
     expect(state().finished, isTrue);
     expect(state().turns, hasLength(6));
   });
+
+  test('en Fotomímica, con pocos objetos, las fotos se repiten y cada turno '
+      'tiene las que alcanzaría un grupo rápido', () {
+    controller().configure(
+      const GameConfig(
+        rounds: 5,
+        groups: [Group('A'), Group('B')],
+        wordSource: WordSource.random,
+        category: GameCategory.photoMime,
+        turnDuration: Duration(seconds: 30),
+      ),
+    );
+    // Solo 6 objetos; un grupo rápido alcanza 10 en 30 segundos.
+    final photos = [
+      for (var i = 0; i < 6; i++)
+        Word('Objeto $i', category: GameCategory.photoMime.code),
+    ];
+    controller().startWithWords(photos);
+    for (final deck in state().decks) {
+      expect(deck, hasLength(10));
+      // Primero salen todos los objetos, sin repetir.
+      expect(deck.take(6).toSet(), hasLength(6));
+      // Nunca dos veces seguidas la misma foto.
+      for (var i = 1; i < deck.length; i++) {
+        expect(deck[i], isNot(deck[i - 1]));
+      }
+    }
+    for (var turn = 0; turn < 10; turn++) {
+      expect(state().finished, isFalse);
+      expect(state().currentDeck, hasLength(10));
+      play(hits: 7, passes: 3);
+    }
+    expect(state().finished, isTrue);
+    expect(state().turns, hasLength(10));
+  });
+
+  test('Fotomímica permite como mucho 5 rondas; lo demás, 10', () {
+    expect(
+      const GameConfig(category: GameCategory.photoMime).roundsMax,
+      GameConfig.maxPhotoMimeRounds,
+    );
+    expect(GameConfig.maxPhotoMimeRounds, 5);
+    expect(const GameConfig().roundsMax, GameConfig.maxRounds);
+  });
 }

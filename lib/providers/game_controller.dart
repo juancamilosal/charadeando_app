@@ -130,9 +130,21 @@ class GameController extends Notifier<GameState> {
   );
 
   /// Empieza con las palabras automáticas, repartidas entre los grupos.
-  void startWithWords(List<Word> words) => startWithDecks(
-    ref.read(wordServiceProvider).decksFromWords(words, state.groups.length),
-  );
+  /// En Fotomímica, si no alcanzan los objetos, cada mazo se completa
+  /// repitiendo fotos.
+  void startWithWords(List<Word> words) {
+    final decks = ref
+        .read(wordServiceProvider)
+        .decksFromWords(words, state.groups.length);
+    startWithDecks(
+      state.config.photoMime
+          ? [
+              for (final deck in decks)
+                _repeatPhotos(deck, words, state.config.fastWordsPerTurn),
+            ]
+          : decks,
+    );
+  }
 
   void startWithDecks(List<List<Word>> decks) {
     state = _firstPlayableFrom(
@@ -197,6 +209,20 @@ class GameController extends Notifier<GameState> {
   List<Word> _refill(List<Word> deck, Turn justPlayed) {
     final need = state.config.fastWordsPerTurn - deck.length;
     if (need <= 0) return deck;
+    if (state.config.photoMime) {
+      // Hay pocos objetos: se repiten, mejor los que este grupo no acaba
+      // de ver.
+      return _repeatPhotos(
+        deck,
+        {
+          for (final d in state.decks) ...d,
+          for (final t in [...state.turns, justPlayed])
+            for (final e in t.entries) e.word,
+        },
+        state.config.fastWordsPerTurn,
+        avoid: {for (final e in justPlayed.entries) e.word},
+      );
+    }
     // Las que siguen en algún mazo no se repiten; el del grupo que acaba de
     // jugar es [deck], porque el estado todavía tiene el anterior.
     final inDecks = {
@@ -210,6 +236,44 @@ class GameController extends Notifier<GameState> {
           if (!inDecks.contains(e.word)) e.word,
     }.toList()..shuffle(_random);
     return [...deck, ...played.take(need)];
+  }
+
+  /// Fotomímica: completa [deck] hasta [size] fotos con las de [pool],
+  /// aunque se repitan, porque todavía hay pocos objetos. Primero van las
+  /// que no están en el mazo ni en [avoid]; después, las que no están en el
+  /// mazo, y si aun así faltan, cualquiera que no sea igual a la anterior.
+  List<Word> _repeatPhotos(
+    List<Word> deck,
+    Iterable<Word> pool,
+    int size, {
+    Set<Word> avoid = const {},
+  }) {
+    final photos = pool.toSet().toList();
+    if (photos.isEmpty) return deck;
+    final result = [...deck];
+    while (result.length < size) {
+      final fresh = [
+        for (final p in photos)
+          if (!result.contains(p) && !avoid.contains(p)) p,
+      ];
+      final unused = [
+        for (final p in photos)
+          if (!result.contains(p)) p,
+      ];
+      final other = [
+        for (final p in photos)
+          if (p != result.lastOrNull) p,
+      ];
+      final options = fresh.isNotEmpty
+          ? fresh
+          : unused.isNotEmpty
+          ? unused
+          : other.isNotEmpty
+          ? other
+          : photos;
+      result.add(options[_random.nextInt(options.length)]);
+    }
+    return result;
   }
 
   /// Pasa al siguiente grupo, o a la siguiente ronda cuando ya jugaron todos.

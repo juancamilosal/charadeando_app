@@ -37,6 +37,10 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   void initState() {
     super.initState();
     _config = ref.read(gameControllerProvider).config;
+    // Fotomímica permite menos rondas.
+    if (_config.rounds > _config.roundsMax) {
+      _config = _config.copyWith(rounds: _config.roundsMax);
+    }
     if (_automatic && !_noDifficulty) {
       // Las palabras vienen mezcladas.
       _difficulty = Difficulty.mixed;
@@ -64,7 +68,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
             if (t.id == id) Group(t.name, teamId: t.id),
       ];
       _config = _config.copyWith(
-        rounds: saved.rounds.clamp(GameConfig.minRounds, GameConfig.maxRounds),
+        rounds: saved.rounds.clamp(GameConfig.minRounds, _config.roundsMax),
         turnDuration: Duration(
           seconds: saved.turnDuration.inSeconds.clamp(
             GameConfig.minTurnSeconds,
@@ -368,7 +372,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                       child: NumberStepper(
                         value: _config.rounds,
                         min: GameConfig.minRounds,
-                        max: GameConfig.maxRounds,
+                        max: _config.roundsMax,
                         onChanged: (v) => _update(_config.copyWith(rounds: v)),
                       ),
                     ),
@@ -500,7 +504,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
           child: NumberStepper(
             value: _config.rounds,
             min: GameConfig.minRounds,
-            max: GameConfig.maxRounds,
+            max: _config.roundsMax,
             onChanged: (v) => _update(_config.copyWith(rounds: v)),
           ),
         ),
