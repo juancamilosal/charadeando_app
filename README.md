@@ -683,6 +683,41 @@ La app se prueba en un celular real: necesita cámara frontal y acelerómetro.
 En modo debug, durante el turno tocar la mitad izquierda de la pantalla pasa
 y la mitad derecha acierta, para probar en un emulador.
 
+### Publicar en Google Play
+
+El identificador de la app es `com.valkiriacode.charadeando` (en Android e
+iOS). No se puede cambiar después de publicar.
+
+La versión de lanzamiento se firma con la llave de subida. Ni la llave
+(`.jks`) ni sus contraseñas van en el repositorio (`android/.gitignore`):
+viven solo en el computador de quien publica.
+
+1. Crear la llave una sola vez y guardarla en un lugar seguro (sin ella no
+   se pueden publicar actualizaciones):
+   ```sh
+   keytool -genkey -v -keystore ~/charadeando-upload.jks -keyalg RSA \
+     -keysize 2048 -validity 10000 -alias upload
+   ```
+2. Crear `android/key.properties`:
+   ```properties
+   storePassword=<contraseña del almacén>
+   keyPassword=<contraseña de la llave>
+   keyAlias=upload
+   storeFile=/ruta/a/charadeando-upload.jks
+   ```
+3. Subir el número después del `+` en `version:` de `pubspec.yaml` en
+   cada publicación (`1.0.0+1`, `1.0.1+2`…) y generar el paquete:
+   ```sh
+   flutter build appbundle --release
+   ```
+   Queda en `build/app/outputs/bundle/release/app-release.aab`.
+
+Sin `key.properties` la versión de lanzamiento se firma con la llave de
+depuración (sirve para probar, pero Google Play no la acepta). Con la firma
+de apps de Google Play activada, Google firma lo que llega a los celulares;
+el ANDROID_ID depende de esa firma, así que los códigos canjeados con una
+versión de depuración no aparecen en la de Play Store.
+
 La app habla con el servidor del juego en
 `https://charadeando-api.valkiriacode.com` (`DirectusService.defaultBaseUrl`).
 Para probar con otro servidor: `flutter run --dart-define=DIRECTUS_URL=https://...`.

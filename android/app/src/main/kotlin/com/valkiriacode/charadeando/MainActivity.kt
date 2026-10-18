@@ -1,4 +1,4 @@
-package com.example.charadeando_app
+package com.valkiriacode.charadeando
 
 import android.content.ActivityNotFoundException
 import android.content.Context
