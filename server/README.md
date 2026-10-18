@@ -387,9 +387,8 @@ y `contents`. Lee el texto de Gemini en `respuesta` (o `texto`, `text`,
 - Firebase App Check (Play Integrity / App Attest) para que solo la app
   publicada pueda llamar a la ruta.
 
-- Cargar los objetos de Fotomímica: la colección `fotomimica` ya existe pero
-  está vacía. Se cargan con `importar-fotomimica.mjs` (ver "Fotomímica"
-  arriba); mientras tanto la app usa sus fotos precargadas.
+- Más objetos de Fotomímica: hoy hay 87 publicados, todos gratis. Se
+  agregan con `importar-fotomimica.mjs` (ver "Fotomímica" arriba).
 
 ## Palabras
 

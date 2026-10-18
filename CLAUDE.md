@@ -55,10 +55,9 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   y dificultad.
 - **Pendiente:** proteger la URL pública del flujo de Gemini y agregar
   Firebase App Check.
-- **Pendiente:** cargar los objetos de Fotomímica en Directus (la colección
-  `fotomimica` existe pero está vacía; se cargan con
-  `server/scripts/importar-fotomimica.mjs`). Mientras tanto la app usa las
-  fotos precargadas.
+- Fotomímica: la colección `fotomimica` tiene 87 objetos publicados (todos
+  gratis por ahora; la app los da gratis con `PhotoMimeBank.freeForNow`).
+  Se agregan más con `server/scripts/importar-fotomimica.mjs`.
 - Cómo instalar o actualizar la extensión: `server/README.md`.
 
 ## Funciones ya hechas en la app
