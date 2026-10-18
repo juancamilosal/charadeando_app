@@ -52,19 +52,17 @@ class WordCard extends StatelessWidget {
       WordOutcome.pass => (_passColors, 'Paso'),
       null => (AppColors.word, word.text),
     };
-    // Fotomímica: la foto grande sobre fondo oscuro, en vez de la palabra.
+    // Fotomímica: la foto grande, en vez de la palabra, sobre el mismo
+    // fondo de siempre.
     final photo = feedback == null && word.image != null;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
       decoration: BoxDecoration(
-        color: photo ? photoMimeBackground : null,
-        gradient: photo
-            ? null
-            : LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: colors,
-              ),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: colors,
+        ),
       ),
       child: SafeArea(
         child: Stack(

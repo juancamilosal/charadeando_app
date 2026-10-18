@@ -418,8 +418,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   marcador y ruleta al
   final, partida rápida o personalizada, el mismo tiempo de turno), pero
   en vez de la palabra se ve la foto del objeto lo más grande posible, sin
-  deformarla, sobre fondo oscuro, y debajo su nombre en letra pequeña para
-  quien actúa (`PhotoMimeView`, en `WordCard` y en el Modo TV). En su
+  deformarla, sobre el mismo fondo de colores del turno con palabras, y
+  debajo su nombre en letra pequeña (blanca) para quien actúa (`PhotoMimeView`, en `WordCard` y en el Modo TV). En su
   configuración no se ve la sección "Puntuación": se cuenta siempre un
   punto por acierto ("Por frase"), aunque la última partida fuera "Por
   palabra". No tiene

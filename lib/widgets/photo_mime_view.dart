@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../theme.dart';
 
-/// Fondo oscuro del turno de Fotomímica, para que la foto resalte.
+/// Fondo oscuro del cartel de Fotomímica en Categorías.
 const photoMimeBackground = Color(0xFF14121C);
 
 /// Lo que se ve en el turno de Fotomímica: la foto del objeto lo más
@@ -42,7 +42,7 @@ class PhotoMimeView extends StatelessWidget {
                     child: Icon(
                       Icons.image_not_supported,
                       size: 64,
-                      color: Colors.white38,
+                      color: Colors.white54,
                     ),
                   ),
                 ),
@@ -55,7 +55,7 @@ class PhotoMimeView extends StatelessWidget {
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: AppFonts.body,
-            color: Colors.white70,
+            color: Colors.white,
             fontSize: nameSize,
             fontWeight: FontWeight.w700,
           ),

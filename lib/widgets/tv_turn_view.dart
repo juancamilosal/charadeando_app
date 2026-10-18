@@ -44,19 +44,17 @@ class TvTurnView extends StatelessWidget {
       null => (AppColors.word, word.text),
     };
     final marking = feedback == null;
-    // Fotomímica: la foto grande sobre fondo oscuro, en vez de la palabra.
+    // Fotomímica: la foto grande, en vez de la palabra, sobre el mismo
+    // fondo de siempre.
     final photo = marking && word.image != null;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
       decoration: BoxDecoration(
-        color: photo ? photoMimeBackground : null,
-        gradient: photo
-            ? null
-            : LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: colors,
-              ),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: colors,
+        ),
       ),
       child: SafeArea(
         child: Padding(

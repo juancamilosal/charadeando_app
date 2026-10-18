@@ -6,6 +6,7 @@ import 'package:charadeando_app/providers/providers.dart';
 import 'package:charadeando_app/router.dart';
 import 'package:charadeando_app/screens/auto_words_screen.dart';
 import 'package:charadeando_app/screens/category_screen.dart';
+import 'package:charadeando_app/theme.dart';
 import 'package:charadeando_app/services/services.dart';
 import 'package:charadeando_app/widgets/photo_mime_view.dart';
 import 'package:charadeando_app/widgets/tv_turn_view.dart';
@@ -275,7 +276,7 @@ void main() {
 
     Word taladro() => Word('Taladro', category: 'FOTOMIMICA', image: image);
 
-    testWidgets('la foto se ve grande sobre fondo oscuro y el nombre, '
+    testWidgets('la foto se ve grande sobre el fondo de siempre y el nombre, '
         'pequeño, debajo', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -298,6 +299,12 @@ void main() {
       );
       final name = tester.widget<Text>(find.text('Taladro'));
       expect(name.style!.fontSize, lessThan(30));
+      // El mismo degradado que con las palabras, no un fondo oscuro.
+      final box = tester.widget<AnimatedContainer>(
+        find.byType(AnimatedContainer).first,
+      );
+      final decoration = box.decoration! as BoxDecoration;
+      expect((decoration.gradient! as LinearGradient).colors, AppColors.word);
       expect(find.text('42'), findsOneWidget);
     });
 
