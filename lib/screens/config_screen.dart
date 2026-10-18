@@ -133,6 +133,13 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   /// solo si no hay ninguna del juego).
   bool get _noDifficulty => !_config.usesDifficulty;
 
+  /// Fotomímica: cada foto es un objeto, así que no se elige la puntuación
+  /// y se cuenta siempre un punto por acierto.
+  bool get _photos => _config.photoMime;
+
+  /// La puntuación con que se juega: en Fotomímica, siempre por frase.
+  ScoringMode? get _scoringToPlay => _photos ? ScoringMode.perPhrase : _scoring;
+
   /// Modo TV: el celular está duplicando la pantalla en un televisor. El
   /// juez marca con botones y no se graba, así que la sección de video no
   /// se muestra.
@@ -150,7 +157,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   /// Lo que falta elegir, para el aviso al tocar "Continuar".
   List<String> get _missingChoices => [
     if (_automatic && !_noDifficulty && _difficulty == null) 'la dificultad',
-    if (_scoring == null) 'la puntuación',
+    if (_scoringToPlay == null) 'la puntuación',
   ];
 
   String? _choiceError(Object? choice) =>
@@ -237,7 +244,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
         .configure(
           _config.copyWith(
             groups: groups,
-            scoringMode: _scoring,
+            scoringMode: _scoringToPlay,
             // Inclinación o toque se elige en Ajustes > Controlador.
             hitMode: _tvMode ? HitMode.tv : HitMode.tilt,
             // En el Modo TV el juez ya marca con los botones del celular.
@@ -382,22 +389,25 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                 ),
                 gap,
               ],
-              ConfigSection(
-                icon: Icons.emoji_events,
-                title: 'Puntuación',
-                children: [
-                  OptionSelector<ScoringMode>(
-                    label: 'Cómo se cuentan los puntos',
-                    options: ScoringMode.values,
-                    selected: _scoring,
-                    labelOf: (o) => o.label,
-                    description: _scoring?.description,
-                    errorText: _choiceError(_scoring),
-                    onSelected: (o) => setState(() => _scoring = o),
-                  ),
-                ],
-              ),
-              gap,
+              // En Fotomímica no hay puntuación que elegir.
+              if (!_photos) ...[
+                ConfigSection(
+                  icon: Icons.emoji_events,
+                  title: 'Puntuación',
+                  children: [
+                    OptionSelector<ScoringMode>(
+                      label: 'Cómo se cuentan los puntos',
+                      options: ScoringMode.values,
+                      selected: _scoring,
+                      labelOf: (o) => o.label,
+                      description: _scoring?.description,
+                      errorText: _choiceError(_scoring),
+                      onSelected: (o) => setState(() => _scoring = o),
+                    ),
+                  ],
+                ),
+                gap,
+              ],
               if (!_tvMode) ...[
                 ConfigSection(
                   icon: Icons.videocam,
