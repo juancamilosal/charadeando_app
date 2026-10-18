@@ -559,6 +559,44 @@ void main() {
     expect(config.customCategory?.name, 'Mi familia');
   });
 
+  testWidgets('en Fotomímica no se ve la Puntuación y se juega por frase', (
+    tester,
+  ) async {
+    final container = await pumpConfig(
+      tester,
+      config: const GameConfig(
+        wordSource: WordSource.random,
+        groups: [Group('A'), Group('B')],
+        category: GameCategory.photoMime,
+      ),
+      // Aunque la última partida fuera por palabra.
+      store: MemoryConfigStore(
+        const SavedConfig(
+          groupNames: ['A', 'B'],
+          rounds: 3,
+          turnDuration: Duration(seconds: 60),
+          wordsPerGroup: 10,
+          scoringMode: ScoringMode.perWord,
+          hitMode: HitMode.tilt,
+          resolution: VideoResolution.hd,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Continuar'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Puntuación'), findsNothing);
+    expect(find.text('Cómo se cuentan los puntos'), findsNothing);
+    await tapContinue(tester);
+    expect(find.text('Descargando'), findsOneWidget);
+    final config = container.read(gameControllerProvider).config;
+    expect(config.photoMime, isTrue);
+    expect(config.scoringMode, ScoringMode.perPhrase);
+  });
+
   testWidgets('sin equipos no se ven Equipos ni Palabras por equipo', (
     tester,
   ) async {

@@ -413,7 +413,10 @@ la cámara frontal graba a los participantes para revivir las risas.
   final, partida rápida o personalizada, el mismo tiempo de turno), pero
   en vez de la palabra se ve la foto del objeto lo más grande posible, sin
   deformarla, sobre fondo oscuro, y debajo su nombre en letra pequeña para
-  quien actúa (`PhotoMimeView`, en `WordCard` y en el Modo TV). No tiene
+  quien actúa (`PhotoMimeView`, en `WordCard` y en el Modo TV). En su
+  configuración no se ve la sección "Puntuación": se cuenta siempre un
+  punto por acierto ("Por frase"), aunque la última partida fuera "Por
+  palabra". No tiene
   dificultad ni se combina con otras categorías (no sale en "Combinar
   categorías"). Antes de empezar, "Preparando imágenes…" con una barra y
   "27 de 60": `PhotoMimeBank` pide los objetos a `POST /juego/fotomimica`
