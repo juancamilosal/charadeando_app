@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/models.dart';
@@ -230,11 +231,9 @@ final premiumUnlockedProvider = Provider(
 final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
 
 /// Muestra las categorías especiales (como Navidad) todo el año, fuera de
-/// sus fechas.
-///
-/// TEMPORAL: en true para probar Navidad. Volver a false antes de
-/// publicar.
-final allSeasonsProvider = Provider((ref) => true);
+/// sus fechas: solo en modo debug, para probarlas. En la versión de
+/// lanzamiento salen únicamente en su temporada.
+final allSeasonsProvider = Provider((ref) => kDebugMode);
 
 /// Categorías del juego que se desbloquean con premium.
 final premiumCategoriesProvider = Provider<Set<GameCategory>>(

@@ -276,9 +276,11 @@ la cámara frontal graba a los participantes para revivir las risas.
      de julio), Halloween (del 1 al 31 de octubre) y Navidad (del 1 de
      diciembre al 6 de enero). Solo aparece cuando hay
      una especial en temporada; fuera de sus fechas no salen en ningún lado
-     (ni en Combinar ni en la bienvenida). TEMPORAL: `allSeasonsProvider`
-     está en `true` para probarlas todo el año; volver a `false` antes de
-     publicar. Otra especial se agrega con su `Season` (mes y día de inicio
+     (ni en Combinar ni en la bienvenida). En modo debug
+     (`flutter run`) salen todo el año para probarlas
+     (`allSeasonsProvider` es `kDebugMode`); en la versión de lanzamiento,
+     solo en su temporada. El botón "Ingresar valores de prueba"
+     (`TestData.enabled`) también sale solo en modo debug. Otra especial se agrega con su `Season` (mes y día de inicio
      y fin).
   En esta pantalla las tarjetas de una sección van en tonos de un mismo
   color (del más oscuro al más claro, alternados en orden), para que no se

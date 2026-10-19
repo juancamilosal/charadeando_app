@@ -1,13 +1,15 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
+
 import '../models/models.dart';
 
 /// Datos para probar la app sin tener que configurar ni escribir palabras.
 ///
-/// TEMPORAL: el botón "Ingresar valores de prueba" se muestra mientras
-/// [enabled] sea true. Ponerlo en false antes de publicar.
+/// El botón "Ingresar valores de prueba" solo se muestra en modo debug
+/// (`flutter run`); en la versión de lanzamiento no aparece.
 abstract final class TestData {
-  static const enabled = true;
+  static const enabled = kDebugMode;
 
   static const config = GameConfig(
     groups: [Group('Los Tigres'), Group('Las Águilas')],
