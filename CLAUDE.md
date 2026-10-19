@@ -18,6 +18,9 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   `server/juez/README.md` si aplica). Luego commit y push a `develop`.
 - **No crear PR** salvo que se pida.
 - **Capturas de pantalla:** siempre con el fondo **Clásico**.
+- **Versiones:** se nombran como en Play Console, `5 (1.0.0)` (código de
+  versión y nombre); en `pubspec.yaml` es `version: 1.0.0+5`. Cada versión
+  que se sube a Play necesita un código mayor que la anterior.
 
 ## Reglas de seguridad
 
