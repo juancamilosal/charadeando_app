@@ -301,7 +301,7 @@ void main() {
   });
 
   testWidgets('en la sección, deslizar sobre la ruleta baja la pantalla y '
-      'no la gira; tocarla la abre a pantalla completa', (tester) async {
+      'no la gira; tocar un campo muestra su castigo completo', (tester) async {
     mockHaptics(tester);
     tester.view.physicalSize = const Size(1080, 2400);
     addTearDown(tester.view.reset);
@@ -334,14 +334,40 @@ void main() {
     expect(angle(), 0);
     expect(tester.getRect(painters.first).top, lessThan(box.top - 100));
 
-    // Con los castigos listos, tocar la ruleta es como tocar "Girar".
+    // Con los castigos de la app, tocar el campo de arriba a la derecha (el
+    // 1) muestra su castigo completo, del color del campo.
     await tester.dragFrom(const Offset(180, 600), const Offset(0, -400));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Los pone la app'));
     await tester.pumpAndSettle();
     await tester.dragFrom(const Offset(180, 400), const Offset(0, 3000));
     await tester.pumpAndSettle();
-    await tester.tap(painters.first);
+    final wheel = tester.widget<PunishmentRoulette>(
+      find.byType(PunishmentRoulette),
+    );
+    final rect = tester.getRect(painters.first);
+    await tester.tapAt(
+      rect.center + Offset(rect.width * 0.1, -rect.width * 0.3),
+    );
+    await tester.pumpAndSettle();
+    final dialog = find.byType(Dialog);
+    expect(dialog, findsOneWidget);
+    expect(
+      tester.widget<Dialog>(dialog).backgroundColor,
+      PunishmentRoulette.colors[0],
+    );
+    expect(
+      find.descendant(of: dialog, matching: find.text(wheel.punishments[0])),
+      findsOneWidget,
+    );
+    expect(find.text('Campo 1'), findsOneWidget);
+    expect(angle(), 0);
+    await tester.tap(find.text('Cerrar'));
+    await tester.pumpAndSettle();
+    expect(dialog, findsNothing);
+
+    // Se gira con "Girar".
+    await tester.tap(find.text('Girar'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('¡Parar!'), findsOneWidget);
@@ -349,6 +375,29 @@ void main() {
     await wait(tester, const Duration(seconds: 12));
     await tester.pumpAndSettle();
     expect(find.text('¡Castigo!'), findsOneWidget);
+  });
+
+  test('el campo de un punto de la ruleta, también girada', () {
+    const size = Size(300, 300);
+    // Sin girar: arriba a la derecha el 0, abajo a la derecha el 1 (de 4).
+    expect(RoulettePainter.fieldAtPoint(const Offset(180, 60), size, 0, 4), 0);
+    expect(RoulettePainter.fieldAtPoint(const Offset(200, 220), size, 0, 4), 1);
+    expect(RoulettePainter.fieldAtPoint(const Offset(100, 220), size, 0, 4), 2);
+    // Girada un cuarto de vuelta en el sentido del reloj, arriba a la
+    // derecha queda el último.
+    expect(
+      RoulettePainter.fieldAtPoint(const Offset(180, 60), size, pi / 2, 4),
+      3,
+    );
+    // En el centro o fuera de la ruleta, ninguno.
+    expect(
+      RoulettePainter.fieldAtPoint(const Offset(150, 162), size, 0, 4),
+      isNull,
+    );
+    expect(
+      RoulettePainter.fieldAtPoint(const Offset(2, 2), size, 0, 4),
+      isNull,
+    );
   });
 
   Future<ProviderContainer> finalScreen(
@@ -472,6 +521,16 @@ void main() {
     await tester.pumpAndSettle();
     final shown = tester.widget<PunishmentRoulette>(roulette).punishments;
     expect(shown, everyElement('?'));
+    // Cada castigo lleva el color de su campo en la ruleta.
+    for (final i in [0, 1, 7]) {
+      final square = tester.widget<Container>(
+        find.byKey(ValueKey('colorCastigo$i')),
+      );
+      expect(
+        (square.decoration! as BoxDecoration).color,
+        PunishmentRoulette.colors[i],
+      );
+    }
     for (var i = 0; i < shown.length; i++) {
       await tester.enterText(find.byKey(ValueKey('castigo$i')), 'Castigo $i');
     }
@@ -503,6 +562,22 @@ void main() {
           .punishments,
       ['Cantar', 'Bailar'],
     );
+    await tester.ensureVisible(find.text('Girar'));
+    await tester.tap(find.text('Girar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Ruleta de Águilas con 2 castigos'), findsOneWidget);
+
+    // Al volver ("Listo"), la ruleta se sigue viendo y se puede girar otra
+    // vez.
+    await tester.tap(find.text('Ruleta de Águilas con 2 castigos'));
+    await tester.pumpAndSettle();
+    tester
+        .state<ScrollableState>(find.byType(Scrollable).first)
+        .position
+        .jumpTo(0);
+    await tester.pumpAndSettle();
+    expect(find.text('¡Ruleta de castigo para Águilas!'), findsOneWidget);
+    expect(find.byType(PunishmentRoulette), findsOneWidget);
     await tester.ensureVisible(find.text('Girar'));
     await tester.tap(find.text('Girar'));
     await tester.pumpAndSettle();

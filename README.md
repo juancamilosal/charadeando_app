@@ -514,7 +514,11 @@ la cámara frontal graba a los participantes para revivir las risas.
   entonces la ruleta se abre a pantalla completa, sin la configuración ni
   la barra de abajo: solo la ruleta girando y "¡Parar!". En la sección y en el final de la
   partida la ruleta no sigue al dedo (`dragToSpin: false`): deslizar encima
-  baja la pantalla, y tocar la ruleta es como tocar "Girar". En la de
+  baja la pantalla, se gira con "Girar" y tocar un campo abre un recuadro de
+  su color con el castigo completo (`showPunishmentField`; en la ruleta a
+  veces se corta con "…"). Al lado de cada castigo que se escribe hay un
+  cuadrado con el color de su campo. En el final, después de girar y tocar
+  "Listo", la ruleta se sigue viendo (con empate pasa al siguiente equipo). En la de
   pantalla completa sí se gira con el dedo: sigue al dedo y, si se suelta
   con impulso, gira hacia donde iba el dedo (a la derecha, en el sentido del
   reloj; a la izquierda, al revés; hacia arriba o abajo, según el lado) y

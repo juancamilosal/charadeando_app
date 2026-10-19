@@ -70,7 +70,8 @@ class PunishmentRoulette extends ConsumerStatefulWidget {
 
   /// Si se gira con el dedo. Dentro de una pantalla que se desplaza (la
   /// sección Ruleta y el final de la partida) no: deslizar el dedo encima
-  /// baja la pantalla, y se gira con "Girar" o tocando la ruleta.
+  /// baja la pantalla, se gira con "Girar" y tocar un campo muestra su
+  /// castigo completo.
   final bool dragToSpin;
 
   /// Vueltas por segundo a toda velocidad.
@@ -228,6 +229,13 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
   /// Velocidad mínima (radianes por segundo) para que al soltarla gire.
   static const _minFling = 2.5;
 
+  /// El castigo del campo tocado en [at], completo y con su color.
+  void _showField(Offset at, Size size) {
+    final field = RoulettePainter.fieldAtPoint(at, size, _angle, _fields);
+    if (field == null) return;
+    showPunishmentField(context, widget.punishments[field], field);
+  }
+
   bool get _canDrag => _spin == _Spin.idle || _spin == _Spin.result;
 
   void _dragStart(DragStartDetails d) {
@@ -313,11 +321,12 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
                     ),
                   );
                   if (!widget.dragToSpin) {
-                    // Tocarla es como tocar "Girar"; los arrastres son de
-                    // la pantalla.
+                    // Tocar un campo muestra su castigo completo; los
+                    // arrastres son de la pantalla.
+                    final size = Size(box.maxWidth, box.maxHeight);
                     return GestureDetector(
                       behavior: HitTestBehavior.opaque,
-                      onTap: _spin == _Spin.idle ? _start : null,
+                      onTapUp: (d) => _showField(d.localPosition, size),
                       child: face,
                     );
                   }
@@ -478,17 +487,34 @@ class RoulettePainter extends CustomPainter {
   /// Giro de la ruleta en radianes, en el sentido del reloj.
   final double angle;
 
+  /// El radio y el centro de la ruleta en un lienzo de [size] (arriba
+  /// queda espacio para el indicador).
+  static (double, Offset) _geometry(Size size) {
+    final pointerHeight = size.width * 0.08;
+    return (
+      size.width / 2 - pointerHeight * 0.55,
+      Offset(size.width / 2, size.height / 2 + pointerHeight * 0.3),
+    );
+  }
+
+  /// El campo que hay en el punto [at] de un lienzo de [size], con la
+  /// ruleta girada [angle]; null fuera de la ruleta o en el centro.
+  static int? fieldAtPoint(Offset at, Size size, double angle, int fields) {
+    final (radius, center) = _geometry(size);
+    final d = at - center;
+    if (d.distance > radius || d.distance < radius * 0.17) return null;
+    // Ángulo del punto desde arriba, en el sentido del reloj.
+    final theta = atan2(d.dx, -d.dy);
+    return Roulette.fieldAt(angle - theta, fields);
+  }
+
   /// Caras ya dibujadas, por castigos y tamaño.
   static final _faces = <int, ui.Picture>{};
 
   @override
   void paint(Canvas canvas, Size size) {
     final pointerHeight = size.width * 0.08;
-    final radius = size.width / 2 - pointerHeight * 0.55;
-    final center = Offset(
-      size.width / 2,
-      size.height / 2 + pointerHeight * 0.3,
-    );
+    final (radius, center) = _geometry(size);
 
     canvas.drawCircle(
       center.translate(0, 4),
@@ -623,6 +649,60 @@ class RoulettePainter extends CustomPainter {
 
 /// Arrastre que gana apenas el dedo toca, para que la lista de la pantalla
 /// no se quede con él.
+/// Recuadro con el castigo del campo [index] completo (en la ruleta a veces
+/// se corta con "…"), del mismo color que su campo.
+Future<void> showPunishmentField(
+  BuildContext context,
+  String punishment,
+  int index,
+) {
+  final color = PunishmentRoulette.colors[index % 10];
+  final onColor = color == AppColors.yellow ? AppColors.ink : Colors.white;
+  final empty = punishment.trim().isEmpty || punishment == '?';
+  return showDialog(
+    context: context,
+    builder: (context) => Dialog(
+      backgroundColor: color,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 22, 24, 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Campo ${index + 1}',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontWeight: FontWeight.w800,
+                color: onColor.withValues(alpha: 0.8),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              empty ? 'Todavía no tiene castigo.' : punishment,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: AppFonts.display,
+                fontSize: 28,
+                fontWeight: FontWeight.w600,
+                height: 1.15,
+                color: onColor,
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: onColor),
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cerrar'),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 class _EagerPan extends PanGestureRecognizer {
   @override
   void addAllowedPointer(PointerDownEvent event) {

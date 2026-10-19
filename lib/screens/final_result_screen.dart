@@ -47,19 +47,20 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
     });
   }
 
-  /// "Girar" (o soltarla con impulso): la ruleta sigue girando a pantalla
-  /// completa, desde donde quedó y hacia el mismo lado. Al volver, le toca
-  /// al siguiente empatado, si hay.
+  /// "Girar" (o tocar la ruleta): gira a pantalla completa. Al volver le
+  /// toca al siguiente empatado, si hay; si no, la ruleta se sigue viendo
+  /// (se puede volver a girar).
   Future<void> _spin(
     String group,
     List<String> punishments,
     RouletteSpin spin,
+    int losers,
   ) async {
     await context.push<bool>(
       Routes.punishmentSpin,
       extra: (group, punishments, spin),
     );
-    if (mounted) setState(() => _punished++);
+    if (mounted && _punished < losers - 1) setState(() => _punished++);
   }
 
   /// Desde la 3.ª partida terminada, con ganador y sin errores, se pide la
@@ -177,8 +178,12 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
                             key: ValueKey(_punished),
                             initialSource: PunishmentSource.system,
                             initialFields: PunishmentSpinScreen.defaultFields,
-                            onSpin: (punishments, spin) =>
-                                _spin(losers[_punished], punishments, spin),
+                            onSpin: (punishments, spin) => _spin(
+                              losers[_punished],
+                              punishments,
+                              spin,
+                              losers.length,
+                            ),
                             onSkip: () => setState(() => _punished++),
                           ),
                         ],

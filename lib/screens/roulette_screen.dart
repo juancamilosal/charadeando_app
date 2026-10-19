@@ -57,9 +57,10 @@ class RouletteScreen extends StatelessWidget {
 
 /// La ruleta con "Girar" y, debajo, su configuración: cuántos campos tiene
 /// y de dónde salen los castigos. La ruleta se va armando con lo que se
-/// elige, pero aquí no gira ni sigue al dedo (deslizar baja la pantalla):
-/// con "Girar" o tocándola, la configuración queda guardada y [onSpin] la
-/// abre a pantalla completa, donde sí se gira con el dedo. La usan la sección Ruleta y el
+/// elige, pero aquí no gira ni sigue al dedo (deslizar baja la pantalla, y
+/// tocar un campo muestra su castigo completo): con "Girar", la
+/// configuración queda guardada y [onSpin] la abre a pantalla completa,
+/// donde sí se gira con el dedo. La usan la sección Ruleta y el
 /// resultado final de la partida.
 class RouletteSetupView extends ConsumerStatefulWidget {
   const RouletteSetupView({
@@ -347,6 +348,8 @@ class _RouletteSetupViewState extends ConsumerState<RouletteSetupView> {
                 // Cada letra se ve en la ruleta.
                 onChanged: (_) => _changed(() {}),
                 decoration: InputDecoration(
+                  // El color de su campo en la ruleta.
+                  prefixIcon: _FieldColor(index: i),
                   labelText: source == PunishmentSource.mixed
                       ? 'Castigo ${i + 1} (opcional)'
                       : 'Castigo ${i + 1}',
@@ -466,6 +469,34 @@ class _PunishmentSpinScreenState extends ConsumerState<PunishmentSpinScreen> {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Un cuadrado con el color que tiene el campo [index] en la ruleta, al
+/// lado de su castigo.
+class _FieldColor extends StatelessWidget {
+  const _FieldColor({required this.index});
+
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Semantics(
+        label: 'Color del campo ${index + 1}',
+        child: Container(
+          key: ValueKey('colorCastigo$index'),
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            color: PunishmentRoulette.colors[index % 10],
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: Colors.black12),
           ),
         ),
       ),
