@@ -539,20 +539,16 @@ la cámara frontal graba a los participantes para revivir las risas.
   dibuja una vez y solo se gira, así los textos quedan fijos a la ruleta
   mientras da vueltas.
 - Al final de la partida, el equipo con menos puntos ve "¡Ruleta de castigo
-  para …!" con la ruleta y sus castigos a la vista, quieta, como en la
-  sección Ruleta, y debajo "Girar", "Editar castigos" y "Sin castigo". Al
-  tocar "Girar" (o girarla con el dedo) sigue girando a pantalla completa
-  con los mismos castigos. Si varios empatan con menos puntos,
+  para …!" con la misma ruleta de la sección Ruleta (`RouletteSetupView`,
+  en `lib/screens/roulette_screen.dart`): la ruleta quieta con sus castigos,
+  "Girar", "Sin castigo", "Otros castigos" y debajo la configuración
+  (cantidad de campos y de dónde salen los castigos). Usa la ruleta guardada
+  o, si nunca se configuró, 8 castigos de la app. Al girar, la
+  configuración queda guardada y la ruleta sigue girando a pantalla
+  completa con los mismos castigos. Si varios empatan con menos puntos,
   cada uno gira su ruleta, uno después del otro; si todos empatan, no hay
-  castigo. Usa la ruleta guardada en la sección o, si nunca se configuró, 8
-  castigos del juego. Con "Editar castigos" (`showPunishmentEditor`,
-  `lib/widgets/punishment_editor.dart`) los jugadores cambian o quitan
-  castigos y agregan los suyos, hasta 10 (mínimo 2; los campos vacíos no
-  se guardan); la ruleta queda guardada como "Jugadores y app", gira con
-  ellos y la sección Ruleta los muestra la próxima vez. En Modo TV la ruleta se ve en el televisor porque el
-  celular duplica su pantalla. Queda preparado `PunishmentService` para
-  traer los castigos de una colección `castigos` de Directus
-  (`POST /juego/castigos`), pero todavía no se usa.
+  castigo. En Modo TV la ruleta se ve en el televisor porque el
+  celular duplica su pantalla.
 - Un solo celular, aciertos con movimiento: inclinar hacia abajo es acierto y
   hacia arriba es pasar. `TiltDetector` mide el ángulo de la pantalla con
   el horizonte de dos formas (el eje Z y la gravedad que queda en el plano

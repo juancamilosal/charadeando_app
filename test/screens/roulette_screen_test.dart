@@ -477,57 +477,48 @@ void main() {
     expect(find.textContaining('Ruleta de castigo'), findsNothing);
   });
 
-  testWidgets('al final se pueden cambiar los castigos y agregar los '
-      'propios, hasta 10, antes de girar', (tester) async {
+  testWidgets('al final se ve la misma ruleta de la sección, con 8 '
+      'castigos de la app si nunca se configuró', (tester) async {
     final container = await finalScreen(tester, [3, 1]);
     final store = container.read(punishmentStoreProvider) as MemoryStore;
-    await tester.ensureVisible(find.text('Editar castigos'));
-    await tester.tap(find.text('Editar castigos'));
-    await tester.pumpAndSettle();
-    expect(find.text('Castigos de la ruleta'), findsOneWidget);
-    // Sin ruleta guardada, empieza con 8 castigos de la app.
-    expect(find.byType(TextField), findsNWidgets(8));
-    expect(find.text('Agregar castigo (8 de 10)'), findsOneWidget);
+    final roulette = find.byType(PunishmentRoulette);
+    expect(roulette, findsOneWidget);
+    expect(
+      tester.widget<PunishmentRoulette>(roulette).punishments,
+      hasLength(8),
+    );
+    expect(find.text('Otros castigos'), findsOneWidget);
+    expect(find.text('Cantidad de campos'), findsOneWidget);
+    expect(find.text('¿De dónde salen los castigos?'), findsOneWidget);
 
-    await tester.enterText(find.byType(TextField).first, 'Cantar como gallo');
-    await tester.tap(find.text('Agregar castigo (8 de 10)'));
+    // Se configura igual que en la sección y gira con lo que se ve. La
+    // lista se baja sin arrastrar: arrastrar sobre la ruleta la gira.
+    final list = tester
+        .state<ScrollableState>(find.byType(Scrollable).first)
+        .position;
+    list.jumpTo(list.maxScrollExtent);
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField).last, 'Bailar salsa');
-    await tester.tap(find.text('Agregar castigo (9 de 10)'));
+    await tester.tap(find.text('Los escriben los jugadores'));
     await tester.pumpAndSettle();
-    // Con 10 ya no se agregan más; el que quedó vacío no se guarda.
-    expect(find.byType(TextField), findsNWidgets(10));
-    final full = find.widgetWithText(TextButton, 'Ya tiene 10 castigos');
-    expect(tester.widget<TextButton>(full).onPressed, isNull);
-    await tester.ensureVisible(find.text('Guardar'));
-    await tester.tap(find.text('Guardar'));
+    final shown = tester.widget<PunishmentRoulette>(roulette).punishments;
+    expect(shown, everyElement('?'));
+    for (var i = 0; i < shown.length; i++) {
+      await tester.enterText(find.byKey(ValueKey('castigo$i')), 'Castigo $i');
+    }
+    // Sin el teclado, que mantiene a la vista el campo que se escribe.
+    FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpAndSettle();
-
-    final saved = store.saved!;
-    expect(saved.fields, 9);
-    expect(saved.punishments.first, 'Cantar como gallo');
-    expect(saved.punishments.last, 'Bailar salsa');
-    expect(saved.source, PunishmentSource.mixed);
-    expect(find.text('La ruleta tiene 9 castigos.'), findsOneWidget);
-
-    // Al volver a abrirla, están los guardados; se puede quitar uno.
-    await tester.ensureVisible(find.text('Editar castigos'));
-    await tester.tap(find.text('Editar castigos'));
+    list.jumpTo(0);
     await tester.pumpAndSettle();
-    expect(find.byType(TextField), findsNWidgets(9));
-    expect(find.text('Cantar como gallo'), findsOneWidget);
-    await tester.tap(find.byTooltip('Quitar castigo 1'));
+    await tester.tap(find.text('Girar'));
     await tester.pumpAndSettle();
-    expect(find.text('Cantar como gallo'), findsNothing);
-    await tester.ensureVisible(find.text('Guardar'));
-    await tester.tap(find.text('Guardar'));
-    await tester.pumpAndSettle();
-    expect(store.saved!.fields, 8);
-    expect(store.saved!.punishments.last, 'Bailar salsa');
+    expect(find.text('Ruleta de Águilas con 8 castigos'), findsOneWidget);
+    expect(store.saved!.source, PunishmentSource.own);
+    expect(store.saved!.punishments.first, 'Castigo 0');
   });
 
-  testWidgets('la ruleta editada necesita al menos 2 castigos', (tester) async {
-    final container = await finalScreen(
+  testWidgets('al final usa la ruleta guardada en la sección', (tester) async {
+    await finalScreen(
       tester,
       [3, 1],
       saved: const RouletteSetup(
@@ -536,60 +527,16 @@ void main() {
         written: ['Cantar', 'Bailar'],
       ),
     );
-    final store = container.read(punishmentStoreProvider) as MemoryStore;
-    await tester.ensureVisible(find.text('Editar castigos'));
-    await tester.tap(find.text('Editar castigos'));
-    await tester.pumpAndSettle();
-    // Con 2 no se puede quitar ninguno.
-    final remove = find.widgetWithIcon(IconButton, Icons.close);
-    expect(remove, findsNWidgets(2));
-    for (final button in tester.widgetList<IconButton>(remove)) {
-      expect(button.onPressed, isNull);
-    }
-    await tester.enterText(find.byType(TextField).last, '');
-    await tester.tap(find.text('Guardar'));
-    await tester.pumpAndSettle();
     expect(
-      find.text('La ruleta necesita al menos 2 castigos.'),
-      findsOneWidget,
+      tester
+          .widget<PunishmentRoulette>(find.byType(PunishmentRoulette))
+          .punishments,
+      ['Cantar', 'Bailar'],
     );
-    expect(store.saved!.punishments, ['Cantar', 'Bailar']);
-  });
-
-  testWidgets('al final la tarjeta muestra la ruleta guardada con sus '
-      'castigos, sin girar hasta tocar "Girar"', (tester) async {
-    final container = await finalScreen(tester, [3, 1]);
-    final store = container.read(punishmentStoreProvider) as MemoryStore;
-    expect(store.saved, isNull);
-    // Sin ruleta guardada, 8 castigos de la app.
-    final roulette = find.byType(PunishmentRoulette);
-    expect(roulette, findsOneWidget);
-    expect(
-      tester.widget<PunishmentRoulette>(roulette).punishments,
-      hasLength(8),
-    );
-
-    // Al editar, la ruleta de la tarjeta cambia de una vez.
-    await tester.ensureVisible(find.text('Editar castigos'));
-    await tester.tap(find.text('Editar castigos'));
-    await tester.pumpAndSettle();
-    for (var i = 7; i >= 3; i--) {
-      await tester.tap(find.byTooltip('Quitar castigo ${i + 1}'));
-      await tester.pumpAndSettle();
-    }
-    await tester.ensureVisible(find.text('Guardar'));
-    await tester.tap(find.text('Guardar'));
-    await tester.pumpAndSettle();
-    expect(
-      tester.widget<PunishmentRoulette>(roulette).punishments,
-      store.saved!.punishments,
-    );
-    expect(store.saved!.punishments, hasLength(3));
-
     await tester.ensureVisible(find.text('Girar'));
     await tester.tap(find.text('Girar'));
     await tester.pumpAndSettle();
-    expect(find.text('Ruleta de Águilas con 3 castigos'), findsOneWidget);
+    expect(find.text('Ruleta de Águilas con 2 castigos'), findsOneWidget);
   });
 
   testWidgets('al final, si todos empatan no hay ruleta', (tester) async {

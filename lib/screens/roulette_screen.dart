@@ -18,23 +18,81 @@ import '../widgets/punishment_roulette.dart';
 /// medida que se eligen cuántos campos tiene y sus castigos, y debajo la
 /// configuración. Al girar, la ruleta queda guardada en el celular para el
 /// final de la partida.
-class RouletteScreen extends ConsumerStatefulWidget {
+class RouletteScreen extends StatelessWidget {
   const RouletteScreen({super.key, this.random});
 
   final Random? random;
 
   @override
-  ConsumerState<RouletteScreen> createState() => _RouletteScreenState();
+  Widget build(BuildContext context) {
+    return PlayBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: const Text('Ruleta de castigos'),
+          // Es una pestaña de la barra de abajo.
+          automaticallyImplyLeading: false,
+        ),
+        body: SafeArea(
+          top: false,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+            children: [
+              RouletteSetupView(
+                random: random,
+                // La de pantalla completa sigue el mismo giro: desde donde
+                // quedó y, si fue con el dedo, hacia el mismo lado.
+                onSpin: (punishments, spin) => context.push(
+                  Routes.punishmentSpin,
+                  extra: (punishments, spin),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-class _RouletteScreenState extends ConsumerState<RouletteScreen> {
+/// La ruleta con "Girar" y, debajo, su configuración: cuántos campos tiene
+/// y de dónde salen los castigos. La ruleta se va armando con lo que se
+/// elige, pero aquí no gira: al girar, la configuración queda guardada y
+/// [onSpin] la abre a pantalla completa. La usan la sección Ruleta y el
+/// resultado final de la partida.
+class RouletteSetupView extends ConsumerStatefulWidget {
+  const RouletteSetupView({
+    super.key,
+    required this.onSpin,
+    this.onSkip,
+    this.random,
+    this.initialSource,
+    this.initialFields = 6,
+  });
+
+  /// Los castigos con que se gira y cómo arrancó el giro.
+  final void Function(List<String> punishments, RouletteSpin spin) onSpin;
+
+  /// "Sin castigo" debajo de "Girar", si se puede saltar.
+  final VoidCallback? onSkip;
+  final Random? random;
+
+  /// Cómo empieza si nunca se guardó una ruleta.
+  final PunishmentSource? initialSource;
+  final int initialFields;
+
+  @override
+  ConsumerState<RouletteSetupView> createState() => _RouletteSetupViewState();
+}
+
+class _RouletteSetupViewState extends ConsumerState<RouletteSetupView> {
   late final Random _random = widget.random ?? Random();
   final _controllers = [
     for (var i = 0; i < RouletteSetup.maxFields; i++) TextEditingController(),
   ];
 
-  int _fields = 6;
-  PunishmentSource? _source;
+  late int _fields = widget.initialFields;
+  late PunishmentSource? _source = widget.initialSource;
   bool _showErrors = false;
 
   /// Castigos del juego para la vista previa: se eligen una vez, para que
@@ -175,68 +233,54 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
       },
     );
     ref.read(punishmentStoreProvider).save(setup).ignore();
-    // La de pantalla completa sigue el mismo giro: desde donde quedó y,
-    // si fue con el dedo, hacia el mismo lado.
-    context.push(Routes.punishmentSpin, extra: (setup.punishments, spin));
+    widget.onSpin(setup.punishments, spin);
     return false;
   }
 
   @override
   Widget build(BuildContext context) {
-    return PlayBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: const Text('Ruleta de castigos'),
-          // Es una pestaña de la barra de abajo.
-          automaticallyImplyLeading: false,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // La ruleta con su botón "Girar" (y "Sin castigo", si se puede).
+        LayoutBuilder(
+          builder: (context, box) {
+            final wheel = min(box.maxWidth, 320.0);
+            return SizedBox(
+              height: wheel + 72 + (widget.onSkip == null ? 0 : 52),
+              child: PunishmentRoulette(
+                punishments: _preview,
+                random: _random,
+                onBeforeSpin: _beforeSpin,
+                onSkip: widget.onSkip,
+                onDone: () {},
+              ),
+            );
+          },
         ),
-        body: SafeArea(
-          top: false,
-          child: LayoutBuilder(
-            builder: (context, box) {
-              final wheel = min(box.maxWidth - 40, 320.0);
-              return ListView(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                children: [
-                  // La ruleta con su botón "Girar".
-                  SizedBox(
-                    height: wheel + 72,
-                    child: PunishmentRoulette(
-                      punishments: _preview,
-                      random: _random,
-                      onBeforeSpin: _beforeSpin,
-                      onDone: () {},
-                    ),
-                  ),
-                  // Con los castigos de la app, "Otros castigos" va justo
-                  // debajo de la ruleta: se cambian sin bajar la pantalla.
-                  if (_source == PunishmentSource.system) ...[
-                    const SizedBox(height: 8),
-                    Center(
-                      child: FilledButton.icon(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: context.backdrop.light
-                              ? AppColors.purple
-                              : Colors.white,
-                          foregroundColor: context.backdrop.light
-                              ? Colors.white
-                              : AppColors.purple,
-                        ),
-                        icon: const Icon(Icons.shuffle),
-                        label: const Text('Otros castigos'),
-                        onPressed: _otherPunishments,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 20),
-                  ..._config(),
-                ],
-              );
-            },
+        // Con los castigos de la app, "Otros castigos" va justo debajo de
+        // la ruleta: se cambian sin bajar la pantalla.
+        if (_source == PunishmentSource.system) ...[
+          const SizedBox(height: 8),
+          Center(
+            child: FilledButton.icon(
+              style: FilledButton.styleFrom(
+                backgroundColor: context.backdrop.light
+                    ? AppColors.purple
+                    : Colors.white,
+                foregroundColor: context.backdrop.light
+                    ? Colors.white
+                    : AppColors.purple,
+              ),
+              icon: const Icon(Icons.shuffle),
+              label: const Text('Otros castigos'),
+              onPressed: _otherPunishments,
+            ),
           ),
-        ),
-      ),
+        ],
+        const SizedBox(height: 20),
+        ..._config(),
+      ],
     );
   }
 
