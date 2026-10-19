@@ -91,7 +91,8 @@ detalles de cada parte están en `README.md`, `server/README.md` y
 ## Celular juez (lo último que se hizo)
 
 - Un segundo celular hace de juez desde el navegador, sin instalar la app:
-  escanea un QR y marca "✓ Acierto" o "→ Pasar". Es Premium.
+  escanea un QR y marca "✓ Acierto" o "→ Pasar". Es gratis, como el Modo
+  TV.
 - **Worker de Cloudflare** `charadeando-juez` en `server/juez/`:
   - Rutas `valkiriacode.com/juez` y `/juez/*`, con un Durable Object `Sala`
     (SQLite + WebSocket Hibernation).

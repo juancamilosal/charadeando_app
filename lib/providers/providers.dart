@@ -44,12 +44,6 @@ final judgeProvider = NotifierProvider<JudgeController, JudgeSetup>(
   JudgeController.new,
 );
 
-/// Si puede usar el celular juez (es de pago; ver
-/// [PremiumAccess.canUseJudge]).
-final judgeUnlockedProvider = Provider(
-  (ref) => ref.watch(premiumProvider).canUseJudge(ref.watch(clockProvider)()),
-);
-
 final tiltServiceProvider = Provider((ref) => TiltService());
 final tvServiceProvider = Provider((ref) => TvService());
 final punishmentStoreProvider = Provider((ref) => PunishmentStore());

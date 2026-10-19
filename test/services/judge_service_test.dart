@@ -399,14 +399,4 @@ void main() {
       expect(await service.check(), JudgeAvailability.offline);
     });
   });
-
-  test('el juez es de pago y todo pasa por canUseJudge', () {
-    expect(const PremiumAccess().canUseJudge(), isFalse);
-    expect(const PremiumAccess(purchased: true).canUseJudge(), isTrue);
-    expect(const PremiumAccess(codeAll: true).canUseJudge(), isTrue);
-    expect(
-      const PremiumAccess(codeCategories: {'ANIME'}).canUseJudge(),
-      isFalse,
-    );
-  });
 }

@@ -43,12 +43,6 @@ class PremiumAccess {
   /// categorías propias sin límite.
   bool get premium => purchased || codeAll;
 
-  /// Puede usar el modo "Celular juez" (puede usar el juez), que es de
-  /// pago. Todo el acceso pasa por aquí: para darlo por un tiempo (por
-  /// ejemplo, un mes de prueba) basta con cambiar esta función, con [now]
-  /// para comparar la fecha.
-  bool canUseJudge([DateTime? now]) => premium;
-
   /// No tiene nada desbloqueado (ni compras ni códigos).
   bool get nothing =>
       !purchased &&

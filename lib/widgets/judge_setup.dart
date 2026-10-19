@@ -5,20 +5,18 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../providers/providers.dart';
 import '../services/services.dart';
 import '../theme.dart';
-import 'premium_sheet.dart';
 
 /// "Celular juez" en la configuración: se enciende con el interruptor, se
 /// crea la sala y se muestra el QR (y el código, por si no pueden
 /// escanearlo) para que otra persona sea el juez desde su celular. Dice si
-/// el juez ya se conectó; se puede seguir sin él. Es de pago: sin Premium
-/// lleva candado y abre la compra.
+/// el juez ya se conectó; se puede seguir sin él. Es gratis, como el Modo
+/// TV.
 class JudgeSetupView extends ConsumerWidget {
   const JudgeSetupView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final setup = ref.watch(judgeProvider);
-    final unlocked = ref.watch(judgeUnlockedProvider);
     final controller = ref.read(judgeProvider.notifier);
     final room = setup.room;
     return Column(
@@ -30,27 +28,13 @@ class JudgeSetupView extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      const Flexible(
-                        child: Text(
-                          'Usar celular juez',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.ink,
-                          ),
-                        ),
-                      ),
-                      if (!unlocked) ...[
-                        const SizedBox(width: 6),
-                        const Icon(
-                          Icons.lock,
-                          size: 18,
-                          color: AppColors.orange,
-                        ),
-                      ],
-                    ],
+                  const Text(
+                    'Usar celular juez',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.ink,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -70,13 +54,7 @@ class JudgeSetupView extends ConsumerWidget {
               value: setup.on,
               activeThumbColor: Colors.white,
               activeTrackColor: AppColors.purple,
-              onChanged: (on) {
-                if (!unlocked) {
-                  showPremiumSheet(context);
-                  return;
-                }
-                on ? controller.start() : controller.stop();
-              },
+              onChanged: (on) => on ? controller.start() : controller.stop(),
             ),
           ],
         ),

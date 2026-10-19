@@ -35,11 +35,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   mostrarlas. A los 1,8 s (o al tocarla) pasa con un fundido a Categorías,
   o a la bienvenida la primera vez. Con "Reducir animaciones" el logo
   aparece sin rebote y los destellos quedan quietos.
-- Celular juez (de pago; el acceso pasa solo por
-  `PremiumAccess.canUseJudge`, para poder darlo por un tiempo sin tocar lo
-  demás): en la configuración, la sección "Celular juez" (no sale en el
-  Modo TV) con el interruptor "Usar celular juez". Sin Premium lleva
-  candado y abre la compra. Al encenderlo la app crea una sala en el Worker
+- Celular juez (gratis, como el Modo TV): en la configuración, la sección
+  "Celular juez" (no sale en el Modo TV) con el interruptor "Usar celular
+  juez". Al encenderlo la app crea una sala en el Worker
   `server/juez` (`JudgeService`, `POST <JUEZ_URL>/api/salas`; `JUEZ_URL` se
   cambia con `--dart-define`, por defecto `https://valkiriacode.com/juez`),
   muestra el QR (`qr_flutter`) con `https://valkiriacode.com/juez/<CÓDIGO>`

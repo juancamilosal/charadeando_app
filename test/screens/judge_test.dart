@@ -69,14 +69,12 @@ void main() {
   group('en la configuración', () {
     Future<ProviderContainer> pump(
       WidgetTester tester, {
-      bool unlocked = true,
       FakeJudgeService? service,
     }) async {
       tester.view.physicalSize = const Size(1080, 2400);
       addTearDown(tester.view.reset);
       final container = ProviderContainer(
         overrides: [
-          judgeUnlockedProvider.overrideWithValue(unlocked),
           judgeServiceProvider.overrideWithValue(service ?? FakeJudgeService()),
           premiumBillingProvider.overrideWithValue(NoBilling()),
         ],
@@ -134,14 +132,17 @@ void main() {
       expect(find.byType(QrImageView), findsNothing);
     });
 
-    testWidgets('sin Premium lleva candado y abre la compra', (tester) async {
+    testWidgets('es gratis: sin Premium no lleva candado y se enciende', (
+      tester,
+    ) async {
       final service = FakeJudgeService();
-      await pump(tester, unlocked: false, service: service);
-      expect(find.byIcon(Icons.lock), findsOneWidget);
+      final container = await pump(tester, service: service);
+      expect(container.read(premiumProvider).premium, isFalse);
+      expect(find.byIcon(Icons.lock), findsNothing);
       await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();
-      expect(find.byType(PremiumSheet), findsOneWidget);
-      expect(service.connections.channels, isEmpty);
+      expect(find.byType(PremiumSheet), findsNothing);
+      expect(find.text('K7M2PQ'), findsOneWidget);
     });
 
     testWidgets('la configuración tiene la sección, salvo en el Modo TV', (
