@@ -274,24 +274,19 @@ class _RouletteSetupViewState extends ConsumerState<RouletteSetupView> {
             );
           },
         ),
+        // "Otros castigos" va dentro de "Personalizar castigos".
         if (widget.compact) ...[
           const SizedBox(height: 8),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 10,
-            runSpacing: 8,
-            children: [
-              if (_source == PunishmentSource.system) _otherButton(context),
-              FilledButton.icon(
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: AppColors.purple,
-                ),
-                icon: const Icon(Icons.tune),
-                label: const Text('Personalizar castigos'),
-                onPressed: _customize,
+          Center(
+            child: FilledButton.icon(
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: AppColors.purple,
               ),
-            ],
+              icon: const Icon(Icons.tune),
+              label: const Text('Personalizar castigos'),
+              onPressed: _customize,
+            ),
           ),
         ]
         // Con los castigos de la app, "Otros castigos" va justo debajo de

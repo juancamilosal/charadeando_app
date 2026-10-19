@@ -506,8 +506,9 @@ void main() {
       tester.widget<PunishmentRoulette>(roulette).punishments,
       hasLength(8),
     );
-    expect(find.text('Otros castigos'), findsOneWidget);
-    // La configuración no está en la pantalla: va en la hoja.
+    // La configuración (con "Otros castigos") no está en la pantalla: va
+    // en la hoja.
+    expect(find.text('Otros castigos'), findsNothing);
     expect(find.text('Cantidad de campos'), findsNothing);
     await tester.ensureVisible(find.text('Personalizar castigos'));
     await tester.tap(find.text('Personalizar castigos'));
@@ -516,6 +517,7 @@ void main() {
     expect(sheet, findsOneWidget);
     expect(find.text('Cantidad de campos'), findsOneWidget);
     expect(find.text('¿De dónde salen los castigos?'), findsOneWidget);
+    expect(find.text('Otros castigos'), findsOneWidget);
 
     // Se configura igual que en la sección; la ruleta de la pantalla
     // cambia con cada cosa.

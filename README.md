@@ -545,9 +545,9 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Al final de la partida, el equipo con menos puntos ve "¡Ruleta de castigo
   para …!" con la misma ruleta de la sección Ruleta (`RouletteSetupView`,
   en `lib/screens/roulette_screen.dart`, con `compact`): la ruleta quieta
-  con sus castigos, "Girar", "Sin castigo", "Otros castigos" y
-  "Personalizar castigos", que abre una hoja desde abajo con una ruleta
-  pequeña que muestra cada cambio, la configuración (cantidad de campos y
+  con sus castigos, "Girar", "Sin castigo" y "Personalizar castigos",
+  que abre una hoja desde abajo con una ruleta pequeña que muestra cada
+  cambio, "Otros castigos" (si los pone la app), la configuración (cantidad de campos y
   de dónde salen los castigos) y "Listo". En la sección Ruleta la
   configuración sigue debajo de la ruleta. Usa la ruleta guardada
   o, si nunca se configuró, 8 castigos de la app. Al girar, la
