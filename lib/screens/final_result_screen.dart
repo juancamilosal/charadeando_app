@@ -12,6 +12,7 @@ import '../services/punishments.dart';
 import '../widgets/backdrop_tile.dart';
 import '../widgets/play_background.dart';
 import '../widgets/punishment_editor.dart';
+import '../widgets/punishment_roulette.dart';
 import '../widgets/result_parts.dart';
 import '../widgets/scoreboard.dart';
 import 'roulette_screen.dart' show PunishmentSpinScreen;
@@ -33,44 +34,10 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
   /// ruleta de castigo. Giran uno después del otro.
   int _punished = 0;
 
-  Future<void> _spin(String group) async {
-    await context.push<bool>(Routes.punishmentSpin, extra: group);
-    if (mounted) setState(() => _punished++);
-  }
-
-  /// Antes de girar, los jugadores pueden cambiar los castigos de la ruleta
-  /// o agregar los suyos. Quedan guardados: la ruleta gira con ellos y la
-  /// sección Ruleta los muestra la próxima vez.
-  Future<void> _editPunishments() async {
-    final store = ref.read(punishmentStoreProvider);
-    final saved = await store.load();
-    final pool = saved == null
-        ? await ref.read(punishmentPoolProvider).ready()
-        : const <String>[];
-    if (!mounted) return;
-    final current =
-        saved?.punishments ??
-        Roulette.systemPick(
-          PunishmentSpinScreen.defaultFields,
-          Random(),
-          pool: pool,
-        );
-    final edited = await showPunishmentEditor(context, current);
-    if (edited == null) return;
-    await store.save(
-      RouletteSetup(
-        source: PunishmentSource.mixed,
-        punishments: edited,
-        written: edited,
-      ),
-    );
-    if (!mounted) return;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(content: Text('La ruleta tiene ${edited.length} castigos.')),
-      );
-  }
+  /// Los castigos de la ruleta que se ve en la tarjeta: la guardada en la
+  /// sección Ruleta o, si nunca se configuró, 8 de la app. Null mientras
+  /// se cargan.
+  List<String>? _roulette;
 
   @override
   void initState() {
@@ -87,6 +54,61 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
         ..recordStats();
       _maybeAskReview(controller.hadErrors).ignore();
     });
+    _loadRoulette();
+  }
+
+  Future<void> _loadRoulette() async {
+    final saved = await ref.read(punishmentStoreProvider).load();
+    final pool = saved == null
+        ? await ref.read(punishmentPoolProvider).ready()
+        : const <String>[];
+    if (!mounted) return;
+    setState(
+      () => _roulette =
+          saved?.punishments ??
+          Roulette.systemPick(
+            PunishmentSpinScreen.defaultFields,
+            Random(),
+            pool: pool,
+          ),
+    );
+  }
+
+  /// "Girar" (o soltarla con impulso) en la tarjeta: la ruleta sigue
+  /// girando a pantalla completa, desde donde quedó y hacia el mismo lado.
+  bool _spin(String group, List<String> punishments, RouletteSpin spin) {
+    context
+        .push<bool>(Routes.punishmentSpin, extra: (group, punishments, spin))
+        .then((_) {
+          if (mounted) setState(() => _punished++);
+        });
+    return false;
+  }
+
+  /// Antes de girar, los jugadores pueden cambiar los castigos de la ruleta
+  /// o agregar los suyos. Quedan guardados: la ruleta gira con ellos y la
+  /// sección Ruleta los muestra la próxima vez.
+  Future<void> _editPunishments() async {
+    final current = _roulette;
+    if (current == null) return;
+    final edited = await showPunishmentEditor(context, current);
+    if (edited == null) return;
+    await ref
+        .read(punishmentStoreProvider)
+        .save(
+          RouletteSetup(
+            source: PunishmentSource.mixed,
+            punishments: edited,
+            written: edited,
+          ),
+        );
+    if (!mounted) return;
+    setState(() => _roulette = edited);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(content: Text('La ruleta tiene ${edited.length} castigos.')),
+      );
   }
 
   /// Desde la 3.ª partida terminada, con ganador y sin errores, se pide la
@@ -178,9 +200,12 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
                         if (_punished < losers.length) ...[
                           const SizedBox(height: 16),
                           _PunishmentCard(
+                            key: ValueKey(_punished),
                             group: losers[_punished],
                             tied: losers.length > 1,
-                            onSpin: () => _spin(losers[_punished]),
+                            punishments: _roulette,
+                            onSpin: (punishments, spin) =>
+                                _spin(losers[_punished], punishments, spin),
                             onEdit: _editPunishments,
                             onSkip: () => setState(() => _punished++),
                           ),
@@ -223,11 +248,14 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
       : '${names.sublist(0, names.length - 1).join(', ')} y ${names.last}';
 }
 
-/// Invitación a girar la ruleta de castigo para el grupo con menos puntos.
+/// La ruleta de castigo para el grupo con menos puntos, como en la sección
+/// Ruleta: se ven sus castigos y se gira con el botón o con el dedo.
 class _PunishmentCard extends StatelessWidget {
   const _PunishmentCard({
+    super.key,
     required this.group,
     required this.tied,
+    required this.punishments,
     required this.onSpin,
     required this.onEdit,
     required this.onSkip,
@@ -237,7 +265,10 @@ class _PunishmentCard extends StatelessWidget {
 
   /// Varios grupos empataron con menos puntos: cada uno gira su ruleta.
   final bool tied;
-  final VoidCallback onSpin;
+
+  /// Null mientras se cargan.
+  final List<String>? punishments;
+  final bool Function(List<String> punishments, RouletteSpin spin) onSpin;
 
   /// Cambiar los castigos o agregar los propios antes de girar.
   final VoidCallback onEdit;
@@ -267,14 +298,21 @@ class _PunishmentCard extends StatelessWidget {
               style: TextStyle(color: Color(0xFF6B5A86)),
             ),
           const SizedBox(height: 12),
-          FilledButton.icon(
-            icon: const Icon(Icons.autorenew),
-            label: const Text('Girar'),
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.coral,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: onSpin,
+          LayoutBuilder(
+            builder: (context, box) {
+              final wheel = min(box.maxWidth, 300.0);
+              final list = punishments;
+              return SizedBox(
+                height: wheel + 72,
+                child: list == null
+                    ? const Center(child: CircularProgressIndicator())
+                    : PunishmentRoulette(
+                        punishments: list,
+                        onBeforeSpin: (spin) => onSpin(list, spin),
+                        onDone: () {},
+                      ),
+              );
+            },
           ),
           const SizedBox(height: 4),
           OutlinedButton.icon(

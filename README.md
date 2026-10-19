@@ -539,7 +539,10 @@ la cámara frontal graba a los participantes para revivir las risas.
   dibuja una vez y solo se gira, así los textos quedan fijos a la ruleta
   mientras da vueltas.
 - Al final de la partida, el equipo con menos puntos ve "¡Ruleta de castigo
-  para …!" con "Girar" o "Sin castigo". Si varios empatan con menos puntos,
+  para …!" con la ruleta y sus castigos a la vista, quieta, como en la
+  sección Ruleta, y debajo "Girar", "Editar castigos" y "Sin castigo". Al
+  tocar "Girar" (o girarla con el dedo) sigue girando a pantalla completa
+  con los mismos castigos. Si varios empatan con menos puntos,
   cada uno gira su ruleta, uno después del otro; si todos empatan, no hay
   castigo. Usa la ruleta guardada en la sección o, si nunca se configuró, 8
   castigos del juego. Con "Editar castigos" (`showPunishmentEditor`,
@@ -605,7 +608,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   resultados") y "Finalizar juego".
 - Resultado final: "¡Ganó Los Primos!" (o "¡Empate entre…!", o "¡Fin del
   juego!" sin equipos) con los puntos en grande, la tabla de puntajes con el
-  primero resaltado, la ruleta de castigo ("Girar" o "Sin castigo") y abajo
+  primero resaltado, la ruleta de castigo (con sus castigos a la vista, "Girar" o "Sin castigo") y abajo
   "Jugar otra vez" (misma configuración; pide palabras nuevas o las vuelven
   a escribir), "⚙️ Cambiar configuración" y "← Salir de la categoría".
 - Palabras escritas por los equipos: las de cada equipo se reparten entre todos

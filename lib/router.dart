@@ -180,9 +180,20 @@ final List<RouteBase> appRoutes = [
   ),
   GoRoute(
     path: Routes.punishmentSpin,
-    // Al final de la partida recibe el nombre del equipo; desde la sección
-    // Ruleta, los castigos con que se gira y cómo arrancó el giro.
+    // Recibe los castigos con que se gira y cómo arrancó el giro en la
+    // ruleta de la sección o de la tarjeta del final (con el nombre del
+    // equipo); con solo el nombre, gira la ruleta guardada.
     builder: (_, state) => switch (state.extra) {
+      (
+        final String group,
+        final List<String> punishments,
+        final RouletteSpin spin,
+      ) =>
+        PunishmentSpinScreen(
+          groupName: group,
+          punishments: punishments,
+          startWith: spin,
+        ),
       (final List<String> punishments, final RouletteSpin spin) =>
         PunishmentSpinScreen(punishments: punishments, startWith: spin),
       final List<String> punishments => PunishmentSpinScreen(

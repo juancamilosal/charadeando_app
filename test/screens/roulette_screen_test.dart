@@ -383,12 +383,15 @@ void main() {
 
   Future<ProviderContainer> finalScreen(
     WidgetTester tester,
-    List<int> hitsPerGroup,
-  ) async {
-    tester.view.physicalSize = const Size(1080, 3600);
+    List<int> hitsPerGroup, {
+    RouletteSetup? saved,
+  }) async {
+    tester.view.physicalSize = const Size(1080, 5400);
     addTearDown(tester.view.reset);
     final container = ProviderContainer(
-      overrides: [punishmentStoreProvider.overrideWithValue(MemoryStore())],
+      overrides: [
+        punishmentStoreProvider.overrideWithValue(MemoryStore()..saved = saved),
+      ],
     );
     addTearDown(container.dispose);
     final game = container.read(gameControllerProvider.notifier);
@@ -427,12 +430,18 @@ void main() {
         ),
         GoRoute(
           path: Routes.punishmentSpin,
-          builder: (context, state) => Scaffold(
-            body: TextButton(
-              onPressed: () => context.pop(),
-              child: Text('Ruleta de ${state.extra}'),
-            ),
-          ),
+          builder: (context, state) {
+            final (group, punishments, _) =
+                state.extra! as (String, List<String>, RouletteSpin);
+            return Scaffold(
+              body: TextButton(
+                onPressed: () => context.pop(),
+                child: Text(
+                  'Ruleta de $group con ${punishments.length} castigos',
+                ),
+              ),
+            );
+          },
         ),
       ],
     );
@@ -454,13 +463,15 @@ void main() {
       find.text('Empataron con menos puntos: cada equipo gira su ruleta.'),
       findsOneWidget,
     );
+    await tester.ensureVisible(find.text('Girar'));
     await tester.tap(find.text('Girar'));
     await tester.pumpAndSettle();
-    expect(find.text('Ruleta de Águilas'), findsOneWidget);
-    await tester.tap(find.text('Ruleta de Águilas'));
+    expect(find.text('Ruleta de Águilas con 8 castigos'), findsOneWidget);
+    await tester.tap(find.text('Ruleta de Águilas con 8 castigos'));
     await tester.pumpAndSettle();
 
     expect(find.text('¡Ruleta de castigo para Leones!'), findsOneWidget);
+    await tester.ensureVisible(find.text('Sin castigo'));
     await tester.tap(find.text('Sin castigo'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Ruleta de castigo'), findsNothing);
@@ -470,6 +481,7 @@ void main() {
       'propios, hasta 10, antes de girar', (tester) async {
     final container = await finalScreen(tester, [3, 1]);
     final store = container.read(punishmentStoreProvider) as MemoryStore;
+    await tester.ensureVisible(find.text('Editar castigos'));
     await tester.tap(find.text('Editar castigos'));
     await tester.pumpAndSettle();
     expect(find.text('Castigos de la ruleta'), findsOneWidget);
@@ -499,6 +511,7 @@ void main() {
     expect(find.text('La ruleta tiene 9 castigos.'), findsOneWidget);
 
     // Al volver a abrirla, están los guardados; se puede quitar uno.
+    await tester.ensureVisible(find.text('Editar castigos'));
     await tester.tap(find.text('Editar castigos'));
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsNWidgets(9));
@@ -514,13 +527,17 @@ void main() {
   });
 
   testWidgets('la ruleta editada necesita al menos 2 castigos', (tester) async {
-    final container = await finalScreen(tester, [3, 1]);
-    final store = container.read(punishmentStoreProvider) as MemoryStore;
-    store.saved = const RouletteSetup(
-      source: PunishmentSource.own,
-      punishments: ['Cantar', 'Bailar'],
-      written: ['Cantar', 'Bailar'],
+    final container = await finalScreen(
+      tester,
+      [3, 1],
+      saved: const RouletteSetup(
+        source: PunishmentSource.own,
+        punishments: ['Cantar', 'Bailar'],
+        written: ['Cantar', 'Bailar'],
+      ),
     );
+    final store = container.read(punishmentStoreProvider) as MemoryStore;
+    await tester.ensureVisible(find.text('Editar castigos'));
     await tester.tap(find.text('Editar castigos'));
     await tester.pumpAndSettle();
     // Con 2 no se puede quitar ninguno.
@@ -537,6 +554,42 @@ void main() {
       findsOneWidget,
     );
     expect(store.saved!.punishments, ['Cantar', 'Bailar']);
+  });
+
+  testWidgets('al final la tarjeta muestra la ruleta guardada con sus '
+      'castigos, sin girar hasta tocar "Girar"', (tester) async {
+    final container = await finalScreen(tester, [3, 1]);
+    final store = container.read(punishmentStoreProvider) as MemoryStore;
+    expect(store.saved, isNull);
+    // Sin ruleta guardada, 8 castigos de la app.
+    final roulette = find.byType(PunishmentRoulette);
+    expect(roulette, findsOneWidget);
+    expect(
+      tester.widget<PunishmentRoulette>(roulette).punishments,
+      hasLength(8),
+    );
+
+    // Al editar, la ruleta de la tarjeta cambia de una vez.
+    await tester.ensureVisible(find.text('Editar castigos'));
+    await tester.tap(find.text('Editar castigos'));
+    await tester.pumpAndSettle();
+    for (var i = 7; i >= 3; i--) {
+      await tester.tap(find.byTooltip('Quitar castigo ${i + 1}'));
+      await tester.pumpAndSettle();
+    }
+    await tester.ensureVisible(find.text('Guardar'));
+    await tester.tap(find.text('Guardar'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<PunishmentRoulette>(roulette).punishments,
+      store.saved!.punishments,
+    );
+    expect(store.saved!.punishments, hasLength(3));
+
+    await tester.ensureVisible(find.text('Girar'));
+    await tester.tap(find.text('Girar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Ruleta de Águilas con 3 castigos'), findsOneWidget);
   });
 
   testWidgets('al final, si todos empatan no hay ruleta', (tester) async {
