@@ -93,6 +93,10 @@ button.marcado{animation:marcado .22s ease-out}
 .posiciones .lugar{font-family:Fredoka,system-ui,sans-serif;font-weight:600;min-width:1.6em;text-align:center}
 .aviso .cerrar{min-height:0;font-size:22px;padding:12px 44px;margin-top:6px;background:#fff;color:#4B10B0}
 @keyframes marcado{from{transform:scale(.95)}to{transform:scale(1)}}
+/* La cuenta regresiva antes del turno, como en el celular de la frente. */
+.cuenta{font-family:Fredoka,system-ui,sans-serif;font-weight:600;font-size:clamp(120px,45vw,220px);line-height:1;
+  text-shadow:0 6px 18px rgba(0,0,0,.3);animation:latido .9s ease-out}
+@keyframes latido{from{transform:scale(1.35);opacity:.2}to{transform:scale(1);opacity:1}}
 </style>
 </head>
 <body>
@@ -114,6 +118,7 @@ button.marcado{animation:marcado .22s ease-out}
 
 <div class="aviso visible" id="aviso">
   <div class="punto" id="aviso-punto"></div>
+  <div class="cuenta" id="cuenta" aria-live="assertive" hidden></div>
   <h1 id="aviso-titulo">Conectando…</h1>
   <p id="aviso-texto">Sala <span class="codigo">${c}</span></p>
   <div class="lista posiciones" id="posiciones" hidden></div>
@@ -214,8 +219,18 @@ button.marcado{animation:marcado .22s ease-out}
     return '¡Empate entre ' + primeros.slice(0, -1).join(', ') + ' y ' + primeros[primeros.length - 1] + '!';
   }
 
-  function aviso(titulo, texto, { punto = false, resumen = null } = {}) {
+  function aviso(titulo, texto, { punto = false, resumen = null, cuenta = null } = {}) {
     $('aviso').classList.toggle('visible', titulo !== null);
+    // El número cambia: se vuelve a animar.
+    const numero = $('cuenta');
+    if (cuenta === null) numero.hidden = true;
+    else if (numero.hidden || numero.textContent !== String(cuenta)) {
+      numero.textContent = cuenta;
+      numero.hidden = false;
+      numero.style.animation = 'none';
+      void numero.offsetWidth;
+      numero.style.animation = '';
+    }
     if (!resumen) lista(null);
     if (!resumen) posiciones(null);
     $('cerrar').hidden = !resumen;
@@ -273,6 +288,7 @@ button.marcado{animation:marcado .22s ease-out}
     const jugando = e.estado === 'jugando';
     for (const b of botones) b.disabled = !jugando;
     if (jugando) aviso(null);
+    else if (e.estado === 'esperando' && e.cuenta) aviso('¡Prepárate!', e.equipo ? 'Turno de ' + e.equipo : '', { cuenta: e.cuenta });
     else if (e.estado === 'esperando') aviso('Esperando a que empiece el turno…', e.equipo ? 'Turno de ' + e.equipo : 'Prepárate para juzgar.', { punto: true });
     else if (e.estado === 'fin_turno') { aviso('Fin del turno', e.equipo ? 'Turno de ' + e.equipo : '', { resumen: e }); lista(e); }
     else if (e.estado === 'fin_partida') {

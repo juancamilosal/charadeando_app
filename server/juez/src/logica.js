@@ -148,6 +148,8 @@ const CAMPOS_ESTADO = {
         entero(p.puntos, -9999, 99999),
     ),
   total: (v) => entero(v, -9999, 99999),
+  // La cuenta regresiva (3, 2, 1) antes de empezar el turno.
+  cuenta: (v) => entero(v, 1, 9),
 };
 const OBLIGATORIOS_ESTADO = ['segundos', 'puntos', 'estado'];
 

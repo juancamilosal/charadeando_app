@@ -62,6 +62,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   frente muestra "¡Correcto!" o "Paso", el juez ve debajo del tiempo
   "✓ ¡Correcto!" o "→ Paso" (también si se marcó inclinando); si tocó y en
   2 segundos no llegó la confirmación, dice "No llegó, toca otra vez".
+  Antes de cada turno el juez ve la misma cuenta regresiva (3, 2, 1, con
+  "¡Prepárate!") que el celular de la frente.
   Al final del turno el juez ve el resumen como en la app (aciertos,
   pasadas, puntos y la lista de palabras con ✅ o ⏭️) y, mientras la app
   está en el resultado de ese turno, puede tocar una palabra para
@@ -76,8 +78,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   página donde se escribe el código.
   Solo un celular puede ser el juez: otro que escanee dice "La sala ya
   tiene juez" (el mismo celular sí puede volver a entrar, por ejemplo si se
-  le fue la señal). En el resultado de cada turno, "QR Juez" muestra solo
-  el QR en grande, para que el juez entre o vuelva a entrar.
+  le fue la señal). En el resultado de cada turno, "QR Juez" muestra el
+  QR en grande y debajo la página y el código de la sala, para que el juez
+  entre o vuelva a entrar escaneando o escribiendo el código.
 - Corregir el turno: en el resultado de cada turno, "Toca una palabra si se
   marcó mal." Tocar una palabra la cambia entre ✅ acertada y ⏭️ pasada
   (`GameController.correctLastTurn`) y se recalculan los aciertos, los

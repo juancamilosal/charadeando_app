@@ -268,6 +268,8 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
         // Mientras se ve "¡Correcto!" o "Paso", el juez también lo ve: así
         // sabe que la marca llegó.
         mark: playing ? _feedback : null,
+        // Y la cuenta regresiva antes de empezar.
+        countdown: _phase == _Phase.countdown ? _countdown : null,
       ),
     );
   }

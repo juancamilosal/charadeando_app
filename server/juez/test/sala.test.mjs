@@ -485,3 +485,14 @@ test('la página del juez se presenta con su id y avisa si hay otro juez', () =>
   // El tiempo va arriba y la marca debajo.
   assert.ok(html.indexOf('id="tiempo"') < html.indexOf('id="marca"'));
 });
+
+test('la cuenta regresiva antes del turno: 3, 2, 1', () => {
+  const espera = (extra) => estado({ estado: 'esperando', ...extra });
+  assert.equal(leerMensaje(espera({ cuenta: 3 }), 'anfitrion').cuenta, 3);
+  assert.ok(leerMensaje(espera({ cuenta: 0 }), 'anfitrion').error);
+  assert.ok(leerMensaje(espera({ cuenta: 1.5 }), 'anfitrion').error);
+  assert.ok(leerMensaje(espera({ cuenta: '3' }), 'anfitrion').error);
+  const html = paginaJuez('ABC234');
+  assert.match(html, /id="cuenta"/);
+  assert.match(html, /¡Prepárate!/);
+});

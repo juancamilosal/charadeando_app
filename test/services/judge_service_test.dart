@@ -216,6 +216,24 @@ void main() {
     );
   });
 
+  test('la cuenta regresiva va solo mientras se espera el turno', () {
+    expect(
+      const JudgeState(
+        phase: JudgeState.waiting,
+        countdown: 2,
+      ).toJson()['cuenta'],
+      2,
+    );
+    expect(
+      const JudgeState(phase: JudgeState.waiting).toJson().keys,
+      isNot(contains('cuenta')),
+    );
+    expect(
+      const JudgeState(phase: JudgeState.playing, countdown: 1).toJson().keys,
+      isNot(contains('cuenta')),
+    );
+  });
+
   test('sabe cuántos jueces hay', () async {
     final c = FakeConnections();
     final r = room(c);

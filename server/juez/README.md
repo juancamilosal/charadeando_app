@@ -23,7 +23,7 @@ SQLite, que sirve en el plan gratis) y la API de **WebSocket Hibernation**
 
 ## Mensajes (JSON)
 
-- **Anfitrión → sala:** `{ "tipo": "estado", "palabra", "categoria", "segundos", "equipo", "puntos", "estado": "esperando" | "jugando" | "fin_turno" | "fin_partida", "aciertos"?, "pasadas"?, "palabras"?, "editable"? }`.
+- **Anfitrión → sala:** `{ "tipo": "estado", "palabra", "categoria", "segundos", "equipo", "puntos", "estado": "esperando" | "jugando" | "fin_turno" | "fin_partida", "aciertos"?, "pasadas"?, "palabras"?, "editable"?, "cuenta"? }`.
   La sala guarda el último y se lo manda a cada juez que se conecta. Al
   final del turno, `palabras` es la lista del turno en orden
   (`[{ "texto", "acierto": true|false, "puntos"? }]`, hasta 100) y
@@ -33,7 +33,10 @@ SQLite, que sirve en el plan gratis) y la API de **WebSocket Hibernation**
   acaba de marcar: la página del juez muestra debajo del tiempo
   "✓ ¡Correcto!" o "→ Paso" (también si se marcó inclinando el celular). Si
   el juez toca y en 2 segundos no llega esa confirmación, dice "No llegó,
-  toca otra vez". Al final de la partida van también `posiciones`
+  toca otra vez". Durante la cuenta regresiva antes del turno, el estado
+  `esperando` lleva `cuenta` (3, 2, 1): la página muestra el número en
+  grande con "¡Prepárate!", al mismo tiempo que el celular de la frente.
+  Al final de la partida van también `posiciones`
   (`[{ "nombre", "puntos" }]`, hasta 20 equipos, de más a menos puntos): la
   página muestra "¡Ganó …!" o "¡Empate entre …!" y la tabla; sin equipos va
   `total` (los puntos de toda la partida). En `fin_turno` y `fin_partida`

@@ -332,7 +332,14 @@ void main() {
       expect(find.textContaining('Juez conectado ✓'), findsOneWidget);
 
       await start(tester);
+      // El juez vio la misma cuenta regresiva: 3, 2, 1.
+      final counts = [
+        for (final s in channel.states)
+          if (s['cuenta'] != null) s['cuenta'],
+      ];
+      expect(counts, [3, 2, 1]);
       expect(channel.states.last['estado'], 'jugando');
+      expect(channel.states.last.containsKey('cuenta'), isFalse);
       expect(channel.states.last['palabra'], 'Pizza');
       expect(channel.states.last['categoria'], 'Animales');
       expect(channel.states.last['puntos'], 0);
@@ -547,7 +554,7 @@ void main() {
       expect(channel.states.last['palabras'], hasLength(2));
     });
 
-    testWidgets('"QR Juez" muestra solo el QR; sin juez no está', (
+    testWidgets('"QR Juez" muestra el QR, la página y el código', (
       tester,
     ) async {
       await show(tester);
@@ -558,10 +565,10 @@ void main() {
         matching: find.byType(QrImageView),
       );
       expect(qr, findsOneWidget);
-      expect(
-        find.descendant(of: find.byType(Dialog), matching: find.byType(Text)),
-        findsNothing,
-      );
+      Finder inDialog(String text) =>
+          find.descendant(of: find.byType(Dialog), matching: find.text(text));
+      expect(inDialog('K7M2PQ'), findsOneWidget);
+      expect(inDialog('valkiriacode.com/juez'), findsOneWidget);
       await tester.tapAt(const Offset(10, 10));
       await tester.pumpAndSettle();
       expect(find.byType(Dialog), findsNothing);

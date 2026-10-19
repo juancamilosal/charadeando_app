@@ -269,8 +269,9 @@ class JudgeQr extends StatelessWidget {
   );
 }
 
-/// Solo el QR del juez, en grande (para que entre o vuelva a entrar). Se
-/// cierra tocando afuera.
+/// El QR del juez en grande y, debajo, la página y el código de la sala
+/// (para que entre o vuelva a entrar sin escanear). Se cierra tocando
+/// afuera.
 Future<void> showJudgeQr(BuildContext context, JudgeRoom room) => showDialog(
   context: context,
   builder: (context) => Dialog(
@@ -278,7 +279,38 @@ Future<void> showJudgeQr(BuildContext context, JudgeRoom room) => showDialog(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
     child: Padding(
       padding: const EdgeInsets.all(18),
-      child: JudgeQr(url: room.judgeUrl, size: 260),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          JudgeQr(url: room.judgeUrl, size: 260),
+          const SizedBox(height: 10),
+          const Text(
+            'O que abra esta página y escriba el código:',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 13, color: AppColors.ink),
+          ),
+          SelectableText(
+            room.baseUrl.replaceFirst(RegExp('^https?://'), ''),
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: AppColors.purple,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            room.code,
+            style: const TextStyle(
+              fontFamily: AppFonts.display,
+              fontSize: 40,
+              letterSpacing: 6,
+              fontWeight: FontWeight.w700,
+              color: AppColors.ink,
+            ),
+          ),
+        ],
+      ),
     ),
   ),
 );

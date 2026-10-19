@@ -94,6 +94,7 @@ class JudgeState {
     this.mark,
     this.standings,
     this.total,
+    this.countdown,
   });
 
   /// `esperando`, `jugando`, `fin_turno` o `fin_partida`.
@@ -125,6 +126,10 @@ class JudgeState {
   /// Al final de la partida sin equipos: los puntos de toda la partida.
   final int? total;
 
+  /// El número de la cuenta regresiva (3, 2, 1) antes de empezar el turno,
+  /// para que el juez la vea igual que el celular de la frente.
+  final int? countdown;
+
   static const waiting = 'esperando';
   static const playing = 'jugando';
   static const turnOver = 'fin_turno';
@@ -155,6 +160,7 @@ class JudgeState {
     if (standings != null)
       'posiciones': [for (final s in standings!.take(20)) s.toJson()],
     if (total != null) 'total': total!.clamp(-9999, 99999),
+    if (phase == waiting && countdown != null) 'cuenta': countdown!.clamp(1, 9),
   };
 
   /// El mismo estado, pero ya sin poder corregir.

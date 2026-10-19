@@ -119,7 +119,8 @@ detalles de cada parte están en `README.md`, `server/README.md` y
 - **En la app:** sección "Celular juez" en la configuración con QR y código;
   con el juez conectado, inclinar o tocar no marca; sin equipos el juez ve
   solo los puntos de cada turno; "QR Juez" en el resultado del turno muestra
-  solo el QR. Archivos: `lib/services/judge_service.dart`,
+  el QR, la página y el código; el juez también ve la cuenta 3, 2, 1
+  antes de cada turno (campo `cuenta`). Archivos: `lib/services/judge_service.dart`,
   `lib/widgets/judge_setup.dart`, `lib/providers/providers.dart`
   (`judgeTurnSummary`, `judgeStandings`), `lib/screens/turn_screen.dart` y
   `lib/screens/turn_result_screen.dart`.
