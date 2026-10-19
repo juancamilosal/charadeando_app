@@ -40,7 +40,7 @@ void main() {
     expect(find.textContaining('El Rey León'), findsNothing);
   });
 
-  testWidgets('rellena las palabras de prueba que faltan', (tester) async {
+  testWidgets('no hay botón para rellenar palabras de prueba', (tester) async {
     tester.view.physicalSize = const Size(1080, 2400);
     addTearDown(tester.view.reset);
     final container = ProviderContainer();
@@ -59,11 +59,9 @@ void main() {
     );
     await tester.tap(find.text('Empezar'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Rellenar palabras de prueba'));
-    await tester.pump();
-
-    expect(find.text('12 de 12 palabras'), findsOneWidget);
+    expect(find.text('0 de 12 palabras'), findsOneWidget);
     expect(find.text('Rellenar palabras de prueba'), findsNothing);
+    expect(find.byIcon(Icons.science), findsNothing);
   });
 
   testWidgets('sin grupos se escribe una sola lista de al menos 10', (

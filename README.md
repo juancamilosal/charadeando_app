@@ -279,8 +279,7 @@ la cámara frontal graba a los participantes para revivir las risas.
      (ni en Combinar ni en la bienvenida). En modo debug
      (`flutter run`) salen todo el año para probarlas
      (`allSeasonsProvider` es `kDebugMode`); en la versión de lanzamiento,
-     solo en su temporada. El botón "Ingresar valores de prueba"
-     (`TestData.enabled`) también sale solo en modo debug. Otra especial se agrega con su `Season` (mes y día de inicio
+     solo en su temporada. Otra especial se agrega con su `Season` (mes y día de inicio
      y fin).
   En esta pantalla las tarjetas de una sección van en tonos de un mismo
   color (del más oscuro al más claro, alternados en orden), para que no se

@@ -65,15 +65,6 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
     _focus.requestFocus();
   }
 
-  /// Completa la lista con palabras de prueba hasta llegar a [required].
-  void _fillTestWords(int required) {
-    final existing = _words.map((w) => w.text).toSet();
-    final missing = TestData.sample(required + existing.length)
-        .where((w) => !existing.contains(w.text))
-        .take(required - _words.length);
-    setState(() => _words.addAll(missing));
-  }
-
   void _done() {
     final controller = ref.read(gameControllerProvider.notifier);
     controller.setWrittenWords(_author, _words);
@@ -278,14 +269,6 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          if (TestData.enabled && !enough) ...[
-            OutlinedButton.icon(
-              icon: const Icon(Icons.science),
-              label: const Text('Rellenar palabras de prueba'),
-              onPressed: () => _fillTestWords(required),
-            ),
-            const SizedBox(height: 10),
-          ],
           FilledButton.icon(
             icon: Icon(max != null ? Icons.arrow_forward : Icons.check),
             label: Text(max != null ? 'Continuar' : 'Listo'),

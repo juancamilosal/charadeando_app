@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../models/models.dart';
 import '../providers/providers.dart';
 import '../router.dart';
-import '../services/services.dart';
 import '../theme.dart';
 import '../widgets/category_art.dart';
 import '../widgets/play_background.dart';
@@ -23,18 +22,6 @@ class FreeModeScreen extends ConsumerWidget {
           ref.read(gameControllerProvider).config.copyWith(wordSource: source),
         );
     choosePlay(context, ref);
-  }
-
-  /// Llena la partida con valores de prueba y va directo al primer turno.
-  void _testValues(BuildContext context, WidgetRef ref) {
-    final controller = ref.read(gameControllerProvider.notifier);
-    controller.configure(TestData.config);
-    final words = TestData.words();
-    for (var i = 0; i < words.length; i++) {
-      controller.setWrittenWords(i, words[i]);
-    }
-    controller.start();
-    context.go(Routes.turn);
   }
 
   @override
@@ -81,23 +68,6 @@ class FreeModeScreen extends ConsumerWidget {
                 description: 'El juego las pone, listas para jugar',
                 onTap: () => _choose(context, ref, WordSource.random),
               ),
-              if (TestData.enabled) ...[
-                SizedBox(height: 24),
-                OutlinedButton.icon(
-                  icon: Icon(Icons.science),
-                  label: Text('Ingresar valores de prueba'),
-                  onPressed: () => _testValues(context, ref),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  '2 equipos, 2 rondas de 60 s y 10 palabras por equipo.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: context.onBackdrop.withValues(alpha: 0.8),
-                    fontSize: 13,
-                  ),
-                ),
-              ],
             ],
           ),
         ),
