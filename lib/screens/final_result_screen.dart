@@ -178,6 +178,8 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
                             key: ValueKey(_punished),
                             initialSource: PunishmentSource.system,
                             initialFields: PunishmentSpinScreen.defaultFields,
+                            // La configuración, en "Personalizar castigos".
+                            compact: true,
                             onSpin: (punishments, spin) => _spin(
                               losers[_punished],
                               punishments,

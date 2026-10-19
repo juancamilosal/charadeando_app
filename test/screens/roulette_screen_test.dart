@@ -496,8 +496,8 @@ void main() {
     expect(find.textContaining('Ruleta de castigo'), findsNothing);
   });
 
-  testWidgets('al final se ve la misma ruleta de la sección, con 8 '
-      'castigos de la app si nunca se configuró', (tester) async {
+  testWidgets('al final se ve la ruleta con 8 castigos de la app y la '
+      'configuración se abre con "Personalizar castigos"', (tester) async {
     final container = await finalScreen(tester, [3, 1]);
     final store = container.read(punishmentStoreProvider) as MemoryStore;
     final roulette = find.byType(PunishmentRoulette);
@@ -507,13 +507,22 @@ void main() {
       hasLength(8),
     );
     expect(find.text('Otros castigos'), findsOneWidget);
+    // La configuración no está en la pantalla: va en la hoja.
+    expect(find.text('Cantidad de campos'), findsNothing);
+    await tester.ensureVisible(find.text('Personalizar castigos'));
+    await tester.tap(find.text('Personalizar castigos'));
+    await tester.pumpAndSettle();
+    final sheet = find.byType(BottomSheet);
+    expect(sheet, findsOneWidget);
     expect(find.text('Cantidad de campos'), findsOneWidget);
     expect(find.text('¿De dónde salen los castigos?'), findsOneWidget);
 
-    // Se configura igual que en la sección y gira con lo que se ve. La
-    // lista se baja sin arrastrar: arrastrar sobre la ruleta la gira.
+    // Se configura igual que en la sección; la ruleta de la pantalla
+    // cambia con cada cosa.
     final list = tester
-        .state<ScrollableState>(find.byType(Scrollable).first)
+        .state<ScrollableState>(
+          find.descendant(of: sheet, matching: find.byType(Scrollable)).first,
+        )
         .position;
     list.jumpTo(list.maxScrollExtent);
     await tester.pumpAndSettle();
@@ -534,11 +543,17 @@ void main() {
     for (var i = 0; i < shown.length; i++) {
       await tester.enterText(find.byKey(ValueKey('castigo$i')), 'Castigo $i');
     }
-    // Sin el teclado, que mantiene a la vista el campo que se escribe.
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpAndSettle();
-    list.jumpTo(0);
+    expect(
+      tester.widget<PunishmentRoulette>(roulette).punishments.first,
+      'Castigo 0',
+    );
+    await tester.tap(find.text('Listo'));
     await tester.pumpAndSettle();
+    expect(sheet, findsNothing);
+
+    await tester.ensureVisible(find.text('Girar'));
     await tester.tap(find.text('Girar'));
     await tester.pumpAndSettle();
     expect(find.text('Ruleta de Águilas con 8 castigos'), findsOneWidget);

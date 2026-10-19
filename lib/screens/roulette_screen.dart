@@ -70,6 +70,7 @@ class RouletteSetupView extends ConsumerStatefulWidget {
     this.random,
     this.initialSource,
     this.initialFields = 6,
+    this.compact = false,
   });
 
   /// Los castigos con que se gira y cómo arrancó el giro.
@@ -82,6 +83,10 @@ class RouletteSetupView extends ConsumerStatefulWidget {
   /// Cómo empieza si nunca se guardó una ruleta.
   final PunishmentSource? initialSource;
   final int initialFields;
+
+  /// Sin la configuración debajo: un botón "Personalizar castigos" la abre
+  /// en una hoja (en el final de la partida, para que no quede tan larga).
+  final bool compact;
 
   @override
   ConsumerState<RouletteSetupView> createState() => _RouletteSetupViewState();
@@ -164,6 +169,7 @@ class _RouletteSetupViewState extends ConsumerState<RouletteSetupView> {
 
   @override
   void dispose() {
+    _revision.dispose();
     for (final c in _controllers) {
       c.dispose();
     }
@@ -202,8 +208,14 @@ class _RouletteSetupViewState extends ConsumerState<RouletteSetupView> {
     ),
   );
 
-  /// Algo cambió en la configuración: la ruleta vuelve a mostrarlo.
-  void _changed(VoidCallback change) => setState(change);
+  /// Algo cambió en la configuración: la ruleta vuelve a mostrarlo (y la
+  /// hoja de "Personalizar castigos", si está abierta).
+  void _changed(VoidCallback change) {
+    setState(change);
+    _revision.value++;
+  }
+
+  final _revision = ValueNotifier(0);
 
   /// "Girar" (o soltarla con impulso): revisa que esté completa, fija los
   /// castigos (en "Jugadores y app", la app llena los vacíos), la guarda para
@@ -262,31 +274,135 @@ class _RouletteSetupViewState extends ConsumerState<RouletteSetupView> {
             );
           },
         ),
+        if (widget.compact) ...[
+          const SizedBox(height: 8),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 10,
+            runSpacing: 8,
+            children: [
+              if (_source == PunishmentSource.system) _otherButton(context),
+              FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: AppColors.purple,
+                ),
+                icon: const Icon(Icons.tune),
+                label: const Text('Personalizar castigos'),
+                onPressed: _customize,
+              ),
+            ],
+          ),
+        ]
         // Con los castigos de la app, "Otros castigos" va justo debajo de
         // la ruleta: se cambian sin bajar la pantalla.
-        if (_source == PunishmentSource.system) ...[
+        else if (_source == PunishmentSource.system) ...[
           const SizedBox(height: 8),
-          Center(
-            child: FilledButton.icon(
-              style: FilledButton.styleFrom(
-                backgroundColor: context.backdrop.light
-                    ? AppColors.purple
-                    : Colors.white,
-                foregroundColor: context.backdrop.light
-                    ? Colors.white
-                    : AppColors.purple,
-              ),
-              icon: const Icon(Icons.shuffle),
-              label: const Text('Otros castigos'),
-              onPressed: _otherPunishments,
-            ),
-          ),
+          Center(child: _otherButton(context)),
         ],
-        const SizedBox(height: 20),
-        ..._config(),
+        if (!widget.compact) ...[const SizedBox(height: 20), ..._config()],
       ],
     );
   }
+
+  Widget _otherButton(BuildContext context) => FilledButton.icon(
+    style: FilledButton.styleFrom(
+      backgroundColor: context.backdrop.light ? AppColors.purple : Colors.white,
+      foregroundColor: context.backdrop.light ? Colors.white : AppColors.purple,
+    ),
+    icon: const Icon(Icons.shuffle),
+    label: const Text('Otros castigos'),
+    onPressed: _otherPunishments,
+  );
+
+  /// "Personalizar castigos": la configuración en una hoja que sube desde
+  /// abajo, con una ruleta pequeña arriba que muestra cada cambio. Lo que
+  /// se cambia ya queda en la ruleta de la pantalla.
+  Future<void> _customize() => showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    backgroundColor: const Color(0xFFF4EEFD),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    ),
+    builder: (sheet) => FractionallySizedBox(
+      heightFactor: 0.92,
+      child: ValueListenableBuilder<int>(
+        valueListenable: _revision,
+        builder: (sheet, _, _) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                children: [
+                  Center(
+                    child: Container(
+                      width: 44,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: AppColors.ink.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Personalizar castigos',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: AppFonts.display,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.ink,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Center(
+                    child: SizedBox.square(
+                      dimension: 170,
+                      child: CustomPaint(
+                        painter: RoulettePainter(
+                          punishments: _preview,
+                          angle: 0,
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (_source == PunishmentSource.system) ...[
+                    const SizedBox(height: 8),
+                    Center(
+                      child: FilledButton.icon(
+                        icon: const Icon(Icons.shuffle),
+                        label: const Text('Otros castigos'),
+                        onPressed: _otherPunishments,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  ..._config(),
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                20,
+                8,
+                20,
+                12 + MediaQuery.viewInsetsOf(sheet).bottom,
+              ),
+              child: FilledButton.icon(
+                icon: const Icon(Icons.check),
+                label: const Text('Listo'),
+                onPressed: () => Navigator.of(sheet).pop(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 
   List<Widget> _config() {
     final source = _source;
