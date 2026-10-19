@@ -133,7 +133,7 @@ void main() {
 
     // Privacidad: un solo interruptor para reportes y estadísticas.
     expect(find.text('Privacidad', skipOffstage: false), findsOneWidget);
-    await tap('Enviar reportes y estadísticas anónimas');
+    await tap('Enviar datos anónimos');
     expect(store.saved!.shareData, isFalse);
     expect(find.text('Fondos', skipOffstage: false), findsOneWidget);
     expect(find.text('Cómo se juega', skipOffstage: false), findsOneWidget);

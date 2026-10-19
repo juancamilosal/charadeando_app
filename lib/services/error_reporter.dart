@@ -52,7 +52,7 @@ class ErrorReporter {
   /// Conecta Crashlytics.
   void attach(CrashBackend backend) => _backend = backend;
 
-  /// Enciende o apaga el envío ("Enviar reportes y estadísticas anónimas").
+  /// Enciende o apaga el envío ("Enviar datos anónimos").
   Future<void> setEnabled(bool enabled) async {
     try {
       await _backend?.setEnabled(enabled);

@@ -133,7 +133,7 @@ class SettingsScreen extends ConsumerWidget {
                   _SwitchRow(
                     icon: Icons.shield_outlined,
                     color: AppColors.teal,
-                    title: 'Enviar reportes y estadísticas anónimas',
+                    title: 'Enviar datos anónimos',
                     value: settings.shareData,
                     onChanged: (v) => update(settings.copyWith(shareData: v)),
                   ),

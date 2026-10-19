@@ -46,7 +46,7 @@ class AppSettings {
   final bool invertedRotation;
   final PlayController controller;
 
-  /// "Enviar reportes y estadísticas anónimas": los errores a Crashlytics y
+  /// "Enviar datos anónimos": los errores a Crashlytics y
   /// las estadísticas de las partidas a Directus.
   final bool shareData;
 

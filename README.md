@@ -237,7 +237,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   (la mitad derecha de la pantalla es acierto y la izquierda, pasar, con
   una marca suave en cada borde durante el turno; en Modo TV el juez sigue
   con sus botones). "Apariencia": "Fondos". "Privacidad": un solo
-  interruptor, "Enviar reportes y estadísticas anónimas" (encendido por
+  interruptor, "Enviar datos anónimos" (encendido por
   defecto, `AppSettings.shareData`), que controla los reportes de errores y
   las estadísticas de las partidas (ver "Reportes, reseña y estadísticas").
   "Ayuda": "Cómo se juega", "Califica Charadeando" (abre la ficha de Play

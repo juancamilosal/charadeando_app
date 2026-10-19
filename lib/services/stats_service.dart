@@ -95,7 +95,7 @@ class StatsService {
   final Future<Directory> Function() _directory;
   final Future<String> Function() _version;
 
-  /// "Enviar reportes y estadísticas anónimas".
+  /// "Enviar datos anónimos".
   bool enabled = true;
 
   /// Una sola tarea a la vez, para que la cola no se pise.
