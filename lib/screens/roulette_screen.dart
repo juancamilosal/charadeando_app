@@ -57,8 +57,9 @@ class RouletteScreen extends StatelessWidget {
 
 /// La ruleta con "Girar" y, debajo, su configuración: cuántos campos tiene
 /// y de dónde salen los castigos. La ruleta se va armando con lo que se
-/// elige, pero aquí no gira: al girar, la configuración queda guardada y
-/// [onSpin] la abre a pantalla completa. La usan la sección Ruleta y el
+/// elige, pero aquí no gira ni sigue al dedo (deslizar baja la pantalla):
+/// con "Girar" o tocándola, la configuración queda guardada y [onSpin] la
+/// abre a pantalla completa, donde sí se gira con el dedo. La usan la sección Ruleta y el
 /// resultado final de la partida.
 class RouletteSetupView extends ConsumerStatefulWidget {
   const RouletteSetupView({
@@ -253,6 +254,8 @@ class _RouletteSetupViewState extends ConsumerState<RouletteSetupView> {
                 random: _random,
                 onBeforeSpin: _beforeSpin,
                 onSkip: widget.onSkip,
+                // Deslizar encima baja la pantalla, no gira la ruleta.
+                dragToSpin: false,
                 onDone: () {},
               ),
             );

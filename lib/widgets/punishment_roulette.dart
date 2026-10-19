@@ -40,6 +40,7 @@ class PunishmentRoulette extends ConsumerStatefulWidget {
     this.onBeforeSpin,
     this.onResult,
     this.startWith,
+    this.dragToSpin = true,
   });
 
   /// Un castigo por campo, en el sentido del reloj desde arriba.
@@ -66,6 +67,11 @@ class PunishmentRoulette extends ConsumerStatefulWidget {
   /// Avisa si se está mostrando el castigo que salió (verdadero) o la
   /// ruleta vuelve a girar (falso).
   final ValueChanged<bool>? onResult;
+
+  /// Si se gira con el dedo. Dentro de una pantalla que se desplaza (la
+  /// sección Ruleta y el final de la partida) no: deslizar el dedo encima
+  /// baja la pantalla, y se gira con "Girar" o tocando la ruleta.
+  final bool dragToSpin;
 
   /// Vueltas por segundo a toda velocidad.
   static const turnsPerSecond = 2.0;
@@ -299,6 +305,22 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
               child: LayoutBuilder(
                 builder: (context, box) {
                   _center = Offset(box.maxWidth / 2, box.maxHeight / 2);
+                  final face = CustomPaint(
+                    size: Size.infinite,
+                    painter: RoulettePainter(
+                      punishments: widget.punishments,
+                      angle: _angle,
+                    ),
+                  );
+                  if (!widget.dragToSpin) {
+                    // Tocarla es como tocar "Girar"; los arrastres son de
+                    // la pantalla.
+                    return GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: _spin == _Spin.idle ? _start : null,
+                      child: face,
+                    );
+                  }
                   // Toma el dedo apenas toca la ruleta, por cualquier
                   // lado: si no, la pantalla se quedaba con los arrastres
                   // hacia arriba o abajo y solo giraba tomándola de arriba.
@@ -314,13 +336,7 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
                               ..onEnd = _dragEnd,
                           ),
                     },
-                    child: CustomPaint(
-                      size: Size.infinite,
-                      painter: RoulettePainter(
-                        punishments: widget.punishments,
-                        angle: _angle,
-                      ),
-                    ),
+                    child: face,
                   );
                 },
               ),

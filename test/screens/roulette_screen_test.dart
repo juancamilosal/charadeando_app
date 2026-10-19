@@ -300,11 +300,9 @@ void main() {
     expect(wheel(tester), isNot(first));
   });
 
-  testWidgets('en la sección se gira desde cualquier lado, también hacia '
-      'arriba o abajo, y la grande sigue hacia el mismo lado', (tester) async {
+  testWidgets('en la sección, deslizar sobre la ruleta baja la pantalla y '
+      'no la gira; tocarla la abre a pantalla completa', (tester) async {
     mockHaptics(tester);
-    // Más baja: la sección se puede desplazar y aun así la ruleta toma el
-    // dedo.
     tester.view.physicalSize = const Size(1080, 2400);
     addTearDown(tester.view.reset);
     final container = ProviderContainer(
@@ -324,58 +322,30 @@ void main() {
     double angle() =>
         (tester.widget<CustomPaint>(painters.last).painter! as RoulettePainter)
             .angle;
+
+    // Por el lado derecho, hacia arriba: la pantalla baja y la ruleta no
+    // se mueve.
     final box = tester.getRect(painters.first);
-
-    // Por el lado derecho, hacia abajo: gira en el sentido del reloj (y la
-    // pantalla no se desplaza).
-    final scroll = tester.getTopLeft(painters.first);
-    final gesture = await tester.startGesture(
+    await tester.dragFrom(
       Offset(box.right - 20, box.center.dy),
+      const Offset(0, -300),
     );
-    for (var i = 0; i < 6; i++) {
-      await gesture.moveBy(const Offset(0, 15));
-      await tester.pump(const Duration(milliseconds: 20));
-    }
-    await tester.pump(const Duration(milliseconds: 300));
-    await gesture.up();
-    await tester.pump();
-    expect(angle(), greaterThan(0.3));
-    expect(tester.getTopLeft(painters.first), scroll);
-
-    // Por abajo, hacia la izquierda: sigue al dedo al revés del reloj.
-    final before = angle();
-    final g2 = await tester.startGesture(
-      Offset(box.center.dx, box.bottom - 20),
-    );
-    for (var i = 0; i < 6; i++) {
-      await g2.moveBy(const Offset(-15, 0));
-      await tester.pump(const Duration(milliseconds: 20));
-    }
-    await tester.pump(const Duration(milliseconds: 300));
-    await g2.up();
-    await tester.pump();
-    expect(angle(), lessThan(before - 0.3));
-
-    // La pantalla se desplaza tocando fuera de la ruleta. Con los castigos
-    // listos, un empujón a la izquierda abre la grande y gira hacia la
-    // izquierda, desde donde quedó.
-    await tester.dragFrom(const Offset(180, 760), const Offset(0, -400));
     await tester.pumpAndSettle();
-    expect(find.text('Los pone la app').hitTestable(), findsOneWidget);
+    expect(angle(), 0);
+    expect(tester.getRect(painters.first).top, lessThan(box.top - 100));
+
+    // Con los castigos listos, tocar la ruleta es como tocar "Girar".
+    await tester.dragFrom(const Offset(180, 600), const Offset(0, -400));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Los pone la app'));
     await tester.pumpAndSettle();
-    await tester.dragFrom(const Offset(180, 760), const Offset(0, 3000));
+    await tester.dragFrom(const Offset(180, 400), const Offset(0, 3000));
     await tester.pumpAndSettle();
-    final left = angle();
-    await tester.flingFrom(
-      Offset(box.center.dx, box.bottom - 30),
-      const Offset(-200, 0),
-      2500,
-    );
+    await tester.tap(painters.first);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('Frenando…'), findsOneWidget);
-    expect(angle(), lessThan(left - 0.5));
+    expect(find.text('¡Parar!'), findsOneWidget);
+    await tester.tap(find.text('¡Parar!'));
     await wait(tester, const Duration(seconds: 12));
     await tester.pumpAndSettle();
     expect(find.text('¡Castigo!'), findsOneWidget);

@@ -512,14 +512,13 @@ la cámara frontal graba a los participantes para revivir las risas.
   ruleta, los cambia sin bajar la pantalla). Al girar se
   revisa que esté completa y, en "Jugadores y app", la app llena los vacíos;
   entonces la ruleta se abre a pantalla completa, sin la configuración ni
-  la barra de abajo: solo la ruleta girando y "¡Parar!". La ruleta también
-  se gira con el dedo: sigue al dedo y, si se suelta con impulso, gira
-  hacia donde iba el dedo (a la derecha, en el sentido del reloj; a la
-  izquierda, al revés; hacia arriba o abajo, según el lado) y frena sola; se
-  toma de cualquier lado (arriba, abajo o a los costados: la ruleta se queda
-  con el dedo apenas la toca, y la pantalla se desplaza tocando fuera de
-  ella). Si se empuja en la sección, la de pantalla completa arranca donde
-  quedó y gira hacia el mismo lado; la
+  la barra de abajo: solo la ruleta girando y "¡Parar!". En la sección y en el final de la
+  partida la ruleta no sigue al dedo (`dragToSpin: false`): deslizar encima
+  baja la pantalla, y tocar la ruleta es como tocar "Girar". En la de
+  pantalla completa sí se gira con el dedo: sigue al dedo y, si se suelta
+  con impulso, gira hacia donde iba el dedo (a la derecha, en el sentido del
+  reloj; a la izquierda, al revés; hacia arriba o abajo, según el lado) y
+  frena sola; se toma de cualquier lado. La
   fuerza solo cambia cuánto tarda, el castigo sale igual al azar.
   "Listo" la deja quieta otra vez para seguir cambiándola. Se elige la
   cantidad de campos (de 2 a 10, la ruleta se divide en partes iguales) y de
