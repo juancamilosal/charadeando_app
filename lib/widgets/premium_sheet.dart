@@ -115,6 +115,9 @@ class _PremiumSheetState extends ConsumerState<PremiumSheet> {
         break;
       case BillingStatus.failed:
         _say('No se pudo completar la compra. Inténtalo otra vez.');
+        // Google también responde con error si ya era suyo ("Ya tienes
+        // este artículo"): se buscan sus compras y, si estaba, se abre.
+        ref.read(premiumProvider.notifier).restore().ignore();
       case BillingStatus.canceled:
         break;
     }

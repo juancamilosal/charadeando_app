@@ -168,7 +168,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   la app, si no lo tiene todo, se buscan las compras hechas (por si se
   reinstaló). Si se cierra la ventana de pago, Android lo avisa sin decir
   el producto (`productID` vacío); igual le llega a la hoja
-  (`PlayBilling.eventFor`) y el botón deja de cargar. Sin Google Play avisa
+  (`PlayBilling.eventFor`) y el botón deja de cargar. Si Google responde con
+  error (también lo hace con "Ya tienes este artículo"), la hoja lo dice y
+  busca las compras hechas, por si ya era suyo. Sin Google Play avisa
   que las compras no están disponibles.
   Los códigos promocionales de Google Play se canjean en Play Store y
   llegan como una compra más.

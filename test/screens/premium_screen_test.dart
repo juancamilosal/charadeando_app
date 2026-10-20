@@ -138,6 +138,24 @@ void main() {
     expect(billing.bought, ['FUTBOLISTAS', 'FUTBOLISTAS']);
   });
 
+  testWidgets('si Google responde con error, avisa y busca las compras (por '
+      'si ya era suyo)', (tester) async {
+    final billing = FakeBilling();
+    await pump(tester, billing: billing);
+    await tapCard(tester, 'Futbolistas');
+    await tester.tap(find.text(r'Solo Futbolistas · $4.000'));
+    await tester.pump();
+    final before = billing.restores;
+    billing.send(const BillingEvent(BillingStatus.failed));
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(
+      find.text('No se pudo completar la compra. Inténtalo otra vez.'),
+      findsOneWidget,
+    );
+    expect(billing.restores, before + 1);
+  });
+
   testWidgets('comprar solo una categoría abre esa y las demás siguen con '
       'candado', (tester) async {
     final billing = FakeBilling();
