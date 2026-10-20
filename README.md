@@ -246,7 +246,10 @@ la cámara frontal graba a los participantes para revivir las risas.
   con sus botones). "Apariencia": "Fondos". "Privacidad": un solo
   interruptor, "Enviar datos anónimos" (encendido por
   defecto, `AppSettings.shareData`), que controla los reportes de errores y
-  las estadísticas de las partidas (ver "Reportes, reseña y estadísticas").
+  las estadísticas de las partidas (ver "Reportes, reseña y estadísticas"),
+  y "Política de privacidad", que abre en el navegador
+  https://valkiriacode.com/charadeando/privacidad (la misma de la ficha de
+  Play; está en el sitio de ValkiriaCode, con `url_launcher`).
   "Ayuda": "Cómo se juega", "Califica Charadeando" (abre la ficha de Play
   Store con `in_app_review`) y "Créditos"
   (abre desde abajo de dónde salen la música, "Comedy" de nastelbom en

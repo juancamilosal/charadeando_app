@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../models/models.dart';
 import '../providers/providers.dart';
@@ -8,6 +9,11 @@ import '../router.dart';
 import '../theme.dart';
 import '../widgets/play_background.dart';
 import '../widgets/premium_sheet.dart';
+
+/// Página de la política de privacidad (la misma de la ficha de Play).
+final privacyPolicyUrl = Uri.parse(
+  'https://valkiriacode.com/charadeando/privacidad',
+);
 
 /// "Ajustes": preferencias de juego, apariencia y ayuda. Todo se guarda en
 /// el celular y se aplica desde que abre la app.
@@ -136,6 +142,15 @@ class SettingsScreen extends ConsumerWidget {
                     title: 'Enviar datos anónimos',
                     value: settings.shareData,
                     onChanged: (v) => update(settings.copyWith(shareData: v)),
+                  ),
+                  _LinkRow(
+                    icon: Icons.policy_outlined,
+                    color: AppColors.purple,
+                    title: 'Política de privacidad',
+                    onTap: () => launchUrl(
+                      privacyPolicyUrl,
+                      mode: LaunchMode.externalApplication,
+                    ),
                   ),
                 ],
               ),

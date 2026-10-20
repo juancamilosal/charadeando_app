@@ -106,7 +106,9 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   (`google-services.json` fuera del repo; sin él compila igual), reseña con
   `in_app_review` (`ReviewPolicy`) y estadísticas a `/juego/partida` con
   cola en el celular. Ajustes > Privacidad tiene un solo interruptor para
-  reportes y estadísticas.
+  reportes y estadísticas y el enlace a la política de privacidad
+  (https://valkiriacode.com/charadeando/privacidad, en el sitio de
+  ValkiriaCode y en la ficha de Play).
 - **Marca y arranque:** splash nativo solo con el fondo y luego pantalla
   Flutter animada con destellos. Ícono y gráficos de Play en `branding/`.
 

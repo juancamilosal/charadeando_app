@@ -9,6 +9,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:url_launcher_platform_interface/link.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
+
+/// Anota las direcciones que la app pide abrir.
+class _FakeLauncher extends UrlLauncherPlatform
+    with MockPlatformInterfaceMixin {
+  final opened = <String>[];
+
+  @override
+  LinkDelegate? get linkDelegate => null;
+
+  @override
+  Future<bool> canLaunch(String url) async => true;
+
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    opened.add(url);
+    return true;
+  }
+}
 
 /// Ajustes guardados en memoria, sin archivos.
 class MemorySettingsStore extends SettingsStore {
@@ -166,6 +187,37 @@ void main() {
     await tester.tap(rate);
     await tester.pump();
     expect(prompt.storeOpened, 1);
+  });
+
+  testWidgets('"Política de privacidad" abre la página en el navegador', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    addTearDown(tester.view.reset);
+    final launcher = _FakeLauncher();
+    final previous = UrlLauncherPlatform.instance;
+    UrlLauncherPlatform.instance = launcher;
+    addTearDown(() => UrlLauncherPlatform.instance = previous);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          settingsStoreProvider.overrideWithValue(MemorySettingsStore()),
+        ],
+        child: const MaterialApp(home: SettingsScreen()),
+      ),
+    );
+    final policy = find.text('Política de privacidad');
+    await tester.scrollUntilVisible(
+      policy,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump();
+    await tester.tap(policy);
+    await tester.pump();
+    expect(launcher.opened, [
+      'https://valkiriacode.com/charadeando/privacidad',
+    ]);
   });
 
   group('vibración', () {
