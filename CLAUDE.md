@@ -80,7 +80,10 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   final, ganador o empate, tabla de puntos y ruleta de castigos (editable).
 - **Premium:** pago único "Todo Charadeando" o categorías sueltas por Google
   Play, más códigos promocionales. Solo las dos primeras categorías de cada
-  sección son gratis. El fondo Oro es exclusivo de quien compra todo.
+  sección son gratis. El fondo Oro es exclusivo de quien compra todo, y
+  quien compra todo graba los videos sin marca de agua (sin Premium llevan
+  el logo abajo a la derecha). Precios: Todo Charadeando $15.000 y cada
+  categoría $4.000 (IDs `charadeando_premium` y `categoria_<código>`).
 - **Fotomímica:** cartel "Más juegos" antes de Mis categorías, con fotos
   precargadas.
 - **Reportes, reseña y estadísticas:** Firebase Crashlytics solo en Android

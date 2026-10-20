@@ -11,23 +11,35 @@ import 'package:flutter/services.dart';
 import '../models/models.dart';
 
 /// Arma el video final de un turno: une las partes grabadas y escribe encima
-/// las palabras, los aciertos y los pases, con la fuente del juego.
+/// las palabras, los aciertos y los pases, con la fuente del juego. Sin
+/// Premium lleva el logo de Charadeando como marca de agua.
 class VideoRenderer {
   static const _fontAsset = 'assets/fonts/Fredoka_700Bold.ttf';
+  static const _watermarkAsset = 'assets/img/marca/marca_agua.png';
+
+  /// Ancho de la marca de agua, como parte del ancho del video.
+  static const watermarkWidth = 0.2;
 
   int? _sessionId;
 
   /// Genera el video en [outputPath] y lo devuelve. Prueba primero el
   /// codificador por hardware del celular y, si falla, uno por software.
-  /// Lanza una [VideoRenderException] si no se pudo.
+  /// Con [watermark] pone el logo en la esquina; si así no se puede armar,
+  /// lo arma sin él antes de rendirse. Lanza una [VideoRenderException] si
+  /// no se pudo.
   Future<String> render(
     TurnRecording recording, {
     required Directory workDir,
     required String outputPath,
     required int bitrateMbps,
+    bool watermark = false,
     void Function(double progress)? onProgress,
   }) async {
     final fontsDir = await _prepareFonts(workDir);
+    final logo = watermark ? await _prepareWatermark(workDir) : null;
+    final logoWidth = logo == null
+        ? 0
+        : watermarkPixels(await _videoWidth(recording.segments.first));
     final subtitles = File('${workDir.path}/turno.ass');
     await subtitles.writeAsString(buildSubtitles(recording.captions));
 
@@ -41,22 +53,26 @@ class VideoRenderer {
     // si con audio falla, se intenta una última vez sin él.
     final hasAudio = await _allHaveAudio(recording.segments);
     String? lastLogs;
-    for (final withAudio in [hasAudio, if (hasAudio) false]) {
-      for (final encoder in encoders) {
-        final failure = await _run(
-          buildArguments(
-            segments: recording.segments,
-            subtitlesPath: subtitles.path,
-            fontsDir: fontsDir,
-            encoder: encoder,
-            outputPath: outputPath,
-            withAudio: withAudio,
-          ),
-          recording.duration,
-          onProgress,
-        );
-        if (failure == null) return outputPath;
-        lastLogs = failure;
+    for (final watermarkPath in [logo, if (logo != null) null]) {
+      for (final withAudio in [hasAudio, if (hasAudio) false]) {
+        for (final encoder in encoders) {
+          final failure = await _run(
+            buildArguments(
+              segments: recording.segments,
+              subtitlesPath: subtitles.path,
+              fontsDir: fontsDir,
+              encoder: encoder,
+              outputPath: outputPath,
+              withAudio: withAudio,
+              watermarkPath: watermarkPath,
+              watermarkPixels: logoWidth,
+            ),
+            recording.duration,
+            onProgress,
+          );
+          if (failure == null) return outputPath;
+          lastLogs = failure;
+        }
       }
     }
     debugPrint('[Charadeando] No se pudo armar el video del turno:\n$lastLogs');
@@ -130,6 +146,47 @@ class VideoRenderer {
     return dir.path;
   }
 
+  /// Ancho del video grabado, para el tamaño de la marca de agua. Si no se
+  /// puede saber, el de un video HD.
+  Future<int> _videoWidth(String segment) async {
+    try {
+      final session = await FFprobeKit.getMediaInformation(segment);
+      for (final s in session.getMediaInformation()?.getStreams() ?? []) {
+        final width = s.getWidth();
+        if (s.getType() == 'video' && width != null && width > 0) {
+          // El turno se graba en horizontal: el ancho es el lado largo
+          // (la cámara a veces guarda la rotación aparte).
+          final height = s.getHeight() ?? width;
+          return width > height ? width : height;
+        }
+      }
+    } on Exception {
+      // Se usa el de HD.
+    }
+    return 1280;
+  }
+
+  /// Ancho del logo en píxeles para un video de [videoWidth] (par, como
+  /// le gusta a los codificadores).
+  static int watermarkPixels(int videoWidth) =>
+      (videoWidth * watermarkWidth / 2).round() * 2;
+
+  /// Copia el logo de la marca de agua a una carpeta que FFmpeg pueda leer.
+  /// Si no se puede, el video sale sin él.
+  Future<String?> _prepareWatermark(Directory workDir) async {
+    try {
+      final file = File('${workDir.path}/marca_agua.png');
+      if (!await file.exists()) {
+        final data = await rootBundle.load(_watermarkAsset);
+        await file.writeAsBytes(data.buffer.asUint8List(), flush: true);
+      }
+      return file.path;
+    } on Exception catch (e) {
+      debugPrint('[Charadeando] Sin marca de agua: $e');
+      return null;
+    }
+  }
+
   static List<String> hardwareEncoder(String codec, int bitrateMbps) => [
     '-c:v',
     codec,
@@ -139,8 +196,10 @@ class VideoRenderer {
 
   static const softwareEncoder = ['-c:v', 'mpeg4', '-q:v', '3'];
 
-  /// Argumentos de FFmpeg: une las partes (video y audio) y escribe los
-  /// subtítulos encima.
+  /// Argumentos de FFmpeg: une las partes (video y audio), escribe los
+  /// subtítulos encima y, con [watermarkPath], pone el logo abajo a la
+  /// derecha, de [watermarkPixels] de ancho y un poco transparente (abajo al
+  /// centro van "¡Correcto!" y "Paso").
   static List<String> buildArguments({
     required List<String> segments,
     required String subtitlesPath,
@@ -148,9 +207,12 @@ class VideoRenderer {
     required List<String> encoder,
     required String outputPath,
     bool withAudio = true,
+    String? watermarkPath,
+    int watermarkPixels = 256,
   }) {
     final inputs = [
       for (final s in segments) ...['-i', s],
+      if (watermarkPath != null) ...['-i', watermarkPath],
     ];
     final streams = [
       for (var i = 0; i < segments.length; i++)
@@ -159,9 +221,15 @@ class VideoRenderer {
     final concat = withAudio
         ? 'concat=n=${segments.length}:v=1:a=1[cv][a]'
         : 'concat=n=${segments.length}:v=1:a=0[cv]';
-    final filter =
-        '$streams$concat;'
-        "[cv]ass=filename=${_quote(subtitlesPath)}:fontsdir=${_quote(fontsDir)}[v]";
+    final ass =
+        "[cv]ass=filename=${_quote(subtitlesPath)}:fontsdir=${_quote(fontsDir)}";
+    final logo = segments.length;
+    final filter = watermarkPath == null
+        ? '$streams$concat;$ass[v]'
+        : '$streams$concat;$ass[sv];'
+              '[$logo:v]scale=$watermarkPixels:-1,format=rgba,'
+              'colorchannelmixer=aa=0.85[wm];'
+              '[sv][wm]overlay=x=W-w-W*0.025:y=H-h-H*0.035[v]';
     return [
       '-y',
       ...inputs,

@@ -94,6 +94,8 @@ void main() {
     }
     expect(find.text('Config'), findsNothing);
 
+    await tester.ensureVisible(find.text(r'Todas las categorías · $15.000'));
+    await tester.pump();
     await tester.tap(find.text(r'Todas las categorías · $15.000'));
     await tester.pump();
     expect(billing.bought, [null]);
@@ -146,6 +148,8 @@ void main() {
     // Sin Google Play se ven los precios de respaldo.
     expect(find.text(r'Todas las categorías · $15.000'), findsOneWidget);
     expect(find.text(r'Solo Futbolistas · $4.000'), findsOneWidget);
+    await tester.ensureVisible(find.text(r'Todas las categorías · $15.000'));
+    await tester.pump();
     await tester.tap(find.text(r'Todas las categorías · $15.000'));
     await tester.pump();
     expect(

@@ -142,7 +142,8 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Compras de pago único (`lib/widgets/premium_sheet.dart`,
   `PremiumController`): cada categoría de pago se puede comprar suelta, o
   todo junto con **Todo Charadeando** (en el código, "premium"), que además
-  trae el video Full HD y Máxima y las categorías propias sin límite. No se
+  trae el video Full HD y Máxima, los videos sin marca de agua y las
+  categorías propias sin límite. No se
   llama "Premium" para que no suene a suscripción. Las de pago
   (`GameCategory.paid`: todas menos las dos primeras de cada sección,
   `GameCategory.freePerSection`; gratis quedan Libre, Animales, Comida,
@@ -628,7 +629,11 @@ la cámara frontal graba a los participantes para revivir las risas.
   otro lugar.
 - El video final muestra las palabras que se están adivinando, los aciertos y
   los pases. Se arma con FFmpeg (`ffmpeg_kit_flutter_new_video`, licencia
-  LGPL) mientras se ven los resultados del turno.
+  LGPL) mientras se ven los resultados del turno. Sin Todo Charadeando lleva
+  el logo de Charadeando como marca de agua (`assets/img/marca/marca_agua.png`)
+  abajo a la derecha, del 20 % del ancho del video (se mide con FFprobe) y un
+  poco transparente, para no tapar la palabra ni "¡Correcto!"/"Paso". Si con
+  el logo FFmpeg falla, el video se arma sin él.
 - "Finalizar juego": antes de cada turno (arriba a la derecha), mientras
   se muestran las palabras (abajo a la izquierda; en Modo TV, arriba junto
   al tiempo), con el turno en pausa y en la tabla de puntajes. Pregunta antes de terminar y lleva a

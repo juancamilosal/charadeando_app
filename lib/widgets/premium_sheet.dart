@@ -21,6 +21,7 @@ const fallbackAllPrice = r'$15.000';
 const premiumBenefits = [
   'Todas las categorías y objetos de pago, también los nuevos',
   'Videos en Full HD y calidad máxima',
+  'Videos sin marca de agua',
   'Categorías propias sin límite',
   'Fondo exclusivo Oro',
 ];

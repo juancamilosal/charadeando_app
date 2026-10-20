@@ -60,6 +60,8 @@ class TurnVideoController extends Notifier<TurnVideoState> {
             workDir: dir,
             outputPath: output,
             bitrateMbps: _bitrate(resolution),
+            // Premium quita la marca de agua.
+            watermark: !ref.read(premiumUnlockedProvider),
             onProgress: (progress) {
               if (generation != _generation) return;
               state = TurnVideoState(

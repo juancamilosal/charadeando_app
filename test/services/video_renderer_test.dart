@@ -66,6 +66,33 @@ void main() {
     expect(args.last, '/v/final.mp4');
   });
 
+  test('buildArguments con marca de agua pone el logo abajo a la derecha', () {
+    final args = VideoRenderer.buildArguments(
+      segments: ['/v/a.mp4', '/v/b.mp4'],
+      subtitlesPath: '/v/turno.ass',
+      fontsDir: '/v/fonts',
+      encoder: VideoRenderer.softwareEncoder,
+      outputPath: '/v/final.mp4',
+      watermarkPath: '/v/marca_agua.png',
+      watermarkPixels: VideoRenderer.watermarkPixels(1280),
+    );
+    // El logo es la tercera entrada, después de las partes.
+    expect(args.where((a) => a == '-i'), hasLength(3));
+    expect(args[args.lastIndexOf('-i') + 1], '/v/marca_agua.png');
+    final filter = args[args.indexOf('-filter_complex') + 1];
+    expect(
+      filter,
+      "[0:v][0:a][1:v][1:a]concat=n=2:v=1:a=1[cv][a];"
+      "[cv]ass=filename='/v/turno.ass':fontsdir='/v/fonts'[sv];"
+      '[2:v]scale=256:-1,format=rgba,colorchannelmixer=aa=0.85[wm];'
+      '[sv][wm]overlay=x=W-w-W*0.025:y=H-h-H*0.035[v]',
+    );
+    // El 20 % del ancho del video, siempre par.
+    expect(VideoRenderer.watermarkPixels(1920), 384);
+    expect(VideoRenderer.watermarkPixels(1000), 200);
+    expect(args, containsAllInOrder(['-map', '[v]', '-map', '[a]']));
+  });
+
   test('buildArguments sin audio no pide pistas de audio', () {
     final args = VideoRenderer.buildArguments(
       segments: ['/v/a.mp4', '/v/b.mp4'],

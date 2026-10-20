@@ -25,6 +25,9 @@ class FakeRenderer extends VideoRenderer {
 
   final bool fail;
   final finish = <void Function()>[];
+
+  /// Si cada video se pidió con marca de agua.
+  final watermarks = <bool>[];
   var cancelled = false;
 
   @override
@@ -33,8 +36,10 @@ class FakeRenderer extends VideoRenderer {
     required Directory workDir,
     required String outputPath,
     required int bitrateMbps,
+    bool watermark = false,
     void Function(double progress)? onProgress,
   }) async {
+    watermarks.add(watermark);
     onProgress?.call(0.5);
     if (fail) throw const VideoRenderException('prueba');
     return outputPath;
@@ -53,12 +58,13 @@ const recording = TurnRecording(
 void main() {
   late FakeVideoService videos;
 
-  ProviderContainer container(FakeRenderer renderer) {
+  ProviderContainer container(FakeRenderer renderer, {bool premium = false}) {
     videos = FakeVideoService();
     final c = ProviderContainer(
       overrides: [
         videoServiceProvider.overrideWithValue(videos),
         videoRendererProvider.overrideWithValue(renderer),
+        premiumUnlockedProvider.overrideWithValue(premium),
       ],
     );
     addTearDown(c.dispose);
@@ -75,6 +81,21 @@ void main() {
     expect(state.withWords, isTrue);
     expect(state.path, contains('charadeando_'));
     expect(videos.deleted, recording.segments);
+  });
+
+  test('sin Premium el video lleva marca de agua; con Premium, no', () async {
+    final free = FakeRenderer();
+    await container(free)
+        .read(turnVideoProvider.notifier)
+        .process(recording, VideoResolution.hd);
+    expect(free.watermarks, [true]);
+
+    final premium = FakeRenderer();
+    await container(
+      premium,
+      premium: true,
+    ).read(turnVideoProvider.notifier).process(recording, VideoResolution.hd);
+    expect(premium.watermarks, [false]);
   });
 
   test('si falla, usa la primera parte sin palabras', () async {
