@@ -15,7 +15,7 @@ import 'category_card.dart';
 /// Play). Deben ser los mismos de Play Console; al comprar, Google cobra el
 /// de Play.
 const fallbackCategoryPrice = r'$3.900';
-const fallbackAllPrice = r'$14.900';
+const fallbackAllPrice = r'$15.000';
 
 /// Lo que trae Premium, para mostrarlo igual en todas partes.
 const premiumBenefits = [

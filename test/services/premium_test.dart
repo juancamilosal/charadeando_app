@@ -26,7 +26,7 @@ class MemoryPremiumStore extends PremiumStore {
   Future<String> deviceId() async => 'celular-de-prueba';
 }
 
-/// Google Play de mentira: Premium a $14.900 y cada categoría a $3.900.
+/// Google Play de mentira: Premium a $15.000 y cada categoría a $3.900.
 /// [available] dice si se puede comprar y [send] manda una compra como si
 /// llegara de la tienda.
 class FakeBilling implements PremiumBilling {
@@ -50,7 +50,7 @@ class FakeBilling implements PremiumBilling {
   Future<StorePrice?> price({String? category}) async {
     if (!available) return null;
     return category == null
-        ? const StorePrice(r'$14.900', 14900, 'COP', symbol: r'$')
+        ? const StorePrice(r'$15.000', 15000, 'COP', symbol: r'$')
         : const StorePrice(r'$3.900', 3900, 'COP', symbol: r'$');
   }
 

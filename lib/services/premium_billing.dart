@@ -29,7 +29,7 @@ class BillingEvent {
   bool get owned => status == BillingStatus.owned;
 }
 
-/// Un precio de la tienda: el texto listo para mostrar ("$14.900") y el
+/// Un precio de la tienda: el texto listo para mostrar ("$15.000") y el
 /// valor, para comparar.
 class StorePrice {
   const StorePrice(this.text, this.amount, this.currency, {this.symbol = ''});

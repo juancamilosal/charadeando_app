@@ -82,7 +82,7 @@ void main() {
     expect(find.text('Desbloquea Anime'), findsOneWidget);
     expect(find.text(r'Solo Anime · $3.900'), findsOneWidget);
     expect(find.text('o mejor'), findsOneWidget);
-    expect(find.text(r'Todas las categorías · $14.900'), findsOneWidget);
+    expect(find.text(r'Todas las categorías · $15.000'), findsOneWidget);
     // Sin decir cuánto se ahorra: solo los dos precios.
     expect(find.textContaining('Ahorras'), findsNothing);
     expect(find.text('Todo Charadeando'), findsOneWidget);
@@ -94,7 +94,7 @@ void main() {
     }
     expect(find.text('Config'), findsNothing);
 
-    await tester.tap(find.text(r'Todas las categorías · $14.900'));
+    await tester.tap(find.text(r'Todas las categorías · $15.000'));
     await tester.pump();
     expect(billing.bought, [null]);
     billing.send(const BillingEvent(BillingStatus.owned));
@@ -144,9 +144,9 @@ void main() {
     await pump(tester, billing: FakeBilling(available: false));
     await tapCard(tester, 'Futbolistas');
     // Sin Google Play se ven los precios de respaldo.
-    expect(find.text(r'Todas las categorías · $14.900'), findsOneWidget);
+    expect(find.text(r'Todas las categorías · $15.000'), findsOneWidget);
     expect(find.text(r'Solo Futbolistas · $3.900'), findsOneWidget);
-    await tester.tap(find.text(r'Todas las categorías · $14.900'));
+    await tester.tap(find.text(r'Todas las categorías · $15.000'));
     await tester.pump();
     expect(
       find.textContaining('Las compras no están disponibles'),
