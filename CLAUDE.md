@@ -49,6 +49,12 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   Seguridad de los datos.
 - Google Play Games para PC quitado; Android XR sigue activo (no se puede
   quitar desde Factores de forma; si hace falta, Catálogo de dispositivos).
+- 20 oct 2026: enviados a revisión los 15 cambios (prueba cerrada Alpha
+  con 8 (1.0.0) en todos los países, ficha es-419 con el Modo TV y el
+  Celular juez como diferenciadores, categoría Juegos de palabras con las
+  etiquetas Casuales, Juegos de palabras y Juegos para fiestas, contacto
+  soporte@valkiriacode.com). Falta crear la lista "Probadores Charadeando"
+  con los Gmail de los probadores.
 - Sigue: prueba cerrada (12+ personas, 14 días) con la guía
   `branding/prueba-cerrada.md` (pasos, mensaje de invitación y tabla de
   comentarios para pedir producción) y luego producción.
