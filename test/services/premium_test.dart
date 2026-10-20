@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:in_app_purchase/in_app_purchase.dart' show PurchaseStatus;
 
 /// Lo desbloqueado, en memoria.
 class MemoryPremiumStore extends PremiumStore {
@@ -498,5 +499,25 @@ void main() {
     expect(PlayBilling.categoryOf('charadeando_premium'), isNull);
     expect(PlayBilling.categoryOf('categoria_anime'), 'ANIME');
     expect(PlayBilling.categoryOf('otra_cosa'), '');
+  });
+
+  test('al cancelar o si falla, Android avisa sin producto y la hoja deja '
+      'de esperar', () {
+    BillingEvent? event(String id, PurchaseStatus status) =>
+        PlayBilling.eventFor(id, status);
+    // Así llega al cerrar la ventana de pago de Google.
+    expect(event('', PurchaseStatus.canceled)?.status, BillingStatus.canceled);
+    expect(event('', PurchaseStatus.error)?.status, BillingStatus.failed);
+    // Sin producto no se sabe qué se compró: no desbloquea nada.
+    expect(event('', PurchaseStatus.purchased), isNull);
+    expect(event('categoria_anime', PurchaseStatus.pending), isNull);
+    final anime = event('categoria_anime', PurchaseStatus.purchased)!;
+    expect(anime.status, BillingStatus.owned);
+    expect(anime.category, 'ANIME');
+    expect(
+      event('charadeando_premium', PurchaseStatus.restored)?.category,
+      isNull,
+    );
+    expect(event('otra_cosa', PurchaseStatus.purchased), isNull);
   });
 }

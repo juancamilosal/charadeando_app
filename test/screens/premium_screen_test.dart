@@ -118,6 +118,26 @@ void main() {
     expect(find.text('Personalizada'), findsOneWidget);
   });
 
+  testWidgets('si se cierra la ventana de pago, el botón deja de cargar', (
+    tester,
+  ) async {
+    final billing = FakeBilling();
+    await pump(tester, billing: billing);
+    await tapCard(tester, 'Futbolistas');
+    await tester.tap(find.text(r'Solo Futbolistas · $4.000'));
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    // Android avisa la cancelación sin decir de qué producto.
+    billing.send(const BillingEvent(BillingStatus.canceled));
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.text('Desbloquea Futbolistas'), findsOneWidget);
+    // Y se puede volver a intentar.
+    await tester.tap(find.text(r'Solo Futbolistas · $4.000'));
+    await tester.pump();
+    expect(billing.bought, ['FUTBOLISTAS', 'FUTBOLISTAS']);
+  });
+
   testWidgets('comprar solo una categoría abre esa y las demás siguen con '
       'candado', (tester) async {
     final billing = FakeBilling();

@@ -107,12 +107,37 @@ class PlayBilling implements PremiumBilling {
     }
   }();
 
+  /// Lo que significa para la app una compra que avisa la tienda, o null
+  /// si no hay nada que hacer (pendiente, o de un producto que no es
+  /// nuestro). Al cancelar o si falla, Android avisa sin el producto
+  /// (`productID` vacío): igual se avisa, para que la hoja de compra deje
+  /// de esperar.
+  static BillingEvent? eventFor(String productId, PurchaseStatus status) {
+    final result = switch (status) {
+      PurchaseStatus.purchased ||
+      PurchaseStatus.restored => BillingStatus.owned,
+      PurchaseStatus.error => BillingStatus.failed,
+      PurchaseStatus.canceled => BillingStatus.canceled,
+      PurchaseStatus.pending => null,
+    };
+    if (result == null) return null;
+    if (productId.isEmpty) {
+      // Sin producto no se sabe qué se compró: solo cuenta si no se compró.
+      return result == BillingStatus.owned ? null : BillingEvent(result);
+    }
+    final category = categoryOf(productId);
+    if (category == '') return null;
+    return BillingEvent(result, category: category);
+  }
+
   @override
   Stream<BillingEvent> get events =>
       _store.purchaseStream.asyncExpand((purchases) async* {
         for (final purchase in purchases) {
-          final category = categoryOf(purchase.productID);
-          if (category == '') continue;
+          if (categoryOf(purchase.productID) == '' &&
+              purchase.productID.isNotEmpty) {
+            continue;
+          }
           // Google devuelve las compras que no se confirman en 3 días.
           if (purchase.pendingCompletePurchase) {
             await _store.completePurchase(purchase);
@@ -124,14 +149,8 @@ class PlayBilling implements PremiumBilling {
               reason: 'Compra ${purchase.productID}',
             );
           }
-          final status = switch (purchase.status) {
-            PurchaseStatus.purchased ||
-            PurchaseStatus.restored => BillingStatus.owned,
-            PurchaseStatus.error => BillingStatus.failed,
-            PurchaseStatus.canceled => BillingStatus.canceled,
-            PurchaseStatus.pending => null,
-          };
-          if (status != null) yield BillingEvent(status, category: category);
+          final event = eventFor(purchase.productID, purchase.status);
+          if (event != null) yield event;
         }
       });
 

@@ -166,7 +166,10 @@ la cámara frontal graba a los participantes para revivir las risas.
   a los 3 días), se guarda en el celular (`premium.json`) y la hoja se
   cierra con "¡Listo! Ya tienes Anime." (o "…Todo Charadeando."). Al abrir
   la app, si no lo tiene todo, se buscan las compras hechas (por si se
-  reinstaló). Sin Google Play avisa que las compras no están disponibles.
+  reinstaló). Si se cierra la ventana de pago, Android lo avisa sin decir
+  el producto (`productID` vacío); igual le llega a la hoja
+  (`PlayBilling.eventFor`) y el botón deja de cargar. Sin Google Play avisa
+  que las compras no están disponibles.
   Los códigos promocionales de Google Play se canjean en Play Store y
   llegan como una compra más.
 - Las categorías de pago que ya son suyas (compradas sueltas o con un
