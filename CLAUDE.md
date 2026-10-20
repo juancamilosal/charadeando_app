@@ -34,6 +34,9 @@ detalles de cada parte están en `README.md`, `server/README.md` y
 - Los 3 canjes de `codigos_canjes` en Directus están **pausados** (prefijo
   `pausado-` en `dispositivo`) para probar sin Premium; se reactivan
   quitando el prefijo, con confirmación del usuario.
+- En `codigos` hay un código `TODO` para los revisores de Google (20 usos,
+  sin vencimiento), puesto en Play Console > Detalles de acceso. **No se
+  pausa ni se borra:** Google lo usa en cada actualización.
 - Sigue: revisar la ficha (`branding/ficha-play.md`) y hacer las capturas,
   contenido de la app (privacidad, seguridad de los datos, clasificación,
   público objetivo), prueba cerrada (12+ personas, 14 días) y producción.
