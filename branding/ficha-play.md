@@ -20,8 +20,9 @@ Charadas en familia: adivina con el celular en la frente y graba cada turno.
 • Juega solo o por equipos, con rondas, puntos y una ruleta de castigos para el que pierda.
 • Cada turno se graba en video con las palabras encima, para reírse después. Guárdalo o compártelo.
 
-**Muchas categorías**
-Animales, comida, películas, profesiones, superhéroes, anime, videojuegos, música, futbolistas, dichos y refranes, y más. Y en temporada: Halloween, Vacaciones y Navidad.
+**Más de 25 categorías**
+Animales, comida, películas, series y novelas, geografía, deportes, equipos de fútbol, profesiones, superhéroes, anime, videojuegos, música, futbolistas, dichos y refranes, marcas y más. Y en temporada: Vacaciones, Halloween y Navidad.
+• 10 categorías gratis para empezar a jugar ya.
 • Combina varias categorías en una sola partida.
 • Crea tus propias categorías con las palabras que quieras.
 • Modo Libre: palabras nuevas en cada partida.
@@ -32,7 +33,7 @@ Animales, comida, películas, profesiones, superhéroes, anime, videojuegos, mú
 • **Celular juez:** otra persona marca los aciertos desde su celular, sin instalar nada. Solo escanea un código QR.
 
 **Todo Charadeando**
-Juega gratis con varias categorías. Con un pago único desbloqueas todas las categorías, video en Full HD sin marca de agua, categorías propias sin límite y el fondo Oro. Sin suscripciones ni mensualidades. También puedes comprar categorías sueltas.
+Juega gratis con 10 categorías. Con un pago único desbloqueas todas las categorías, video en Full HD sin marca de agua, categorías propias sin límite y el fondo Oro. Sin suscripciones ni mensualidades. También puedes comprar categorías sueltas.
 
 ¡Descarga Charadeando y empieza la fiesta!
 
