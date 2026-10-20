@@ -41,4 +41,11 @@ Juega gratis con 8 categorías todo el año. Con un pago único desbloqueas toda
 
 - Ícono 512 × 512: `google-play-icono-512.png`
 - Gráfico destacado 1024 × 500: `google-play-destacada-1024x500.png`
-- Capturas del celular (2 a 8): pendientes, con el fondo Clásico.
+- Capturas del celular (2 a 8): 6 listas, con el fondo Clásico (categorías,
+  turno, resultado del turno, resultado final, ruleta y celular juez).
+
+## Video (pendiente, más adelante)
+
+Play lo toma de un enlace de YouTube: el video debe ser público o "no
+listado", sin anuncios y mejor en horizontal; de 30 segundos a 2 minutos,
+mostrando a gente jugando de verdad.
