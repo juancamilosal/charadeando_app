@@ -25,8 +25,8 @@ detalles de cada parte están en `README.md`, `server/README.md` y
 ## Lanzamiento en Google Play (en qué va)
 
 - App `com.valkiriacode.charadeando` en prueba interna; la última subida
-  es 7 (1.0.0) y `develop` va en 8 (1.0.0) (enlace a la política de
-  privacidad en Ajustes).
+  es 8 (1.0.0) (con el enlace a la política de privacidad en Ajustes);
+  la próxima que se suba debe ser 9 (1.0.0).
 - Hechos: perfil de pagos (persona física, Colombia) con la cuenta
   Davibank aprobada (ya sin retención), programa de cargos del 15 %, los 17
   productos activos (opción de compra `comprar`) y verificadores de
@@ -47,7 +47,7 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   con la sección `#borrar-datos` que usa Play como URL de eliminación.
   Si la app empieza a enviar otros datos, hay que actualizar la política y
   Seguridad de los datos.
-- Sigue: subir 8 (1.0.0) a prueba interna, quitar el factor de forma
+- Sigue: quitar el factor de forma
   Google Play Games para PC, prueba cerrada (12+ personas, 14 días) y
   producción.
 
