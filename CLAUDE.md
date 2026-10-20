@@ -37,9 +37,18 @@ detalles de cada parte están en `README.md`, `server/README.md` y
 - En `codigos` hay un código `TODO` para los revisores de Google (20 usos,
   sin vencimiento), puesto en Play Console > Detalles de acceso. **No se
   pausa ni se borra:** Google lo usa en cada actualización.
-- Sigue: revisar la ficha (`branding/ficha-play.md`) y hacer las capturas,
-  contenido de la app (privacidad, seguridad de los datos, clasificación,
-  público objetivo), prueba cerrada (12+ personas, 14 días) y producción.
+- Ficha con capturas lista y las 10 declaraciones de "Contenido de la app"
+  completas (20 oct 2026): público 13+, sin anuncios ni ID de publicidad,
+  seguridad de los datos con 4 tipos (registros de fallas, diagnóstico,
+  interacciones y ID del dispositivo; recopilados, no compartidos,
+  opcionales). La política vive en el repo `juancamilosal/valkiria-code`
+  (`src/app/pages/privacy/`, rama `develop`, se publica uniendo a `main`),
+  con la sección `#borrar-datos` que usa Play como URL de eliminación.
+  Si la app empieza a enviar otros datos, hay que actualizar la política y
+  Seguridad de los datos.
+- Sigue: subir 7 (1.0.0) a prueba interna, quitar el factor de forma
+  Google Play Games para PC, prueba cerrada (12+ personas, 14 días) y
+  producción.
 
 ## Reglas de seguridad
 
