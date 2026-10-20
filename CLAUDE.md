@@ -26,11 +26,11 @@ detalles de cada parte están en `README.md`, `server/README.md` y
 
 - App `com.valkiriacode.charadeando` en prueba interna; la última subida
   es 6 (1.0.0) y `develop` va en 7 (1.0.0).
-- Hechos: perfil de pagos (persona física, Colombia), cuenta Davibank
-  agregada (en revisión; hay una retención hasta que la aprueben),
-  programa de cargos del 15 %, los 17 productos activos (opción de compra
-  `comprar`, íconos en el scratchpad de la sesión) y verificadores de
-  licencia; las compras de prueba funcionan.
+- Hechos: perfil de pagos (persona física, Colombia) con la cuenta
+  Davibank aprobada (ya sin retención), programa de cargos del 15 %, los 17
+  productos activos (opción de compra `comprar`) y verificadores de
+  licencia; las compras de prueba funcionan (los errores intermitentes de
+  Google del primer día eran por productos recién creados).
 - Los 3 canjes de `codigos_canjes` en Directus están **pausados** (prefijo
   `pausado-` en `dispositivo`) para probar sin Premium; se reactivan
   quitando el prefijo, con confirmación del usuario.
