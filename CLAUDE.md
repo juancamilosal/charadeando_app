@@ -38,6 +38,8 @@ detalles de cada parte están en `README.md`, `server/README.md` y
 - En `codigos` hay un código `TODO` para los revisores de Google (20 usos,
   sin vencimiento), puesto en Play Console > Detalles de acceso. **No se
   pausa ni se borra:** Google lo usa en cada actualización.
+- En `codigos` hay 20 códigos `TODO` de un solo uso (prefijo `PRUEBA-`,
+  sin vencimiento) para regalar a los probadores de la prueba cerrada.
 - Ficha con capturas lista y las 10 declaraciones de "Contenido de la app"
   completas (20 oct 2026): público 13+, sin anuncios ni ID de publicidad,
   seguridad de los datos con 4 tipos (registros de fallas, diagnóstico,
