@@ -22,6 +22,22 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   versión y nombre); en `pubspec.yaml` es `version: 1.0.0+5`. Cada versión
   que se sube a Play necesita un código mayor que la anterior.
 
+## Lanzamiento en Google Play (en qué va)
+
+- App `com.valkiriacode.charadeando` en prueba interna; la última subida
+  es 6 (1.0.0) y `develop` va en 7 (1.0.0).
+- Hechos: perfil de pagos (persona física, Colombia), cuenta Davibank
+  agregada (en revisión; hay una retención hasta que la aprueben),
+  programa de cargos del 15 %, los 17 productos activos (opción de compra
+  `comprar`, íconos en el scratchpad de la sesión) y verificadores de
+  licencia; las compras de prueba funcionan.
+- Los 3 canjes de `codigos_canjes` en Directus están **pausados** (prefijo
+  `pausado-` en `dispositivo`) para probar sin Premium; se reactivan
+  quitando el prefijo, con confirmación del usuario.
+- Sigue: revisar la ficha (`branding/ficha-play.md`) y hacer las capturas,
+  contenido de la app (privacidad, seguridad de los datos, clasificación,
+  público objetivo), prueba cerrada (12+ personas, 14 días) y producción.
+
 ## Reglas de seguridad
 
 - Nunca pedir ni pegar tokens en el chat. No subir tokens ni códigos
