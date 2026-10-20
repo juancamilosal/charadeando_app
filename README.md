@@ -149,12 +149,12 @@ la cámara frontal graba a los participantes para revivir las risas.
   Películas, Series y novelas, Geografía, Lugares, Deportes, Equipos de
   fútbol, Vacaciones y Halloween) llevan un
   candado amarillo en su tarjeta (con todos sus colores) y en Combinar. Al
-  tocar una se abre "Desbloquea Anime": "Solo Anime · $3.900" y, debajo, "o
+  tocar una se abre "Desbloquea Anime": "Solo Anime · $4.000" y, debajo, "o
   mejor" el recuadro de Todo Charadeando con lo que trae (también las
   categorías nuevas que vayan llegando con las actualizaciones), "Todas las
   categorías · $15.000" y "Pago único · sin mensualidades". No se dice
   cuánto se ahorra. Los precios y la moneda los da Google Play; mientras
-  no los da, se muestran $3.900 y $15.000 (`fallbackCategoryPrice`,
+  no los da, se muestran $4.000 y $15.000 (`fallbackCategoryPrice`,
   `fallbackAllPrice`). Una
   resolución bloqueada ("Full HD (1080p) · Todo Charadeando") o "Nueva
   categoría" sin cupo abren solo Todo Charadeando ("Desbloquea todo").

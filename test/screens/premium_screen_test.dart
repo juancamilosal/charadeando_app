@@ -80,7 +80,7 @@ void main() {
 
     await tapCard(tester, 'Anime');
     expect(find.text('Desbloquea Anime'), findsOneWidget);
-    expect(find.text(r'Solo Anime · $3.900'), findsOneWidget);
+    expect(find.text(r'Solo Anime · $4.000'), findsOneWidget);
     expect(find.text('o mejor'), findsOneWidget);
     expect(find.text(r'Todas las categorías · $15.000'), findsOneWidget);
     // Sin decir cuánto se ahorra: solo los dos precios.
@@ -121,7 +121,7 @@ void main() {
     final billing = FakeBilling();
     final container = await pump(tester, billing: billing);
     await tapCard(tester, 'Futbolistas');
-    await tester.tap(find.text(r'Solo Futbolistas · $3.900'));
+    await tester.tap(find.text(r'Solo Futbolistas · $4.000'));
     await tester.pump();
     expect(billing.bought, ['FUTBOLISTAS']);
     billing.send(
@@ -145,7 +145,7 @@ void main() {
     await tapCard(tester, 'Futbolistas');
     // Sin Google Play se ven los precios de respaldo.
     expect(find.text(r'Todas las categorías · $15.000'), findsOneWidget);
-    expect(find.text(r'Solo Futbolistas · $3.900'), findsOneWidget);
+    expect(find.text(r'Solo Futbolistas · $4.000'), findsOneWidget);
     await tester.tap(find.text(r'Todas las categorías · $15.000'));
     await tester.pump();
     expect(

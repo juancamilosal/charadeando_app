@@ -14,7 +14,7 @@ import 'category_card.dart';
 /// ejemplo, si todavía no están creados los productos o el celular no tiene
 /// Play). Deben ser los mismos de Play Console; al comprar, Google cobra el
 /// de Play.
-const fallbackCategoryPrice = r'$3.900';
+const fallbackCategoryPrice = r'$4.000';
 const fallbackAllPrice = r'$15.000';
 
 /// Lo que trae Premium, para mostrarlo igual en todas partes.
