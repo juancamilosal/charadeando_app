@@ -47,9 +47,11 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   con la sección `#borrar-datos` que usa Play como URL de eliminación.
   Si la app empieza a enviar otros datos, hay que actualizar la política y
   Seguridad de los datos.
-- Sigue: quitar el factor de forma
-  Google Play Games para PC, prueba cerrada (12+ personas, 14 días) y
-  producción.
+- Google Play Games para PC quitado; Android XR sigue activo (no se puede
+  quitar desde Factores de forma; si hace falta, Catálogo de dispositivos).
+- Sigue: prueba cerrada (12+ personas, 14 días) con la guía
+  `branding/prueba-cerrada.md` (pasos, mensaje de invitación y tabla de
+  comentarios para pedir producción) y luego producción.
 
 ## Reglas de seguridad
 

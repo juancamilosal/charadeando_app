@@ -24,3 +24,11 @@ Colores del fondo: `#1B024A` (ícono) y `#190442` (logo).
 | `firma.png` | "by ValkiriaCode" en blanco al 70% (600x240, fondo transparente), para la imagen de marca del splash nativo. |
 
 Fondo: `#1F0252`, con un brillo radial `#6E28E6` detrás del logo.
+
+## Google Play (textos)
+
+- `ficha-play.md`: textos de la ficha de Play Store y lista de capturas.
+- `politica-privacidad.md`: borrador de la política (la publicada está en
+  https://valkiriacode.com/charadeando/privacidad).
+- `prueba-cerrada.md`: cómo armar la prueba cerrada (12+ personas, 14 días),
+  el mensaje de invitación y la tabla de comentarios para pedir producción.
