@@ -55,8 +55,12 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   con 8 (1.0.0) en todos los países, ficha es-419 con el Modo TV y el
   Celular juez como diferenciadores, categoría Juegos de palabras con las
   etiquetas Casuales, Juegos de palabras y Juegos para fiestas, contacto
-  soporte@valkiriacode.com). Falta crear la lista "Probadores Charadeando"
-  con los Gmail de los probadores.
+  soporte@valkiriacode.com).
+- 21 oct 2026: Google aprobó y publicó la prueba cerrada. Lista
+  "Probadores Charadeando" enviada a revisión. Los probadores, con su código
+  y su estado, se siguen en el artefacto privado "Probadores Charadeando"
+  (https://claude.ai/artifact/VaRnD29RFWgA4VBNqUvQJp, base de datos del
+  artefacto; los correos y códigos no van en el repositorio).
 - Sigue: prueba cerrada (12+ personas, 14 días) con la guía
   `branding/prueba-cerrada.md` (pasos, mensaje de invitación y tabla de
   comentarios para pedir producción) y luego producción.
