@@ -103,6 +103,10 @@ Cada comentario se anota en la tabla del final.
   probar Premium, mejor darle un código promocional.
 - Si se corrige algo, subir una versión nueva (código mayor) a la prueba
   cerrada; no reinicia los 14 días.
+- Si a un probador le sale "No se puede descargar Charadeando" (aunque ya
+  ve la ficha "acceso anticipado"): borrar la caché de Google Play Store
+  (Ajustes > Aplicaciones > Google Play Store > Almacenamiento > Borrar
+  caché) y volver a intentar. Así se resolvió el primer caso.
 
 ## 4. Pedir acceso a producción
 
