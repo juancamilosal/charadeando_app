@@ -41,7 +41,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     with WidgetsBindingObserver {
   static const _countdownFrom = 3;
   static const _clockFrom = Duration(seconds: 10);
-  static const _feedbackDuration = Duration(milliseconds: 700);
+  static const _feedbackDuration = Duration(milliseconds: 500);
 
   final _camera = CameraService();
   bool _cameraLoading = true;

@@ -19,15 +19,19 @@ enum TiltAction { hit, pass }
 /// bastante inclinada (por ejemplo, con el celular debajo de la cara), y
 /// se ajusta despacio mientras está quieto en ella. Después de cada acción
 /// hay que volver a la neutra antes de que cuente la siguiente, y la
-/// inclinación tiene que sostenerse unas lecturas: los golpes y sacudidas
+/// inclinación tiene que sostenerse un momento: los golpes y sacudidas
 /// sueltos no cuentan.
+///
+/// El filtro y la espera se miden en tiempo, no en lecturas: hay celulares
+/// que entregan las lecturas más espaciadas, y contadas por lecturas el
+/// acierto tardaba más en llegar.
 class TiltDetector {
   TiltDetector({
-    this.triggerAngle = 32,
+    this.triggerAngle = 28,
     this.neutralAngle = 15,
     this.maxBaseline = 50,
     this.limitAngle = 75,
-    this.holdSamples = 4,
+    this.holdTime = const Duration(milliseconds: 60),
     this.smoothing = 0.3,
     this.drift = 0.01,
   });
@@ -47,15 +51,20 @@ class TiltDetector {
   /// basta con llegar aquí, para que siempre se pueda pasar o acertar.
   final double limitAngle;
 
-  /// Lecturas seguidas (unos 20 ms cada una) que tiene que durar la
-  /// inclinación para contar.
-  final int holdSamples;
+  /// Cuánto tiene que durar la inclinación para contar.
+  final Duration holdTime;
 
-  /// Peso de cada lectura nueva en el filtro que suaviza el temblor.
+  /// Peso de una lectura nueva en el filtro que suaviza el temblor, para
+  /// lecturas cada [sampleInterval]; con lecturas más espaciadas pesa más.
   final double smoothing;
 
-  /// Qué tan rápido la neutra sigue al jugador cuando está quieto en ella.
+  /// Qué tan rápido la neutra sigue al jugador cuando está quieto en ella,
+  /// también por cada [sampleInterval].
   final double drift;
+
+  /// Intervalo de referencia entre lecturas (el que pide la app) y el que
+  /// se supone cuando una lectura no trae la hora.
+  static const sampleInterval = Duration(milliseconds: 20);
 
   List<double>? _filtered;
   double? _baseline;
@@ -64,7 +73,10 @@ class TiltDetector {
   double _g = gravity;
   bool _armed = false;
   TiltAction? _pending;
-  int _held = 0;
+
+  /// Tiempo que lleva sostenida la inclinación [_pending].
+  Duration _held = Duration.zero;
+  DateTime? _lastAt;
 
   /// Olvida la calibración; la siguiente lectura fija la posición neutra.
   void reset() {
@@ -73,7 +85,8 @@ class TiltDetector {
     _g = gravity;
     _armed = false;
     _pending = null;
-    _held = 0;
+    _held = Duration.zero;
+    _lastAt = null;
   }
 
   /// Ángulo (en grados) de la pantalla con el horizonte: positivo hacia el
@@ -88,13 +101,37 @@ class TiltDetector {
     return angle * 180 / pi;
   }
 
-  TiltAction? addSample(double x, double y, double z) {
+  /// Tiempo desde la lectura anterior. Sin hora (o con una hora rara) se
+  /// supone el intervalo de referencia; una pausa larga cuenta como mucho
+  /// 250 ms.
+  Duration _elapsed(DateTime? at) {
+    final last = _lastAt;
+    _lastAt = at;
+    if (at == null || last == null) return sampleInterval;
+    final dt = at.difference(last);
+    if (dt <= Duration.zero) return sampleInterval;
+    const most = Duration(milliseconds: 250);
+    return dt > most ? most : dt;
+  }
+
+  /// [weight] por [sampleInterval] llevado a una espera de [dt].
+  static double _scaled(double weight, Duration dt) {
+    if (weight >= 1) return 1;
+    final steps = dt.inMicroseconds / sampleInterval.inMicroseconds;
+    return 1 - pow(1 - weight, steps).toDouble();
+  }
+
+  /// Procesa una lectura. [at] es su hora (la del sensor); sin ella se
+  /// supone una lectura cada [sampleInterval].
+  TiltAction? addSample(double x, double y, double z, {DateTime? at}) {
+    final dt = _elapsed(at);
     final previous = _filtered;
+    final alpha = _scaled(smoothing, dt);
     final filtered = previous == null
         ? [x, y, z]
         : [
             for (final (i, v) in [x, y, z].indexed)
-              previous[i] + smoothing * (v - previous[i]),
+              previous[i] + alpha * (v - previous[i]),
           ];
     _filtered = filtered;
     if (previous == null) {
@@ -114,7 +151,7 @@ class TiltDetector {
       return null;
     }
     if (delta.abs() < neutralAngle) {
-      _baseline = baseline + drift * delta;
+      _baseline = baseline + _scaled(drift, dt) * delta;
     }
     final hitAt = max(baseline - triggerAngle, -limitAngle);
     final passAt = min(baseline + triggerAngle, limitAngle);
@@ -123,16 +160,18 @@ class TiltDetector {
         : angle >= passAt
         ? TiltAction.pass
         : null;
+    // La primera lectura inclinada empieza a contar; las siguientes suman
+    // el tiempo desde la anterior.
     if (action == null || action != _pending) {
       _pending = action;
-      _held = action == null ? 0 : 1;
+      _held = Duration.zero;
     } else {
-      _held++;
+      _held += dt;
     }
-    if (action == null || _held < holdSamples) return null;
+    if (action == null || _held < holdTime) return null;
     _armed = false;
     _pending = null;
-    _held = 0;
+    _held = Duration.zero;
     return action;
   }
 }
@@ -143,7 +182,14 @@ class TiltService {
   Stream<TiltAction> actions() {
     final detector = TiltDetector();
     return accelerometerEventStream(samplingPeriod: SensorInterval.gameInterval)
-        .map((event) => detector.addSample(event.x, event.y, event.z))
+        .map(
+          (event) => detector.addSample(
+            event.x,
+            event.y,
+            event.z,
+            at: event.timestamp,
+          ),
+        )
         .where((action) => action != null)
         .cast<TiltAction>();
   }

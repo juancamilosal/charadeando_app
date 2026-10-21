@@ -26,7 +26,9 @@ detalles de cada parte están en `README.md`, `server/README.md` y
 
 - App `com.valkiriacode.charadeando` en prueba interna; la última subida
   es 8 (1.0.0) (con el enlace a la política de privacidad en Ajustes);
-  la próxima que se suba debe ser 9 (1.0.0).
+  `develop` va en 9 (1.0.0): inclinación más rápida (28°, 60 ms medidos
+  en tiempo y no en lecturas) y "¡Correcto!" 0,5 s, por un comentario de
+  la prueba cerrada.
 - Hechos: perfil de pagos (persona física, Colombia) con la cuenta
   Davibank aprobada (ya sin retención), programa de cargos del 15 %, los 17
   productos activos (opción de compra `comprar`) y verificadores de

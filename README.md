@@ -569,7 +569,11 @@ la cámara frontal graba a los participantes para revivir las risas.
   hacia arriba es pasar. `TiltDetector` mide el ángulo de la pantalla con
   el horizonte de dos formas (el eje Z y la gravedad que queda en el plano
   de la pantalla) y usa la menor, así que girar la cabeza a un lado no
-  cuenta. Pide unos 32° desde la posición neutra, sostenidos unos 80 ms;
+  cuenta. Pide unos 28° desde la posición neutra, sostenidos 60 ms (medidos
+  con la hora de cada lectura del sensor, igual que el filtro que suaviza
+  el temblor, para que en celulares con lecturas más espaciadas el acierto
+  no tarde más); "¡Correcto!" o "Paso" se ve medio segundo antes de la
+  palabra siguiente;
   la neutra se toma al empezar, puede estar inclinada hasta 50° (por
   ejemplo, con el celular debajo de la cara) y nunca pide pasar de 75°, así
   que siempre se puede pasar y acertar. Al empezar toma la gravedad que

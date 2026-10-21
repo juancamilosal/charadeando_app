@@ -112,6 +112,75 @@ void main() {
     expect(tilt(36), [TiltAction.pass]);
   });
 
+  test('basta con inclinar 28 grados', () {
+    final detector = TiltDetector();
+    feed(detector, 0);
+    expect(feed(detector, -25), isEmpty);
+    expect(feed(detector, 0), isEmpty);
+    expect(feed(detector, -31), [TiltAction.hit]);
+  });
+
+  test('con lecturas lentas el acierto llega igual de rápido', () {
+    // Un celular rápido (cada 20 ms) y uno lento (cada 80 ms): los dos
+    // marcan el acierto en menos de un cuarto de segundo.
+    for (final every in const [
+      Duration(milliseconds: 20),
+      Duration(milliseconds: 80),
+    ]) {
+      final detector = TiltDetector();
+      var now = DateTime(2026);
+      DateTime clock() => now;
+      void advance(Duration d) => now = now.add(d);
+      feedTimed(detector, 0, every: every, clock: clock, advance: advance);
+      final hits = feedTimed(
+        detector,
+        -60,
+        every: every,
+        clock: clock,
+        advance: advance,
+      );
+      expect(hits, hasLength(1), reason: 'cada $every');
+      expect(hits.single.$2, TiltAction.hit);
+      expect(
+        hits.single.$1,
+        lessThan(const Duration(milliseconds: 250)),
+        reason: 'cada $every',
+      );
+    }
+  });
+
+  test('con la hora del sensor, un golpe de 40 ms no cuenta', () {
+    final detector = TiltDetector(smoothing: 1);
+    var now = DateTime(2026);
+    DateTime clock() => now;
+    void advance(Duration d) => now = now.add(d);
+    const every = Duration(milliseconds: 20);
+    feedTimed(detector, 0, every: every, clock: clock, advance: advance);
+    expect(
+      feedTimed(
+        detector,
+        -60,
+        every: every,
+        clock: clock,
+        advance: advance,
+        times: 3,
+      ),
+      isEmpty,
+    );
+    feedTimed(detector, 0, every: every, clock: clock, advance: advance);
+    expect(
+      feedTimed(
+        detector,
+        -60,
+        every: every,
+        clock: clock,
+        advance: advance,
+        times: 4,
+      ).map((e) => e.$2),
+      [TiltAction.hit],
+    );
+  });
+
   test('reset vuelve a calibrar', () {
     final detector = TiltDetector();
     feed(detector, -60);
@@ -119,4 +188,24 @@ void main() {
     feed(detector, 0);
     expect(feed(detector, -60), [TiltAction.hit]);
   });
+}
+
+/// Como [feed], pero con la hora de cada lectura: una cada [every].
+List<(Duration, TiltAction)> feedTimed(
+  TiltDetector detector,
+  double degrees, {
+  required Duration every,
+  required DateTime Function() clock,
+  required void Function(Duration) advance,
+  int times = 15,
+}) {
+  final (x, y, z) = reading(degrees);
+  final start = clock();
+  final out = <(Duration, TiltAction)>[];
+  for (var i = 0; i < times; i++) {
+    advance(every);
+    final action = detector.addSample(x, y, z, at: clock());
+    if (action != null) out.add((clock().difference(start), action));
+  }
+  return out;
 }

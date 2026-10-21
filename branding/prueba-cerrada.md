@@ -119,4 +119,4 @@ aquí los comentarios y arreglos de la prueba facilita esas respuestas.
 
 | Fecha | Quién | Comentario | Qué se hizo |
 |---|---|---|---|
-| | | | |
+| 21 oct 2026 | Probador 7 | Al bajar el celular, tarda en dar "¡Correcto!" y mostrar la palabra siguiente. | 9 (1.0.0): basta inclinar 28° (antes 32°), la espera se mide en tiempo (60 ms) y no en lecturas del sensor, y "¡Correcto!" dura 0,5 s (antes 0,7 s). |
