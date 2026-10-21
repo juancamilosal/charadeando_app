@@ -57,11 +57,46 @@ tienes una idea, escríbeme por aquí.
 No tienes que comprar nada: lo gratis alcanza para probar. ¡Mil gracias! 🙌
 ```
 
+## 2b. Qué tienen que probar
+
+Mensaje para mandar después de que se unan (o junto con la invitación):
+
+```
+¡Gracias por ayudarme con Charadeando! 🙌 Esto es lo que te pido en estos
+14 días (no tienes que hacerlo todo el mismo día):
+
+🎁 Primero: canjea tu código en Ajustes → Canjear código: [CÓDIGO]
+
+1️⃣ Una partida rápida: toca una categoría y juega. Ponte el celular en la
+   frente, inclínalo hacia abajo cuando aciertes y hacia arriba para pasar.
+2️⃣ Una partida por equipos con familia o amigos (2 o más equipos), y al
+   final gira la ruleta de castigos.
+3️⃣ Mira el video de tu turno, guárdalo y compártelo por WhatsApp.
+4️⃣ Prueba el Celular juez: en la configuración de la partida enciende
+   "Celular juez" y escanea el QR con otro celular; esa persona marca los
+   aciertos.
+5️⃣ Si tienes Chromecast o un TV inteligente, prueba el Modo TV
+   duplicando la pantalla.
+6️⃣ Crea una categoría propia en "Mis categorías" y juega con ella.
+7️⃣ Prueba Fotomímica (en "Más juegos") y el modo Libre.
+
+Y lo más importante: ábrela de vez en cuando durante los 14 días y no la
+desinstales 🙏
+
+Cuéntame por aquí:
+• Si algo falló o se cerró (qué estabas haciendo y qué celular tienes).
+• Qué fue lo que más te gustó.
+• Qué cambiarías o qué categoría te gustaría que tuviera.
+```
+
+Cada comentario se anota en la tabla del final.
+
 ## 3. Durante los 14 días
 
 - Revisar en **Prueba cerrada > Verificadores** cuántos se han inscrito; el
   conteo de 14 días empieza cuando hay 12 inscritos.
-- Recordarles abrir la app un par de veces por semana. Google pregunta
+- Recordarles abrir la app un par de veces por semana (por ejemplo, un
+  mensaje al día 4 y otro al día 10 con alguna de las pruebas de 2b). Google pregunta
   después cómo fue la prueba y cuenta que haya uso real.
 - Las compras de los probadores **son reales** (se cobran), salvo que el
   correo también esté en los verificadores de licencia. Si alguien quiere
