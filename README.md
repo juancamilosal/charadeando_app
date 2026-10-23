@@ -783,8 +783,9 @@ compila y funciona igual, sin enviar reportes (el plugin
 como mucho una vez por hora) `AppUpdateController` le pregunta a Google Play
 si hay una versión nueva. Si la hay, Play muestra su aviso ("Actualizar" /
 "No, gracias") y la baja en segundo plano mientras se sigue jugando (la
-actualización flexible); cuando termina, sale "Hay una versión nueva de
-Charadeando lista." con "Reiniciar", que la instala. Se pregunta una vez
+actualización flexible); cuando termina, sale una ventana "¡Hay una versión
+nueva!" (`showUpdateReady`) con "Más tarde" y "Actualizar", que la instala
+(la app se cierra y se abre de nuevo). Se pregunta una vez
 por sesión y nunca en el turno ni viendo un video. Solo funciona con la app
 instalada desde Play (también en las pruebas interna y cerrada); en modo
 debug no hace nada.

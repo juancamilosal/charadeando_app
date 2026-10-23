@@ -8,6 +8,7 @@ import 'services/services.dart';
 import 'router.dart';
 import 'theme.dart';
 import 'widgets/tap_sounds.dart';
+import 'widgets/update_dialog.dart';
 
 class CharadeandoApp extends ConsumerStatefulWidget {
   const CharadeandoApp({super.key});
@@ -22,9 +23,7 @@ class _CharadeandoAppState extends ConsumerState<CharadeandoApp>
     welcomeSeen: () => ref.read(welcomeSeenProvider),
   );
 
-  final _messenger = GlobalKey<ScaffoldMessengerState>();
-
-  /// Ya se ofreció "Reiniciar" con la versión nueva en esta sesión.
+  /// Ya se ofreció "Actualizar" con la versión nueva en esta sesión.
   bool _updateOffered = false;
   late final AppUpdateController _updates = ref.read(appUpdateProvider);
 
@@ -73,21 +72,15 @@ class _CharadeandoAppState extends ConsumerState<CharadeandoApp>
     _updates.check().ignore();
   }
 
-  /// La versión nueva ya se bajó: se ofrece reiniciar, una vez, fuera del
-  /// turno.
-  void _offerUpdate() {
+  /// La versión nueva ya se bajó: se ofrece actualizar con una ventana,
+  /// una vez, fuera del turno. Con "Más tarde" queda bajada y se ofrece de
+  /// nuevo la próxima vez que abran la app.
+  Future<void> _offerUpdate() async {
     if (_updateOffered || !_updates.ready.value || _busy) return;
+    final context = _router.routerDelegate.navigatorKey.currentContext;
+    if (context == null) return;
     _updateOffered = true;
-    _messenger.currentState?.showSnackBar(
-      SnackBar(
-        content: const Text('Hay una versión nueva de Charadeando lista.'),
-        duration: const Duration(seconds: 15),
-        action: SnackBarAction(
-          label: 'Reiniciar',
-          onPressed: () => _updates.install().ignore(),
-        ),
-      ),
-    );
+    if (await showUpdateReady(context)) await _updates.install();
   }
 
   void _reportScreen() {
@@ -139,7 +132,6 @@ class _CharadeandoAppState extends ConsumerState<CharadeandoApp>
       // Los colores del juego no cambian con el modo oscuro del celular.
       themeMode: ThemeMode.light,
       routerConfig: _router,
-      scaffoldMessengerKey: _messenger,
     );
   }
 }
