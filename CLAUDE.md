@@ -30,9 +30,10 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   en tiempo y no en lecturas), "¡Correcto!" 0,5 s y "Ponte el celular en
   la frente para comenzar" antes de la cuenta (con Inclinación), por
   comentarios de la prueba cerrada. 23 oct 2026: 9 (1.0.0) enviada a
-  revisión en la prueba cerrada. `develop` va en 10 (1.0.0): aviso de
-  actualización de Google Play dentro de la app (`in_app_update`,
-  `AppUpdateController`); todavía no se sube.
+  revisión en la prueba cerrada. 10 (1.0.0): aviso de actualización de
+  Google Play dentro de la app (`in_app_update`, `AppUpdateController`,
+  ventana `showUpdateReady` con "Más tarde" y "Actualizar"); enviada a
+  revisión en la prueba cerrada. La próxima que se suba debe ser 11 (1.0.0).
 - Hechos: perfil de pagos (persona física, Colombia) con la cuenta
   Davibank aprobada (ya sin retención), programa de cargos del 15 %, los 17
   productos activos (opción de compra `comprar`) y verificadores de
