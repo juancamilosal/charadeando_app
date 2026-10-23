@@ -177,16 +177,17 @@ class TiltDetector {
 }
 
 /// Reconoce cuándo el jugador ya tiene el celular en la frente: de lado,
-/// con la pantalla casi vertical (como mucho [maxAngle] hacia el techo o el
-/// piso) y quieto durante [still]. Así la inclinación se calibra con el
-/// celular ya puesto, y no mientras lo acomodan. Quien lee la pantalla en
-/// la mano suele tenerla inclinada hacia el techo, más que [maxAngle], y no
-/// cuenta; con el celular debajo de la cara tampoco, y para eso la pantalla
-/// ofrece "Empezar igual".
+/// con la pantalla de pie o algo inclinada (como mucho [maxAngle] hacia el
+/// techo o el piso) y quieto durante [still]. Sentado, la frente queda
+/// inclinada hacia atrás y la pantalla mira un poco al techo, así que el
+/// margen es amplio (el mismo que acepta [TiltDetector] como posición
+/// neutra). Acostado en la mesa o sacudiéndolo no cuenta. Si se adelanta
+/// (por ejemplo, con el celular quieto en la mano), no pasa nada: la
+/// inclinación se calibra al empezar el turno, después de la cuenta.
 class ForeheadDetector {
   ForeheadDetector({
-    this.maxAngle = 25,
-    this.wobble = 8,
+    this.maxAngle = 55,
+    this.wobble = 10,
     this.still = const Duration(seconds: 1),
   });
 

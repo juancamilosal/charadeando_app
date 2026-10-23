@@ -421,12 +421,13 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
           // Sin acelerómetro no hay nada que esperar.
           onError: (Object _) => _placed(),
         );
-    // Con el celular debajo de la cara (o si el sensor no lo reconoce),
-    // que nadie se quede esperando.
-    _placementHelp = Timer(const Duration(seconds: 4), () {
-      if (mounted && _phase == _Phase.placing) {
-        setState(() => _showStartAnyway = true);
-      }
+    // Si el sensor no lo reconoce, que nadie se quede esperando: a los 3
+    // segundos sale "Empezar igual" y a los 6 la cuenta arranca sola (con
+    // el celular en la frente no se ve el botón).
+    _placementHelp = Timer(const Duration(seconds: 3), () {
+      if (!mounted || _phase != _Phase.placing) return;
+      setState(() => _showStartAnyway = true);
+      _placementHelp = Timer(const Duration(seconds: 3), _placed);
     });
   }
 

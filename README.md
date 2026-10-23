@@ -616,12 +616,13 @@ la cámara frontal graba a los participantes para revivir las risas.
   cámara se fija en horizontal. Al terminar el turno vuelve a vertical.
 - Con Inclinación, "¡Listo!" (o "Continuar") lleva primero a "Ponte el
   celular en la frente para comenzar": `ForeheadDetector` espera el celular
-  de lado, con la pantalla casi vertical (hasta 25°) y quieto un segundo, y
-  ahí arranca la cuenta 3, 2, 1; así la inclinación se calibra con el
-  celular ya en la frente. Leer la pantalla en la mano (inclinada hacia el
-  techo) o tenerlo acostado no cuenta. A los 4 segundos aparece "Empezar
-  igual" por si no lo reconoce (por ejemplo, con el celular debajo de la
-  cara), y sin acelerómetro empieza solo. Con Toque, en Modo TV o con el
+  de lado, con la pantalla de pie o inclinada hasta 55° (sentado, la frente
+  queda inclinada hacia atrás) y quieto un segundo, y ahí arranca la cuenta
+  3, 2, 1; así la inclinación se calibra con el celular ya en la frente.
+  Acostado en la mesa o sacudiéndolo no cuenta. A los 3 segundos aparece
+  "Empezar igual" y a los 6 la cuenta arranca sola por si no lo reconoce
+  (con el celular en la frente el botón no se ve), y sin acelerómetro
+  empieza de una. Con Toque, en Modo TV o con el
   celular juez conectado se va directo a la cuenta. Idea de un probador de
   la prueba cerrada.
 - Resultado de cada turno: "¡Tiempo!" y "Los Primos · Ronda 2 de 3" (sin

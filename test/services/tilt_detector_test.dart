@@ -198,18 +198,23 @@ void main() {
       expect(placedAfter(detector, 5, 15), isTrue);
     });
 
-    test('acostado en la mesa o leyendo la pantalla en la mano, no', () {
+    test('sentado, con la frente inclinada hacia atrás, también cuenta', () {
+      expect(placedAfter(ForeheadDetector(), 40, 55), isTrue);
+      expect(placedAfter(ForeheadDetector(), -30, 55), isTrue);
+    });
+
+    test('acostado en la mesa o con la pantalla al techo, no', () {
       expect(placedAfter(ForeheadDetector(), 90, 100), isFalse);
-      expect(placedAfter(ForeheadDetector(), 45, 100), isFalse);
-      expect(placedAfter(ForeheadDetector(), -60, 100), isFalse);
+      expect(placedAfter(ForeheadDetector(), 70, 100), isFalse);
+      expect(placedAfter(ForeheadDetector(), -75, 100), isFalse);
     });
 
     test('moviéndolo no cuenta: vuelve a esperar que esté quieto', () {
       final detector = ForeheadDetector();
       expect(placedAfter(detector, 0, 40), isFalse);
-      // Lo mueve 15 grados: empieza otra vez el segundo.
-      expect(placedAfter(detector, 15, 40), isFalse);
-      expect(placedAfter(detector, 15, 15), isTrue);
+      // Lo mueve 20 grados: empieza otra vez el segundo.
+      expect(placedAfter(detector, 20, 40), isFalse);
+      expect(placedAfter(detector, 20, 15), isTrue);
     });
 
     test('sacudiéndolo no cuenta', () {
