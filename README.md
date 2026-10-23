@@ -779,6 +779,16 @@ Firebase y se guarda solo en el computador de quien compila. Sin él la app
 compila y funciona igual, sin enviar reportes (el plugin
 `com.google.gms.google-services` solo se aplica si el archivo existe).
 
+**Actualizaciones (`in_app_update`).** Al abrir la app (y al volver a ella,
+como mucho una vez por hora) `AppUpdateController` le pregunta a Google Play
+si hay una versión nueva. Si la hay, Play muestra su aviso ("Actualizar" /
+"No, gracias") y la baja en segundo plano mientras se sigue jugando (la
+actualización flexible); cuando termina, sale "Hay una versión nueva de
+Charadeando lista." con "Reiniciar", que la instala. Se pregunta una vez
+por sesión y nunca en el turno ni viendo un video. Solo funciona con la app
+instalada desde Play (también en las pruebas interna y cerrada); en modo
+debug no hace nada.
+
 **Reseña (`in_app_review`).** En el resultado final, unos 2 segundos
 después de ver al ganador, se pide la reseña de Play Store si se cumple
 todo: es la 3.ª partida terminada o más, hubo ganador (con equipos y sin

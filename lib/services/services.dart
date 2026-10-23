@@ -33,3 +33,4 @@ export 'promo_code_service.dart';
 export 'error_reporter.dart';
 export 'review_service.dart';
 export 'stats_service.dart';
+export 'app_update_service.dart';

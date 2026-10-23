@@ -22,6 +22,12 @@ class _CharadeandoAppState extends ConsumerState<CharadeandoApp>
     welcomeSeen: () => ref.read(welcomeSeenProvider),
   );
 
+  final _messenger = GlobalKey<ScaffoldMessengerState>();
+
+  /// Ya se ofreció "Reiniciar" con la versión nueva en esta sesión.
+  bool _updateOffered = false;
+  late final AppUpdateController _updates = ref.read(appUpdateProvider);
+
   @override
   void initState() {
     super.initState();
@@ -50,6 +56,38 @@ class _CharadeandoAppState extends ConsumerState<CharadeandoApp>
     });
     // La pantalla actual acompaña cada reporte de error.
     _router.routerDelegate.addListener(_reportScreen);
+    // Actualizaciones de Google Play: se busca al abrir y, si hay una, se
+    // baja mientras se juega; cuando está lista se ofrece "Reiniciar".
+    _updates.ready.addListener(_offerUpdate);
+    _router.routerDelegate.addListener(_offerUpdate);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkUpdate());
+  }
+
+  String get _path => _router.routerDelegate.currentConfiguration.uri.path;
+
+  /// En el turno o viendo un video no se interrumpe con avisos.
+  bool get _busy => _path == Routes.turn || _path == Routes.video;
+
+  void _checkUpdate() {
+    if (_busy) return;
+    _updates.check().ignore();
+  }
+
+  /// La versión nueva ya se bajó: se ofrece reiniciar, una vez, fuera del
+  /// turno.
+  void _offerUpdate() {
+    if (_updateOffered || !_updates.ready.value || _busy) return;
+    _updateOffered = true;
+    _messenger.currentState?.showSnackBar(
+      SnackBar(
+        content: const Text('Hay una versión nueva de Charadeando lista.'),
+        duration: const Duration(seconds: 15),
+        action: SnackBarAction(
+          label: 'Reiniciar',
+          onPressed: () => _updates.install().ignore(),
+        ),
+      ),
+    );
   }
 
   void _reportScreen() {
@@ -62,6 +100,8 @@ class _CharadeandoAppState extends ConsumerState<CharadeandoApp>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     ref.read(backgroundMusicProvider).foreground =
         state == AppLifecycleState.resumed;
+    // Al volver a la app se busca de nuevo (como mucho una vez por hora).
+    if (state == AppLifecycleState.resumed) _checkUpdate();
   }
 
   /// El sonido de un toque, si "Efectos de sonido" está encendido y no se
@@ -75,6 +115,8 @@ class _CharadeandoAppState extends ConsumerState<CharadeandoApp>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _router.routerDelegate.removeListener(_reportScreen);
+    _router.routerDelegate.removeListener(_offerUpdate);
+    _updates.ready.removeListener(_offerUpdate);
     _router.dispose();
     super.dispose();
   }
@@ -97,6 +139,7 @@ class _CharadeandoAppState extends ConsumerState<CharadeandoApp>
       // Los colores del juego no cambian con el modo oscuro del celular.
       themeMode: ThemeMode.light,
       routerConfig: _router,
+      scaffoldMessengerKey: _messenger,
     );
   }
 }

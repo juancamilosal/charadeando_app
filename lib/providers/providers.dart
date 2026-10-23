@@ -44,6 +44,14 @@ final judgeProvider = NotifierProvider<JudgeController, JudgeSetup>(
   JudgeController.new,
 );
 
+/// Actualizaciones de Google Play dentro de la app.
+final appUpdaterProvider = Provider<AppUpdater>((ref) => PlayAppUpdater());
+final appUpdateProvider = Provider((ref) {
+  final controller = AppUpdateController(ref.watch(appUpdaterProvider));
+  ref.onDispose(controller.dispose);
+  return controller;
+});
+
 final tiltServiceProvider = Provider((ref) => TiltService());
 final tvServiceProvider = Provider((ref) => TvService());
 final punishmentStoreProvider = Provider((ref) => PunishmentStore());
