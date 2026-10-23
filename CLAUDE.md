@@ -29,7 +29,8 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   `develop` va en 9 (1.0.0): inclinación más rápida (28°, 60 ms medidos
   en tiempo y no en lecturas), "¡Correcto!" 0,5 s y "Ponte el celular en
   la frente para comenzar" antes de la cuenta (con Inclinación), por
-  comentarios de la prueba cerrada. Todavía no se sube a Play.
+  comentarios de la prueba cerrada. 23 oct 2026: 9 (1.0.0) enviada a
+  revisión en la prueba cerrada; la próxima que se suba debe ser 10 (1.0.0).
 - Hechos: perfil de pagos (persona física, Colombia) con la cuenta
   Davibank aprobada (ya sin retención), programa de cargos del 15 %, los 17
   productos activos (opción de compra `comprar`) y verificadores de
