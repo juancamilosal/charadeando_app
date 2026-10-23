@@ -21,10 +21,11 @@ import '../widgets/tv_connect.dart';
 import '../widgets/tv_turn_view.dart';
 import '../widgets/word_card.dart';
 
-enum _Phase { ready, countdown, playing, paused, saving }
+enum _Phase { ready, placing, countdown, playing, paused, saving }
 
-/// Un turno: preparación, cuenta regresiva, juego con el celular en la
-/// frente y grabación con la cámara frontal. Si la app se va a segundo
+/// Un turno: preparación, "Ponte el celular en la frente" (solo si se marca
+/// inclinando), cuenta regresiva, juego con el celular en la frente y
+/// grabación con la cámara frontal. Si la app se va a segundo
 /// plano, el turno se pausa y al volver sigue donde quedó.
 ///
 /// En el Modo TV el celular se duplica en el televisor y lo tiene un juez
@@ -60,6 +61,14 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   late Duration _remaining;
   Timer? _timer;
   StreamSubscription<TiltAction>? _tilt;
+
+  /// Mientras se espera que el jugador se ponga el celular en la frente.
+  StreamSubscription<void>? _placement;
+  Timer? _placementHelp;
+
+  /// Verdadero cuando ya pasó un rato sin reconocer el celular en la
+  /// frente: aparece "Empezar igual".
+  bool _showStartAnyway = false;
 
   /// Resultado que se está mostrando antes de pasar a la siguiente palabra.
   WordOutcome? _feedback;
@@ -188,7 +197,11 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
       case AppLifecycleState.inactive:
       case AppLifecycleState.hidden:
       case AppLifecycleState.paused:
-        if (_phase == _Phase.countdown || _phase == _Phase.playing) {
+        if (_phase == _Phase.placing) {
+          // Bajar la barra de notificaciones deja la app inactiva un
+          // momento: eso no interrumpe la espera.
+          if (state != AppLifecycleState.inactive) _stopPlacing();
+        } else if (_phase == _Phase.countdown || _phase == _Phase.playing) {
           _pause();
         } else if (_phase == _Phase.ready &&
             state != AppLifecycleState.inactive) {
@@ -220,6 +233,12 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     final now = _judge?.judges.value ?? 0;
     if (!mounted || was == now) return;
     setState(() => _judges = now);
+    // Si el juez entra mientras se espera el celular en la frente, ya no
+    // hace falta: marca él.
+    if (_phase == _Phase.placing && now > 0) {
+      _placed();
+      return;
+    }
     final inTurn = _phase == _Phase.playing || _phase == _Phase.countdown;
     if (!inTurn) return;
     final text = was > 0 && now == 0
@@ -304,6 +323,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     _tilt?.cancel();
+    _cancelPlacing();
     _camera.dispose();
     WakelockPlus.disable();
     ScreenOrientation.portrait();
@@ -375,7 +395,67 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
 
   // --- Juego ---------------------------------------------------------------
 
+  /// Verdadero si se marca inclinando el celular: antes de la cuenta se
+  /// espera a que el jugador lo tenga en la frente, para que la inclinación
+  /// se calibre con el celular ya puesto. Con Toque, en Modo TV o con el
+  /// juez conectado nadie lo tiene en la frente.
+  bool get _waitsForForehead => !_tvMode && !_touch && !_judgeConnected;
+
+  /// "¡Listo!" o "Continuar": primero "Ponte el celular en la frente" y,
+  /// cuando está puesto y quieto, la cuenta regresiva.
+  void _begin() {
+    if (!_waitsForForehead) {
+      _startCountdown();
+      return;
+    }
+    setState(() {
+      _phase = _Phase.placing;
+      _showStartAnyway = false;
+    });
+    ScreenOrientation.landscape();
+    _placement = ref
+        .read(tiltServiceProvider)
+        .onForehead()
+        .listen(
+          (_) => _placed(),
+          // Sin acelerómetro no hay nada que esperar.
+          onError: (Object _) => _placed(),
+        );
+    // Con el celular debajo de la cara (o si el sensor no lo reconoce),
+    // que nadie se quede esperando.
+    _placementHelp = Timer(const Duration(seconds: 4), () {
+      if (mounted && _phase == _Phase.placing) {
+        setState(() => _showStartAnyway = true);
+      }
+    });
+  }
+
+  /// El celular ya está en la frente (o tocaron "Empezar igual").
+  void _placed() {
+    if (_phase != _Phase.placing) return;
+    _cancelPlacing();
+    ref.read(hapticsProvider).light();
+    _startCountdown();
+  }
+
+  void _cancelPlacing() {
+    _placement?.cancel();
+    _placement = null;
+    _placementHelp?.cancel();
+    _placementHelp = null;
+  }
+
+  /// La app se fue a segundo plano mientras se esperaba el celular en la
+  /// frente: se vuelve a la pantalla de antes (sin cámara, que el sistema
+  /// le quita a la app).
+  void _stopPlacing() {
+    _cancelPlacing();
+    setState(() => _phase = _resumed ? _Phase.paused : _Phase.ready);
+    _camera.dispose();
+  }
+
   Future<void> _startCountdown() async {
+    _cancelPlacing();
     _tvLost = false;
     setState(() {
       _phase = _Phase.countdown;
@@ -636,6 +716,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
           backgroundColor: Colors.transparent,
           body: switch (_phase) {
             _Phase.ready => _readyView(context, game),
+            _Phase.placing => _placingView(),
             _Phase.countdown => CountdownView(value: _countdown),
             _Phase.playing =>
               game.config.tvMode ? _tvView(game) : _playingView(context, game),
@@ -644,6 +725,62 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
               child: CircularProgressIndicator(color: context.onBackdrop),
             ),
           },
+        ),
+      ),
+    );
+  }
+
+  /// "Ponte el celular en la frente para comenzar": la cuenta empieza sola
+  /// cuando el celular está en la frente y quieto.
+  Widget _placingView() {
+    return PlayBackground(
+      colors: AppColors.countdown,
+      child: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.face_retouching_natural,
+                  size: 64,
+                  color: Colors.white,
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Ponte el celular en la frente para comenzar',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: AppFonts.display,
+                    fontSize: 34,
+                    height: 1.1,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Con la pantalla hacia tus amigos. Cuando esté quieto, '
+                  'empieza la cuenta.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                if (_showStartAnyway) ...[
+                  const SizedBox(height: 18),
+                  FilledButton.icon(
+                    icon: const Icon(Icons.play_arrow),
+                    label: const Text('Empezar igual'),
+                    onPressed: _placed,
+                  ),
+                ],
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -723,7 +860,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
         FilledButton.icon(
           icon: const Icon(Icons.play_arrow),
           label: const Text('¡Listo!'),
-          onPressed: _cameraLoading || tvMissing ? null : _startCountdown,
+          onPressed: _cameraLoading || tvMissing ? null : _begin,
         ),
       ],
     );
@@ -882,9 +1019,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
                         ? 'Esperando el televisor…'
                         : 'Continuar',
                   ),
-                  onPressed: _cameraLoading || tvMissing
-                      ? null
-                      : _startCountdown,
+                  onPressed: _cameraLoading || tvMissing ? null : _begin,
                 ),
                 EndGameButton(onPressed: _endGame),
               ],

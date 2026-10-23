@@ -176,9 +176,93 @@ class TiltDetector {
   }
 }
 
+/// Reconoce cuándo el jugador ya tiene el celular en la frente: de lado,
+/// con la pantalla casi vertical (como mucho [maxAngle] hacia el techo o el
+/// piso) y quieto durante [still]. Así la inclinación se calibra con el
+/// celular ya puesto, y no mientras lo acomodan. Quien lee la pantalla en
+/// la mano suele tenerla inclinada hacia el techo, más que [maxAngle], y no
+/// cuenta; con el celular debajo de la cara tampoco, y para eso la pantalla
+/// ofrece "Empezar igual".
+class ForeheadDetector {
+  ForeheadDetector({
+    this.maxAngle = 25,
+    this.wobble = 8,
+    this.still = const Duration(seconds: 1),
+  });
+
+  /// Inclinación máxima de la pantalla, en grados, para contar como puesta
+  /// en la frente.
+  final double maxAngle;
+
+  /// Cuánto puede moverse el ángulo, en grados, y seguir contando como
+  /// quieto.
+  final double wobble;
+
+  /// Cuánto tiempo tiene que estar quieto en la frente.
+  final Duration still;
+
+  DateTime? _lastAt;
+  double? _anchor;
+  Duration _held = Duration.zero;
+
+  /// Procesa una lectura y responde si ya está en la frente. [at] es la
+  /// hora del sensor; sin ella se supone una lectura cada 20 ms.
+  bool addSample(double x, double y, double z, {DateTime? at}) {
+    final last = _lastAt;
+    _lastAt = at;
+    var dt = TiltDetector.sampleInterval;
+    if (at != null && last != null) {
+      final d = at.difference(last);
+      if (d > Duration.zero) {
+        dt = d > const Duration(milliseconds: 250)
+            ? const Duration(milliseconds: 250)
+            : d;
+      }
+    }
+    final magnitude = sqrt(x * x + y * y + z * z);
+    final angle = TiltDetector.pitch(x, y, z);
+    // Acostado en la mesa, sacudiéndolo o con la pantalla al techo no
+    // cuenta.
+    final upright =
+        angle.abs() <= maxAngle &&
+        (magnitude - TiltDetector.gravity).abs() < 2.5;
+    final anchor = _anchor;
+    if (!upright) {
+      _anchor = null;
+      _held = Duration.zero;
+      return false;
+    }
+    if (anchor == null || (angle - anchor).abs() > wobble) {
+      _anchor = angle;
+      _held = Duration.zero;
+      return false;
+    }
+    _held += dt;
+    return _held >= still;
+  }
+}
+
 class TiltService {
   /// Emite una acción cada vez que el jugador inclina el celular. Cada
   /// suscripción calibra su propia posición neutra.
+  /// Termina (con un evento) cuando el jugador ya tiene el celular en la
+  /// frente y quieto. Si el celular no tiene acelerómetro, el error llega
+  /// por el stream.
+  Stream<void> onForehead() {
+    final detector = ForeheadDetector();
+    return accelerometerEventStream(samplingPeriod: SensorInterval.gameInterval)
+        .where(
+          (event) => detector.addSample(
+            event.x,
+            event.y,
+            event.z,
+            at: event.timestamp,
+          ),
+        )
+        .take(1)
+        .map((_) {});
+  }
+
   Stream<TiltAction> actions() {
     final detector = TiltDetector();
     return accelerometerEventStream(samplingPeriod: SensorInterval.gameInterval)

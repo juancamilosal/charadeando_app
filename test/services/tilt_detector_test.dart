@@ -181,6 +181,49 @@ void main() {
     );
   });
 
+  group('celular en la frente', () {
+    bool placedAfter(ForeheadDetector detector, double degrees, int times) {
+      final (x, y, z) = reading(degrees);
+      var placed = false;
+      for (var i = 0; i < times; i++) {
+        placed = detector.addSample(x, y, z);
+      }
+      return placed;
+    }
+
+    test('de pie y quieto un segundo, cuenta como puesto', () {
+      final detector = ForeheadDetector();
+      // 40 lecturas de 20 ms: 0,8 s, todavía no.
+      expect(placedAfter(detector, 5, 40), isFalse);
+      expect(placedAfter(detector, 5, 15), isTrue);
+    });
+
+    test('acostado en la mesa o leyendo la pantalla en la mano, no', () {
+      expect(placedAfter(ForeheadDetector(), 90, 100), isFalse);
+      expect(placedAfter(ForeheadDetector(), 45, 100), isFalse);
+      expect(placedAfter(ForeheadDetector(), -60, 100), isFalse);
+    });
+
+    test('moviéndolo no cuenta: vuelve a esperar que esté quieto', () {
+      final detector = ForeheadDetector();
+      expect(placedAfter(detector, 0, 40), isFalse);
+      // Lo mueve 15 grados: empieza otra vez el segundo.
+      expect(placedAfter(detector, 15, 40), isFalse);
+      expect(placedAfter(detector, 15, 15), isTrue);
+    });
+
+    test('sacudiéndolo no cuenta', () {
+      final detector = ForeheadDetector();
+      var placed = false;
+      for (var i = 0; i < 100; i++) {
+        final (x, y, z) = reading(0);
+        // Una sacudida fuerte en cada lectura.
+        placed = detector.addSample(x * 1.6, y, z);
+      }
+      expect(placed, isFalse);
+    });
+  });
+
   test('reset vuelve a calibrar', () {
     final detector = TiltDetector();
     feed(detector, -60);
