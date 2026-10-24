@@ -71,6 +71,9 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   y su estado, se siguen en el artefacto privado "Probadores Charadeando"
   (https://claude.ai/artifact/VaRnD29RFWgA4VBNqUvQJp, base de datos del
   artefacto; los correos y códigos no van en el repositorio).
+- 24 oct 2026: el Panel marca 12 verificadores que aceptaron participar;
+  los 14 días cuentan desde ahí, así que "Solicitar acceso a producción"
+  se activa hacia el 7 nov 2026 si no bajan de 12.
 - Sigue: prueba cerrada (12+ personas, 14 días) con la guía
   `branding/prueba-cerrada.md` (pasos, mensaje de invitación y tabla de
   comentarios para pedir producción) y luego producción.
