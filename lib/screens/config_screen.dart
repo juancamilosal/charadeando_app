@@ -50,6 +50,11 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
       for (final g in _config.groups)
         if (g.name.trim().isNotEmpty) g,
     ];
+    // Por si el aviso del TV quedó viejo (se dejó de duplicar la pantalla
+    // sin que el celular avisara): así no se esconde la sección de video.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) confirmTvConnected(ref).ignore();
+    });
     // Si es una partida nueva (sin equipos), se llena con la última
     // configuración guardada.
     if (_teams.isEmpty) _loadSaved();
@@ -228,6 +233,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   }
 
   void _continue() {
+    final tv = _tvMode;
     final teams = _currentTeams(ref.read(teamsProvider).value ?? const []);
     final missingNames = _inGroups && teams.length < GameConfig.minGroups;
     final missing = _missingChoices;
@@ -250,10 +256,9 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
             groups: groups,
             scoringMode: _scoringToPlay,
             // Inclinación o toque se elige en Ajustes > Controlador.
-            hitMode: _tvMode ? HitMode.tv : HitMode.tilt,
+            hitMode: tv ? HitMode.tv : HitMode.tilt,
             // En el Modo TV el juez ya marca con los botones del celular.
-            judgePhone:
-                !_tvMode && ref.read(judgeProvider.notifier).room != null,
+            judgePhone: !tv && ref.read(judgeProvider.notifier).room != null,
             difficulty: _automatic && !_noDifficulty ? _difficulty : null,
             clearDifficulty: _noDifficulty,
           ),

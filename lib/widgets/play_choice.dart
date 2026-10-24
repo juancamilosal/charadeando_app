@@ -39,6 +39,9 @@ Future<void> choosePlay(BuildContext context, WidgetRef ref) async {
   // siempre.
   final game = ref.read(gameControllerProvider.notifier);
   game.configure(QuickGame.custom(ref.read(gameControllerProvider).config));
+  // Mientras eligen, se confirma con el sistema si sigue el TV conectado
+  // (algunos celulares no avisan al dejar de duplicar la pantalla).
+  confirmTvConnected(ref).ignore();
   final choice = await showModalBottomSheet<PlayChoice>(
     context: context,
     useSafeArea: true,

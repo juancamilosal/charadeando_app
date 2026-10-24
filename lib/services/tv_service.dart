@@ -24,6 +24,20 @@ class TvService {
     }
   }
 
+  /// Le pregunta al sistema, en este momento, si hay un televisor
+  /// conectado. Null si la plataforma no lo dice (por ejemplo, en pruebas).
+  /// Sirve para no fiarse de un aviso viejo: algunos celulares no avisan
+  /// cuando dejan de duplicar la pantalla.
+  Future<bool?> isConnected() async {
+    try {
+      return await _methods.invokeMethod<bool>('conectado');
+    } on MissingPluginException {
+      return null;
+    } on PlatformException {
+      return null;
+    }
+  }
+
   /// Abre la lista de televisores del sistema. Devuelve falso si el sistema
   /// no tiene una pantalla para eso (en iPhone se usa el Centro de control).
   Future<bool> openSettings() => _call('abrirAjustes');

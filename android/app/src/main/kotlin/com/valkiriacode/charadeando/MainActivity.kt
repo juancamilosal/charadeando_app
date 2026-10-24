@@ -25,6 +25,7 @@ class MainActivity : FlutterActivity() {
         MethodChannel(messenger, "charadeando/tv").setMethodCallHandler { call, result ->
             when (call.method) {
                 "abrirAjustes" -> result.success(openCastSettings())
+                "conectado" -> result.success(connection.isConnected())
                 "desconectar" -> result.success(stopCasting())
                 else -> result.notImplemented()
             }
@@ -44,6 +45,13 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
+    }
+
+    // Al volver a la app (por ejemplo, después de dejar de duplicar la
+    // pantalla desde el menú del sistema) se revisa otra vez el TV.
+    override fun onResume() {
+        super.onResume()
+        tv?.refresh()
     }
 
     override fun onDestroy() {
@@ -95,17 +103,31 @@ private class TvConnection(context: Context) : EventChannel.StreamHandler {
     private var last: Boolean? = null
 
     private val displayListener = object : DisplayManager.DisplayListener {
-        override fun onDisplayAdded(displayId: Int) = send()
-        override fun onDisplayRemoved(displayId: Int) = send()
-        override fun onDisplayChanged(displayId: Int) = send()
+        override fun onDisplayAdded(displayId: Int) = refresh()
+        override fun onDisplayRemoved(displayId: Int) = refresh()
+        override fun onDisplayChanged(displayId: Int) = refresh()
     }
 
     private val routerCallback = object : MediaRouter.SimpleCallback() {
-        override fun onRouteSelected(router: MediaRouter, type: Int, info: MediaRouter.RouteInfo) = send()
-        override fun onRouteUnselected(router: MediaRouter, type: Int, info: MediaRouter.RouteInfo) = send()
-        override fun onRouteChanged(router: MediaRouter, info: MediaRouter.RouteInfo) = send()
-        override fun onRoutePresentationDisplayChanged(router: MediaRouter, info: MediaRouter.RouteInfo) = send()
+        override fun onRouteSelected(router: MediaRouter, type: Int, info: MediaRouter.RouteInfo) = refresh()
+        override fun onRouteUnselected(router: MediaRouter, type: Int, info: MediaRouter.RouteInfo) = refresh()
+        override fun onRouteChanged(router: MediaRouter, info: MediaRouter.RouteInfo) = refresh()
+        override fun onRoutePresentationDisplayChanged(router: MediaRouter, info: MediaRouter.RouteInfo) = refresh()
     }
+
+    fun isConnected(): Boolean = connected()
+
+    // Revisa ahora y otra vez un momento después: al dejar de transmitir,
+    // algunos celulares avisan antes de que la ruta del sistema cambie, y
+    // con una sola revisión el TV quedaba como conectado.
+    fun refresh() {
+        send()
+        main.removeCallbacks(recheck)
+        main.postDelayed(recheck, 500)
+        main.postDelayed(recheck, 2000)
+    }
+
+    private val recheck = Runnable { send() }
 
     private fun connected(): Boolean {
         if (displays.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION).isNotEmpty()) {
@@ -132,6 +154,7 @@ private class TvConnection(context: Context) : EventChannel.StreamHandler {
 
     override fun onCancel(arguments: Any?) {
         if (sink == null) return
+        main.removeCallbacks(recheck)
         displays.unregisterDisplayListener(displayListener)
         router.removeCallback(routerCallback)
         sink = null

@@ -582,7 +582,12 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Con un TV conectado, la animación de la bienvenida dice "El juez toca
   ¡Correcto! o Pasar en el celular." en vez de explicar cómo inclinarlo.
 - Modo TV, en todas las categorías: se activa solo cuando el celular duplica
-  la pantalla en un TV (AirPlay, Chromecast o HDMI). Mientras está activo, la
+  la pantalla en un TV (AirPlay, Chromecast o HDMI). Como algunos celulares no
+  avisan al dejar de duplicar, la app vuelve a preguntarle al sistema
+  (`TvService.isConnected`, `confirmTvConnected`) al abrir la configuración,
+  al elegir la forma de jugar y al volver a la app, y el código nativo revisa
+  otra vez a los 0,5 y 2 segundos de cada cambio; así no queda en Modo TV,
+  sin cámara, después de desconectar el televisor. Mientras está activo, la
   configuración oculta las secciones de aciertos y de video, durante el turno el
   TV muestra solo el turno del equipo, el tiempo, "Finalizar juego", la
   palabra y los botones (sin marcador, para no confundir), y después los

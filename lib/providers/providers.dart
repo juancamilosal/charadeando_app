@@ -191,6 +191,18 @@ final customCategoriesProvider =
 final tvConnectedProvider = StreamProvider<bool>(
   (ref) => ref.watch(tvServiceProvider).connection(),
 );
+
+/// Si hay un televisor conectado ahora mismo: se le pregunta al sistema y,
+/// si el último aviso era otro (un celular que no avisó al dejar de
+/// duplicar la pantalla), se vuelve a escuchar para que todo se corrija.
+Future<bool> confirmTvConnected(WidgetRef ref) async {
+  final cached = ref.read(tvConnectedProvider).value ?? false;
+  final now = await ref.read(tvServiceProvider).isConnected();
+  if (now == null) return cached;
+  if (now != cached) ref.invalidate(tvConnectedProvider);
+  return now;
+}
+
 final videoServiceProvider = Provider((ref) => VideoService());
 final videoRendererProvider = Provider((ref) => VideoRenderer());
 
