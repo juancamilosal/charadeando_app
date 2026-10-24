@@ -21,12 +21,15 @@ detalles de cada parte están en `README.md`, `server/README.md` y
 - **Versiones:** se nombran como en Play Console, `5 (1.0.0)` (código de
   versión y nombre); en `pubspec.yaml` es `version: 1.0.0+5`. Cada versión
   que se sube a Play necesita un código mayor que la anterior.
+  El usuario avisa cada vez que sube una versión a Play. Mientras no avise,
+  los cambios nuevos se juntan en la misma versión de `develop` (no se sube
+  el número otra vez).
 
 ## Lanzamiento en Google Play (en qué va)
 
-- App `com.valkiriacode.charadeando` en prueba interna; la última subida
-  es 8 (1.0.0) (con el enlace a la política de privacidad en Ajustes);
-  `develop` va en 9 (1.0.0): inclinación más rápida (28°, 60 ms medidos
+- App `com.valkiriacode.charadeando` en prueba cerrada. **La última
+  subida a Play es 11 (1.0.0)** (24 oct 2026). Historial: 8 (1.0.0), enlace
+  a la política de privacidad en Ajustes; 9 (1.0.0): inclinación más rápida (28°, 60 ms medidos
   en tiempo y no en lecturas), "¡Correcto!" 0,5 s y "Ponte el celular en
   la frente para comenzar" antes de la cuenta (con Inclinación), por
   comentarios de la prueba cerrada. 23 oct 2026: 9 (1.0.0) enviada a
@@ -35,10 +38,10 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   ventana `showUpdateReady` con "Más tarde" y "Actualizar"); enviada a
   revisión en la prueba cerrada. 11 (1.0.0): "Ponte el
   celular en la frente" reconoce hasta 55° (antes 25°: sentado no
-  arrancaba). `develop` va en 12 (1.0.0): "Empezar igual" sale a los 8 s
-  (antes 3 s) y la cuenta arranca sola a los 15 s (antes 6 s). 13 (1.0.0):
-  el Modo TV ya no se queda pegado al dejar de duplicar la pantalla (antes
-  la siguiente partida quedaba sin cámara); reporte de un probador.
+  arrancaba). **`develop` va en 12 (1.0.0), sin subir:** "Empezar igual"
+  sale a los 8 s (antes 3 s) y la cuenta arranca sola a los 15 s (antes
+  6 s), y el Modo TV ya no se queda pegado al dejar de duplicar la pantalla
+  (antes la siguiente partida quedaba sin cámara; reporte de un probador).
 - Hechos: perfil de pagos (persona física, Colombia) con la cuenta
   Davibank aprobada (ya sin retención), programa de cargos del 15 %, los 17
   productos activos (opción de compra `comprar`) y verificadores de
