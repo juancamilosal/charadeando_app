@@ -33,9 +33,10 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   revisión en la prueba cerrada. 10 (1.0.0): aviso de actualización de
   Google Play dentro de la app (`in_app_update`, `AppUpdateController`,
   ventana `showUpdateReady` con "Más tarde" y "Actualizar"); enviada a
-  revisión en la prueba cerrada. `develop` va en 11 (1.0.0): "Ponte el
+  revisión en la prueba cerrada. 11 (1.0.0): "Ponte el
   celular en la frente" reconoce hasta 55° (antes 25°: sentado no
-  arrancaba) y la cuenta arranca sola a los 6 s; todavía no se sube.
+  arrancaba). `develop` va en 12 (1.0.0): "Empezar igual" sale a los 8 s
+  (antes 3 s) y la cuenta arranca sola a los 15 s (antes 6 s).
 - Hechos: perfil de pagos (persona física, Colombia) con la cuenta
   Davibank aprobada (ya sin retención), programa de cargos del 15 %, los 17
   productos activos (opción de compra `comprar`) y verificadores de

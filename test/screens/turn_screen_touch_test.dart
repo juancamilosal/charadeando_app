@@ -204,6 +204,9 @@ void main() {
     await tester.tap(find.text('¡Listo!'));
     await tester.pump();
     expect(find.text('Empezar igual'), findsNothing);
+    // Hay tiempo de acomodarse: a los 5 segundos todavía no sale.
+    await tester.pump(const Duration(seconds: 5));
+    expect(find.text('Empezar igual'), findsNothing);
     await tester.pump(const Duration(seconds: 3));
     await tester.tap(find.text('Empezar igual'));
     await tester.pump();
@@ -214,15 +217,17 @@ void main() {
     expect(tilt.listens, 1);
   });
 
-  testWidgets('si no lo reconoce, a los 6 segundos la cuenta arranca sola', (
+  testWidgets('si no lo reconoce, a los 15 segundos la cuenta arranca sola', (
     tester,
   ) async {
     final (_, tilt) = await _show(tester, PlayController.tilt);
     await tester.tap(find.text('¡Listo!'));
     await tester.pump();
-    await tester.pump(const Duration(seconds: 3));
+    await tester.pump(const Duration(seconds: 8));
     expect(find.text('Empezar igual'), findsOneWidget);
-    await tester.pump(const Duration(seconds: 3));
+    await tester.pump(const Duration(seconds: 6));
+    expect(find.text('3'), findsNothing);
+    await tester.pump(const Duration(seconds: 1));
     await tester.pump();
     expect(find.text('3'), findsOneWidget);
     for (var i = 0; i < 4; i++) {

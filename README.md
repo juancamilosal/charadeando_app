@@ -619,8 +619,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   de lado, con la pantalla de pie o inclinada hasta 55° (sentado, la frente
   queda inclinada hacia atrás) y quieto un segundo, y ahí arranca la cuenta
   3, 2, 1; así la inclinación se calibra con el celular ya en la frente.
-  Acostado en la mesa o sacudiéndolo no cuenta. A los 3 segundos aparece
-  "Empezar igual" y a los 6 la cuenta arranca sola por si no lo reconoce
+  Acostado en la mesa o sacudiéndolo no cuenta. A los 8 segundos (tiempo
+  para acomodarse) aparece "Empezar igual" y a los 15 la cuenta arranca
+  sola por si no lo reconoce
   (con el celular en la frente el botón no se ve), y sin acelerómetro
   empieza de una. Con Toque, en Modo TV o con el
   celular juez conectado se va directo a la cuenta. Idea de un probador de
