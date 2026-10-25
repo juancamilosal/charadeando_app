@@ -5,10 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 /// La configuración y los resultados se ven en vertical; el juego va en
-/// horizontal. Antes de la cuenta regresiva la pantalla gira sola hacia el
-/// lado en que se tenga el celular (aunque el giro automático del sistema
-/// esté apagado), así la palabra nunca queda al revés; desde la cuenta se
-/// fija en ese lado, para que el video quede grabado derecho y la pantalla
+/// horizontal. Antes del turno y durante la cuenta regresiva la pantalla
+/// gira sola hacia el lado en que se tenga el celular (aunque el giro
+/// automático del sistema esté apagado), así la palabra nunca queda al
+/// revés; cuando empieza el juego se fija en ese lado, para que la pantalla
 /// no gire al inclinar el celular.
 abstract final class ScreenOrientation {
   static const _channel = MethodChannel('charadeando/pantalla');
