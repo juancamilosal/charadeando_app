@@ -136,8 +136,8 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     });
     // La pantalla de antes del turno ya va en horizontal, con la cámara, y
     // gira hacia el lado en que se tenga el celular (la vista de la cámara
-    // gira con ella).
-    _screenTurns = ScreenOrientation.changes.listen(_camera.follow);
+    // gira con ella) hasta que termina la cuenta.
+    _screenTurns = ScreenOrientation.changes.listen(_onScreenTurned);
     ScreenOrientation.landscape();
     _initCamera();
   }
@@ -345,10 +345,41 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
 
   // --- Video ---------------------------------------------------------------
 
+  /// Lado con el que se está grabando la parte actual del video.
+  DeviceOrientation? _recordingSide;
+  bool _restarting = false;
+
+  /// La pantalla giró hacia el otro lado (antes del juego). Sin grabar,
+  /// la vista de la cámara gira con ella; si ya graba (en la cuenta), esa
+  /// parte se cierra y se graba otra con el lado nuevo, para que el video
+  /// no quede de cabeza.
+  Future<void> _onScreenTurned(DeviceOrientation side) async {
+    if (!_recording) {
+      await _camera.follow(side);
+      return;
+    }
+    if (_restarting) return;
+    _restarting = true;
+    try {
+      while (_recording && _recordingSide != ScreenOrientation.game) {
+        await _stopSegment();
+        if (!mounted ||
+            (_phase != _Phase.countdown && _phase != _Phase.playing)) {
+          return;
+        }
+        await _startSegment();
+      }
+    } finally {
+      _restarting = false;
+    }
+  }
+
   Future<void> _startSegment() async {
     if (!_cameraReady) return;
     try {
-      await _camera.startRecording(ScreenOrientation.game);
+      final side = ScreenOrientation.game;
+      await _camera.startRecording(side);
+      _recordingSide = side;
       _segmentClock
         ..reset()
         ..start();
@@ -475,11 +506,10 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
       _phase = _Phase.countdown;
       _countdown = _countdownFrom;
     });
-    // La cuenta regresiva da tiempo de ponerse el celular en la frente.
-    // Desde aquí la pantalla se queda en el lado en que está: el video se
-    // graba derecho y no gira al inclinar el celular. También se empieza a
-    // grabar aquí, para absorber la demora de la cámara al arrancar.
-    await ScreenOrientation.lock();
+    // La cuenta regresiva da tiempo de ponerse el celular en la frente, y
+    // la pantalla todavía gira si lo voltean. También se empieza a grabar
+    // aquí, para absorber la demora de la cámara al arrancar.
+    await ScreenOrientation.landscape();
     await _startSegment();
     if (_phase != _Phase.countdown) return;
     final game = ref.read(gameControllerProvider);
@@ -508,6 +538,9 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
 
   void _startPlaying() {
     setState(() => _phase = _Phase.playing);
+    // Durante el juego la pantalla se queda en el lado en que está: no gira
+    // al inclinar el celular para acertar o pasar.
+    ScreenOrientation.lock();
     // Si se pausó justo después de marcar una palabra, se pasa a la
     // siguiente; si no, se vuelve a mostrar la que estaba.
     if (_feedback != null) {

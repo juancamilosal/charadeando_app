@@ -246,4 +246,33 @@ void main() {
     );
     expect(tilt.foreheadListens, 0);
   });
+
+  testWidgets('la pantalla gira hasta el final de la cuenta y en el juego '
+      'se queda en su lado', (tester) async {
+    await _show(tester, PlayController.touch);
+    final preferred = <Object?>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'SystemChrome.setPreferredOrientations') {
+          preferred.add(call.arguments);
+        }
+        return null;
+      },
+    );
+    const both = [
+      'DeviceOrientation.landscapeLeft',
+      'DeviceOrientation.landscapeRight',
+    ];
+
+    await tester.tap(find.text('¡Listo!'));
+    await tester.pump(const Duration(seconds: 1));
+    expect(preferred.last, both);
+
+    for (var i = 0; i < 3; i++) {
+      await tester.pump(const Duration(seconds: 1));
+    }
+    expect(find.text('Acierto'), findsOneWidget);
+    expect(preferred.last, ['DeviceOrientation.landscapeLeft']);
+  });
 }

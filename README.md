@@ -618,13 +618,17 @@ la cámara frontal graba a los participantes para revivir las risas.
   turno vuelve a vertical.
 - La pantalla del juego gira sola hacia el lado en que se tenga el celular
   (horizontal izquierda o derecha), así la palabra nunca queda al revés.
-  Antes del turno y en "Ponte el celular en la frente" sigue al sensor
+  Antes del turno, en "Ponte el celular en la frente" y durante la cuenta
+  3, 2, 1 sigue al sensor
   aunque el giro automático del sistema esté apagado (Android:
   `SCREEN_ORIENTATION_SENSOR_LANDSCAPE` por el canal `charadeando/pantalla`
   de `MainActivity.kt`, que avisa cada giro con `giro`), y la vista de la
-  cámara gira con ella (`CameraService.follow`). Desde la cuenta regresiva
-  la pantalla se fija en el lado en que está (`ScreenOrientation.lock`):
-  el video se graba derecho y la pantalla no gira al inclinar el celular.
+  cámara gira con ella (`CameraService.follow`). Si giran el celular en la
+  cuenta, cuando ya se está grabando, esa parte del video se cierra y se
+  graba otra con el lado nuevo, así no queda de cabeza. Cuando empieza el
+  juego la pantalla se fija en el lado en que está
+  (`ScreenOrientation.lock`): no gira al inclinar el celular para acertar
+  o pasar.
   La inclinación se mide en el eje perpendicular a la pantalla, así que
   abajo es acierto en los dos lados. Reemplaza el antiguo ajuste "Rotación
   invertida".

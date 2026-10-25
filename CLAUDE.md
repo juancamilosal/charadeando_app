@@ -42,8 +42,8 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   sale a los 8 s (antes 3 s) y la cuenta arranca sola a los 15 s (antes
   6 s), y el Modo TV ya no se queda pegado al dejar de duplicar la pantalla
   (antes la siguiente partida quedaba sin cámara; reporte de un probador),
-  y la pantalla del turno gira sola hacia el lado del celular (se fija desde
-  la cuenta; se quitó el ajuste "Rotación invertida").
+  y la pantalla del turno gira sola hacia el lado del celular (se fija cuando
+  empieza el juego; se quitó el ajuste "Rotación invertida").
 - Hechos: perfil de pagos (persona física, Colombia) con la cuenta
   Davibank aprobada (ya sin retención), programa de cargos del 15 %, los 17
   productos activos (opción de compra `comprar`) y verificadores de
