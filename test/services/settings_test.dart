@@ -43,15 +43,12 @@ class MemorySettingsStore extends SettingsStore {
 }
 
 void main() {
-  tearDown(() => ScreenOrientation.inverted = false);
-
-  test('por defecto: música, sonidos y vibración encendidos, sin rotación '
-      'invertida y con Inclinación', () {
+  test('por defecto: música, sonidos y vibración encendidos y con '
+      'Inclinación', () {
     const s = AppSettings();
     expect(s.music, isTrue);
     expect(s.sounds, isTrue);
     expect(s.vibration, isTrue);
-    expect(s.invertedRotation, isFalse);
     expect(s.controller, PlayController.tilt);
     // Los reportes y las estadísticas anónimas vienen encendidos.
     expect(s.shareData, isTrue);
@@ -67,7 +64,6 @@ void main() {
         music: false,
         sounds: false,
         vibration: false,
-        invertedRotation: true,
         controller: PlayController.touch,
         shareData: false,
       ),
@@ -77,22 +73,7 @@ void main() {
     expect(loaded.music, isFalse);
     expect(loaded.sounds, isFalse);
     expect(loaded.vibration, isFalse);
-    expect(loaded.invertedRotation, isTrue);
     expect(loaded.controller, PlayController.touch);
-  });
-
-  test('la rotación invertida gira el juego hacia la derecha', () {
-    final container = ProviderContainer(
-      overrides: [
-        settingsStoreProvider.overrideWithValue(MemorySettingsStore()),
-      ],
-    );
-    addTearDown(container.dispose);
-    expect(ScreenOrientation.game, DeviceOrientation.landscapeLeft);
-    container
-        .read(settingsProvider.notifier)
-        .update(const AppSettings(invertedRotation: true));
-    expect(ScreenOrientation.game, DeviceOrientation.landscapeRight);
   });
 
   testWidgets('con Todo Charadeando, Ajustes muestra su tarjeta dorada', (
@@ -146,8 +127,7 @@ void main() {
     expect(store.saved!.sounds, isFalse);
     expect(store.saved!.vibration, isFalse);
 
-    await tap('Rotación invertida');
-    expect(store.saved!.invertedRotation, isTrue);
+    expect(find.text('Rotación invertida', skipOffstage: false), findsNothing);
 
     await tap('Toque');
     expect(store.saved!.controller, PlayController.touch);

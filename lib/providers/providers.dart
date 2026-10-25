@@ -99,15 +99,11 @@ class SettingsController extends Notifier<AppSettings> {
   final AppSettings _initial;
 
   @override
-  AppSettings build() {
-    ScreenOrientation.inverted = _initial.invertedRotation;
-    return _initial;
-  }
+  AppSettings build() => _initial;
 
   /// Cambia los ajustes y los guarda en el celular.
   void update(AppSettings settings) {
     state = settings;
-    ScreenOrientation.inverted = settings.invertedRotation;
     ref.read(settingsStoreProvider).save(settings).ignore();
   }
 }

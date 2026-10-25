@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -66,6 +67,9 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   late Duration _remaining;
   Timer? _timer;
   StreamSubscription<TiltAction>? _tilt;
+
+  /// La pantalla giró hacia el otro lado antes de la cuenta.
+  StreamSubscription<DeviceOrientation>? _screenTurns;
 
   /// Mientras se espera que el jugador se ponga el celular en la frente.
   StreamSubscription<void>? _placement;
@@ -130,7 +134,10 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
       _precachePhoto(0);
       _precachePhoto(1);
     });
-    // La pantalla de antes del turno ya va en horizontal, con la cámara.
+    // La pantalla de antes del turno ya va en horizontal, con la cámara, y
+    // gira hacia el lado en que se tenga el celular (la vista de la cámara
+    // gira con ella).
+    _screenTurns = ScreenOrientation.changes.listen(_camera.follow);
     ScreenOrientation.landscape();
     _initCamera();
   }
@@ -329,6 +336,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     _timer?.cancel();
     _tilt?.cancel();
     _cancelPlacing();
+    _screenTurns?.cancel();
     _camera.dispose();
     WakelockPlus.disable();
     ScreenOrientation.portrait();
@@ -467,10 +475,11 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
       _phase = _Phase.countdown;
       _countdown = _countdownFrom;
     });
-    // La cuenta regresiva da tiempo de girar el celular y ponerlo en la
-    // frente. También se empieza a grabar aquí, para absorber la demora de
-    // la cámara al arrancar.
-    await ScreenOrientation.landscape();
+    // La cuenta regresiva da tiempo de ponerse el celular en la frente.
+    // Desde aquí la pantalla se queda en el lado en que está: el video se
+    // graba derecho y no gira al inclinar el celular. También se empieza a
+    // grabar aquí, para absorber la demora de la cámara al arrancar.
+    await ScreenOrientation.lock();
     await _startSegment();
     if (_phase != _Phase.countdown) return;
     final game = ref.read(gameControllerProvider);

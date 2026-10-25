@@ -3,11 +3,15 @@ package com.valkiriacode.charadeando
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.hardware.display.DisplayManager
 import android.media.MediaRouter
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.util.DisplayMetrics
+import android.view.Surface
+import android.view.WindowManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
@@ -15,6 +19,7 @@ import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
     private var tv: TvConnection? = null
+    private var screen: ScreenSide? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -27,6 +32,22 @@ class MainActivity : FlutterActivity() {
                 "abrirAjustes" -> result.success(openCastSettings())
                 "conectado" -> result.success(connection.isConnected())
                 "desconectar" -> result.success(stopCasting())
+                else -> result.notImplemented()
+            }
+        }
+        // El turno gira solo hacia el lado en que se tenga el celular, aunque
+        // el giro automático del sistema esté apagado.
+        val pantalla = MethodChannel(messenger, "charadeando/pantalla")
+        val side = ScreenSide(this, pantalla)
+        screen = side
+        pantalla.setMethodCallHandler { call, result ->
+            when (call.method) {
+                "girarLibre" -> {
+                    requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                    side.start()
+                    result.success(side.current())
+                }
+                "lado" -> result.success(side.current())
                 else -> result.notImplemented()
             }
         }
@@ -56,6 +77,7 @@ class MainActivity : FlutterActivity() {
 
     override fun onDestroy() {
         tv?.onCancel(null)
+        screen?.stop()
         super.onDestroy()
     }
 
@@ -158,5 +180,55 @@ private class TvConnection(context: Context) : EventChannel.StreamHandler {
         displays.unregisterDisplayListener(displayListener)
         router.removeCallback(routerCallback)
         sink = null
+    }
+}
+
+// Avisa a Flutter hacia qué lado está girada la pantalla horizontal
+// ("izquierda" o "derecha", como landscapeLeft y landscapeRight de
+// Flutter). Al girar 180° Android no cambia la configuración, así que se
+// escucha la pantalla misma.
+private class ScreenSide(context: Context, private val channel: MethodChannel) {
+    private val displays = context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
+    private val windows = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    private val main = Handler(Looper.getMainLooper())
+    private var listening = false
+    private var last: String? = null
+
+    private val listener = object : DisplayManager.DisplayListener {
+        override fun onDisplayAdded(displayId: Int) {}
+        override fun onDisplayRemoved(displayId: Int) {}
+        override fun onDisplayChanged(displayId: Int) {
+            val now = current() ?: return
+            if (now == last) return
+            last = now
+            channel.invokeMethod("giro", now)
+        }
+    }
+
+    fun start() {
+        last = current()
+        if (listening) return
+        listening = true
+        displays.registerDisplayListener(listener, main)
+    }
+
+    fun stop() {
+        if (!listening) return
+        listening = false
+        displays.unregisterDisplayListener(listener)
+    }
+
+    // Null si la pantalla está vertical.
+    @Suppress("DEPRECATION")
+    fun current(): String? {
+        val display = windows.defaultDisplay
+        val rotation = display.rotation
+        val metrics = DisplayMetrics()
+        display.getRealMetrics(metrics)
+        if (metrics.widthPixels <= metrics.heightPixels) return null
+        // En casi todos los celulares la pantalla natural es vertical y la
+        // horizontal "izquierda" es girar 90°; en tabletas es la de 0°.
+        val upright = rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_90
+        return if (upright) "izquierda" else "derecha"
     }
 }

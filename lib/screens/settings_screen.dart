@@ -106,14 +106,6 @@ class SettingsScreen extends ConsumerWidget {
                     value: settings.vibration,
                     onChanged: (v) => update(settings.copyWith(vibration: v)),
                   ),
-                  _SwitchRow(
-                    icon: Icons.screen_rotation,
-                    color: AppColors.blue,
-                    title: 'Rotación invertida',
-                    value: settings.invertedRotation,
-                    onChanged: (v) =>
-                        update(settings.copyWith(invertedRotation: v)),
-                  ),
                   _ControllerRow(
                     value: settings.controller,
                     onChanged: (c) => update(settings.copyWith(controller: c)),

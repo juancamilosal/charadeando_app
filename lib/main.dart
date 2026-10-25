@@ -16,7 +16,6 @@ Future<void> main() async {
   final welcomeSeen = await WelcomeStore().seen();
   final backdrop = await BackdropStore().load();
   final settings = await SettingsStore().load();
-  ScreenOrientation.inverted = settings.invertedRotation;
   // Reportes de errores (Firebase Crashlytics), según el ajuste de
   // Privacidad. Nunca en modo debug.
   await startCrashReporting(enabled: settings.shareData);

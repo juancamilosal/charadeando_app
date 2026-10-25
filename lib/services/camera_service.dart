@@ -42,6 +42,22 @@ class CameraService {
     }
   }
 
+  /// La pantalla de antes del turno giró hacia el otro lado: la vista de
+  /// la cámara gira con ella (mientras graba no se toca).
+  Future<void> follow(DeviceOrientation orientation) async {
+    final controller = _controller;
+    if (controller == null ||
+        !controller.value.isInitialized ||
+        controller.value.isRecordingVideo) {
+      return;
+    }
+    try {
+      await controller.lockCaptureOrientation(orientation);
+    } on CameraException catch (e) {
+      debugPrint('[Cámara] No se pudo girar la vista: $e');
+    }
+  }
+
   /// Graba con la orientación fija en [orientation], para que el video no
   /// gire cuando el jugador incline el celular.
   Future<void> startRecording(DeviceOrientation orientation) async {

@@ -236,10 +236,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   cada sonido devuelve su reproductor al grupo al terminar;
   los efectos pasan por `AssetEffectPlayer` y
   los demás todavía no tienen archivo), "Vibración" (encendida; todas las vibraciones pasan
-  por `Haptics`, que no vibra si está apagada), "Rotación invertida"
-  (apagada; encendida, el juego gira a horizontal derecha y la vista de la
-  cámara y el video siguen esa orientación; la inclinación se mide en el
-  eje de la pantalla, así que abajo sigue siendo acierto) y "Controlador":
+  por `Haptics`, que no vibra si está apagada) y "Controlador":
   "Inclinación" (por defecto: abajo es acierto y arriba, pasar) o "Toque"
   (la mitad derecha de la pantalla es acierto y la izquierda, pasar, con
   una marca suave en cada borde durante el turno; en Modo TV el juez sigue
@@ -617,8 +614,20 @@ la cámara frontal graba a los participantes para revivir las risas.
   según el controlador ("↓ Acierto" y "↑ Pasar" con Inclinación; "Toca a la
   derecha: Acierto" y "Toca a la izquierda: Pasar" con Toque) y "¡Listo!". Sin video o en Modo TV es la misma
   pantalla sobre el fondo de la app; mientras abre la cámara también se ve
-  el fondo, y sin permiso de cámara se juega sin video. La vista de la
-  cámara se fija en horizontal. Al terminar el turno vuelve a vertical.
+  el fondo, y sin permiso de cámara se juega sin video. Al terminar el
+  turno vuelve a vertical.
+- La pantalla del juego gira sola hacia el lado en que se tenga el celular
+  (horizontal izquierda o derecha), así la palabra nunca queda al revés.
+  Antes del turno y en "Ponte el celular en la frente" sigue al sensor
+  aunque el giro automático del sistema esté apagado (Android:
+  `SCREEN_ORIENTATION_SENSOR_LANDSCAPE` por el canal `charadeando/pantalla`
+  de `MainActivity.kt`, que avisa cada giro con `giro`), y la vista de la
+  cámara gira con ella (`CameraService.follow`). Desde la cuenta regresiva
+  la pantalla se fija en el lado en que está (`ScreenOrientation.lock`):
+  el video se graba derecho y la pantalla no gira al inclinar el celular.
+  La inclinación se mide en el eje perpendicular a la pantalla, así que
+  abajo es acierto en los dos lados. Reemplaza el antiguo ajuste "Rotación
+  invertida".
 - Con Inclinación, "¡Listo!" (o "Continuar") lleva primero a "Ponte el
   celular en la frente para comenzar": `ForeheadDetector` espera el celular
   de lado, con la pantalla de pie o inclinada hasta 55° (sentado, la frente
