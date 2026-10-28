@@ -104,15 +104,17 @@ void main() {
 
     await tester.tap(find.text('¡Parar!'));
     // Al frenar, los clics se espacian: hay más al principio que al final.
-    await wait(tester, const Duration(seconds: 3));
+    await wait(tester, const Duration(seconds: 2));
     final early = clicks.count;
-    await wait(tester, const Duration(seconds: 3));
+    await wait(tester, const Duration(seconds: 2));
     final middle = clicks.count;
-    await wait(tester, const Duration(seconds: 3));
+    await wait(tester, const Duration(seconds: 1));
     expect(middle - early, lessThan(early - ticksSpinning));
     expect(clicks.count - middle, lessThan(middle - early));
     expect(find.text('Frenando…'), findsOneWidget);
-    await wait(tester, const Duration(milliseconds: 1500));
+    // El castigo sale apenas se ve quieta, antes de los 7 segundos.
+    await wait(tester, const Duration(seconds: 1));
+    expect(find.text('Frenando…'), findsNothing);
     await tester.pumpAndSettle();
 
     expect(find.text('¡Castigo!'), findsOneWidget);

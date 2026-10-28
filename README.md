@@ -546,11 +546,14 @@ la cámara frontal graba a los participantes para revivir las risas.
   equipo escribe algunos y la app completa los vacíos sin repetir). Al girar, la ruleta queda guardada en el celular.
 - Cómo gira: "Girar" la pone a toda velocidad y sigue sola hasta que tocan
   "¡Parar!" (o pasan 30 segundos). Entonces se elige el castigo al azar (el
-  momento del toque no influye) y la ruleta frena durante 10 segundos con una
+  momento del toque no influye) y la ruleta frena durante 7 segundos con una
   curva que es rápida al principio y muy lenta al final, hasta quedar justo en
   el centro de ese campo. Cada campo que pasa por el indicador hace un "tic"
-  con vibración, y al caer el castigo aparece en grande con una vibración
-  fuerte, con "Girar otra vez" y "Listo". Si un castigo es muy largo para su
+  con vibración, y el castigo cae apenas a la ruleta le falta menos de 1°
+  (`PunishmentRoulette.landWithin`, unos 6 segundos): el final de la curva
+  ya se ve quieto y esperarlo se sentía como un retraso. Aparece en grande
+  (entra en 0,4 s) con una vibración fuerte, con "Girar otra vez" y
+  "Listo". Si un castigo es muy largo para su
   campo, se corta con "…" (completo se ve al caer). La cara de la ruleta se
   dibuja una vez y solo se gira, así los textos quedan fijos a la ruleta
   mientras da vueltas.

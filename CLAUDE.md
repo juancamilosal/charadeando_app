@@ -49,7 +49,9 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   oscuro completo (tarjetas, ventanas, hojas y barra de abajo oscuras;
   colores en `context.surfaces`), y "Guardar" junto a "Ver video" en el
   resultado del turno, con aviso y pregunta al salir sin guardar, más
-  "Guardar automáticamente" en los ajustes de video (apagado por defecto).
+  "Guardar automáticamente" en los ajustes de video (apagado por defecto),
+  y la ruleta frena en 7 s (antes 10) y muestra el castigo apenas se ve
+  quieta.
 - Hechos: perfil de pagos (persona física, Colombia) con la cuenta
   Davibank aprobada (ya sin retención), programa de cargos del 15 %, los 17
   productos activos (opción de compra `comprar`) y verificadores de

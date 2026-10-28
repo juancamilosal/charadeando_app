@@ -78,7 +78,13 @@ class PunishmentRoulette extends ConsumerStatefulWidget {
   static const turnsPerSecond = 2.0;
 
   /// Cuánto tarda en frenar.
-  static const stopDuration = Duration(seconds: 10);
+  static const stopDuration = Duration(seconds: 7);
+
+  /// Al frenar, el castigo sale apenas a la ruleta le falta menos que esto
+  /// (1°) para detenerse: el final de la curva es tan lento que a la vista
+  /// ya está quieta, y esperar los últimos segundos se sentía como un
+  /// retraso.
+  static const landWithin = pi / 180;
 
   /// Si nadie toca "¡Parar!", la ruleta frena sola después de este tiempo.
   static const autoStopAfter = Duration(seconds: 30);
@@ -106,7 +112,7 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
   late final Random _random = widget.random ?? Random();
   late final AnimationController _reveal = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 700),
+    duration: const Duration(milliseconds: 400),
   );
 
   static const _speed = PunishmentRoulette.turnsPerSecond * 2 * pi;
@@ -118,7 +124,7 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
   double _from = 0;
   double _to = 0;
 
-  /// Lo que tarda en frenar: 10 segundos con "¡Parar!"; al soltarla con el
+  /// Lo que tarda en frenar: 7 segundos con "¡Parar!"; al soltarla con el
   /// dedo, según la fuerza.
   double _stopSeconds = PunishmentRoulette.stopDuration.inMilliseconds / 1000;
 
@@ -193,8 +199,11 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
         if (elapsed >= PunishmentRoulette.autoStopAfter) _stop();
       case _Spin.stopping:
         final t = seconds / _stopSeconds;
-        _setAngle(_from + (_to - _from) * Roulette.easeOutQuart(t));
-        if (t >= 1) _land();
+        final angle = _from + (_to - _from) * Roulette.easeOutQuart(t);
+        _setAngle(angle);
+        if (t >= 1 || (_to - angle).abs() < PunishmentRoulette.landWithin) {
+          _land();
+        }
       case _Spin.idle:
       case _Spin.result:
         break;
