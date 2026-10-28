@@ -224,5 +224,6 @@ class _RecordingStats extends NoStatsService {
     required List<Turn> turns,
     required bool finished,
     required PlayController controller,
+    bool recordVideo = true,
   }) async => records.add((finished, turns.length));
 }

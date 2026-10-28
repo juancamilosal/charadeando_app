@@ -59,14 +59,8 @@ void main() {
       expect(find.text('Partida rápida'), findsOneWidget);
       await tapVisible(tester, 'Personalizada');
       expect(find.text('Configuración'), findsOneWidget);
-
-      final premium = find.text('Full HD (1080p) · Todo Charadeando');
-      await tester.scrollUntilVisible(
-        premium,
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
-      expect(premium, findsOneWidget);
+      // El video se elige antes del turno, no en la configuración.
+      expect(find.text('Resolución', skipOffstage: false), findsNothing);
     },
   );
 }

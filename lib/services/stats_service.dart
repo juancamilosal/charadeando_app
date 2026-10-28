@@ -24,6 +24,7 @@ abstract final class GameStats {
     required bool finished,
     required PlayController controller,
     required String version,
+    bool recordVideo = true,
   }) {
     final (mode, categories) = _modeAndCategories(config);
     final entries = [for (final t in turns) ...t.entries];
@@ -46,7 +47,7 @@ abstract final class GameStats {
         _ => controller == PlayController.touch ? 'TOQUE' : 'INCLINACION',
       },
       'terminada': finished,
-      'video': config.hitMode != HitMode.tv && config.resolution.records,
+      'video': config.records && recordVideo,
       'version_app': version,
     };
   }
@@ -116,6 +117,7 @@ class StatsService {
     required List<Turn> turns,
     required bool finished,
     required PlayController controller,
+    bool recordVideo = true,
   }) {
     if (!enabled) return Future.value();
     return _enqueue(() async {
@@ -124,6 +126,7 @@ class StatsService {
         turns: turns,
         finished: finished,
         controller: controller,
+        recordVideo: recordVideo,
         version: await _version(),
       );
       final queue = [...await _read(), stats];
@@ -218,6 +221,7 @@ class NoStatsService extends StatsService {
     required List<Turn> turns,
     required bool finished,
     required PlayController controller,
+    bool recordVideo = true,
   }) async {}
 
   @override

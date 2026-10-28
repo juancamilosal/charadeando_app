@@ -19,7 +19,7 @@ void main() {
         wordsPerGroup: 8,
         scoringMode: ScoringMode.perWord,
         hitMode: HitMode.tilt,
-        resolution: VideoResolution.off,
+        resolution: VideoResolution.fullHd,
         difficulty: Difficulty.easy,
         teamIds: ['t1', 't2'],
       ),
@@ -31,8 +31,14 @@ void main() {
     expect(loaded.turnDuration, const Duration(seconds: 75));
     expect(loaded.wordsPerGroup, 8);
     expect(loaded.scoringMode, ScoringMode.perWord);
-    expect(loaded.resolution, VideoResolution.off);
+    expect(loaded.resolution, VideoResolution.fullHd);
     expect(loaded.difficulty, Difficulty.easy);
+  });
+
+  test('"Jugar sin grabar" guardado antes vuelve a HD: ahora se apaga el '
+      'video antes del turno', () {
+    final loaded = SavedConfig.fromJson({'video': 'off'});
+    expect(loaded.resolution, VideoResolution.hd);
   });
 
   test('el Modo TV no se guarda: vuelve a Movimiento', () {

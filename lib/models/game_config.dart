@@ -104,21 +104,64 @@ enum Difficulty {
 
 /// Resolución de los videos de cada turno.
 enum VideoResolution {
-  /// No se abre la cámara ni se graba.
+  /// No se abre la cámara ni se graba. Ya no es una opción: se juega sin
+  /// grabar con "Grabar video" antes del turno. Queda para las pruebas.
   off('Jugar sin grabar', null, premium: false),
-  normal('Normal (480p)', ResolutionPreset.medium, premium: false),
-  hd('HD (720p)', ResolutionPreset.high, premium: false),
-  fullHd('Full HD (1080p)', ResolutionPreset.veryHigh, premium: true),
-  max('Máxima', ResolutionPreset.max, premium: true);
+  normal(
+    'Normal (480p)',
+    ResolutionPreset.medium,
+    premium: false,
+    short: 'Normal',
+    note: 'Más liviano',
+  ),
+  hd(
+    'HD (720p)',
+    ResolutionPreset.high,
+    premium: false,
+    short: 'HD',
+    note: 'Recomendado',
+  ),
+  fullHd(
+    'Full HD (1080p)',
+    ResolutionPreset.veryHigh,
+    premium: true,
+    short: 'Full HD',
+    note: 'Más nitidez, pesa más',
+  ),
+  max(
+    'Máxima',
+    ResolutionPreset.max,
+    premium: true,
+    short: 'Máxima',
+    note: 'La mejor de la cámara, pesa más',
+  );
 
-  const VideoResolution(this.label, this.preset, {required this.premium});
+  const VideoResolution(
+    this.label,
+    this.preset, {
+    required this.premium,
+    this.short = '',
+    this.note = '',
+  });
 
   final String label;
+
+  /// Nombre corto, para el botón de antes del turno.
+  final String short;
+
+  /// Qué se gana o se pierde con esta resolución.
+  final String note;
 
   /// Null si no se graba.
   final ResolutionPreset? preset;
 
   bool get records => preset != null;
+
+  /// Las que se eligen antes del turno: todas las que graban.
+  static List<VideoResolution> get choices => [
+    for (final r in values)
+      if (r.records) r,
+  ];
 
   /// Las resoluciones premium se desbloquean con una compra.
   final bool premium;

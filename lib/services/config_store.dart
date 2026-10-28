@@ -44,11 +44,16 @@ class SavedConfig {
       ),
       // El Modo TV depende de si hay un televisor conectado, no se guarda.
       hitMode: hit.available && hit != HitMode.tv ? hit : HitMode.tilt,
-      resolution: byName(
+      // "Jugar sin grabar" ya no es una resolución: ahora se elige antes
+      // del turno.
+      resolution: switch (byName(
         VideoResolution.values,
         json['video'],
         VideoResolution.hd,
-      ),
+      )) {
+        VideoResolution.off => VideoResolution.hd,
+        final r => r,
+      },
       teamIds: [
         for (final id in json['equipos'] as List? ?? const [])
           if (id is String) id,

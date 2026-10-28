@@ -13,7 +13,6 @@ import '../widgets/number_stepper.dart';
 import '../widgets/option_selector.dart';
 import '../widgets/play_mode_selector.dart';
 import '../widgets/play_background.dart';
-import '../widgets/premium_sheet.dart';
 import '../widgets/tv_connect.dart';
 import '../widgets/team_badge.dart';
 import '../widgets/words_reminder.dart';
@@ -277,7 +276,6 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final premium = ref.watch(premiumUnlockedProvider);
     final automatic = _automatic;
     const gap = SizedBox(height: 14);
     // Se vuelve a dibujar al conectar o desconectar el TV, y se avisa.
@@ -416,25 +414,6 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                   ],
                 ),
                 gap,
-              ],
-              if (!_tvMode) ...[
-                ConfigSection(
-                  icon: Icons.videocam,
-                  title: 'Video',
-                  children: [
-                    OptionSelector<VideoResolution>(
-                      label: 'Resolución',
-                      options: VideoResolution.values,
-                      selected: _config.resolution,
-                      labelOf: (o) => o.label,
-                      lockReasonOf: (o) =>
-                          o.premium && !premium ? 'Todo Charadeando' : null,
-                      onLockedTap: (_) => showPremiumSheet(context),
-                      onSelected: (o) =>
-                          _update(_config.copyWith(resolution: o)),
-                    ),
-                  ],
-                ),
               ],
               // El celular juez y el Modo TV van al final, después del video.
               // Si su servidor no responde, la opción no se muestra.

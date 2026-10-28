@@ -366,8 +366,7 @@ void main() {
     expect(config.difficulty, saved.difficulty);
   });
 
-  testWidgets('al duplicar la pantalla se activa el Modo TV y se oculta '
-      'el video', (tester) async {
+  testWidgets('al duplicar la pantalla se activa el Modo TV', (tester) async {
     final tv = StreamController<bool>();
     addTearDown(tv.close);
     final container = await pumpConfig(tester, tv: tv.stream);
@@ -383,18 +382,13 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Jugar en un TV'), findsOneWidget);
-    // El Modo TV va al final, después del video.
-    expect(find.text('Resolución'), findsOneWidget);
-    expect(
-      tester.getTopLeft(find.text('Modo TV')).dy,
-      greaterThan(tester.getTopLeft(find.text('Resolución')).dy),
-    );
+    // El video ya no se elige aquí: va antes del turno.
+    expect(find.text('Resolución'), findsNothing);
 
     tv.add(true);
     await tester.pumpAndSettle();
     expect(find.text('Desconectar TV'), findsOneWidget);
     expect(find.textContaining('Modo TV activado'), findsWidgets);
-    expect(find.text('Resolución'), findsNothing);
     // Se espera a que el aviso se cierre para que no tape el botón.
     await tester.pump(const Duration(seconds: 5));
     await tester.pumpAndSettle();
@@ -438,13 +432,14 @@ void main() {
     expect(find.text('Conectar a un televisor'), findsNothing);
   });
 
-  testWidgets('al desconectar el TV vuelve el video', (tester) async {
+  testWidgets('al desconectar el TV avisa que se juega sin televisor', (
+    tester,
+  ) async {
     final tv = StreamController<bool>();
     addTearDown(tv.close);
     await pumpConfig(tester, tv: tv.stream);
     tv.add(true);
     await tester.pumpAndSettle();
-    expect(find.text('Resolución'), findsNothing);
 
     tv.add(false);
     await tester.pumpAndSettle();
@@ -452,12 +447,6 @@ void main() {
       find.text('TV desconectado: se juega sin televisor'),
       findsOneWidget,
     );
-    await tester.scrollUntilVisible(
-      find.text('Resolución'),
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    expect(find.text('Resolución'), findsOneWidget);
   });
 
   testWidgets('el Modo TV también está con palabras automáticas', (

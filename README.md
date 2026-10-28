@@ -157,7 +157,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   cuánto se ahorra. Los precios y la moneda los da Google Play; mientras
   no los da, se muestran $4.000 y $15.000 (`fallbackCategoryPrice`,
   `fallbackAllPrice`). Una
-  resolución bloqueada ("Full HD (1080p) · Todo Charadeando") o "Nueva
+  resolución bloqueada (Full HD o Máxima con candado, en "Ajustes de
+  video" antes del turno) o "Nueva
   categoría" sin cupo abren solo Todo Charadeando ("Desbloquea todo").
   Abajo, "Restaurar compras" y "Tengo un código". Los productos de Google
   Play (`PlayBilling`, con `in_app_purchase`; solo en Android) son
@@ -329,7 +330,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   palabras (se piden 20 al servidor; de una categoría propia, 20 al azar),
   dificultad Mezcladas, aciertos con movimiento (o los botones del juez si
   hay un TV conectado) y el video con la resolución de la última
-  configuración guardada ("sin video" no graba). No cambia la última
+  configuración guardada (se cambia antes del turno). No cambia la última
   configuración guardada. Con palabras manuales (Libre, "Las escribimos")
   va directo a escribirlas en una sola lista de 10 a 20, con el contador
   "12 de 20", una barra de avance y, desde 10, "Ya pueden jugar" en verde;
@@ -609,7 +610,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   del turno ya va en horizontal (en la rápida y en la personalizada) y es
   muy simple: de fondo, la cámara frontal en vivo (todavía sin grabar; se
   graba desde la cuenta regresiva) con un degradado oscuro a la izquierda y
-  arriba a la derecha "● Cámara"; a la izquierda, "Finalizar juego", a
+  arriba a la derecha "● Video · HD" (ver "Ajustes de video"); a la izquierda, "Finalizar juego", a
   quién le toca (solo con equipos: "Turno de Los Primos"), las píldoras
   según el controlador ("↓ Acierto" y "↑ Pasar" con Inclinación; "Toca a la
   derecha: Acierto" y "Toca a la izquierda: Pasar" con Toque) y "¡Listo!". Sin video o en Modo TV es la misma
@@ -663,9 +664,17 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Puntuación por palabra (cuentan artículos y conectores) o por frase. Pasar
   no suma ni resta, y las palabras pasadas no vuelven al mazo. Igualdad de
   puntos es empate.
-- Video de cada turno con la cámara frontal, en 720p por defecto. También se
-  puede jugar sin grabar. 1080p y la máxima resolución quedan bloqueadas como
-  de Todo Charadeando; al tocarlas se abre la hoja de compra.
+- Video de cada turno con la cámara frontal, en 720p por defecto. Se elige
+  en la pantalla de antes del turno: arriba a la derecha, "● Video · HD"
+  (o "Sin grabar") abre "Ajustes de video", un panel pequeño con "Grabar
+  video" y la resolución (Normal "Más liviano", HD "Recomendado", Full HD
+  y Máxima). Al cambiar la resolución la cámara se vuelve a abrir con la
+  nueva, y se ve detrás del panel. Full HD y Máxima son de Todo
+  Charadeando: con candado, y al tocarlas se abre la hoja de compra. Lo
+  elegido se recuerda para los turnos y las partidas siguientes
+  (`AppSettings.recordVideo` y la resolución de la última configuración);
+  la configuración personalizada ya no tiene sección de video. Un "Jugar
+  sin grabar" guardado antes vuelve a HD.
 - El video se puede ver, guardar en la galería o compartir. Al continuar al
   siguiente turno se borra del celular; la app no guarda videos en ningún
   otro lugar.

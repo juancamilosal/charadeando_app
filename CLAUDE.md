@@ -43,7 +43,9 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   6 s), y el Modo TV ya no se queda pegado al dejar de duplicar la pantalla
   (antes la siguiente partida quedaba sin cámara; reporte de un probador),
   y la pantalla del turno gira sola hacia el lado del celular (se fija cuando
-  empieza el juego; se quitó el ajuste "Rotación invertida").
+  empieza el juego; se quitó el ajuste "Rotación invertida"), y "Ajustes de video" antes
+  del turno (grabar o no y la resolución, con candado en Full HD y Máxima;
+  se quitó la sección Video de Personalizada).
 - Hechos: perfil de pagos (persona física, Colombia) con la cuenta
   Davibank aprobada (ya sin retención), programa de cargos del 15 %, los 17
   productos activos (opción de compra `comprar`) y verificadores de

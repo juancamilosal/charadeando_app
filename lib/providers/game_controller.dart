@@ -96,6 +96,7 @@ class GameState {
   List<int> get losers => Roulette.losers(scores);
 
   GameState copyWith({
+    GameConfig? config,
     List<List<Word>>? writtenWords,
     List<List<Word>>? decks,
     List<Turn>? turns,
@@ -107,7 +108,7 @@ class GameState {
     int? errorsAtStart,
   }) {
     return GameState(
-      config: config,
+      config: config ?? this.config,
       writtenWords: writtenWords ?? this.writtenWords,
       decks: decks ?? this.decks,
       turns: turns ?? this.turns,
@@ -134,6 +135,14 @@ class GameController extends Notifier<GameState> {
     state = GameState.fromConfig(config);
   }
 
+  /// Cambia la resolución del video en medio de la partida (se elige antes
+  /// de cada turno).
+  void setResolution(VideoResolution resolution) {
+    state = state.copyWith(
+      config: state.config.copyWith(resolution: resolution),
+    );
+  }
+
   /// Registra las estadísticas anónimas de la partida, una sola vez y solo
   /// si se jugó al menos un turno: terminada si llegó al resultado final (o
   /// es una partida rápida, que termina con su único turno), abandonada si
@@ -149,6 +158,7 @@ class GameController extends Notifier<GameState> {
           turns: game.turns,
           finished: game.finished || game.config.quick,
           controller: ref.read(settingsProvider).controller,
+          recordVideo: ref.read(settingsProvider).recordVideo,
         )
         .ignore();
   }

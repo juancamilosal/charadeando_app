@@ -18,6 +18,7 @@ import '../widgets/countdown_view.dart';
 import '../widgets/end_game_dialog.dart';
 import '../widgets/judge_setup.dart' show judgeStatus;
 import '../widgets/play_background.dart';
+import '../widgets/premium_sheet.dart';
 import '../widgets/tv_connect.dart';
 import '../widgets/tv_turn_view.dart';
 import '../widgets/word_card.dart';
@@ -142,9 +143,67 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     _initCamera();
   }
 
-  /// Falso si eligieron jugar sin grabar o en Modo TV: no se abre la
+  /// Falso si se juega en Modo TV o tocaron "Sin grabar": no se abre la
   /// cámara.
-  bool get _records => ref.read(gameControllerProvider).config.records;
+  bool get _records => _canRecord && ref.read(settingsProvider).recordVideo;
+
+  /// La partida admite video (no es Modo TV): se ve el botón "Grabando" o
+  /// "Sin grabar".
+  bool get _canRecord => ref.read(gameControllerProvider).config.records;
+
+  /// "Ajustes de video", antes del turno: si se graba y con qué
+  /// resolución. Se recuerda para los turnos y las partidas siguientes.
+  Future<void> _showVideoSettings() => showGeneralDialog<void>(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: 'Cerrar',
+    // Casi sin oscurecer: se ve cómo cambia la cámara detrás.
+    barrierColor: const Color(0x22000000),
+    pageBuilder: (context, _, _) => SafeArea(
+      child: Align(
+        alignment: Alignment.topRight,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+          child: _VideoSettingsPanel(
+            onRecording: _setRecording,
+            onResolution: _setResolution,
+          ),
+        ),
+      ),
+    ),
+  );
+
+  Future<void> _setResolution(VideoResolution resolution) async {
+    if (resolution.premium && !ref.read(premiumUnlockedProvider)) {
+      await showPremiumSheet(context);
+      return;
+    }
+    if (resolution == ref.read(gameControllerProvider).config.resolution) {
+      return;
+    }
+    ref.read(gameControllerProvider.notifier).setResolution(resolution);
+    final store = ref.read(configStoreProvider);
+    final saved = await store.load();
+    await store.save(
+      SavedConfig.fromJson({...?saved?.toJson(), 'video': resolution.name}),
+    );
+    // La cámara se vuelve a abrir con la resolución nueva.
+    if (_records && mounted) {
+      await _camera.dispose();
+      await _initCamera();
+    }
+  }
+
+  Future<void> _setRecording(bool on) async {
+    final settings = ref.read(settingsProvider.notifier);
+    settings.update(ref.read(settingsProvider).copyWith(recordVideo: on));
+    if (on) {
+      await _initCamera();
+    } else {
+      await _camera.dispose();
+      if (mounted) setState(() => _cameraError = null);
+    }
+  }
 
   bool get _tvMode => ref.read(gameControllerProvider).config.tvMode;
 
@@ -940,10 +999,14 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
                 child: Stack(
                   children: [
-                    if (camera != null)
-                      const Align(
+                    if (_canRecord)
+                      Align(
                         alignment: Alignment.topRight,
-                        child: _CameraTag(),
+                        child: _VideoButton(
+                          on: ref.watch(settingsProvider).recordVideo,
+                          resolution: config.resolution,
+                          onTap: _showVideoSettings,
+                        ),
                       ),
                     Align(
                       alignment: wide
@@ -1238,39 +1301,152 @@ class _CameraBackground extends StatelessWidget {
   }
 }
 
-/// Arriba a la derecha sobre la cámara: "Cámara" con un punto verde.
-class _CameraTag extends StatelessWidget {
-  const _CameraTag();
+/// Arriba a la derecha antes del turno: "Video · HD" con un punto verde,
+/// o "Sin grabar". Abre los ajustes de video.
+class _VideoButton extends StatelessWidget {
+  const _VideoButton({
+    required this.on,
+    required this.resolution,
+    required this.onTap,
+  });
+
+  final bool on;
+  final VideoResolution resolution;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: const Color(0x99000000),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.circle, size: 10, color: AppColors.green),
-              SizedBox(width: 6),
-              Text(
-                'Cámara',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
+    return Semantics(
+      button: true,
+      child: Material(
+        color: const Color(0x99000000),
+        shape: const StadiumBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (on)
+                  const Icon(Icons.circle, size: 10, color: AppColors.green)
+                else
+                  const Icon(Icons.videocam_off, size: 18, color: Colors.white),
+                const SizedBox(width: 6),
+                Text(
+                  on ? 'Video · ${resolution.short}' : 'Sin grabar',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
+                const SizedBox(width: 4),
+                const Icon(Icons.tune, size: 18, color: Colors.white70),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// "Ajustes de video": grabar o no y la resolución. Full HD y Máxima son de
+/// Todo Charadeando.
+class _VideoSettingsPanel extends ConsumerWidget {
+  const _VideoSettingsPanel({
+    required this.onRecording,
+    required this.onResolution,
+  });
+
+  final ValueChanged<bool> onRecording;
+  final ValueChanged<VideoResolution> onResolution;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final on = ref.watch(settingsProvider).recordVideo;
+    final selected = ref.watch(gameControllerProvider).config.resolution;
+    final premium = ref.watch(premiumUnlockedProvider);
+    const white = Colors.white;
+    return Material(
+      color: const Color(0xE612052B),
+      borderRadius: BorderRadius.circular(20),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 8, 14),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Grabar video',
+                      style: TextStyle(
+                        color: white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  Switch(
+                    value: on,
+                    activeThumbColor: white,
+                    activeTrackColor: AppColors.green,
+                    onChanged: onRecording,
+                  ),
+                ],
               ),
+              if (on) ...[
+                const SizedBox(height: 4),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    for (final r in VideoResolution.choices)
+                      ChoiceChip(
+                        label: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(r.short),
+                            if (r.premium && !premium) ...[
+                              const SizedBox(width: 4),
+                              const Icon(Icons.lock, size: 14),
+                            ],
+                          ],
+                        ),
+                        selected: r == selected,
+                        showCheckmark: false,
+                        onSelected: (_) => onResolution(r),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  selected.note,
+                  style: TextStyle(
+                    color: white.withValues(alpha: 0.8),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ] else
+                Text(
+                  'Se juega sin abrir la cámara.',
+                  style: TextStyle(
+                    color: white.withValues(alpha: 0.8),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
             ],
           ),
         ),
-      ],
+      ),
     );
   }
 }

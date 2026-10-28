@@ -18,6 +18,7 @@ class AppSettings {
     this.music = true,
     this.sounds = true,
     this.vibration = true,
+    this.recordVideo = true,
     this.controller = PlayController.tilt,
     this.shareData = true,
   });
@@ -26,6 +27,7 @@ class AppSettings {
     music: json['musica'] as bool? ?? true,
     sounds: json['sonidos'] as bool? ?? true,
     vibration: json['vibracion'] as bool? ?? true,
+    recordVideo: json['grabarVideo'] as bool? ?? true,
     controller: PlayController.values.firstWhere(
       (c) => c.name == json['controlador'],
       orElse: () => PlayController.tilt,
@@ -39,6 +41,10 @@ class AppSettings {
   final bool sounds;
   final bool vibration;
 
+  /// "Grabando" o "Sin grabar", en la pantalla de antes del turno. Vale
+  /// para toda la partida y para las siguientes.
+  final bool recordVideo;
+
   final PlayController controller;
 
   /// "Enviar datos anónimos": los errores a Crashlytics y
@@ -49,12 +55,14 @@ class AppSettings {
     bool? music,
     bool? sounds,
     bool? vibration,
+    bool? recordVideo,
     PlayController? controller,
     bool? shareData,
   }) => AppSettings(
     music: music ?? this.music,
     sounds: sounds ?? this.sounds,
     vibration: vibration ?? this.vibration,
+    recordVideo: recordVideo ?? this.recordVideo,
     controller: controller ?? this.controller,
     shareData: shareData ?? this.shareData,
   );
@@ -63,6 +71,7 @@ class AppSettings {
     'musica': music,
     'sonidos': sounds,
     'vibracion': vibration,
+    'grabarVideo': recordVideo,
     'controlador': controller.name,
     'compartirDatos': shareData,
   };
