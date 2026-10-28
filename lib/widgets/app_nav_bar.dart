@@ -58,13 +58,17 @@ class AppNavBar extends StatelessWidget {
   static const active = AppColors.purple;
   static const inactive = Color(0xFFB4B1E6);
 
+  /// Con el fondo Noche la barra es oscura.
+  static const darkActive = Color(0xFFB794FF);
+  static const darkInactive = Color(0xFF8D84C2);
+
   final int index;
   final ValueChanged<int> onTap;
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: const _CurvedBarPainter(),
+      painter: _CurvedBarPainter(context.surfaces.card),
       child: SafeArea(
         top: false,
         child: Padding(
@@ -90,10 +94,12 @@ class AppNavBar extends StatelessWidget {
   }
 }
 
-/// El fondo blanco de la barra: el borde de arriba es un arco que sube en
-/// el centro.
+/// El fondo de la barra (blanco, u oscuro con Noche): el borde de arriba es
+/// un arco que sube en el centro.
 class _CurvedBarPainter extends CustomPainter {
-  const _CurvedBarPainter();
+  const _CurvedBarPainter(this.color);
+
+  final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -106,11 +112,12 @@ class _CurvedBarPainter extends CustomPainter {
       ..lineTo(0, size.height)
       ..close();
     canvas.drawShadow(path, const Color(0x552B0A57), 8, false);
-    canvas.drawPath(path, Paint()..color = Colors.white);
+    canvas.drawPath(path, Paint()..color = color);
   }
 
   @override
-  bool shouldRepaint(_CurvedBarPainter oldDelegate) => false;
+  bool shouldRepaint(_CurvedBarPainter oldDelegate) =>
+      oldDelegate.color != color;
 }
 
 class _NavButton extends StatelessWidget {
@@ -126,7 +133,10 @@ class _NavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppNavBar.active : AppNavBar.inactive;
+    final dark = context.backdrop.dark;
+    final color = selected
+        ? (dark ? AppNavBar.darkActive : AppNavBar.active)
+        : (dark ? AppNavBar.darkInactive : AppNavBar.inactive);
     return Semantics(
       button: true,
       selected: selected,
@@ -175,15 +185,20 @@ class RouletteIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox.square(
       dimension: size,
-      child: CustomPaint(painter: _RouletteIconPainter(color)),
+      child: CustomPaint(
+        painter: _RouletteIconPainter(color, context.surfaces.card),
+      ),
     );
   }
 }
 
 class _RouletteIconPainter extends CustomPainter {
-  const _RouletteIconPainter(this.color);
+  const _RouletteIconPainter(this.color, this.background);
 
   final Color color;
+
+  /// El color de la barra, para los campos vacíos y los bordes.
+  final Color background;
 
   static const _fields = 8;
 
@@ -200,7 +215,7 @@ class _RouletteIconPainter extends CustomPainter {
         -pi / 2 + i * sweep,
         sweep,
         true,
-        Paint()..color = i.isEven ? color : Colors.white,
+        Paint()..color = i.isEven ? color : background,
       );
     }
     canvas.drawCircle(
@@ -211,7 +226,7 @@ class _RouletteIconPainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = s * 0.07,
     );
-    canvas.drawCircle(center, s * 0.08, Paint()..color = Colors.white);
+    canvas.drawCircle(center, s * 0.08, Paint()..color = background);
     canvas.drawCircle(center, s * 0.04, Paint()..color = color);
     // El indicador, arriba, apuntando a la rueda.
     final top = center.dy - radius;
@@ -223,7 +238,7 @@ class _RouletteIconPainter extends CustomPainter {
     canvas.drawPath(
       pointer,
       Paint()
-        ..color = Colors.white
+        ..color = background
         ..style = PaintingStyle.stroke
         ..strokeWidth = s * 0.06
         ..strokeJoin = StrokeJoin.round,
@@ -233,5 +248,5 @@ class _RouletteIconPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RouletteIconPainter oldDelegate) =>
-      oldDelegate.color != color;
+      oldDelegate.color != color || oldDelegate.background != background;
 }

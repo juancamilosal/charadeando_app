@@ -8,10 +8,10 @@ Future<bool> showUpdateReady(BuildContext context) async {
   final update = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
-      icon: const Icon(
+      icon: Icon(
         Icons.system_update_rounded,
         size: 44,
-        color: AppColors.purple,
+        color: context.surfaces.accent,
       ),
       title: const Text('¡Hay una versión nueva!'),
       content: const Text(
@@ -21,7 +21,7 @@ Future<bool> showUpdateReady(BuildContext context) async {
       ),
       actions: [
         TextButton(
-          style: TextButton.styleFrom(foregroundColor: AppColors.purple),
+          style: TextButton.styleFrom(foregroundColor: context.surfaces.accent),
           onPressed: () => Navigator.pop(context, false),
           child: const Text('Más tarde'),
         ),

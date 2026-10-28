@@ -203,17 +203,17 @@ class _Section extends StatelessWidget {
           ),
         ),
         Material(
-          color: Colors.white,
+          color: context.surfaces.card,
           borderRadius: BorderRadius.circular(20),
           clipBehavior: Clip.antiAlias,
           child: Column(
             children: [
               for (var i = 0; i < rows.length; i++) ...[
                 if (i > 0)
-                  const Divider(
+                  Divider(
                     height: 1,
                     indent: 64,
-                    color: Color(0xFFEDE6F8),
+                    color: context.surfaces.divider,
                   ),
                 rows[i],
               ],
@@ -246,11 +246,8 @@ class _RowIcon extends StatelessWidget {
   }
 }
 
-const _rowTitle = TextStyle(
-  fontSize: 16,
-  fontWeight: FontWeight.w800,
-  color: AppColors.ink,
-);
+/// Sin color: toma el de los textos de la tarjeta.
+const _rowTitle = TextStyle(fontSize: 16, fontWeight: FontWeight.w800);
 
 class _SwitchRow extends StatelessWidget {
   const _SwitchRow({
@@ -306,14 +303,14 @@ class _LinkRow extends StatelessWidget {
           ? null
           : Text(
               subtitle!,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF6B5A86),
+                color: context.surfaces.soft,
               ),
             ),
       trailing: onTap == null
           ? const Icon(Icons.check_circle, color: AppColors.green)
-          : const Icon(Icons.chevron_right, color: AppColors.ink),
+          : Icon(Icons.chevron_right, color: context.surfaces.onCard),
       onTap: onTap,
     );
   }
@@ -374,12 +371,12 @@ class _ControllerOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? Colors.white : AppColors.ink;
+    final color = selected ? Colors.white : context.surfaces.onCard;
     return Semantics(
       inMutuallyExclusiveGroup: true,
       checked: selected,
       child: Material(
-        color: selected ? AppColors.purple : const Color(0xFFF4EEFD),
+        color: selected ? AppColors.purple : context.surfaces.chip,
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
@@ -413,7 +410,7 @@ Future<void> showCredits(BuildContext context) => showModalBottomSheet<void>(
   context: context,
   useSafeArea: true,
   isScrollControlled: true,
-  backgroundColor: Colors.white,
+  backgroundColor: context.surfaces.card,
   shape: const RoundedRectangleBorder(
     borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
   ),
@@ -468,19 +465,19 @@ class CreditsSheet extends StatelessWidget {
                 width: 44,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE3D7F7),
+                  color: context.surfaces.divider,
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
             ),
             const SizedBox(height: 14),
-            const Text(
+            Text(
               'Créditos',
               style: TextStyle(
                 fontFamily: AppFonts.display,
                 fontSize: 26,
                 fontWeight: FontWeight.w600,
-                color: AppColors.ink,
+                color: context.surfaces.onCard,
               ),
             ),
             const SizedBox(height: 6),
@@ -500,9 +497,9 @@ class CreditsSheet extends StatelessWidget {
                           const SizedBox(height: 2),
                           Text(
                             text,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
-                              color: Color(0xFF6B5A86),
+                              color: context.surfaces.soft,
                             ),
                           ),
                         ],

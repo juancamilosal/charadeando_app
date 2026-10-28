@@ -57,7 +57,69 @@ class BackdropTheme extends ThemeExtension<BackdropTheme> {
       t < 0.5 || other == null ? this : other;
 }
 
+/// Colores de las tarjetas, ventanas y hojas: blancas, o azul oscuro con
+/// el fondo Noche.
+class Surfaces {
+  const Surfaces._({
+    required this.card,
+    required this.onCard,
+    required this.soft,
+    required this.accent,
+    required this.divider,
+    required this.chip,
+    required this.value,
+    required this.picked,
+  });
+
+  static const light = Surfaces._(
+    card: Colors.white,
+    onCard: AppColors.ink,
+    soft: Color(0xFF6B5A86),
+    accent: AppColors.purple,
+    divider: Color(0xFFEDE7F6),
+    chip: Color(0xFFF4EEFD),
+    value: AppColors.purple,
+    picked: Color(0xFFF1E8FF),
+  );
+
+  static const dark = Surfaces._(
+    card: Color(0xFF2C2468),
+    onCard: Colors.white,
+    soft: Color(0xFFC9BFE6),
+    accent: Color(0xFFB794FF),
+    divider: Color(0xFF3D3480),
+    chip: Color(0xFF3B3180),
+    value: Colors.white,
+    picked: Color(0xFF4A3E99),
+  );
+
+  /// Fondo de la tarjeta.
+  final Color card;
+
+  /// Textos e íconos sobre la tarjeta.
+  final Color onCard;
+
+  /// Textos secundarios.
+  final Color soft;
+
+  /// Íconos y textos de acento (morado).
+  final Color accent;
+  final Color divider;
+
+  /// Botones y campos dentro de la tarjeta.
+  final Color chip;
+
+  /// Números y valores elegidos (rondas, tiempo).
+  final Color value;
+
+  /// Fondo de una opción elegida dentro de la tarjeta.
+  final Color picked;
+}
+
 extension BackdropContext on BuildContext {
+  /// Colores de las tarjetas según el fondo.
+  Surfaces get surfaces => backdrop.dark ? Surfaces.dark : Surfaces.light;
+
   /// El fondo elegido. Sin tema (en algunas pruebas), el que viene elegido.
   Backdrop get backdrop =>
       Theme.of(this).extension<BackdropTheme>()?.backdrop ?? Backdrop.standard;
@@ -69,13 +131,14 @@ extension BackdropContext on BuildContext {
 ThemeData buildAppTheme([Backdrop backdrop = Backdrop.standard]) {
   final on = backdrop.onColor;
   final light = backdrop.light;
+  final surfaces = backdrop.dark ? Surfaces.dark : Surfaces.light;
   final scheme = ColorScheme.fromSeed(seedColor: AppColors.purple).copyWith(
     primary: AppColors.purple,
     onPrimary: Colors.white,
     secondary: AppColors.yellow,
     onSecondary: AppColors.ink,
-    surface: Colors.white,
-    onSurface: AppColors.ink,
+    surface: surfaces.card,
+    onSurface: surfaces.onCard,
   );
   final base = ThemeData(
     colorScheme: scheme,
@@ -99,7 +162,7 @@ ThemeData buildAppTheme([Backdrop backdrop = Backdrop.standard]) {
           fontWeight: FontWeight.w800,
         ),
       )
-      .apply(bodyColor: AppColors.ink, displayColor: AppColors.ink);
+      .apply(bodyColor: surfaces.onCard, displayColor: surfaces.onCard);
   final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(20));
 
   return base.copyWith(
@@ -164,15 +227,20 @@ ThemeData buildAppTheme([Backdrop backdrop = Backdrop.standard]) {
         ),
       ),
     ),
+    dialogTheme: DialogThemeData(backgroundColor: surfaces.card),
+    bottomSheetTheme: BottomSheetThemeData(backgroundColor: surfaces.card),
     cardTheme: CardThemeData(
-      color: Colors.white,
+      color: surfaces.card,
       elevation: 0,
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: const Color(0xFFF4EEFF),
+      fillColor: surfaces.chip,
+      hintStyle: TextStyle(color: surfaces.soft.withValues(alpha: 0.8)),
+      labelStyle: TextStyle(color: surfaces.soft),
+      counterStyle: TextStyle(color: surfaces.soft),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide.none,

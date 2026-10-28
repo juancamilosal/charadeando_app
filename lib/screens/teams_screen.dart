@@ -23,13 +23,13 @@ class TeamsScreen extends ConsumerWidget {
     final choice = await showModalBottomSheet<String>(
       context: context,
       showDragHandle: true,
-      backgroundColor: Colors.white,
+      backgroundColor: context.surfaces.card,
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.edit, color: AppColors.purple),
+              leading: Icon(Icons.edit, color: context.surfaces.accent),
               title: const Text('Editar'),
               onTap: () => Navigator.pop(context, 'editar'),
             ),
@@ -53,7 +53,9 @@ class TeamsScreen extends ConsumerWidget {
           content: const Text('Se borrará también su historial.'),
           actions: [
             TextButton(
-              style: TextButton.styleFrom(foregroundColor: AppColors.purple),
+              style: TextButton.styleFrom(
+                foregroundColor: context.surfaces.accent,
+              ),
               onPressed: () => Navigator.pop(context, false),
               child: const Text('Cancelar'),
             ),
@@ -171,9 +173,9 @@ class _TeamCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const muted = TextStyle(fontSize: 13, color: Color(0xFF6B5A86));
+    final muted = TextStyle(fontSize: 13, color: context.surfaces.soft);
     return Material(
-      color: Colors.white,
+      color: context.surfaces.card,
       borderRadius: BorderRadius.circular(20),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -190,11 +192,11 @@ class _TeamCard extends StatelessWidget {
                   children: [
                     Text(
                       team.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: AppFonts.display,
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.ink,
+                        color: context.surfaces.onCard,
                       ),
                     ),
                     if (team.players.isNotEmpty)
@@ -211,7 +213,7 @@ class _TeamCard extends StatelessWidget {
               ),
               IconButton(
                 tooltip: 'Opciones',
-                icon: const Icon(Icons.more_vert, color: AppColors.ink),
+                icon: Icon(Icons.more_vert, color: context.surfaces.onCard),
                 onPressed: onOptions,
               ),
             ],
@@ -259,7 +261,7 @@ class _History extends StatelessWidget {
         stat(
           Icons.sports_esports,
           '${team.played} ${team.played == 1 ? 'partida' : 'partidas'}',
-          AppColors.purple,
+          context.surfaces.accent,
         ),
         stat(
           Icons.emoji_events,

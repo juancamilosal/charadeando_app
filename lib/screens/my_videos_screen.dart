@@ -58,12 +58,12 @@ Future<bool> deleteSavedVideo(
       actionsOverflowButtonSpacing: 4,
       actions: [
         TextButton(
-          style: TextButton.styleFrom(foregroundColor: AppColors.purple),
+          style: TextButton.styleFrom(foregroundColor: context.surfaces.accent),
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancelar'),
         ),
         TextButton(
-          style: TextButton.styleFrom(foregroundColor: AppColors.purple),
+          style: TextButton.styleFrom(foregroundColor: context.surfaces.accent),
           onPressed: () => Navigator.pop(context, _DeleteChoice.onlyHere),
           child: const Text('Solo de Mis videos'),
         ),
@@ -275,8 +275,8 @@ class _AccessCard extends StatelessWidget {
             const SizedBox(height: 10),
             OutlinedButton(
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.purple,
-                side: const BorderSide(color: AppColors.purple, width: 2),
+                foregroundColor: context.surfaces.accent,
+                side: BorderSide(color: context.surfaces.accent, width: 2),
               ),
               onPressed: onPressed,
               child: Text(button),
@@ -303,9 +303,9 @@ class _VideoCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final thumbnail = ref.watch(videoThumbnailProvider(video.assetId)).value;
-    const muted = TextStyle(fontSize: 13, color: Color(0xFF6B5A86));
+    final muted = TextStyle(fontSize: 13, color: context.surfaces.soft);
     return Material(
-      color: Colors.white,
+      color: context.surfaces.card,
       borderRadius: BorderRadius.circular(20),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -345,18 +345,18 @@ class _VideoCard extends ConsumerWidget {
                       video.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: AppFonts.display,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.ink,
+                        color: context.surfaces.onCard,
                       ),
                     ),
                     Text(
                       '${video.category} · Ronda ${video.round}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        color: AppColors.ink,
+                        color: context.surfaces.onCard,
                       ),
                     ),
                     Text(formatVideoDate(video.savedAt), style: muted),
@@ -372,7 +372,10 @@ class _VideoCard extends ConsumerWidget {
               ),
               IconButton(
                 tooltip: 'Borrar',
-                icon: const Icon(Icons.delete_outline, color: AppColors.ink),
+                icon: Icon(
+                  Icons.delete_outline,
+                  color: context.surfaces.onCard,
+                ),
                 onPressed: onDelete,
               ),
             ],

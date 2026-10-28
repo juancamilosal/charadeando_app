@@ -26,7 +26,7 @@ class ConfigSection extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
             child: Row(
               children: [
-                Icon(icon, color: AppColors.purple),
+                Icon(icon, color: context.surfaces.accent),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
@@ -41,7 +41,7 @@ class ConfigSection extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(height: 1, color: Color(0xFFEDE7F6)),
+          Divider(height: 1, color: context.surfaces.divider),
           Padding(
             padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
             child: Column(
@@ -94,10 +94,7 @@ class ConfigRow extends StatelessWidget {
               if (hint != null)
                 Text(
                   hint!,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF6B5A86),
-                  ),
+                  style: TextStyle(fontSize: 13, color: context.surfaces.soft),
                 ),
             ],
           ),

@@ -96,8 +96,13 @@ la cámara frontal graba a los participantes para revivir las risas.
   Clásico, Uva, Noche, Coral y Turquesa; blancas con el
   borde y el título del color de la categoría en Crema; cómic (borde y
   sombra oscuros) en Mostaza. En los fondos claros los textos y botones van
-  oscuros. Se guarda en el celular (`fondo.txt`) y se aplica en todas las
-  pantallas desde que abre la app.
+  oscuros. Noche es un tema oscuro completo (`Backdrop.dark`): las
+  tarjetas, las ventanas, las hojas de abajo, los campos de texto y la
+  barra de abajo también van en azul oscuro con letras blancas, y los
+  números y acentos morados pasan a blanco o morado claro. Los colores de
+  las tarjetas salen de `context.surfaces` (`Surfaces.light` o
+  `Surfaces.dark` en `lib/theme.dart`). Se guarda en el celular
+  (`fondo.txt`) y se aplica en todas las pantallas desde que abre la app.
 - Inicio, "Cómo se juega" (`lib/screens/welcome_screen.dart`): siete
   pantallas sobre un degradado azul a violeta, que se pasan con el botón
   verde "Continuar" o deslizando, con puntos que dicen en cuál se está y

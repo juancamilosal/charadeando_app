@@ -356,9 +356,9 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                       ),
                       Text(
                         '${_config.totalWords} en total',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
-                          color: Color(0xFF6B5A86),
+                          color: context.surfaces.soft,
                         ),
                       ),
                       const WordsReminder(),
@@ -573,8 +573,8 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
           ),
         OutlinedButton.icon(
           style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.purple,
-            side: const BorderSide(color: AppColors.purple, width: 2),
+            foregroundColor: context.surfaces.accent,
+            side: BorderSide(color: context.surfaces.accent, width: 2),
           ),
           icon: const Icon(Icons.add),
           label: const Text('Nuevo equipo'),
@@ -610,7 +610,7 @@ class _TeamChoice extends StatelessWidget {
     return Semantics(
       checked: selected,
       child: Material(
-        color: selected ? const Color(0xFFF1E8FF) : const Color(0xFFF8F5FD),
+        color: selected ? context.surfaces.picked : context.surfaces.chip,
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
@@ -634,18 +634,18 @@ class _TeamChoice extends StatelessWidget {
                     children: [
                       Text(
                         name,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.ink,
+                          color: context.surfaces.onCard,
                         ),
                       ),
                       if (note != null)
                         Text(
                           note!,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF6B5A86),
+                            color: context.surfaces.soft,
                           ),
                         ),
                     ],
@@ -656,12 +656,12 @@ class _TeamChoice extends StatelessWidget {
                   height: 30,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: selected ? AppColors.purple : Colors.white,
+                    color: selected ? AppColors.purple : context.surfaces.card,
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: selected
                           ? AppColors.purple
-                          : const Color(0xFFCFC3E6),
+                          : context.surfaces.divider,
                       width: 2,
                     ),
                   ),

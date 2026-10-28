@@ -37,19 +37,19 @@ class Scoreboard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [for (final i in order) _row(i)],
+          children: [for (final i in order) _row(context, i)],
         ),
       ),
     );
   }
 
-  Widget _row(int i) {
+  Widget _row(BuildContext context, int i) {
     final rank = _rank(i);
     final highlighted = i == highlight;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: highlighted ? const Color(0xFFF1E8FF) : null,
+        color: highlighted ? context.surfaces.picked : null,
         borderRadius: BorderRadius.circular(16),
       ),
       child: ListTile(
@@ -57,8 +57,10 @@ class Scoreboard extends StatelessWidget {
           radius: 16,
           backgroundColor: rank <= _medals.length
               ? _medals[rank - 1]
-              : const Color(0xFFEDE7F6),
-          foregroundColor: AppColors.ink,
+              : context.surfaces.divider,
+          foregroundColor: rank <= _medals.length
+              ? AppColors.ink
+              : context.surfaces.onCard,
           child: Text(
             '$rank',
             style: const TextStyle(fontWeight: FontWeight.w800),
@@ -70,11 +72,11 @@ class Scoreboard extends StatelessWidget {
         ),
         trailing: Text(
           '${scores[i]} pts',
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: AppFonts.display,
             fontSize: 22,
             fontWeight: FontWeight.w600,
-            color: AppColors.purple,
+            color: context.surfaces.value,
           ),
         ),
       ),

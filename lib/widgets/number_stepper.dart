@@ -27,6 +27,7 @@ class NumberStepper extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         _button(
+          context,
           Icons.remove,
           value - step >= min,
           () => onChanged(value - step),
@@ -36,26 +37,37 @@ class NumberStepper extends StatelessWidget {
           child: Text(
             format?.call(value) ?? '$value',
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppFonts.display,
               fontSize: 22,
               fontWeight: FontWeight.w700,
-              color: AppColors.purple,
+              color: context.surfaces.value,
             ),
           ),
         ),
-        _button(Icons.add, value + step <= max, () => onChanged(value + step)),
+        _button(
+          context,
+          Icons.add,
+          value + step <= max,
+          () => onChanged(value + step),
+        ),
       ],
     );
   }
 
-  Widget _button(IconData icon, bool enabled, VoidCallback onPressed) {
+  Widget _button(
+    BuildContext context,
+    IconData icon,
+    bool enabled,
+    VoidCallback onPressed,
+  ) {
+    final accent = context.surfaces.accent;
     return IconButton.outlined(
       icon: Icon(icon, size: 20),
-      color: AppColors.purple,
+      color: accent,
       style: IconButton.styleFrom(
         side: BorderSide(
-          color: enabled ? AppColors.purple : const Color(0xFFD9CCF2),
+          color: enabled ? accent : context.surfaces.divider,
           width: 1.5,
         ),
       ),

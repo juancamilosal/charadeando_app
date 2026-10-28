@@ -202,7 +202,7 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
                       labelText: full ? 'Lista completa' : 'Palabra o frase',
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.add_circle),
-                        color: AppColors.purple,
+                        color: context.surfaces.accent,
                         onPressed: full ? null : _add,
                       ),
                     ),
@@ -219,7 +219,9 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
                       counter,
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
-                        color: enough ? AppColors.green : AppColors.ink,
+                        color: enough
+                            ? AppColors.green
+                            : context.surfaces.onCard,
                       ),
                     ),
                   const SizedBox(height: 4),
@@ -236,7 +238,7 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
                             icon: Icon(
                               visible ? Icons.visibility : Icons.visibility_off,
                             ),
-                            color: AppColors.purple,
+                            color: context.surfaces.accent,
                             tooltip: visible ? 'Ocultar' : 'Mostrar',
                             onPressed: () => setState(
                               () => visible
@@ -360,11 +362,11 @@ class _QuickCounter extends StatelessWidget {
           children: [
             Text(
               counter,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: AppFonts.display,
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
-                color: AppColors.ink,
+                color: context.surfaces.onCard,
               ),
             ),
             const SizedBox(width: 8),
@@ -402,7 +404,7 @@ class _QuickCounter extends StatelessWidget {
             value: count / max,
             minHeight: 10,
             color: enough ? AppColors.green : AppColors.orange,
-            backgroundColor: const Color(0xFFEDE6F8),
+            backgroundColor: context.surfaces.divider,
           ),
         ),
       ],

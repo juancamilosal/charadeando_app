@@ -19,7 +19,7 @@ Future<bool> confirmEndGame(
       ),
       actions: [
         TextButton(
-          style: TextButton.styleFrom(foregroundColor: AppColors.purple),
+          style: TextButton.styleFrom(foregroundColor: context.surfaces.accent),
           onPressed: () => Navigator.pop(context, false),
           child: const Text('Seguir jugando'),
         ),

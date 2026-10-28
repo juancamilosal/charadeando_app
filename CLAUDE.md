@@ -45,7 +45,9 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   y la pantalla del turno gira sola hacia el lado del celular (se fija cuando
   empieza el juego; se quitó el ajuste "Rotación invertida"), y "Ajustes de video" antes
   del turno (grabar o no y la resolución, con candado en Full HD y Máxima;
-  se quitó la sección Video de Personalizada).
+  se quitó la sección Video de Personalizada), y el fondo Noche es un tema
+  oscuro completo (tarjetas, ventanas, hojas y barra de abajo oscuras;
+  colores en `context.surfaces`).
 - Hechos: perfil de pagos (persona física, Colombia) con la cuenta
   Davibank aprobada (ya sin retención), programa de cargos del 15 %, los 17
   productos activos (opción de compra `comprar`) y verificadores de

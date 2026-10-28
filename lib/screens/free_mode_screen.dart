@@ -55,7 +55,7 @@ class FreeModeScreen extends ConsumerWidget {
               const SizedBox(height: 14),
               _ModeCard(
                 icon: Icons.edit,
-                color: AppColors.purple,
+                color: context.surfaces.accent,
                 title: 'Las escribimos',
                 description: 'Antes de empezar',
                 onTap: () => _choose(context, ref, WordSource.groups),
@@ -94,7 +94,7 @@ class _ModeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: context.surfaces.card,
       borderRadius: BorderRadius.circular(24),
       child: InkWell(
         borderRadius: BorderRadius.circular(24),

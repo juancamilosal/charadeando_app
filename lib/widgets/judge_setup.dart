@@ -28,12 +28,12 @@ class JudgeSetupView extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Usar celular juez',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.ink,
+                      color: context.surfaces.onCard,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -43,7 +43,7 @@ class JudgeSetupView extends ConsumerWidget {
                     'celular.',
                     style: TextStyle(
                       fontSize: 14,
-                      color: AppColors.ink.withValues(alpha: 0.75),
+                      color: context.surfaces.onCard.withValues(alpha: 0.75),
                     ),
                   ),
                 ],
@@ -88,7 +88,7 @@ class JudgeSetupView extends ConsumerWidget {
                 ),
                 TextButton(
                   style: TextButton.styleFrom(
-                    foregroundColor: AppColors.purple,
+                    foregroundColor: context.surfaces.accent,
                   ),
                   onPressed: controller.start,
                   child: const Text('Reintentar'),
@@ -125,7 +125,7 @@ class _RoomView extends ConsumerWidget {
                 ),
                 TextButton(
                   style: TextButton.styleFrom(
-                    foregroundColor: AppColors.purple,
+                    foregroundColor: context.surfaces.accent,
                   ),
                   onPressed: ref.read(judgeProvider.notifier).start,
                   child: const Text('Crear otra'),
@@ -149,7 +149,7 @@ class _RoomView extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFFEDE7F6), width: 2),
+                  border: Border.all(color: context.surfaces.divider, width: 2),
                 ),
                 child: JudgeQr(url: room.judgeUrl, size: 190),
               ),
@@ -162,21 +162,21 @@ class _RoomView extends ConsumerWidget {
               SelectableText(
                 room.baseUrl.replaceFirst(RegExp('^https?://'), ''),
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.purple,
+                  color: context.surfaces.accent,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 room.code,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: AppFonts.display,
                   fontSize: 40,
                   letterSpacing: 6,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.ink,
+                  color: context.surfaces.onCard,
                 ),
               ),
               const SizedBox(height: 6),
@@ -199,7 +199,9 @@ class _RoomView extends ConsumerWidget {
                       judgeStatus(judges),
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
-                        color: ready ? const Color(0xFF0E7A40) : AppColors.ink,
+                        color: ready
+                            ? const Color(0xFF0E7A40)
+                            : context.surfaces.onCard,
                       ),
                     ),
                   );
@@ -212,7 +214,7 @@ class _RoomView extends ConsumerWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13,
-                  color: AppColors.ink.withValues(alpha: 0.7),
+                  color: context.surfaces.onCard.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -253,7 +255,7 @@ class JudgeQr extends StatelessWidget {
 Future<void> showJudgeQr(BuildContext context, JudgeRoom room) => showDialog(
   context: context,
   builder: (context) => Dialog(
-    backgroundColor: Colors.white,
+    backgroundColor: context.surfaces.card,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
     child: Padding(
       padding: const EdgeInsets.all(18),
@@ -262,29 +264,29 @@ Future<void> showJudgeQr(BuildContext context, JudgeRoom room) => showDialog(
         children: [
           JudgeQr(url: room.judgeUrl, size: 260),
           const SizedBox(height: 10),
-          const Text(
+          Text(
             'O que abra esta página y escriba el código:',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13, color: AppColors.ink),
+            style: TextStyle(fontSize: 13, color: context.surfaces.onCard),
           ),
           SelectableText(
             room.baseUrl.replaceFirst(RegExp('^https?://'), ''),
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w800,
-              color: AppColors.purple,
+              color: context.surfaces.accent,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             room.code,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppFonts.display,
               fontSize: 40,
               letterSpacing: 6,
               fontWeight: FontWeight.w700,
-              color: AppColors.ink,
+              color: context.surfaces.onCard,
             ),
           ),
         ],

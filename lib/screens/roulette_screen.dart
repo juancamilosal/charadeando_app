@@ -317,7 +317,7 @@ class _RouletteSetupViewState extends ConsumerState<RouletteSetupView> {
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: const Color(0xFFF4EEFD),
+    backgroundColor: context.surfaces.card,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),
@@ -337,20 +337,20 @@ class _RouletteSetupViewState extends ConsumerState<RouletteSetupView> {
                       width: 44,
                       height: 5,
                       decoration: BoxDecoration(
-                        color: AppColors.ink.withValues(alpha: 0.2),
+                        color: context.surfaces.onCard.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(3),
                       ),
                     ),
                   ),
                   const SizedBox(height: 12),
-                  const Text(
+                  Text(
                     'Personalizar castigos',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: AppFonts.display,
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.ink,
+                      color: context.surfaces.onCard,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -636,7 +636,7 @@ class _SourceOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppColors.purple : AppColors.ink;
+    final color = selected ? context.surfaces.accent : context.surfaces.onCard;
     return Semantics(
       button: true,
       selected: selected,
@@ -647,12 +647,12 @@ class _SourceOption extends StatelessWidget {
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
           decoration: BoxDecoration(
-            color: selected
-                ? AppColors.purple.withValues(alpha: 0.08)
-                : const Color(0xFFF7F4FD),
+            color: selected ? context.surfaces.picked : context.surfaces.chip,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: selected ? AppColors.purple : const Color(0xFFE4DCF5),
+              color: selected
+                  ? context.surfaces.accent
+                  : context.surfaces.divider,
               width: 2,
             ),
           ),
@@ -679,7 +679,7 @@ class _SourceOption extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.ink.withValues(alpha: 0.7),
+                        color: context.surfaces.onCard.withValues(alpha: 0.7),
                       ),
                     ),
                   ],
@@ -690,7 +690,9 @@ class _SourceOption extends StatelessWidget {
                 selected
                     ? Icons.radio_button_checked_rounded
                     : Icons.radio_button_unchecked_rounded,
-                color: selected ? AppColors.purple : const Color(0xFFB4B1E6),
+                color: selected
+                    ? context.surfaces.accent
+                    : context.surfaces.soft,
               ),
             ],
           ),

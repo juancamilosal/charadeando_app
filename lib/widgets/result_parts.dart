@@ -162,7 +162,7 @@ class TurnWordsPanel extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.surfaces.card,
         borderRadius: BorderRadius.circular(24),
         boxShadow: const [
           BoxShadow(
@@ -179,7 +179,7 @@ class TurnWordsPanel extends StatelessWidget {
                 'No se marcó ninguna palabra.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: AppColors.ink,
+                  color: context.surfaces.onCard,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -211,13 +211,13 @@ class _EntryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const on = AppColors.ink;
+    final on = context.surfaces.onCard;
     final hit = entry.outcome == WordOutcome.hit;
     final mode = this.mode;
     final row = Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF4EEFD),
+        color: context.surfaces.chip,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -225,7 +225,7 @@ class _EntryRow extends StatelessWidget {
           Expanded(
             child: Text(
               entry.word.text,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w800,
                 color: on,
@@ -321,10 +321,10 @@ class _ScoreChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: leader ? AppColors.yellow : Colors.white,
+        color: leader ? AppColors.yellow : context.surfaces.card,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: leader ? AppColors.ink : const Color(0xFFE3D7F7),
+          color: leader ? AppColors.ink : context.surfaces.divider,
           width: 2,
         ),
       ),
@@ -337,19 +337,19 @@ class _ScoreChip extends StatelessWidget {
           ],
           Text(
             name,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w800,
-              color: AppColors.ink,
+              color: leader ? AppColors.ink : context.surfaces.onCard,
             ),
           ),
           const SizedBox(width: 8),
           Text(
             '$score',
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppFonts.display,
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: AppColors.purple,
+              color: leader ? AppColors.purple : context.surfaces.value,
             ),
           ),
         ],

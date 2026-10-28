@@ -183,7 +183,7 @@ class _TeamEditorScreenState extends ConsumerState<TeamEditorScreen> {
                             entry.value,
                             color: _iconKey == entry.key
                                 ? draft.onColor
-                                : AppColors.ink,
+                                : context.surfaces.onCard,
                           ),
                         ),
                     ],
@@ -278,7 +278,7 @@ class _ColorDot extends StatelessWidget {
           color: color,
           shape: BoxShape.circle,
           border: Border.all(
-            color: selected ? AppColors.ink : Colors.transparent,
+            color: selected ? context.surfaces.onCard : Colors.transparent,
             width: 3,
           ),
         ),
@@ -318,7 +318,7 @@ class _BadgeChoice extends StatelessWidget {
         height: 48,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: selected ? color : const Color(0xFFF4EEFF),
+          color: selected ? color : context.surfaces.chip,
           borderRadius: BorderRadius.circular(14),
         ),
         child: child,

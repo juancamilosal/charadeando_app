@@ -16,7 +16,7 @@ Future<bool?> showCombineCategories(BuildContext context) {
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: Colors.white,
+    backgroundColor: context.surfaces.card,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),
@@ -144,7 +144,7 @@ class _CombineCategoriesSheetState
       heightFactor: 0.9,
       child: ScaffoldMessenger(
         child: Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: context.surfaces.card,
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -154,12 +154,12 @@ class _CombineCategoriesSheetState
                   width: 44,
                   height: 5,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE3D7F7),
+                    color: context.surfaces.divider,
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),
               ),
-              const Padding(
+              Padding(
                 padding: EdgeInsets.fromLTRB(20, 14, 20, 4),
                 child: Text(
                   'Combinar categorías',
@@ -167,16 +167,16 @@ class _CombineCategoriesSheetState
                     fontFamily: AppFonts.display,
                     fontSize: 28,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.ink,
+                    color: context.surfaces.onCard,
                   ),
                 ),
               ),
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
                   'Marca al menos 2. Las palabras se reparten en partes '
                   'iguales entre las que elijas.',
-                  style: TextStyle(fontSize: 14, color: Color(0xFF6B5A86)),
+                  style: TextStyle(fontSize: 14, color: context.surfaces.soft),
                 ),
               ),
               Expanded(
@@ -227,8 +227,8 @@ class _CombineCategoriesSheetState
               ),
               Container(
                 padding: const EdgeInsets.fromLTRB(20, 10, 20, 16),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
+                decoration: BoxDecoration(
+                  color: context.surfaces.card,
                   boxShadow: [
                     BoxShadow(
                       color: Color(0x1A2B0A57),
@@ -243,7 +243,7 @@ class _CombineCategoriesSheetState
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.purple,
                       foregroundColor: Colors.white,
-                      disabledBackgroundColor: const Color(0xFFEDE6F8),
+                      disabledBackgroundColor: context.surfaces.divider,
                       disabledForegroundColor: const Color(0xFF8A7AA6),
                     ),
                     icon: const Icon(Icons.shuffle),
@@ -279,11 +279,11 @@ class _SectionTitle extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: AppFonts.display,
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: AppColors.purple,
+          color: context.surfaces.accent,
         ),
       ),
     );
@@ -338,10 +338,10 @@ class _PickRow extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.ink,
+                        color: context.surfaces.onCard,
                       ),
                     ),
                     if (subtitle != null)
@@ -362,9 +362,9 @@ class _PickRow extends StatelessWidget {
                   child: CategoryBadge.soon(),
                 )
               else if (locked)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.all(12),
-                  child: Icon(Icons.lock, color: AppColors.ink),
+                  child: Icon(Icons.lock, color: context.surfaces.onCard),
                 )
               else
                 Checkbox(

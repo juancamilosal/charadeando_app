@@ -19,8 +19,8 @@ class TvConnect extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final connected = ref.watch(tvConnectedProvider).value ?? false;
-    final ink = light ? context.onBackdrop : AppColors.ink;
-    final accent = light ? context.onBackdrop : AppColors.purple;
+    final ink = light ? context.onBackdrop : context.surfaces.onCard;
+    final accent = light ? context.onBackdrop : context.surfaces.accent;
     final row = Row(
       children: [
         Icon(
@@ -101,8 +101,8 @@ class TvConnect extends ConsumerWidget {
           style: light
               ? null
               : OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.purple,
-                  side: const BorderSide(color: AppColors.purple, width: 2),
+                  foregroundColor: context.surfaces.accent,
+                  side: BorderSide(color: context.surfaces.accent, width: 2),
                   textStyle: const TextStyle(
                     fontFamily: AppFonts.display,
                     fontSize: 17,
@@ -147,7 +147,7 @@ Future<void> showTvSteps(BuildContext context) => showModalBottomSheet<void>(
   context: context,
   useSafeArea: true,
   isScrollControlled: true,
-  backgroundColor: Colors.white,
+  backgroundColor: context.surfaces.card,
   shape: const RoundedRectangleBorder(
     borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
   ),
@@ -198,10 +198,10 @@ class _TvInfo extends StatelessWidget {
               connected
                   ? '¡TV conectado!'
                   : '¿Ya duplicas la pantalla? Se conecta solo.',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: AppColors.ink,
+                color: context.surfaces.onCard,
               ),
             ),
           ),
@@ -228,7 +228,7 @@ Future<void> disconnectTv(BuildContext context, WidgetRef ref) async {
     context: context,
     useSafeArea: true,
     isScrollControlled: true,
-    backgroundColor: Colors.white,
+    backgroundColor: context.surfaces.card,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),
@@ -277,7 +277,7 @@ class TvStepsSheet extends StatelessWidget {
                 width: 44,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE3D7F7),
+                  color: context.surfaces.divider,
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
@@ -285,11 +285,11 @@ class TvStepsSheet extends StatelessWidget {
             const SizedBox(height: 14),
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: AppFonts.display,
                 fontSize: 26,
                 fontWeight: FontWeight.w600,
-                color: AppColors.ink,
+                color: context.surfaces.onCard,
               ),
             ),
             const SizedBox(height: 10),
@@ -321,10 +321,10 @@ class TvStepsSheet extends StatelessWidget {
                     Expanded(
                       child: Text(
                         steps[i],
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.ink,
+                          color: context.surfaces.onCard,
                         ),
                       ),
                     ),
@@ -335,7 +335,7 @@ class TvStepsSheet extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 note!,
-                style: const TextStyle(fontSize: 13, color: Color(0xFF6B5A86)),
+                style: TextStyle(fontSize: 13, color: context.surfaces.soft),
               ),
             ],
             const SizedBox(height: 16),

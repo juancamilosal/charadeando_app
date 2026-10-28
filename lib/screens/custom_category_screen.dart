@@ -104,7 +104,9 @@ class _CustomCategoryScreenState extends ConsumerState<CustomCategoryScreen> {
         content: const Text('Se perderán los cambios de esta categoría.'),
         actions: [
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: AppColors.purple),
+            style: TextButton.styleFrom(
+              foregroundColor: context.surfaces.accent,
+            ),
             onPressed: () => Navigator.pop(context, false),
             child: const Text('Seguir editando'),
           ),
@@ -250,7 +252,7 @@ class _CustomCategoryScreenState extends ConsumerState<CustomCategoryScreen> {
   }
 
   Widget _wordsSection(CustomCategory draft) {
-    const hint = TextStyle(fontSize: 13, color: Color(0xFF6B5A86));
+    final hint = TextStyle(fontSize: 13, color: context.surfaces.soft);
     final missing = draft.missingWords;
     return ConfigSection(
       icon: Icons.edit_note,
@@ -284,7 +286,7 @@ class _CustomCategoryScreenState extends ConsumerState<CustomCategoryScreen> {
             ),
           ],
         ),
-        const Text(
+        Text(
           'Puedes pegar varias separadas por comas o en renglones distintos.',
           style: hint,
         ),
@@ -298,7 +300,7 @@ class _CustomCategoryScreenState extends ConsumerState<CustomCategoryScreen> {
             color: missing > 0 ? AppColors.coral : AppColors.green,
           ),
         ),
-        const Text(
+        Text(
           'Con ${CustomCategory.suggestedWords} o más palabras no se repiten '
           'tan rápido.',
           style: hint,
@@ -331,7 +333,7 @@ class _ColorDot extends StatelessWidget {
           color: color,
           shape: BoxShape.circle,
           border: Border.all(
-            color: selected ? AppColors.ink : Colors.transparent,
+            color: selected ? context.surfaces.onCard : Colors.transparent,
             width: 3,
           ),
         ),
@@ -366,10 +368,13 @@ class _IconChoice extends StatelessWidget {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: selected ? color : const Color(0xFFF4EEFF),
+          color: selected ? color : context.surfaces.chip,
           borderRadius: BorderRadius.circular(14),
         ),
-        child: Icon(icon, color: selected ? Colors.white : AppColors.ink),
+        child: Icon(
+          icon,
+          color: selected ? Colors.white : context.surfaces.onCard,
+        ),
       ),
     );
   }

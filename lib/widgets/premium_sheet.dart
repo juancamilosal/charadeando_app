@@ -37,7 +37,7 @@ Future<bool?> showPremiumSheet(
   context: context,
   useSafeArea: true,
   isScrollControlled: true,
-  backgroundColor: Colors.white,
+  backgroundColor: context.surfaces.card,
   shape: const RoundedRectangleBorder(
     borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
   ),
@@ -206,7 +206,7 @@ class _PremiumSheetState extends ConsumerState<PremiumSheet> {
                     width: 44,
                     height: 5,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE3D7F7),
+                      color: context.surfaces.divider,
                       borderRadius: BorderRadius.circular(3),
                     ),
                   ),
@@ -231,11 +231,11 @@ class _PremiumSheetState extends ConsumerState<PremiumSheet> {
                       ? 'Desbloquea ${category.label}'
                       : 'Desbloquea todo',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: AppFonts.display,
                     fontSize: 26,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.ink,
+                    color: context.surfaces.onCard,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -244,10 +244,10 @@ class _PremiumSheetState extends ConsumerState<PremiumSheet> {
                       ? 'Cómprala sola o llévatelas todas de una vez.'
                       : 'Un solo pago y es tuyo para siempre.',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF6B5A86),
+                    color: context.surfaces.soft,
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -264,20 +264,20 @@ class _PremiumSheetState extends ConsumerState<PremiumSheet> {
                         : () => _buy(category: category.code),
                   ),
                   const SizedBox(height: 12),
-                  const Row(
+                  Row(
                     children: [
-                      Expanded(child: Divider(color: Color(0xFFE3D7F7))),
+                      Expanded(child: Divider(color: context.surfaces.divider)),
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 10),
                         child: Text(
                           'o mejor',
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF6B5A86),
+                            color: context.surfaces.soft,
                           ),
                         ),
                       ),
-                      Expanded(child: Divider(color: Color(0xFFE3D7F7))),
+                      Expanded(child: Divider(color: context.surfaces.divider)),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -295,31 +295,31 @@ class _PremiumSheetState extends ConsumerState<PremiumSheet> {
                   children: [
                     TextButton(
                       style: TextButton.styleFrom(
-                        foregroundColor: AppColors.purple,
+                        foregroundColor: context.surfaces.accent,
                       ),
                       onPressed: _restore,
                       child: const Text('Restaurar compras'),
                     ),
                     TextButton(
                       style: TextButton.styleFrom(
-                        foregroundColor: AppColors.purple,
+                        foregroundColor: context.surfaces.accent,
                       ),
                       onPressed: _restoreCodes,
                       child: const Text('Restaurar mis códigos'),
                     ),
                     TextButton(
                       style: TextButton.styleFrom(
-                        foregroundColor: AppColors.purple,
+                        foregroundColor: context.surfaces.accent,
                       ),
                       onPressed: _code,
                       child: const Text('Tengo un código'),
                     ),
                   ],
                 ),
-                const Text(
+                Text(
                   'Los pagos se hacen con Google Play.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: Color(0xFF8E80A6)),
+                  style: TextStyle(fontSize: 12, color: context.surfaces.soft),
                 ),
               ],
             );
@@ -653,7 +653,7 @@ class _RedeemCodeDialogState extends ConsumerState<RedeemCodeDialog> {
       actions: [
         TextButton(
           // El tema pone los botones de texto en blanco, para los fondos.
-          style: TextButton.styleFrom(foregroundColor: AppColors.purple),
+          style: TextButton.styleFrom(foregroundColor: context.surfaces.accent),
           onPressed: _busy ? null : () => Navigator.pop(context),
           child: const Text('Cancelar'),
         ),

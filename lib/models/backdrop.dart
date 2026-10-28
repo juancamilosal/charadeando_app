@@ -80,6 +80,10 @@ enum Backdrop {
   /// Le pasa un brillo de vez en cuando, como al oro.
   final bool shiny;
 
+  /// Tema oscuro: las tarjetas, las ventanas y las hojas también van
+  /// oscuras, no solo el fondo.
+  bool get dark => this == noche;
+
   /// Color de los textos y los íconos que van directo sobre el fondo.
   Color get onColor => light ? const Color(0xFF2B0A57) : Colors.white;
 
