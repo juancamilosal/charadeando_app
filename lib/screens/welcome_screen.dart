@@ -8,12 +8,13 @@ import '../router.dart';
 import '../theme.dart';
 import '../widgets/category_art.dart';
 import '../widgets/punishment_roulette.dart';
+import '../widgets/team_badge.dart';
 
 /// Una pantalla de "Cómo se juega": título, texto corto, la imagen (las
 /// categorías, la ruleta o una ilustración) y el texto del botón.
 typedef _Page = (String title, String text, Widget art, String button);
 
-/// "Cómo se juega": siete pantallas que se pasan con "Continuar" o
+/// "Cómo se juega": ocho pantallas que se pasan con "Continuar" o
 /// deslizando. Se ven la primera vez que se abre la app y desde Ajustes >
 /// Ayuda. "Omitir" las salta.
 class WelcomeScreen extends ConsumerStatefulWidget {
@@ -83,6 +84,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
             : 'Inclina el celular hacia arriba y pasa a la siguiente '
                   'palabra.',
         const _Art('assets/img/inicio/pasar.webp'),
+        'Continuar',
+      ),
+      (
+        'Jueguen por equipos',
+        'Cada equipo tiene su turno. Suman puntos y gana el que más acierte.',
+        const _SampleTeams(),
         'Continuar',
       ),
       (
@@ -254,6 +261,73 @@ class _Art extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Image.asset(asset, fit: BoxFit.contain);
+}
+
+/// Una tabla de puntos de ejemplo, con tres equipos.
+class _SampleTeams extends StatelessWidget {
+  const _SampleTeams();
+
+  static const _teams = [
+    (SavedTeam(id: 'a', name: 'Los Primos', colorIndex: 0, emoji: '🦁'), 7),
+    (SavedTeam(id: 'b', name: 'Las Tías', colorIndex: 1, emoji: '🦄'), 5),
+    (SavedTeam(id: 'c', name: 'Los Abuelos', colorIndex: 5, emoji: '🐢'), 3),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 320),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final (i, (team, points)) in _teams.indexed)
+              Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.fromLTRB(10, 8, 16, 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: i == 0
+                      ? Border.all(color: AppColors.yellow, width: 3)
+                      : null,
+                ),
+                child: Row(
+                  children: [
+                    TeamBadge(team: team, size: 44),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        team.name,
+                        style: const TextStyle(
+                          fontFamily: AppFonts.display,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.ink,
+                        ),
+                      ),
+                    ),
+                    if (i == 0) ...[
+                      const Icon(Icons.emoji_events, color: AppColors.orange),
+                      const SizedBox(width: 6),
+                    ],
+                    Text(
+                      '$points',
+                      style: const TextStyle(
+                        fontFamily: AppFonts.display,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.purple,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// La ruleta de castigos con algunos castigos de ejemplo, quieta.

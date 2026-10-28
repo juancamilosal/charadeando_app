@@ -51,7 +51,8 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   resultado del turno, con aviso y pregunta al salir sin guardar, más
   "Guardar automáticamente" en los ajustes de video (apagado por defecto),
   y la ruleta frena en 7 s (antes 10) y muestra el castigo apenas se ve
-  quieta.
+  quieta, y los equipos ya no piden jugadores (idea anotada en el artefacto
+  del proyecto) y se explica cómo se juega por equipos.
 - Hechos: perfil de pagos (persona física, Colombia) con la cuenta
   Davibank aprobada (ya sin retención), programa de cargos del 15 %, los 17
   productos activos (opción de compra `comprar`) y verificadores de

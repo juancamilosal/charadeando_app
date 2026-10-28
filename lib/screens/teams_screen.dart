@@ -126,6 +126,12 @@ class TeamsScreen extends ConsumerWidget {
 class _Empty extends StatelessWidget {
   const _Empty({required this.onCreate});
 
+  static const _steps = [
+    'Crea los equipos con su nombre y su color.',
+    'En una partida personalizada, elige "En equipos" y escógelos.',
+    'Se turnan para adivinar y gana el que más puntos sume.',
+  ];
+
   final VoidCallback onCreate;
 
   @override
@@ -150,7 +156,37 @@ class _Empty extends StatelessWidget {
                 color: on,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
+            // Cómo se juega por equipos, en tres pasos.
+            for (final (i, step) in _steps.indexed)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 15,
+                      backgroundColor: AppColors.yellow,
+                      foregroundColor: AppColors.ink,
+                      child: Text(
+                        '${i + 1}',
+                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        step,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: on,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 14),
             FilledButton.icon(
               icon: const Icon(Icons.add),
               label: const Text('Crear equipo'),
@@ -163,8 +199,7 @@ class _Empty extends StatelessWidget {
   }
 }
 
-/// Un equipo de la lista: su distintivo, el nombre, los jugadores y el
-/// historial.
+/// Un equipo de la lista: su distintivo, el nombre y el historial.
 class _TeamCard extends StatelessWidget {
   const _TeamCard({required this.team, required this.onOptions});
 
@@ -173,7 +208,6 @@ class _TeamCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final muted = TextStyle(fontSize: 13, color: context.surfaces.soft);
     return Material(
       color: context.surfaces.card,
       borderRadius: BorderRadius.circular(20),
@@ -199,13 +233,6 @@ class _TeamCard extends StatelessWidget {
                         color: context.surfaces.onCard,
                       ),
                     ),
-                    if (team.players.isNotEmpty)
-                      Text(
-                        team.players.join(', '),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: muted,
-                      ),
                     const SizedBox(height: 4),
                     _History(team: team),
                   ],

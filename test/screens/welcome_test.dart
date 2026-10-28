@@ -61,11 +61,12 @@ void main() {
     expect(_welcome, findsOneWidget);
     expect(_categories, findsNothing);
 
-    // Siete pantallas con "Continuar"; la última, "¡Vamos a jugar!".
+    // Ocho pantallas con "Continuar"; la última, "¡Vamos a jugar!".
     for (final title in [
       'Cómo empezar',
       '¿Lo has acertado?',
       '¿No puedes adivinar?',
+      'Jueguen por equipos',
       'Castiga al equipo que pierda',
       'Modo TV',
       '¡Listos para divertirse!',

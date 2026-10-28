@@ -103,7 +103,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   las tarjetas salen de `context.surfaces` (`Surfaces.light` o
   `Surfaces.dark` en `lib/theme.dart`). Se guarda en el celular
   (`fondo.txt`) y se aplica en todas las pantallas desde que abre la app.
-- Inicio, "Cómo se juega" (`lib/screens/welcome_screen.dart`): siete
+- Inicio, "Cómo se juega" (`lib/screens/welcome_screen.dart`): ocho
   pantallas sobre un degradado azul a violeta, que se pasan con el botón
   verde "Continuar" o deslizando, con puntos que dicen en cuál se está y
   "Omitir" arriba a la derecha: 1) "Muchas categorías para jugar"
@@ -111,9 +111,11 @@ la cámara frontal graba a los participantes para revivir las risas.
   categorías pasando en dos filas de derecha a izquierda, como una
   vitrina: es solo informativa y no se pueden tocar; 2) "Cómo empezar" con los amigos jugando; 3) "¿Lo
   has acertado?" con el celular verde; 4) "¿No puedes adivinar?" con el
-  celular naranja; 5) "Castiga al equipo que pierda" con la ruleta de
-  castigos y algunos de ejemplo; 6) "Modo TV" con el celular del juez y
-  el TV; 7) "¡Listos para divertirse!" con los
+  celular naranja; 5) "Jueguen por equipos" ("Cada equipo tiene su turno.
+  Suman puntos y gana el que más acierte.") con una tabla de puntos de
+  ejemplo; 6) "Castiga al equipo que pierda" con la ruleta de
+  castigos y algunos de ejemplo; 7) "Modo TV" con el celular del juez y
+  el TV; 8) "¡Listos para divertirse!" con los
   cuatro amigos felices y "¡Vamos a jugar!". Los textos de acertar y pasar
   dicen cómo se marca según el controlador de Ajustes. Las ilustraciones
   están en `assets/img/inicio/` (WebP sin fondo). Se ven solo la primera
@@ -137,12 +139,17 @@ la cámara frontal graba a los participantes para revivir las risas.
   selector "Todas | Mías", sin texto encima. "Salir de la categoría" y
   salir del turno llevan a Categorías.
 - Equipos (`lib/screens/teams_screen.dart`): la lista de equipos guardados,
-  cada uno con su nombre, su color, un ícono o emoji, sus jugadores y su
+  cada uno con su nombre, su color, un ícono o emoji y su
   historial (partidas, victorias y mejor puntaje). "Crear equipo" abre el
   editor: nombre (obligatorio, hasta 24 letras, sin repetir), color de la
-  paleta de la app, ícono o emoji y jugadores (opcional). Mantener
+  paleta de la app e ícono o emoji. Los jugadores se quitaron del editor
+  (quedan como idea: decir a quién le toca en cada turno); los que se
+  escribieron antes siguen guardados en `equipos.json`. Mantener
   presionado un equipo o su botón de tres puntos: "Editar" y "Borrar" (pide
-  confirmación). Sin equipos: "Crea tu primer equipo" con "Crear equipo".
+  confirmación). Sin equipos: "Crea tu primer equipo", tres pasos de cómo
+  se juega por equipos (crearlos, elegir "En equipos" en una partida
+  personalizada, se turnan y gana el que más puntos sume) y "Crear
+  equipo".
   Se guardan solo en el celular (`equipos.json`), no en un servidor.
 - Compras de pago único (`lib/widgets/premium_sheet.dart`,
   `PremiumController`): cada categoría de pago se puede comprar suelta, o

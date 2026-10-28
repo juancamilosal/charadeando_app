@@ -10,7 +10,7 @@ import '../widgets/play_background.dart';
 import '../widgets/team_badge.dart';
 
 /// Crear o editar un equipo: nombre (obligatorio, sin repetir), color,
-/// ícono o emoji y jugadores (opcional). Al guardar vuelve con el equipo,
+/// ícono o emoji. Al guardar vuelve con el equipo,
 /// para que la configuración lo marque.
 class TeamEditorScreen extends ConsumerStatefulWidget {
   const TeamEditorScreen({super.key, this.team});
@@ -24,12 +24,10 @@ class TeamEditorScreen extends ConsumerStatefulWidget {
 
 class _TeamEditorScreenState extends ConsumerState<TeamEditorScreen> {
   late final _name = TextEditingController(text: widget.team?.name);
-  final _player = TextEditingController();
   late int _colorIndex =
       widget.team?.colorIndex ?? _firstFreeColor(ref.read(teamsProvider));
   late String? _iconKey = widget.team?.iconKey;
   late String? _emoji = widget.team == null ? '🦁' : widget.team!.emoji;
-  late List<String> _players = [...?widget.team?.players];
   bool _showErrors = false;
 
   bool get _editing => widget.team != null;
@@ -46,7 +44,6 @@ class _TeamEditorScreenState extends ConsumerState<TeamEditorScreen> {
   @override
   void dispose() {
     _name.dispose();
-    _player.dispose();
     super.dispose();
   }
 
@@ -60,7 +57,9 @@ class _TeamEditorScreenState extends ConsumerState<TeamEditorScreen> {
       colorIndex: _colorIndex,
       iconKey: _iconKey,
       emoji: _iconKey == null ? _emoji : null,
-      players: _players,
+      // Los jugadores ya no se piden (quedan como idea para más adelante),
+      // pero los que se escribieron antes se conservan.
+      players: base.players,
       played: base.played,
       wins: base.wins,
       best: base.best,
@@ -77,20 +76,7 @@ class _TeamEditorScreenState extends ConsumerState<TeamEditorScreen> {
     return taken ? 'Ya hay un equipo con ese nombre' : null;
   }
 
-  void _addPlayer() {
-    final name = _player.text.trim();
-    if (name.isEmpty) return;
-    setState(() {
-      if (!_players.any((p) => p.toLowerCase() == name.toLowerCase())) {
-        _players = [..._players, name];
-      }
-      _player.clear();
-    });
-  }
-
   Future<void> _save() async {
-    // Lo que quedó escrito sin tocar "Agregar" también cuenta.
-    if (_player.text.trim().isNotEmpty) _addPlayer();
     if (_nameError != null) {
       setState(() => _showErrors = true);
       return;
@@ -188,57 +174,6 @@ class _TeamEditorScreenState extends ConsumerState<TeamEditorScreen> {
                         ),
                     ],
                   ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              ConfigSection(
-                icon: Icons.person_add,
-                title: 'Jugadores (opcional)',
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          key: const ValueKey('jugador'),
-                          controller: _player,
-                          maxLength: SavedTeam.maxPlayerLength,
-                          textCapitalization: TextCapitalization.words,
-                          onSubmitted: (_) => _addPlayer(),
-                          decoration: const InputDecoration(
-                            hintText: 'Nombre de un jugador',
-                            counterText: '',
-                            isDense: true,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton.filled(
-                        tooltip: 'Agregar',
-                        style: IconButton.styleFrom(
-                          backgroundColor: AppColors.purple,
-                        ),
-                        icon: const Icon(Icons.add, color: Colors.white),
-                        onPressed: _addPlayer,
-                      ),
-                    ],
-                  ),
-                  if (_players.isNotEmpty)
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 4,
-                      children: [
-                        for (final p in _players)
-                          InputChip(
-                            label: Text(p),
-                            onDeleted: () => setState(
-                              () => _players = [
-                                for (final x in _players)
-                                  if (x != p) x,
-                              ],
-                            ),
-                          ),
-                      ],
-                    ),
                 ],
               ),
               const SizedBox(height: 24),

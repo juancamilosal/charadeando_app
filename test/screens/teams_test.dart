@@ -57,7 +57,8 @@ void main() {
     expect(find.text('Crear equipo'), findsOneWidget);
   });
 
-  testWidgets('crear un equipo con color, emoji y jugadores', (tester) async {
+  testWidgets('crear un equipo con color y emoji, sin jugadores (quedan '
+      'como idea para más adelante)', (tester) async {
     final store = MemoryTeamStore();
     await _pump(tester, store);
     await tester.tap(find.text('Crear equipo'));
@@ -79,24 +80,15 @@ void main() {
       'Los Primos',
     );
     await _tapVisible(tester, find.text('🚀'));
-    await tester.scrollUntilVisible(
-      find.byKey(const ValueKey('jugador')),
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.enterText(find.byKey(const ValueKey('jugador')), 'Ana');
-    await tester.tap(find.byTooltip('Agregar'));
-    await tester.pump();
-    await tester.enterText(find.byKey(const ValueKey('jugador')), 'Luis');
+    expect(find.textContaining('Jugadores', skipOffstage: false), findsNothing);
     await _tapVisible(tester, find.text('Crear equipo'));
 
     expect(find.text('Los Primos'), findsOneWidget);
-    expect(find.text('Ana, Luis'), findsOneWidget);
     expect(find.text('0 partidas'), findsOneWidget);
     final team = store.teams.single;
     expect(team.name, 'Los Primos');
     expect(team.emoji, '🚀');
-    expect(team.players, ['Ana', 'Luis']);
+    expect(team.players, isEmpty);
   });
 
   testWidgets('no deja repetir el nombre de otro equipo', (tester) async {
