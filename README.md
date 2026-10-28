@@ -672,7 +672,7 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Video de cada turno con la cámara frontal, en 720p por defecto. Se elige
   en la pantalla de antes del turno: arriba a la derecha, "● Video · HD"
   (o "Sin grabar") abre "Ajustes de video", un panel pequeño con "Grabar
-  video" y la resolución (Normal "Más liviano", HD "Recomendado", Full HD
+  video", "Guardar automáticamente" y la resolución (Normal "Más liviano", HD "Recomendado", Full HD
   y Máxima). Al cambiar la resolución la cámara se vuelve a abrir con la
   nueva, y se ve detrás del panel. Full HD y Máxima son de Todo
   Charadeando: con candado, y al tocarlas se abre la hoja de compra. Lo
@@ -680,8 +680,19 @@ la cámara frontal graba a los participantes para revivir las risas.
   (`AppSettings.recordVideo` y la resolución de la última configuración);
   la configuración personalizada ya no tiene sección de video. Un "Jugar
   sin grabar" guardado antes vuelve a HD.
-- El video se puede ver, guardar en la galería o compartir. Al continuar al
-  siguiente turno se borra del celular; la app no guarda videos en ningún
+- El video se puede ver, guardar en la galería o compartir. En el
+  resultado del turno, junto a "Ver video", está "Guardar" (lo guarda sin
+  abrirlo; ya guardado dice "Guardado"), y debajo siempre se avisa
+  "Guárdalo para verlo en Mis videos. Si no, se borra al continuar" ("al
+  salir" en la rápida). Si está listo sin guardar y se toca continuar,
+  otra rápida, personalizada, salir o finalizar, pregunta "¿Salir sin
+  guardar el video?" con "Guardar" y "Salir sin guardar" (tocar afuera
+  deja en el resultado). Con "Guardar automáticamente" (en "Ajustes de
+  video", apagado por defecto, `AppSettings.autoSaveVideo`) cada video se
+  guarda solo en la galería y en Mis videos cuando termina de armarse,
+  aunque ya hayan salido del resultado (el armado sigue por detrás y borra
+  su archivo temporal al guardarlo), y no se pregunta nada. Sin guardar,
+  al continuar se borra del celular; la app no guarda videos en ningún
   otro lugar.
 - El video final muestra las palabras que se están adivinando, los aciertos y
   los pases. Se arma con FFmpeg (`ffmpeg_kit_flutter_new_video`, licencia

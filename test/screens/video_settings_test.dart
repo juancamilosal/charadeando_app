@@ -77,7 +77,7 @@ void main() {
     expect(configs.saved!.resolution, VideoResolution.normal);
     expect(find.text('Más liviano'), findsOneWidget);
 
-    await tester.tap(find.byType(Switch));
+    await tester.tap(find.byType(Switch).first);
     await tester.pumpAndSettle();
     expect(settings.saved!.recordVideo, isFalse);
     expect(find.text('Se juega sin abrir la cámara.'), findsOneWidget);

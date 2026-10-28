@@ -406,3 +406,61 @@ class VideoButton extends StatelessWidget {
     );
   }
 }
+
+/// "Guardar" junto a "Ver video": guarda el video del turno en la galería y
+/// en Mis videos sin tener que abrirlo. Ya guardado, dice "Guardado".
+class SaveVideoButton extends StatelessWidget {
+  const SaveVideoButton({
+    super.key,
+    required this.saved,
+    required this.saving,
+    required this.onPressed,
+    this.auto = false,
+  });
+
+  final bool saved;
+  final bool saving;
+
+  /// "Guardar automáticamente": mientras se guarda solo dice "Guardando".
+  final bool auto;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final light = context.backdrop.light;
+    return FilledButton.icon(
+      style: FilledButton.styleFrom(
+        backgroundColor: AppColors.green,
+        foregroundColor: Colors.white,
+        disabledBackgroundColor: AppColors.green.withValues(alpha: 0.7),
+        disabledForegroundColor: Colors.white,
+        minimumSize: const Size(0, 60),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        side: light ? const BorderSide(color: AppColors.ink, width: 2) : null,
+        textStyle: const TextStyle(
+          fontFamily: AppFonts.display,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      onPressed: saved || saving || auto ? null : onPressed,
+      icon: saving || (auto && !saved)
+          ? const SizedBox.square(
+              dimension: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                color: Colors.white,
+              ),
+            )
+          : Icon(saved ? Icons.check : Icons.download),
+      label: Text(
+        saved
+            ? 'Guardado'
+            : auto
+            ? 'Guardando'
+            : 'Guardar',
+      ),
+    );
+  }
+}

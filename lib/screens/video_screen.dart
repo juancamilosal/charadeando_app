@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../models/models.dart';
 import '../providers/providers.dart';
-import '../services/services.dart';
 import '../widgets/video_view.dart';
 
 /// Reproduce el video del último turno, con opción de guardarlo en la
@@ -20,44 +18,12 @@ class VideoScreen extends ConsumerStatefulWidget {
 
 class _VideoScreenState extends ConsumerState<VideoScreen> {
   bool _saving = false;
-  bool _saved = false;
 
   String? get _path => ref.read(turnVideoProvider).path;
 
-  /// Los datos del turno que se guardan con el video en Mis videos.
-  SavedVideo _describe(String assetId) {
-    final game = ref.read(gameControllerProvider);
-    final turn = game.lastTurn;
-    final config = game.config;
-    return SavedVideo(
-      assetId: assetId,
-      savedAt: DateTime.now(),
-      category: config.categoryLabel,
-      round: turn?.round ?? game.round,
-      points: turn?.points(config.scoringMode) ?? 0,
-      group: game.inGroups && turn != null
-          ? game.groups[turn.groupIndex].name
-          : null,
-      groups: game.inGroups ? [for (final g in game.groups) g.name] : const [],
-      scores: game.inGroups ? game.scores : const [],
-    );
-  }
-
   Future<void> _save() async {
-    final path = _path;
-    if (path == null) return;
     setState(() => _saving = true);
-    String message;
-    try {
-      final id = await ref.read(videoGalleryProvider).save(path);
-      await ref.read(myVideosProvider.notifier).add(_describe(id));
-      _saved = true;
-      message = 'Video guardado en la galería y en Mis videos.';
-    } on GalleryException catch (e) {
-      message = e.denied
-          ? 'Sin permiso para guardar en la galería.'
-          : 'No se pudo guardar el video.';
-    }
+    final message = await ref.read(turnVideoProvider.notifier).save();
     if (!mounted) return;
     setState(() => _saving = false);
     ScaffoldMessenger.of(context)
@@ -72,6 +38,7 @@ class _VideoScreenState extends ConsumerState<VideoScreen> {
   @override
   Widget build(BuildContext context) {
     final path = _path;
+    final saved = ref.watch(turnVideoProvider).saved;
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -100,9 +67,9 @@ class _VideoScreenState extends ConsumerState<VideoScreen> {
                     children: [
                       Expanded(
                         child: FilledButton.icon(
-                          icon: Icon(_saved ? Icons.check : Icons.download),
-                          label: Text(_saved ? 'Guardado' : 'Guardar'),
-                          onPressed: _saving || _saved || path == null
+                          icon: Icon(saved ? Icons.check : Icons.download),
+                          label: Text(saved ? 'Guardado' : 'Guardar'),
+                          onPressed: _saving || saved || path == null
                               ? null
                               : _save,
                         ),

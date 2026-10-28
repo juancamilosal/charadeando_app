@@ -19,6 +19,7 @@ class AppSettings {
     this.sounds = true,
     this.vibration = true,
     this.recordVideo = true,
+    this.autoSaveVideo = false,
     this.controller = PlayController.tilt,
     this.shareData = true,
   });
@@ -28,6 +29,7 @@ class AppSettings {
     sounds: json['sonidos'] as bool? ?? true,
     vibration: json['vibracion'] as bool? ?? true,
     recordVideo: json['grabarVideo'] as bool? ?? true,
+    autoSaveVideo: json['guardarVideoSolo'] as bool? ?? false,
     controller: PlayController.values.firstWhere(
       (c) => c.name == json['controlador'],
       orElse: () => PlayController.tilt,
@@ -45,6 +47,10 @@ class AppSettings {
   /// para toda la partida y para las siguientes.
   final bool recordVideo;
 
+  /// "Guardar automáticamente", en los ajustes de video: cada video se
+  /// guarda solo en la galería y en Mis videos.
+  final bool autoSaveVideo;
+
   final PlayController controller;
 
   /// "Enviar datos anónimos": los errores a Crashlytics y
@@ -56,6 +62,7 @@ class AppSettings {
     bool? sounds,
     bool? vibration,
     bool? recordVideo,
+    bool? autoSaveVideo,
     PlayController? controller,
     bool? shareData,
   }) => AppSettings(
@@ -63,6 +70,7 @@ class AppSettings {
     sounds: sounds ?? this.sounds,
     vibration: vibration ?? this.vibration,
     recordVideo: recordVideo ?? this.recordVideo,
+    autoSaveVideo: autoSaveVideo ?? this.autoSaveVideo,
     controller: controller ?? this.controller,
     shareData: shareData ?? this.shareData,
   );
@@ -72,6 +80,7 @@ class AppSettings {
     'sonidos': sounds,
     'vibracion': vibration,
     'grabarVideo': recordVideo,
+    'guardarVideoSolo': autoSaveVideo,
     'controlador': controller.name,
     'compartirDatos': shareData,
   };

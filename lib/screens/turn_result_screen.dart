@@ -128,10 +128,55 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
     judge.send(summary);
   }
 
+  bool _saving = false;
+
+  /// "Guardar": el video del turno a la galería y a Mis videos.
+  Future<void> _save() async {
+    if (_saving) return;
+    setState(() => _saving = true);
+    final message = await ref.read(turnVideoProvider.notifier).save();
+    if (!mounted) return;
+    setState(() => _saving = false);
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  /// Antes de salir, si el video está listo y sin guardar, pregunta una
+  /// vez: "Guardar" lo guarda y sigue; "Salir sin guardar" sigue. Falso si
+  /// cerraron la ventana sin elegir (se quedan).
+  Future<bool> _videoHandled() async {
+    // Con "Guardar automáticamente" se guarda solo, aunque salgan.
+    if (ref.read(settingsProvider).autoSaveVideo) return true;
+    if (!ref.read(turnVideoProvider).unsaved) return true;
+    final save = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('¿Salir sin guardar el video?'),
+        content: const Text('Si no lo guardas, se borra.'),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: context.surfaces.accent,
+            ),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Salir sin guardar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Guardar'),
+          ),
+        ],
+      ),
+    );
+    if (save == null || !mounted) return false;
+    if (save) await _save();
+    return mounted;
+  }
+
   /// El video del turno se borra al continuar, salvo que el usuario lo haya
   /// guardado en la galería.
   Future<void> _continue() async {
-    if (_leaving) return;
+    if (_leaving || !await _videoHandled()) return;
     setState(() => _leaving = true);
     _lockJudge();
     await ref.read(turnVideoProvider.notifier).discard();
@@ -148,6 +193,7 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
   Future<void> _endGame() async {
     if (_leaving) return;
     if (!await confirmEndGame(context, played: true) || !mounted) return;
+    if (!await _videoHandled()) return;
     setState(() => _leaving = true);
     _lockJudge(gameOver: true);
     await ref.read(turnVideoProvider.notifier).discard();
@@ -157,7 +203,7 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
 
   /// Partida rápida: otra con la misma categoría y palabras nuevas.
   Future<void> _quickAgain() async {
-    if (_leaving) return;
+    if (_leaving || !await _videoHandled()) return;
     setState(() => _leaving = true);
     _lockJudge();
     await ref.read(turnVideoProvider.notifier).discard();
@@ -171,7 +217,7 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
 
   /// Partida rápida: la misma categoría, pero personalizada.
   Future<void> _custom() async {
-    if (_leaving) return;
+    if (_leaving || !await _videoHandled()) return;
     setState(() => _leaving = true);
     _lockJudge();
     await ref.read(turnVideoProvider.notifier).discard();
@@ -185,7 +231,7 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
 
   /// Partida rápida: vuelve a Categorías.
   Future<void> _exit() async {
-    if (_leaving) return;
+    if (_leaving || !await _videoHandled()) return;
     setState(() => _leaving = true);
     _lockJudge();
     await ref.read(turnVideoProvider.notifier).discard();
@@ -198,6 +244,7 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
   Widget build(BuildContext context) {
     final game = ref.watch(gameControllerProvider);
     final video = ref.watch(turnVideoProvider);
+    final autoSave = ref.watch(settingsProvider).autoSaveVideo;
     final turn = game.lastTurn;
     if (turn == null) return Scaffold();
     final config = game.config;
@@ -272,18 +319,32 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
                   ),
                   const SizedBox(height: 12),
                   if (hasVideo) ...[
-                    VideoButton(video: video),
-                    // En la rápida solo se avisa si algo salió mal.
-                    if (!quick || !video.withWords) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        '${video.withWords ? '' : 'No se pudieron escribir las '
-                                  'palabras en este video. '}'
-                        'Se borra al ${quick ? 'salir' : 'continuar'}',
-                        style: muted,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                    Row(
+                      children: [
+                        Expanded(child: VideoButton(video: video)),
+                        if (video.status == TurnVideoStatus.ready) ...[
+                          const SizedBox(width: 10),
+                          SaveVideoButton(
+                            saved: video.saved,
+                            saving: _saving,
+                            auto: autoSave,
+                            onPressed: _save,
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${video.withWords ? '' : 'No se pudieron escribir las '
+                                'palabras en este video. '}'
+                      '${video.saved
+                          ? 'Guardado en Mis videos.'
+                          : autoSave
+                          ? 'Se guarda solo en Mis videos.'
+                          : 'Guárdalo para verlo en Mis videos. Si no, se borra al ${quick ? 'salir' : 'continuar'}.'}',
+                      style: muted,
+                      textAlign: TextAlign.center,
+                    ),
                     const SizedBox(height: 10),
                   ],
                   if (quick) ...[

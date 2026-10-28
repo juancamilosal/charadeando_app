@@ -1366,6 +1366,12 @@ class _VideoSettingsPanel extends ConsumerWidget {
   final ValueChanged<bool> onRecording;
   final ValueChanged<VideoResolution> onResolution;
 
+  static const _label = TextStyle(
+    color: Colors.white,
+    fontSize: 16,
+    fontWeight: FontWeight.w800,
+  );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final on = ref.watch(settingsProvider).recordVideo;
@@ -1404,6 +1410,24 @@ class _VideoSettingsPanel extends ConsumerWidget {
                 ],
               ),
               if (on) ...[
+                Row(
+                  children: [
+                    const Expanded(
+                      child: Text('Guardar automáticamente', style: _label),
+                    ),
+                    Switch(
+                      value: ref.watch(settingsProvider).autoSaveVideo,
+                      activeThumbColor: white,
+                      activeTrackColor: AppColors.green,
+                      onChanged: (v) {
+                        final settings = ref.read(settingsProvider);
+                        ref
+                            .read(settingsProvider.notifier)
+                            .update(settings.copyWith(autoSaveVideo: v));
+                      },
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 4),
                 Wrap(
                   spacing: 6,
