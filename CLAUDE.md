@@ -28,8 +28,8 @@ detalles de cada parte están en `README.md`, `server/README.md` y
 ## Lanzamiento en Google Play (en qué va)
 
 - App `com.valkiriacode.charadeando` en prueba cerrada. **La última
-  subida a Play es 12 (1.0.0)** (el código 12 ya estaba usado en Play al
-  28 oct 2026). Historial: 8 (1.0.0), enlace
+  subida a Play es 13 (1.0.0)** (29 oct 2026, probada en el celular por el
+  usuario). `develop` va en 14 (1.0.0), sin cambios todavía. Historial: 8 (1.0.0), enlace
   a la política de privacidad en Ajustes; 9 (1.0.0): inclinación más rápida (28°, 60 ms medidos
   en tiempo y no en lecturas), "¡Correcto!" 0,5 s y "Ponte el celular en
   la frente para comenzar" antes de la cuenta (con Inclinación), por
@@ -40,7 +40,7 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   revisión en la prueba cerrada. 11 (1.0.0): "Ponte el
   celular en la frente" reconoce hasta 55° (antes 25°: sentado no
   arrancaba). 12 (1.0.0): subida a Play antes de los cambios que siguen.
-  **`develop` va en 13 (1.0.0), sin subir:** "Empezar igual"
+  13 (1.0.0), subida el 29 oct 2026: "Empezar igual"
   sale a los 8 s (antes 3 s) y la cuenta arranca sola a los 15 s (antes
   6 s), y el Modo TV ya no se queda pegado al dejar de duplicar la pantalla
   (antes la siguiente partida quedaba sin cámara; reporte de un probador),
