@@ -32,3 +32,5 @@ Fondo: `#1F0252`, con un brillo radial `#6E28E6` detrás del logo.
   https://valkiriacode.com/charadeando/privacidad).
 - `prueba-cerrada.md`: cómo armar la prueba cerrada (12+ personas, 14 días),
   el mensaje de invitación y la tabla de comentarios para pedir producción.
+- `solicitud-produccion.md`: respuestas para el formulario "Solicitar
+  acceso a producción" (la prueba cerrada, la app y los cambios hechos).
