@@ -92,6 +92,9 @@ detalles de cada parte están en `README.md`, `server/README.md` y
 - 24 oct 2026: el Panel marca 12 verificadores que aceptaron participar;
   los 14 días cuentan desde ahí, así que "Solicitar acceso a producción"
   se activa hacia el 7 nov 2026 si no bajan de 12.
+- 9 nov 2026: enviada la solicitud de acceso a producción (respuestas en
+  `branding/solicitud-produccion.md`); Google responde por correo, en 7
+  días o menos. Estado de comerciante declarado (Comerciante).
 - Sigue: prueba cerrada (12+ personas, 14 días) con la guía
   `branding/prueba-cerrada.md` (pasos, mensaje de invitación y tabla de
   comentarios para pedir producción) y luego producción.
