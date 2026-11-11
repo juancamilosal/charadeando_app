@@ -32,7 +32,9 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   usuario). `develop` va en 14 (1.0.0), sin subir: "Otra categoría con
   este puntaje" en el resultado final (la partida siguiente empieza con
   los puntos de ahora, con los mismos equipos; aviso en Categorías y
-  "Siguen sumando" en la configuración) y la palabra que
+  "Siguen sumando" en la configuración), el botón atrás del celular en
+  la configuración, Libre, escribir palabras y la descarga ya no minimiza
+  la app (hace lo mismo que la flecha de arriba) y la palabra que
   estaba en pantalla al acabarse el tiempo aparece como pasada en la lista
   del turno. Fotomímica repite fotos porque solo hay 87 objetos: queda
   para otra ocasión (más objetos y marcar como vistas solo las que salen). Historial: 8 (1.0.0), enlace

@@ -8,6 +8,7 @@ import '../router.dart';
 import '../services/services.dart';
 import '../theme.dart';
 import '../widgets/play_background.dart';
+import '../widgets/system_back.dart';
 
 /// Cada grupo, por turnos, escribe las palabras que adivinará su rival.
 /// El texto se oculta al guardarlo para que nadie vea las suyas. Sin grupos
@@ -95,34 +96,37 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
     final author = game.groups[_author];
     final rivals = WordService.rivalsLabel(_author, game.groups);
     final single = game.groups.length == 2;
-    return PlayBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: Text('Palabras de ${author.name}'),
-          leading: BackButton(onPressed: _back),
-        ),
-        body: SafeArea(
-          top: false,
-          child: _handoff
-              ? _HandoffView(
-                  author: author.name,
-                  rivals: rivals,
-                  single: single,
-                  onReady: () => setState(() => _handoff = false),
-                )
-              : _entryView(
-                  context,
-                  game.config.wordsPerGroup,
-                  message: single
-                      ? 'Escriban palabras o frases para que $rivals las '
-                            'adivine.'
-                      : 'Escriban palabras o frases para $rivals. Ustedes no '
-                            'las verán en su turno.',
-                  counter:
-                      '${_words.length} de ${game.config.wordsPerGroup} '
-                      'palabras',
-                ),
+    return SystemBack(
+      onBack: _back,
+      child: PlayBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            title: Text('Palabras de ${author.name}'),
+            leading: BackButton(onPressed: _back),
+          ),
+          body: SafeArea(
+            top: false,
+            child: _handoff
+                ? _HandoffView(
+                    author: author.name,
+                    rivals: rivals,
+                    single: single,
+                    onReady: () => setState(() => _handoff = false),
+                  )
+                : _entryView(
+                    context,
+                    game.config.wordsPerGroup,
+                    message: single
+                        ? 'Escriban palabras o frases para que $rivals las '
+                              'adivine.'
+                        : 'Escriban palabras o frases para $rivals. Ustedes no '
+                              'las verán en su turno.',
+                    counter:
+                        '${_words.length} de ${game.config.wordsPerGroup} '
+                        'palabras',
+                  ),
+          ),
         ),
       ),
     );
@@ -133,29 +137,32 @@ class _WordEntryScreenState extends ConsumerState<WordEntryScreen> {
   /// un contador y una barra de avance.
   Widget _soloView(BuildContext context) {
     final max = _max;
-    return PlayBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: const Text('Palabras'),
-          leading: BackButton(onPressed: _back),
-        ),
-        body: SafeArea(
-          top: false,
-          child: _entryView(
-            context,
-            GameConfig.minSoloWords,
-            message: max != null
-                ? 'Escriban de ${GameConfig.minSoloWords} a $max palabras o '
-                      'frases.'
-                : 'Escriban las palabras o frases que van a jugar. Mínimo '
-                      '${GameConfig.minSoloWords}.',
-            counter: max != null
-                ? '${_words.length} de $max'
-                : '${_words.length} '
-                      '${_words.length == 1 ? 'palabra' : 'palabras'} · '
-                      'mínimo ${GameConfig.minSoloWords}',
-            max: max,
+    return SystemBack(
+      onBack: _back,
+      child: PlayBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            title: const Text('Palabras'),
+            leading: BackButton(onPressed: _back),
+          ),
+          body: SafeArea(
+            top: false,
+            child: _entryView(
+              context,
+              GameConfig.minSoloWords,
+              message: max != null
+                  ? 'Escriban de ${GameConfig.minSoloWords} a $max palabras o '
+                        'frases.'
+                  : 'Escriban las palabras o frases que van a jugar. Mínimo '
+                        '${GameConfig.minSoloWords}.',
+              counter: max != null
+                  ? '${_words.length} de $max'
+                  : '${_words.length} '
+                        '${_words.length == 1 ? 'palabra' : 'palabras'} · '
+                        'mínimo ${GameConfig.minSoloWords}',
+              max: max,
+            ),
           ),
         ),
       ),

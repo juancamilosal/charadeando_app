@@ -86,6 +86,11 @@ la cámara frontal graba a los participantes para revivir las risas.
   La palabra que estaba en pantalla cuando se acabó el tiempo también
   aparece al final de la lista, como pasada: si el equipo la adivinó y no
   alcanzaron a marcarla, se corrige ahí (y en el Celular juez).
+- Botón atrás del celular: en la configuración, Libre, escribir las
+  palabras y la descarga de palabras o fotos hace lo mismo que la flecha
+  de arriba (`SystemBack`, en `lib/widgets/system_back.dart`). Esas
+  pantallas se abren con `context.go`, sin otra debajo, y antes el botón
+  atrás cerraba la app hacia el fondo.
 - Al cambiar de pestaña en la barra de abajo, la que se deja se borra: al
   volver empieza de nuevo, arriba del todo, sin lo escrito y sin ventanas
   abiertas (como "Combinar categorías"). Lo que se guarda en el celular

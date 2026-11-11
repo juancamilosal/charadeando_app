@@ -11,6 +11,7 @@ import '../router.dart';
 import '../services/services.dart';
 import '../theme.dart';
 import '../widgets/play_background.dart';
+import '../widgets/system_back.dart';
 
 /// Trae de Directus las palabras automáticas de toda la partida, espera a
 /// que estén listas y empieza el primer turno. Durante el juego no se usa
@@ -204,26 +205,31 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
     context.go(Routes.turn);
   }
 
+  /// La flecha de arriba y el botón atrás del celular: la partida rápida
+  /// vuelve a Categorías y la personalizada, a la configuración.
+  void _back() => context.go(
+    ref.read(gameControllerProvider).config.quick
+        ? Routes.categories
+        : Routes.config,
+  );
+
   @override
   Widget build(BuildContext context) {
-    return PlayBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: Text(_photos ? 'Fotomímica' : 'Palabras automáticas'),
-          leading: BackButton(
-            onPressed: () => context.go(
-              ref.read(gameControllerProvider).config.quick
-                  ? Routes.categories
-                  : Routes.config,
-            ),
+    return SystemBack(
+      onBack: _back,
+      child: PlayBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            title: Text(_photos ? 'Fotomímica' : 'Palabras automáticas'),
+            leading: BackButton(onPressed: _back),
           ),
-        ),
-        body: SafeArea(
-          top: false,
-          child: Padding(
-            padding: EdgeInsets.all(24),
-            child: Center(child: _content()),
+          body: SafeArea(
+            top: false,
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Center(child: _content()),
+            ),
           ),
         ),
       ),

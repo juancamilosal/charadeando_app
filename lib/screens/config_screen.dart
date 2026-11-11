@@ -13,6 +13,7 @@ import '../widgets/number_stepper.dart';
 import '../widgets/option_selector.dart';
 import '../widgets/play_mode_selector.dart';
 import '../widgets/play_background.dart';
+import '../widgets/system_back.dart';
 import '../widgets/tv_connect.dart';
 import '../widgets/team_badge.dart';
 import '../widgets/words_reminder.dart';
@@ -279,6 +280,14 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
     );
   }
 
+  /// La flecha de arriba y el botón atrás del celular: a Libre (si se
+  /// juega Libre) o a Categorías.
+  void _back() => context.go(
+    _config.category == GameCategory.free && !_custom && !_config.isMix
+        ? Routes.freeMode
+        : Routes.categories,
+  );
+
   /// "a", "a y b", "a, b y c".
   static String _joinList(List<String> items) => items.length == 1
       ? items.single
@@ -310,149 +319,147 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
           ),
         );
     });
-    return PlayBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: const Text('Configuración'),
-          leading: BackButton(
-            onPressed: () => context.go(
-              _config.category == GameCategory.free &&
-                      !_custom &&
-                      !_config.isMix
-                  ? Routes.freeMode
-                  : Routes.categories,
-            ),
+    return SystemBack(
+      onBack: _back,
+      child: PlayBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            title: const Text('Configuración'),
+            leading: BackButton(onPressed: _back),
           ),
-        ),
-        body: SafeArea(
-          top: false,
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-            children: [
-              CategoryHeader(config: _config),
-              const SizedBox(height: 16),
-              // Si siguen sumando, los equipos y sus puntos no se cambian.
-              if (carry != null) ...[
-                _carrySection(carry),
-                gap,
-              ] else ...[
-                // Lo primero: sin grupos (viene elegido) o en grupos.
-                PlayModeSelector(
-                  inGroups: _inGroups,
-                  onChanged: (v) => _update(_config.copyWith(inGroups: v)),
-                ),
-                const SizedBox(height: 20),
-                _RandomButton(onTap: _autoFill),
-                gap,
-                if (_inGroups) ...[_teamsSection(), gap],
-              ],
-              if (automatic) ...[
-                _autoGameSection(),
-                gap,
-                // Las palabras propias no tienen dificultad.
-                if (!_noDifficulty) ...[_difficultySection(), gap],
-              ] else ...[
-                // Sin grupos, las palabras se escriben en una sola lista.
-                if (_inGroups) ...[
+          body: SafeArea(
+            top: false,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+              children: [
+                CategoryHeader(config: _config),
+                const SizedBox(height: 16),
+                // Si siguen sumando, los equipos y sus puntos no se cambian.
+                if (carry != null) ...[
+                  _carrySection(carry),
+                  gap,
+                ] else ...[
+                  // Lo primero: sin grupos (viene elegido) o en grupos.
+                  PlayModeSelector(
+                    inGroups: _inGroups,
+                    onChanged: (v) => _update(_config.copyWith(inGroups: v)),
+                  ),
+                  const SizedBox(height: 20),
+                  _RandomButton(onTap: _autoFill),
+                  gap,
+                  if (_inGroups) ...[_teamsSection(), gap],
+                ],
+                if (automatic) ...[
+                  _autoGameSection(),
+                  gap,
+                  // Las palabras propias no tienen dificultad.
+                  if (!_noDifficulty) ...[_difficultySection(), gap],
+                ] else ...[
+                  // Sin grupos, las palabras se escriben en una sola lista.
+                  if (_inGroups) ...[
+                    ConfigSection(
+                      icon: Icons.edit_note,
+                      title: 'Palabras por equipo',
+                      children: [
+                        const Text(
+                          '¿Cuántas palabras escribe cada equipo?',
+                          style: TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                        ConfigRow(
+                          label: 'Palabras o frases por equipo',
+                          child: NumberStepper(
+                            value: _config.wordsPerGroup,
+                            min: GameConfig.minWordsPerGroup,
+                            max: GameConfig.maxWordsPerGroup,
+                            onChanged: (v) =>
+                                _update(_config.copyWith(wordsPerGroup: v)),
+                          ),
+                        ),
+                        Text(
+                          '${_config.totalWords} en total',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: context.surfaces.soft,
+                          ),
+                        ),
+                        const WordsReminder(),
+                      ],
+                    ),
+                    gap,
+                  ],
                   ConfigSection(
-                    icon: Icons.edit_note,
-                    title: 'Palabras por equipo',
+                    icon: Icons.timer,
+                    title: 'Partida',
                     children: [
-                      const Text(
-                        '¿Cuántas palabras escribe cada equipo?',
-                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ConfigRow(
+                        label: 'Rondas',
+                        child: NumberStepper(
+                          value: _config.rounds,
+                          min: GameConfig.minRounds,
+                          max: _config.roundsMax,
+                          onChanged: (v) =>
+                              _update(_config.copyWith(rounds: v)),
+                        ),
                       ),
                       ConfigRow(
-                        label: 'Palabras o frases por equipo',
+                        label: 'Tiempo por turno',
                         child: NumberStepper(
-                          value: _config.wordsPerGroup,
-                          min: GameConfig.minWordsPerGroup,
-                          max: GameConfig.maxWordsPerGroup,
-                          onChanged: (v) =>
-                              _update(_config.copyWith(wordsPerGroup: v)),
+                          value: _config.turnDuration.inSeconds,
+                          min: GameConfig.minTurnSeconds,
+                          max: GameConfig.maxTurnSeconds,
+                          step: 15,
+                          format: (v) => '$v\u00A0s',
+                          onChanged: (v) => _update(
+                            _config.copyWith(
+                              turnDuration: Duration(seconds: v),
+                            ),
+                          ),
                         ),
                       ),
-                      Text(
-                        '${_config.totalWords} en total',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: context.surfaces.soft,
-                        ),
-                      ),
-                      const WordsReminder(),
                     ],
                   ),
                   gap,
                 ],
-                ConfigSection(
-                  icon: Icons.timer,
-                  title: 'Partida',
-                  children: [
-                    ConfigRow(
-                      label: 'Rondas',
-                      child: NumberStepper(
-                        value: _config.rounds,
-                        min: GameConfig.minRounds,
-                        max: _config.roundsMax,
-                        onChanged: (v) => _update(_config.copyWith(rounds: v)),
+                // En Fotomímica no hay puntuación que elegir.
+                if (!_photos) ...[
+                  ConfigSection(
+                    icon: Icons.emoji_events,
+                    title: 'Puntuación',
+                    children: [
+                      OptionSelector<ScoringMode>(
+                        label: 'Cómo se cuentan los puntos',
+                        options: ScoringMode.values,
+                        selected: _scoring,
+                        labelOf: (o) => o.label,
+                        description: _scoring?.description,
+                        errorText: _choiceError(_scoring),
+                        onSelected: (o) => setState(() => _scoring = o),
                       ),
-                    ),
-                    ConfigRow(
-                      label: 'Tiempo por turno',
-                      child: NumberStepper(
-                        value: _config.turnDuration.inSeconds,
-                        min: GameConfig.minTurnSeconds,
-                        max: GameConfig.maxTurnSeconds,
-                        step: 15,
-                        format: (v) => '$v\u00A0s',
-                        onChanged: (v) => _update(
-                          _config.copyWith(turnDuration: Duration(seconds: v)),
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  gap,
+                ],
+                // El celular juez y el Modo TV van al final, después del video.
+                // Si su servidor no responde, la opción no se muestra.
+                if (!_tvMode && _judgeShown) ...[
+                  gap,
+                  const ConfigSection(
+                    icon: Icons.gavel_rounded,
+                    title: 'Celular juez',
+                    children: [JudgeSetupView()],
+                  ),
+                  gap,
+                ],
+                _tvSection(),
+                const SizedBox(height: 24),
+                FilledButton.icon(
+                  icon: const Icon(Icons.arrow_forward),
+                  label: const Text('Continuar'),
+                  onPressed: _continue,
                 ),
-                gap,
               ],
-              // En Fotomímica no hay puntuación que elegir.
-              if (!_photos) ...[
-                ConfigSection(
-                  icon: Icons.emoji_events,
-                  title: 'Puntuación',
-                  children: [
-                    OptionSelector<ScoringMode>(
-                      label: 'Cómo se cuentan los puntos',
-                      options: ScoringMode.values,
-                      selected: _scoring,
-                      labelOf: (o) => o.label,
-                      description: _scoring?.description,
-                      errorText: _choiceError(_scoring),
-                      onSelected: (o) => setState(() => _scoring = o),
-                    ),
-                  ],
-                ),
-                gap,
-              ],
-              // El celular juez y el Modo TV van al final, después del video.
-              // Si su servidor no responde, la opción no se muestra.
-              if (!_tvMode && _judgeShown) ...[
-                gap,
-                const ConfigSection(
-                  icon: Icons.gavel_rounded,
-                  title: 'Celular juez',
-                  children: [JudgeSetupView()],
-                ),
-                gap,
-              ],
-              _tvSection(),
-              const SizedBox(height: 24),
-              FilledButton.icon(
-                icon: const Icon(Icons.arrow_forward),
-                label: const Text('Continuar'),
-                onPressed: _continue,
-              ),
-            ],
+            ),
           ),
         ),
       ),

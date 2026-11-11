@@ -9,6 +9,7 @@ import '../theme.dart';
 import '../widgets/category_art.dart';
 import '../widgets/play_background.dart';
 import '../widgets/play_choice.dart';
+import '../widgets/system_back.dart';
 
 /// Categoría Libre: se elige de dónde salen las palabras, escritas por los
 /// grupos o automáticas, y se sigue a la configuración.
@@ -26,49 +27,53 @@ class FreeModeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return PlayBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: const Text('Libre'),
-          leading: BackButton(onPressed: () => context.go(Routes.categories)),
-        ),
-        body: SafeArea(
-          top: false,
-          child: ListView(
-            padding: EdgeInsets.fromLTRB(20, 0, 20, 24),
-            children: [
-              Center(
-                child: CategoryArt(category: GameCategory.free, size: 120),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '¿Cómo quieren las palabras?',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: AppFonts.display,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w600,
-                  color: context.onBackdrop,
+    void back() => context.go(Routes.categories);
+    return SystemBack(
+      onBack: back,
+      child: PlayBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            title: const Text('Libre'),
+            leading: BackButton(onPressed: back),
+          ),
+          body: SafeArea(
+            top: false,
+            child: ListView(
+              padding: EdgeInsets.fromLTRB(20, 0, 20, 24),
+              children: [
+                Center(
+                  child: CategoryArt(category: GameCategory.free, size: 120),
                 ),
-              ),
-              const SizedBox(height: 14),
-              _ModeCard(
-                icon: Icons.edit,
-                color: context.surfaces.accent,
-                title: 'Las escribimos',
-                description: 'Antes de empezar',
-                onTap: () => _choose(context, ref, WordSource.groups),
-              ),
-              const SizedBox(height: 12),
-              _ModeCard(
-                icon: Icons.casino,
-                color: AppColors.turquoise,
-                title: 'Al azar',
-                description: 'El juego las pone, listas para jugar',
-                onTap: () => _choose(context, ref, WordSource.random),
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  '¿Cómo quieren las palabras?',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: AppFonts.display,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w600,
+                    color: context.onBackdrop,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                _ModeCard(
+                  icon: Icons.edit,
+                  color: context.surfaces.accent,
+                  title: 'Las escribimos',
+                  description: 'Antes de empezar',
+                  onTap: () => _choose(context, ref, WordSource.groups),
+                ),
+                const SizedBox(height: 12),
+                _ModeCard(
+                  icon: Icons.casino,
+                  color: AppColors.turquoise,
+                  title: 'Al azar',
+                  description: 'El juego las pone, listas para jugar',
+                  onTap: () => _choose(context, ref, WordSource.random),
+                ),
+              ],
+            ),
           ),
         ),
       ),
