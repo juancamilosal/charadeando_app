@@ -95,6 +95,9 @@ detalles de cada parte están en `README.md`, `server/README.md` y
 - 9 nov 2026: enviada la solicitud de acceso a producción (respuestas en
   `branding/solicitud-produccion.md`); Google responde por correo, en 7
   días o menos. Estado de comerciante declarado (Comerciante).
+- 11 nov 2026: **Google aprobó el acceso a producción** (correo "Your app
+  has been granted Google Play production access"). Falta crear la versión
+  de producción.
 - Sigue: prueba cerrada (12+ personas, 14 días) con la guía
   `branding/prueba-cerrada.md` (pasos, mensaje de invitación y tabla de
   comentarios para pedir producción) y luego producción.
