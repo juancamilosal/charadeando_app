@@ -63,6 +63,7 @@ class _TeamEditorScreenState extends ConsumerState<TeamEditorScreen> {
       played: base.played,
       wins: base.wins,
       best: base.best,
+      total: base.total,
     );
   }
 

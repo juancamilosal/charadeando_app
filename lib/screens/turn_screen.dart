@@ -692,6 +692,14 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   Future<void> _endTurn() async {
     if (_phase == _Phase.saving) return;
     _timer?.cancel();
+    // La palabra que estaba en pantalla cuando se acabó el tiempo también va
+    // en la lista, como pasada: si el equipo sí la adivinó y no alcanzaron a
+    // marcarla, se corrige en el resultado del turno.
+    if (_phase == _Phase.playing &&
+        _feedback == null &&
+        _wordIndex < _deck.length) {
+      _entries.add(TurnEntry(_deck[_wordIndex], WordOutcome.pass));
+    }
     // Una marimba suave cierra el turno, y la música de la app vuelve
     // cuando termina, no encima de ella.
     if (ref.read(soundServiceProvider).play(SoundEffect.timeUp)) {

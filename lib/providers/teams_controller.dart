@@ -65,6 +65,14 @@ class TeamsController extends AsyncNotifier<List<SavedTeam>> {
     if (changed) await _update(list);
   }
 
+  /// "Reiniciar puntajes": el acumulado de todos los equipos vuelve a 0. El
+  /// historial (partidas, victorias y mejor puntaje) no cambia.
+  Future<void> resetTotals() async {
+    final teams = await future;
+    if (teams.every((t) => t.total == 0)) return;
+    await _update([for (final t in teams) t.copyWith(total: 0)]);
+  }
+
   /// Id para un equipo nuevo.
   static String newId() => DateTime.now().microsecondsSinceEpoch.toString();
 }

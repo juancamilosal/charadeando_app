@@ -76,14 +76,53 @@ class TeamsScreen extends ConsumerWidget {
     }
   }
 
+  /// "Reiniciar puntajes": pregunta y pone en 0 el acumulado de todos.
+  Future<void> _resetTotals(BuildContext context, WidgetRef ref) async {
+    final sure = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('¿Reiniciar los puntajes?'),
+        content: const Text(
+          'El puntaje acumulado de todos los equipos vuelve a 0. '
+          'Las partidas y victorias se conservan.',
+        ),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: context.surfaces.accent,
+            ),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Reiniciar'),
+          ),
+        ],
+      ),
+    );
+    if (sure == true) await ref.read(teamsProvider.notifier).resetTotals();
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final teams = ref.watch(teamsProvider).value;
     final on = context.onBackdrop;
+    final anyPoints = teams?.any((t) => t.total > 0) ?? false;
     return PlayBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(title: const Text('Equipos')),
+        appBar: AppBar(
+          title: const Text('Equipos'),
+          actions: [
+            if (anyPoints)
+              TextButton.icon(
+                icon: const Icon(Icons.restart_alt),
+                label: const Text('Reiniciar puntajes'),
+                onPressed: () => _resetTotals(context, ref),
+              ),
+          ],
+        ),
         body: SafeArea(
           top: false,
           child: teams == null
@@ -199,7 +238,8 @@ class _Empty extends StatelessWidget {
   }
 }
 
-/// Un equipo de la lista: su distintivo, el nombre y el historial.
+/// Un equipo de la lista: su distintivo, el nombre, el historial y el
+/// puntaje acumulado.
 class _TeamCard extends StatelessWidget {
   const _TeamCard({required this.team, required this.onOptions});
 
@@ -224,14 +264,47 @@ class _TeamCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      team.name,
-                      style: TextStyle(
-                        fontFamily: AppFonts.display,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: context.surfaces.onCard,
-                      ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            team.name,
+                            style: TextStyle(
+                              fontFamily: AppFonts.display,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: context.surfaces.onCard,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // El puntaje acumulado, en grande: sigue de una
+                        // partida a otra hasta que se reinicia.
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: '${team.total}',
+                                style: TextStyle(
+                                  fontFamily: AppFonts.display,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w700,
+                                  color: context.surfaces.value,
+                                ),
+                              ),
+                              TextSpan(
+                                text: team.total == 1 ? ' punto' : ' puntos',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  color: context.surfaces.soft,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     _History(team: team),

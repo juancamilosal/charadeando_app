@@ -35,14 +35,15 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
     super.initState();
     // Por si quedó algún video temporal de la partida.
     ref.read(videoServiceProvider).deleteAll().ignore();
-    // La partida se suma al historial de los equipos guardados.
-    ref.read(gameControllerProvider.notifier).saveHistory().ignore();
-    // Y a las estadísticas anónimas, como terminada. Después de construir
-    // la pantalla, porque cambia el estado de la partida.
+    // La partida se suma al historial (y al puntaje acumulado) de los
+    // equipos guardados, y a las estadísticas anónimas, como terminada.
+    // Después de construir la pantalla, porque cambia el estado de la
+    // partida.
     Future(() {
       if (!mounted) return;
-      final controller = ref.read(gameControllerProvider.notifier)
-        ..recordStats();
+      final controller = ref.read(gameControllerProvider.notifier);
+      controller.saveHistory().ignore();
+      controller.recordStats();
       _maybeAskReview(controller.hadErrors).ignore();
     });
   }
@@ -109,6 +110,17 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
         : '¡Ganó ${leaders.single}!';
 
     final scores = game.scores;
+    // Los grupos que son equipos guardados, con su acumulado (ya con esta
+    // partida, que se suma al abrir la pantalla).
+    final saved = {
+      for (final t in ref.watch(teamsProvider).value ?? const <SavedTeam>[])
+        t.id: t,
+    };
+    final accumulated = [
+      if (game.inGroups && game.historySaved)
+        for (final g in game.groups)
+          if (saved[g.teamId] case final team?) (g, team.total),
+    ];
     final best = game.inGroups ? scores[game.leaders.first] : game.totalScore;
     return PopScope(
       canPop: false,
@@ -147,6 +159,36 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
                             scores: scores,
                             // El primero, resaltado.
                             highlight: game.isTie ? null : game.leaders.single,
+                          ),
+                        ],
+                        // Con equipos guardados, el puntaje que llevan
+                        // sumando todas sus partidas (en cualquier
+                        // categoría), hasta que se reinicia en Equipos.
+                        if (accumulated.isNotEmpty) ...[
+                          const SizedBox(height: 20),
+                          Text(
+                            'Puntaje acumulado',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: AppFonts.display,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w600,
+                              color: context.onBackdrop,
+                            ),
+                          ),
+                          Text(
+                            'Suma todas sus partidas. Se reinicia en Equipos.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: context.onBackdrop.withValues(alpha: 0.85),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Scoreboard(
+                            groups: [for (final (g, _) in accumulated) g],
+                            scores: [for (final (_, t) in accumulated) t],
                           ),
                         ],
                         // La misma ruleta de la sección, con su

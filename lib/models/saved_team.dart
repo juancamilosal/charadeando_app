@@ -15,6 +15,7 @@ class SavedTeam {
     this.played = 0,
     this.wins = 0,
     this.best = 0,
+    this.total = 0,
   });
 
   factory SavedTeam.fromJson(Map<String, dynamic> json) => SavedTeam(
@@ -30,6 +31,7 @@ class SavedTeam {
     played: (json['partidas'] as num?)?.toInt() ?? 0,
     wins: (json['victorias'] as num?)?.toInt() ?? 0,
     best: (json['mejorPuntaje'] as num?)?.toInt() ?? 0,
+    total: (json['acumulado'] as num?)?.toInt() ?? 0,
   );
 
   static const maxNameLength = 24;
@@ -87,6 +89,10 @@ class SavedTeam {
   final int wins;
   final int best;
 
+  /// Puntos acumulados de todas sus partidas, en cualquier categoría, hasta
+  /// que se reinician en Equipos ("Reiniciar puntajes").
+  final int total;
+
   Color get color => colors[colorIndex % colors.length];
 
   /// Texto e íconos sobre el color del equipo.
@@ -112,6 +118,7 @@ class SavedTeam {
     int? played,
     int? wins,
     int? best,
+    int? total,
   }) => SavedTeam(
     id: id,
     name: name ?? this.name,
@@ -122,14 +129,16 @@ class SavedTeam {
     played: played ?? this.played,
     wins: wins ?? this.wins,
     best: best ?? this.best,
+    total: total ?? this.total,
   );
 
   /// Suma una partida al historial: [won] si ganó (en empate no cuenta) y
-  /// [score] para el mejor puntaje.
+  /// [score] para el mejor puntaje y el acumulado.
   SavedTeam withGame({required int score, required bool won}) => copyWith(
     played: played + 1,
     wins: wins + (won ? 1 : 0),
     best: score > best ? score : best,
+    total: total + score,
   );
 
   Map<String, dynamic> toJson() => {
@@ -142,6 +151,7 @@ class SavedTeam {
     'partidas': played,
     'victorias': wins,
     'mejorPuntaje': best,
+    'acumulado': total,
   };
 
   @override

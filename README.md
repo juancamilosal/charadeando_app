@@ -83,6 +83,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   marcó mal." Tocar una palabra la cambia entre ✅ acertada y ⏭️ pasada
   (`GameController.correctLastTurn`) y se recalculan los aciertos, los
   puntos y el marcador. Solo el último turno, antes de pasar al siguiente.
+  La palabra que estaba en pantalla cuando se acabó el tiempo también
+  aparece al final de la lista, como pasada: si el equipo la adivinó y no
+  alcanzaron a marcarla, se corrige ahí (y en el Celular juez).
 - Al cambiar de pestaña en la barra de abajo, la que se deja se borra: al
   volver empieza de nuevo, arriba del todo, sin lo escrito y sin ventanas
   abiertas (como "Combinar categorías"). Lo que se guarda en el celular
@@ -140,7 +143,16 @@ la cámara frontal graba a los participantes para revivir las risas.
   salir del turno llevan a Categorías.
 - Equipos (`lib/screens/teams_screen.dart`): la lista de equipos guardados,
   cada uno con su nombre, su color, un ícono o emoji y su
-  historial (partidas, victorias y mejor puntaje). "Crear equipo" abre el
+  historial (partidas, victorias y mejor puntaje) y, junto al nombre, su
+  **puntaje acumulado** ("27 puntos"): cada partida que termina con equipos
+  guardados le suma sus puntos, en cualquier categoría, así una familia
+  sigue la competencia de Animales a Películas sin perder la cuenta
+  (`SavedTeam.total`, campo `acumulado` en `equipos.json`). "Reiniciar
+  puntajes", arriba a la derecha (solo si algún equipo tiene puntos),
+  pregunta y los pone todos en 0 sin tocar el historial. El resultado
+  final muestra también la tabla "Puntaje acumulado" de los equipos
+  guardados; la ruleta de castigos sigue siendo para quien perdió esa
+  partida. "Crear equipo" abre el
   editor: nombre (obligatorio, hasta 24 letras, sin repetir), color de la
   paleta de la app e ícono o emoji. Los jugadores se quitaron del editor
   (quedan como idea: decir a quién le toca en cada turno); los que se

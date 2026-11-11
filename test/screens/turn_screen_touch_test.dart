@@ -159,10 +159,14 @@ void main() {
       SoundEffect.timeUp,
     ]);
     final turn = container.read(gameControllerProvider).lastTurn!;
+    // La palabra que estaba en pantalla al acabarse el tiempo va al final,
+    // como pasada, para poder corregirla.
     expect(turn.entries.map((e) => e.outcome), [
       WordOutcome.hit,
       WordOutcome.pass,
+      WordOutcome.pass,
     ]);
+    expect(turn.entries.last.word.text, 'Titanic');
   });
 
   testWidgets('con Inclinación se escucha el sensor y se ven sus píldoras', (

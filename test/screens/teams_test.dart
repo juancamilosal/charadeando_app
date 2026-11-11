@@ -91,6 +91,28 @@ void main() {
     expect(team.players, isEmpty);
   });
 
+  testWidgets('cada equipo muestra su puntaje acumulado y "Reiniciar '
+      'puntajes" lo pone en 0', (tester) async {
+    final store = MemoryTeamStore(const [
+      SavedTeam(id: 'p', name: 'Los Primos', played: 2, wins: 1, total: 9),
+      SavedTeam(id: 't', name: 'Las Tías', played: 2, wins: 1, total: 11),
+    ]);
+    await _pump(tester, store);
+    expect(find.text('9 puntos', findRichText: true), findsOneWidget);
+    expect(find.text('11 puntos', findRichText: true), findsOneWidget);
+
+    await tester.tap(find.text('Reiniciar puntajes'));
+    await tester.pumpAndSettle();
+    expect(find.text('¿Reiniciar los puntajes?'), findsOneWidget);
+    await tester.tap(find.text('Reiniciar'));
+    await tester.pumpAndSettle();
+    expect([for (final t in store.teams) t.total], [0, 0]);
+    // El historial se conserva.
+    expect([for (final t in store.teams) t.played], [2, 2]);
+    // Sin puntos, el botón ya no aparece.
+    expect(find.text('Reiniciar puntajes'), findsNothing);
+  });
+
   testWidgets('no deja repetir el nombre de otro equipo', (tester) async {
     await _pump(
       tester,

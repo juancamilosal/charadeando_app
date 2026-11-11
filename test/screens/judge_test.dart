@@ -395,11 +395,14 @@ void main() {
       final last = channel.states.last;
       expect(last['estado'], 'fin_turno');
       expect(last['aciertos'], 1);
-      expect(last['pasadas'], 1);
+      // La palabra que estaba en pantalla al acabarse el tiempo también
+      // cuenta, como pasada.
+      expect(last['pasadas'], 2);
       expect(last['puntos'], 1);
       final turn = container.read(gameControllerProvider).lastTurn!;
       expect(turn.entries.map((e) => e.outcome), [
         WordOutcome.hit,
+        WordOutcome.pass,
         WordOutcome.pass,
       ]);
     });
