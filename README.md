@@ -581,7 +581,12 @@ la cámara frontal graba a los participantes para revivir las risas.
   ya se ve quieto y esperarlo se sentía como un retraso. Aparece en grande
   (entra en 0,4 s) con una vibración fuerte, con "Girar otra vez" y
   "Listo". Si un castigo es muy largo para su
-  campo, se corta con "…" (completo se ve al caer). La cara de la ruleta se
+  campo, se corta con "…" (completo se ve al caer). Al tocar un castigo se ve
+  completo en un recuadro de su color, con "Editar" (cambia el texto) y
+  "Quitar" (quita el campo, con confirmación; mínimo 2 campos). Si los
+  ponía la app, la ruleta pasa a "Jugadores y app" con los mismos castigos
+  que se ven, y queda guardada. Mientras gira a pantalla completa, el
+  recuadro solo muestra el castigo. La cara de la ruleta se
   dibuja una vez y solo se gira, así los textos quedan fijos a la ruleta
   mientras da vueltas.
 - Al final de la partida, el equipo con menos puntos ve "¡Ruleta de castigo

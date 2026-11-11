@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/scheduler.dart';
 
+import '../models/models.dart';
 import '../services/services.dart';
 import '../providers/providers.dart';
 import '../theme.dart';
@@ -41,6 +42,7 @@ class PunishmentRoulette extends ConsumerStatefulWidget {
     this.onResult,
     this.startWith,
     this.dragToSpin = true,
+    this.onEditField,
   });
 
   /// Un castigo por campo, en el sentido del reloj desde arriba.
@@ -67,6 +69,10 @@ class PunishmentRoulette extends ConsumerStatefulWidget {
   /// Avisa si se está mostrando el castigo que salió (verdadero) o la
   /// ruleta vuelve a girar (falso).
   final ValueChanged<bool>? onResult;
+
+  /// Al tocar un castigo, "Editar" lo cambia por el texto nuevo y "Quitar"
+  /// quita el campo (texto null). Null: el recuadro solo lo muestra.
+  final void Function(int index, String? text)? onEditField;
 
   /// Si se gira con el dedo. Dentro de una pantalla que se desplaza (la
   /// sección Ruleta y el final de la partida) no: deslizar el dedo encima
@@ -242,7 +248,18 @@ class _PunishmentRouletteState extends ConsumerState<PunishmentRoulette>
   void _showField(Offset at, Size size) {
     final field = RoulettePainter.fieldAtPoint(at, size, _angle, _fields);
     if (field == null) return;
-    showPunishmentField(context, widget.punishments[field], field);
+    // Mientras gira, solo se mira: no se cambia en medio del giro.
+    final still = _spin == _Spin.idle;
+    final edit = widget.onEditField;
+    showPunishmentField(
+      context,
+      widget.punishments[field],
+      field,
+      onEdit: still && edit != null ? (text) => edit(field, text) : null,
+      onRemove: still && edit != null && _fields > RouletteSetup.minFields
+          ? () => edit(field, null)
+          : null,
+    );
   }
 
   bool get _canDrag => _spin == _Spin.idle || _spin == _Spin.result;
@@ -659,18 +676,119 @@ class RoulettePainter extends CustomPainter {
 /// Arrastre que gana apenas el dedo toca, para que la lista de la pantalla
 /// no se quede con él.
 /// Recuadro con el castigo del campo [index] completo (en la ruleta a veces
-/// se corta con "…"), del mismo color que su campo.
+/// se corta con "…"), del mismo color que su campo. Con [onEdit] se puede
+/// cambiar el texto ("Editar") y con [onRemove], quitar el campo ("Quitar").
 Future<void> showPunishmentField(
   BuildContext context,
   String punishment,
-  int index,
-) {
-  final color = PunishmentRoulette.colors[index % 10];
-  final onColor = color == AppColors.yellow ? AppColors.ink : Colors.white;
-  final empty = punishment.trim().isEmpty || punishment == '?';
-  return showDialog(
-    context: context,
-    builder: (context) => Dialog(
+  int index, {
+  ValueChanged<String>? onEdit,
+  VoidCallback? onRemove,
+}) => showDialog(
+  context: context,
+  builder: (context) => _PunishmentFieldDialog(
+    punishment: punishment,
+    index: index,
+    onEdit: onEdit,
+    onRemove: onRemove,
+  ),
+);
+
+class _PunishmentFieldDialog extends StatefulWidget {
+  const _PunishmentFieldDialog({
+    required this.punishment,
+    required this.index,
+    this.onEdit,
+    this.onRemove,
+  });
+
+  final String punishment;
+  final int index;
+  final ValueChanged<String>? onEdit;
+  final VoidCallback? onRemove;
+
+  /// Largo máximo de un castigo, como al escribirlos en la configuración.
+  static const maxLength = 60;
+
+  @override
+  State<_PunishmentFieldDialog> createState() => _PunishmentFieldDialogState();
+}
+
+class _PunishmentFieldDialogState extends State<_PunishmentFieldDialog> {
+  bool get _empty =>
+      widget.punishment.trim().isEmpty || widget.punishment == '?';
+
+  /// Escribiendo el castigo nuevo.
+  bool _editing = false;
+  late final _text = TextEditingController(
+    text: _empty ? '' : widget.punishment,
+  );
+
+  @override
+  void dispose() {
+    _text.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final text = _text.text.trim();
+    if (text.isEmpty) return;
+    widget.onEdit!(text);
+    Navigator.of(context).pop();
+  }
+
+  Future<void> _remove() async {
+    final sure = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('¿Quitar este castigo?'),
+        content: const Text('La ruleta queda con un campo menos.'),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: context.surfaces.accent,
+            ),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.coral,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Quitar'),
+          ),
+        ],
+      ),
+    );
+    if (sure != true || !mounted) return;
+    widget.onRemove!();
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = PunishmentRoulette.colors[widget.index % 10];
+    final onColor = color == AppColors.yellow ? AppColors.ink : Colors.white;
+    final big = TextStyle(
+      fontFamily: AppFonts.display,
+      fontSize: 28,
+      fontWeight: FontWeight.w600,
+      height: 1.15,
+      color: onColor,
+    );
+    final action = OutlinedButton.styleFrom(
+      foregroundColor: onColor,
+      side: BorderSide(color: onColor, width: 2),
+      minimumSize: const Size(0, 44),
+      textStyle: const TextStyle(
+        fontFamily: AppFonts.body,
+        fontSize: 16,
+        fontWeight: FontWeight.w800,
+      ),
+    );
+    return Dialog(
       backgroundColor: color,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
       child: Padding(
@@ -680,7 +798,7 @@ Future<void> showPunishmentField(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Campo ${index + 1}',
+              'Campo ${widget.index + 1}',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontWeight: FontWeight.w800,
@@ -688,18 +806,70 @@ Future<void> showPunishmentField(
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              empty ? 'Todavía no tiene castigo.' : punishment,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: AppFonts.display,
-                fontSize: 28,
-                fontWeight: FontWeight.w600,
-                height: 1.15,
-                color: onColor,
+            if (_editing) ...[
+              TextField(
+                key: const ValueKey('castigo'),
+                controller: _text,
+                autofocus: true,
+                maxLength: _PunishmentFieldDialog.maxLength,
+                textCapitalization: TextCapitalization.sentences,
+                textAlign: TextAlign.center,
+                style: big.copyWith(fontSize: 22, color: AppColors.ink),
+                cursorColor: AppColors.ink,
+                decoration: const InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  hintText: 'Escribe el castigo',
+                  counterText: '',
+                ),
+                onSubmitted: (_) => _save(),
               ),
-            ),
-            const SizedBox(height: 12),
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: AppColors.ink,
+                  minimumSize: const Size.fromHeight(48),
+                ),
+                icon: const Icon(Icons.check),
+                label: const Text('Guardar'),
+                onPressed: _save,
+              ),
+            ] else ...[
+              Text(
+                _empty ? 'Todavía no tiene castigo.' : widget.punishment,
+                textAlign: TextAlign.center,
+                style: big,
+              ),
+              if (widget.onEdit != null || widget.onRemove != null) ...[
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    if (widget.onEdit != null)
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          style: action,
+                          icon: const Icon(Icons.edit),
+                          label: const Text('Editar'),
+                          onPressed: () => setState(() => _editing = true),
+                        ),
+                      ),
+                    if (widget.onEdit != null && widget.onRemove != null)
+                      const SizedBox(width: 10),
+                    if (widget.onRemove != null)
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          style: action,
+                          icon: const Icon(Icons.delete_outline),
+                          label: const Text('Quitar'),
+                          onPressed: _remove,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ],
+            const SizedBox(height: 4),
             TextButton(
               style: TextButton.styleFrom(foregroundColor: onColor),
               onPressed: () => Navigator.of(context).pop(),
@@ -708,8 +878,8 @@ Future<void> showPunishmentField(
           ],
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _EagerPan extends PanGestureRecognizer {

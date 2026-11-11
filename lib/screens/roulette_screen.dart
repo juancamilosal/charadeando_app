@@ -208,6 +208,54 @@ class _RouletteSetupViewState extends ConsumerState<RouletteSetupView> {
     ),
   );
 
+  /// Al tocar un castigo de la ruleta: "Editar" lo cambia por [text] y
+  /// "Quitar" (con [text] null) quita ese campo. Si los ponía la app, pasa a
+  /// "Jugadores y app" con los mismos castigos que se ven, para que solo
+  /// cambie el que se tocó. Queda guardado para la próxima vez.
+  void _editField(int index, String? text) {
+    final source = _source;
+    final written = source == null || source == PunishmentSource.system
+        ? [
+            for (final p in _preview)
+              if (p == '?') '' else p,
+          ]
+        : _written;
+    if (index >= written.length) return;
+    if (text == null) {
+      if (written.length <= RouletteSetup.minFields) return;
+      written.removeAt(index);
+    } else {
+      written[index] = text;
+    }
+    _changed(() {
+      _fields = written.length;
+      if (source == null || source == PunishmentSource.system) {
+        _source = PunishmentSource.mixed;
+      }
+      for (var i = 0; i < _controllers.length; i++) {
+        _controllers[i].text = i < written.length ? written[i] : '';
+      }
+    });
+    final now = _source!;
+    ref
+        .read(punishmentStoreProvider)
+        .save(
+          RouletteSetup(
+            source: now,
+            written: written,
+            punishments: now == PunishmentSource.own
+                ? written
+                : Roulette.completeMixed(
+                    written,
+                    _fields,
+                    _random,
+                    pool: _pool,
+                  ),
+          ),
+        )
+        .ignore();
+  }
+
   /// Algo cambió en la configuración: la ruleta vuelve a mostrarlo (y la
   /// hoja de "Personalizar castigos", si está abierta).
   void _changed(VoidCallback change) {
@@ -267,6 +315,8 @@ class _RouletteSetupViewState extends ConsumerState<RouletteSetupView> {
                 random: _random,
                 onBeforeSpin: _beforeSpin,
                 onSkip: widget.onSkip,
+                // Tocar un castigo deja editarlo o quitarlo.
+                onEditField: _editField,
                 // Deslizar encima baja la pantalla, no gira la ruleta.
                 dragToSpin: false,
                 onDone: () {},
