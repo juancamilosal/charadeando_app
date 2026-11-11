@@ -28,8 +28,9 @@ detalles de cada parte están en `README.md`, `server/README.md` y
 ## Lanzamiento en Google Play (en qué va)
 
 - App `com.valkiriacode.charadeando` en prueba cerrada. **La última
-  subida a Play es 13 (1.0.0)** (29 oct 2026, probada en el celular por el
-  usuario). `develop` va en 14 (1.0.0), sin subir: "Otra categoría con
+  subida a Play es 14 (1.0.0)** (prueba cerrada, aprobada el 11 nov 2026;
+  falta probarla y enviarla a producción). `develop` va en 15 (1.0.0), sin
+  cambios todavía. 14 (1.0.0): "Otra categoría con
   este puntaje" en el resultado final (la partida siguiente empieza con
   los puntos de ahora, con los mismos equipos; aviso en Categorías y
   "Siguen sumando" en la configuración), el botón atrás del celular en
@@ -37,7 +38,8 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   la app (hace lo mismo que la flecha de arriba), al tocar un castigo de
   la ruleta se puede editar o quitar, y la palabra que
   estaba en pantalla al acabarse el tiempo aparece como pasada en la lista
-  del turno. Fotomímica repite fotos porque solo hay 87 objetos: queda
+  del turno; con ella se completó el estado de comerciante a nivel de la
+  app (Sí, sin URL de Condiciones del Servicio). Fotomímica repite fotos porque solo hay 87 objetos: queda
   para otra ocasión (más objetos y marcar como vistas solo las que salen). Historial: 8 (1.0.0), enlace
   a la política de privacidad en Ajustes; 9 (1.0.0): inclinación más rápida (28°, 60 ms medidos
   en tiempo y no en lecturas), "¡Correcto!" 0,5 s y "Ponte el celular en
