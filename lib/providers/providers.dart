@@ -265,6 +265,32 @@ final gameControllerProvider = NotifierProvider<GameController, GameState>(
   GameController.new,
 );
 
+/// "Otra categoría con este puntaje": los equipos y los puntos que llevan
+/// mientras eligen la categoría siguiente. Null si la próxima partida
+/// empieza de cero.
+class ScoreCarry {
+  const ScoreCarry(this.groups, this.scores);
+
+  final List<Group> groups;
+  final List<int> scores;
+}
+
+class ScoreCarryController extends Notifier<ScoreCarry?> {
+  @override
+  ScoreCarry? build() => null;
+
+  /// Siguen sumando: la próxima partida empieza con estos puntos.
+  void keep(List<Group> groups, List<int> scores) =>
+      state = ScoreCarry(List.unmodifiable(groups), List.unmodifiable(scores));
+
+  /// "Empezar de cero", o ya empezó la partida que los usa.
+  void clear() => state = null;
+}
+
+final scoreCarryProvider = NotifierProvider<ScoreCarryController, ScoreCarry?>(
+  ScoreCarryController.new,
+);
+
 final turnVideoProvider = NotifierProvider<TurnVideoController, TurnVideoState>(
   TurnVideoController.new,
 );

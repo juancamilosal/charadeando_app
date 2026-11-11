@@ -83,7 +83,12 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
   /// Otra partida con la misma configuración: las palabras se vuelven a
   /// escribir o a pedir.
   void _playAgain() {
-    final config = ref.read(gameControllerProvider).config;
+    ref.read(scoreCarryProvider.notifier).clear();
+    // Otra partida empieza de cero, aunque esta viniera sumando.
+    final config = ref
+        .read(gameControllerProvider)
+        .config
+        .copyWith(clearStartScores: true);
     ref.read(gameControllerProvider.notifier).configure(config);
     context.go(
       config.wordSource == WordSource.random ? Routes.autoWords : Routes.words,
@@ -92,9 +97,21 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
 
   /// A la configuración, con la de esta partida.
   void _changeConfig() {
-    final config = ref.read(gameControllerProvider).config;
+    ref.read(scoreCarryProvider.notifier).clear();
+    final config = ref
+        .read(gameControllerProvider)
+        .config
+        .copyWith(clearStartScores: true);
     ref.read(gameControllerProvider.notifier).configure(config);
     context.go(Routes.config);
+  }
+
+  /// "Otra categoría con este puntaje": eligen otra categoría y la partida
+  /// siguiente empieza con los puntos de ahora, con los mismos equipos.
+  void _keepScores() {
+    final game = ref.read(gameControllerProvider);
+    ref.read(scoreCarryProvider.notifier).keep(game.groups, game.scores);
+    context.go(Routes.categories);
   }
 
   @override
@@ -110,17 +127,6 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
         : '¡Ganó ${leaders.single}!';
 
     final scores = game.scores;
-    // Los grupos que son equipos guardados, con su acumulado (ya con esta
-    // partida, que se suma al abrir la pantalla).
-    final saved = {
-      for (final t in ref.watch(teamsProvider).value ?? const <SavedTeam>[])
-        t.id: t,
-    };
-    final accumulated = [
-      if (game.inGroups && game.historySaved)
-        for (final g in game.groups)
-          if (saved[g.teamId] case final team?) (g, team.total),
-    ];
     final best = game.inGroups ? scores[game.leaders.first] : game.totalScore;
     return PopScope(
       canPop: false,
@@ -159,36 +165,6 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
                             scores: scores,
                             // El primero, resaltado.
                             highlight: game.isTie ? null : game.leaders.single,
-                          ),
-                        ],
-                        // Con equipos guardados, el puntaje que llevan
-                        // sumando todas sus partidas (en cualquier
-                        // categoría), hasta que se reinicia en Equipos.
-                        if (accumulated.isNotEmpty) ...[
-                          const SizedBox(height: 20),
-                          Text(
-                            'Puntaje acumulado',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontFamily: AppFonts.display,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w600,
-                              color: context.onBackdrop,
-                            ),
-                          ),
-                          Text(
-                            'Suma todas sus partidas. Se reinicia en Equipos.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: context.onBackdrop.withValues(alpha: 0.85),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Scoreboard(
-                            groups: [for (final (g, _) in accumulated) g],
-                            scores: [for (final (_, t) in accumulated) t],
                           ),
                         ],
                         // La misma ruleta de la sección, con su
@@ -250,10 +226,21 @@ class _FinalResultScreenState extends ConsumerState<FinalResultScreen> {
                     ),
                   ),
                   const SizedBox(height: 4),
+                  // La partida siguiente, en otra categoría, empieza con los
+                  // puntos de ahora.
+                  if (game.inGroups)
+                    QuietButton(
+                      icon: Icons.add_circle_outline,
+                      label: 'Otra categoría con este puntaje',
+                      onPressed: _keepScores,
+                    ),
                   QuietButton(
                     icon: Icons.arrow_back,
                     label: 'Salir de la categoría',
-                    onPressed: () => context.go(Routes.categories),
+                    onPressed: () {
+                      ref.read(scoreCarryProvider.notifier).clear();
+                      context.go(Routes.categories);
+                    },
                   ),
                 ],
               ),

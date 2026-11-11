@@ -42,6 +42,12 @@ Future<void> choosePlay(BuildContext context, WidgetRef ref) async {
   // Mientras eligen, se confirma con el sistema si sigue el TV conectado
   // (algunos celulares no avisan al dejar de duplicar la pantalla).
   confirmTvConnected(ref).ignore();
+  // Si siguen sumando puntos, la partida es con los mismos equipos: va
+  // directo a la configuración (la rápida no tiene equipos).
+  if (ref.read(scoreCarryProvider) != null) {
+    context.go(Routes.config);
+    return;
+  }
   final choice = await showModalBottomSheet<PlayChoice>(
     context: context,
     useSafeArea: true,

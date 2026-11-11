@@ -49,7 +49,8 @@ class TeamsController extends AsyncNotifier<List<SavedTeam>> {
   Future<void> recordGame(GameState game) async {
     final teams = await future;
     if (!game.inGroups) return;
-    final scores = game.scores;
+    // El mejor puntaje es el de esta partida, sin los puntos que traían.
+    final scores = game.gameScores;
     final leaders = game.leaders;
     final winner = leaders.length == 1 ? leaders.single : null;
     final list = [...teams];
@@ -63,14 +64,6 @@ class TeamsController extends AsyncNotifier<List<SavedTeam>> {
       changed = true;
     }
     if (changed) await _update(list);
-  }
-
-  /// "Reiniciar puntajes": el acumulado de todos los equipos vuelve a 0. El
-  /// historial (partidas, victorias y mejor puntaje) no cambia.
-  Future<void> resetTotals() async {
-    final teams = await future;
-    if (teams.every((t) => t.total == 0)) return;
-    await _update([for (final t in teams) t.copyWith(total: 0)]);
   }
 
   /// Id para un equipo nuevo.

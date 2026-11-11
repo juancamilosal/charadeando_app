@@ -74,6 +74,7 @@ Future<ProviderContainer> pumpConfig(
   ConfigStore? store,
   TeamStore? teams,
   List<Override> overrides = const [],
+  void Function(ProviderContainer container)? setUp,
 }) async {
   tester.view.physicalSize = const Size(1080, 2400);
   addTearDown(tester.view.reset);
@@ -89,6 +90,7 @@ Future<ProviderContainer> pumpConfig(
   if (config != null) {
     container.read(gameControllerProvider.notifier).configure(config);
   }
+  setUp?.call(container);
   final router = GoRouter(
     initialLocation: Routes.config,
     routes: [

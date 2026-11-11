@@ -45,6 +45,11 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
       _difficulty = Difficulty.mixed;
       _config = _config.copyWith(difficulty: _difficulty);
     }
+    // "Otra categoría con este puntaje": juegan los mismos equipos.
+    final carry = ref.read(scoreCarryProvider);
+    if (carry != null) {
+      _config = _config.copyWith(inGroups: true, groups: carry.groups);
+    }
     _teams = [
       for (final g in _config.groups)
         if (g.name.trim().isNotEmpty) g,
@@ -233,7 +238,10 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
 
   void _continue() {
     final tv = _tvMode;
-    final teams = _currentTeams(ref.read(teamsProvider).value ?? const []);
+    final carry = ref.read(scoreCarryProvider);
+    final teams =
+        carry?.groups ??
+        _currentTeams(ref.read(teamsProvider).value ?? const []);
     final missingNames = _inGroups && teams.length < GameConfig.minGroups;
     final missing = _missingChoices;
     if (missingNames || missing.isNotEmpty) {
@@ -260,8 +268,12 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
             judgePhone: !tv && ref.read(judgeProvider.notifier).room != null,
             difficulty: _automatic && !_noDifficulty ? _difficulty : null,
             clearDifficulty: _noDifficulty,
+            // Si siguen sumando, empiezan con los puntos que traían.
+            startScores: carry?.scores,
+            clearStartScores: carry == null,
           ),
         );
+    ref.read(scoreCarryProvider.notifier).clear();
     context.go(
       _config.wordSource == WordSource.random ? Routes.autoWords : Routes.words,
     );
@@ -276,6 +288,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final carry = ref.watch(scoreCarryProvider);
     final automatic = _automatic;
     const gap = SizedBox(height: 14);
     // Se vuelve a dibujar al conectar o desconectar el TV, y se avisa.
@@ -319,15 +332,21 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
             children: [
               CategoryHeader(config: _config),
               const SizedBox(height: 16),
-              // Lo primero: sin grupos (viene elegido) o en grupos.
-              PlayModeSelector(
-                inGroups: _inGroups,
-                onChanged: (v) => _update(_config.copyWith(inGroups: v)),
-              ),
-              const SizedBox(height: 20),
-              _RandomButton(onTap: _autoFill),
-              gap,
-              if (_inGroups) ...[_teamsSection(), gap],
+              // Si siguen sumando, los equipos y sus puntos no se cambian.
+              if (carry != null) ...[
+                _carrySection(carry),
+                gap,
+              ] else ...[
+                // Lo primero: sin grupos (viene elegido) o en grupos.
+                PlayModeSelector(
+                  inGroups: _inGroups,
+                  onChanged: (v) => _update(_config.copyWith(inGroups: v)),
+                ),
+                const SizedBox(height: 20),
+                _RandomButton(onTap: _autoFill),
+                gap,
+                if (_inGroups) ...[_teamsSection(), gap],
+              ],
               if (automatic) ...[
                 _autoGameSection(),
                 gap,
@@ -511,6 +530,58 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   /// "Equipos": se eligen de 2 a 4 de los guardados (tocar para marcar),
   /// con "Nuevo equipo" para crear otro. Los de la configuración aleatoria
   /// también se ven, marcados como de esta partida.
+  /// "Siguen sumando": los mismos equipos con los puntos que traen, y
+  /// "Empezar de cero" para jugar esta partida desde 0.
+  Widget _carrySection(ScoreCarry carry) {
+    final order = [for (var i = 0; i < carry.groups.length; i++) i]
+      ..sort((a, b) => carry.scores[b].compareTo(carry.scores[a]));
+    return ConfigSection(
+      icon: Icons.add_circle,
+      title: 'Siguen sumando',
+      children: [
+        const Text(
+          'Los mismos equipos empiezan con los puntos que llevan.',
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
+        for (final i in order)
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  carry.groups[i].name,
+                  style: const TextStyle(
+                    fontFamily: AppFonts.display,
+                    fontSize: 19,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Text(
+                '${carry.scores[i]} ${carry.scores[i] == 1 ? 'pt' : 'pts'}',
+                style: TextStyle(
+                  fontFamily: AppFonts.display,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: context.surfaces.value,
+                ),
+              ),
+            ],
+          ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            style: TextButton.styleFrom(
+              foregroundColor: context.surfaces.accent,
+            ),
+            icon: const Icon(Icons.restart_alt),
+            label: const Text('Empezar de cero'),
+            onPressed: () => ref.read(scoreCarryProvider.notifier).clear(),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _teamsSection() {
     final saved = ref.watch(teamsProvider).value ?? const <SavedTeam>[];
     final chosen = _currentTeams(saved);

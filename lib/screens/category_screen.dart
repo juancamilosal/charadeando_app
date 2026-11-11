@@ -121,6 +121,12 @@ class CategoryScreen extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
             children: [
+              // "Otra categoría con este puntaje": recuerda los puntos que
+              // llevan mientras eligen.
+              if (ref.watch(scoreCarryProvider) case final carry?) ...[
+                _CarryBanner(carry: carry),
+                const SizedBox(height: 16),
+              ],
               CategoryTabSelector(
                 selected: tab,
                 onChanged: (t) =>
@@ -944,6 +950,62 @@ class _Snapshot extends StatelessWidget {
         child: ColoredBox(
           color: const Color(0xFFECE8E2),
           child: Image.asset(photo, fit: BoxFit.cover),
+        ),
+      ),
+    );
+  }
+}
+
+/// Arriba de Categorías mientras siguen sumando: los puntos de cada equipo
+/// y "Empezar de cero".
+class _CarryBanner extends ConsumerWidget {
+  const _CarryBanner({required this.carry});
+
+  final ScoreCarry carry;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final order = [for (var i = 0; i < carry.groups.length; i++) i]
+      ..sort((a, b) => carry.scores[b].compareTo(carry.scores[a]));
+    return Material(
+      color: AppColors.green,
+      borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Siguen sumando: elijan la categoría',
+              style: TextStyle(
+                fontFamily: AppFonts.display,
+                fontSize: 19,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              [
+                for (final i in order)
+                  '${carry.groups[i].name} ${carry.scores[i]}',
+              ].join(' · '),
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                style: TextButton.styleFrom(foregroundColor: Colors.white),
+                icon: const Icon(Icons.restart_alt),
+                label: const Text('Empezar de cero'),
+                onPressed: () => ref.read(scoreCarryProvider.notifier).clear(),
+              ),
+            ),
+          ],
         ),
       ),
     );

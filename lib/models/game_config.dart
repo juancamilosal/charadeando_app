@@ -186,6 +186,7 @@ class GameConfig {
     this.resolution = VideoResolution.hd,
     this.quick = false,
     this.judgePhone = false,
+    this.startScores = const [],
   });
 
   static const minGroups = 2;
@@ -216,6 +217,10 @@ class GameConfig {
   /// la página que abre el QR). Mientras el juez está conectado, la
   /// inclinación no marca.
   final bool judgePhone;
+
+  /// "Otra categoría con este puntaje": los puntos con que empieza cada
+  /// grupo, los que traían de la partida anterior. Vacío si empiezan en 0.
+  final List<int> startScores;
   final Duration turnDuration;
   final int rounds;
   final List<Group> groups;
@@ -362,6 +367,8 @@ class GameConfig {
     VideoResolution? resolution,
     bool? quick,
     bool? judgePhone,
+    List<int>? startScores,
+    bool clearStartScores = false,
   }) {
     return GameConfig(
       turnDuration: turnDuration ?? this.turnDuration,
@@ -382,6 +389,9 @@ class GameConfig {
       resolution: resolution ?? this.resolution,
       quick: quick ?? this.quick,
       judgePhone: judgePhone ?? this.judgePhone,
+      startScores: clearStartScores
+          ? const []
+          : startScores ?? this.startScores,
     );
   }
 }

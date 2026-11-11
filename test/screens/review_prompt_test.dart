@@ -137,6 +137,9 @@ void main() {
     await finalScreen(tester, [3, 1]);
     await tester.pump(const Duration(milliseconds: 500));
     await tester.ensureVisible(find.text('Girar'));
+    // Que no quede pegado al borde, junto a los botones de abajo.
+    await tester.drag(find.byType(ListView).first, const Offset(0, -300));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Girar'));
     await tester.pumpAndSettle();
     expect(find.text('Ruleta'), findsOneWidget);

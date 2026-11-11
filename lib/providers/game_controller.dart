@@ -71,8 +71,13 @@ class GameState {
   /// Puntos de toda la partida, sumando los de todos los grupos.
   int get totalScore => scores.fold(0, (a, b) => a + b);
 
+  /// Puntos de cada grupo, contando los que traían si siguen sumando de la
+  /// partida anterior ([GameConfig.startScores]).
   List<int> get scores {
-    final scores = List.filled(groups.length, 0);
+    final start = config.startScores;
+    final scores = start.length == groups.length
+        ? [...start]
+        : List.filled(groups.length, 0);
     for (final turn in turns) {
       scores[turn.groupIndex] += turn.points(config.scoringMode);
     }
@@ -94,6 +99,15 @@ class GameState {
   /// Índices de los grupos que giran la ruleta de castigos: los de menos
   /// puntos. Vacío si todos empatan.
   List<int> get losers => Roulette.losers(scores);
+
+  /// Puntos de cada grupo solo en esta partida, sin los que traían.
+  List<int> get gameScores {
+    final scores = List.filled(groups.length, 0);
+    for (final turn in turns) {
+      scores[turn.groupIndex] += turn.points(config.scoringMode);
+    }
+    return scores;
+  }
 
   GameState copyWith({
     GameConfig? config,

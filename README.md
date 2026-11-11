@@ -141,18 +141,21 @@ la cámara frontal graba a los participantes para revivir las risas.
   de castigos ahora están en la barra de abajo. Debajo va directo el
   selector "Todas | Mías", sin texto encima. "Salir de la categoría" y
   salir del turno llevan a Categorías.
+- "Otra categoría con este puntaje": en el resultado final de una partida
+  por equipos, encima de "Salir de la categoría" y con su mismo estilo.
+  Lleva a Categorías con un aviso verde ("Siguen sumando: elijan la
+  categoría", con los puntos y "Empezar de cero"); al elegir la categoría
+  va directo a la configuración (sin la partida rápida), donde "Siguen
+  sumando" muestra los mismos equipos con sus puntos (no se cambian ni se
+  juega sin equipos). La partida empieza con esos puntos
+  (`GameConfig.startScores`, `scoreCarryProvider`) y todo sigue sumando:
+  resultados de cada turno, resultado final y la ruleta (para el último
+  en el total). "Jugar otra vez", "Cambiar configuración" y "Salir de la
+  categoría" empiezan de cero. El mejor puntaje de un equipo guardado
+  cuenta solo lo de esa partida (`GameState.gameScores`).
 - Equipos (`lib/screens/teams_screen.dart`): la lista de equipos guardados,
   cada uno con su nombre, su color, un ícono o emoji y su
-  historial (partidas, victorias y mejor puntaje) y, junto al nombre, su
-  **puntaje acumulado** ("27 puntos"): cada partida que termina con equipos
-  guardados le suma sus puntos, en cualquier categoría, así una familia
-  sigue la competencia de Animales a Películas sin perder la cuenta
-  (`SavedTeam.total`, campo `acumulado` en `equipos.json`). "Reiniciar
-  puntajes", arriba a la derecha (solo si algún equipo tiene puntos),
-  pregunta y los pone todos en 0 sin tocar el historial. El resultado
-  final muestra también la tabla "Puntaje acumulado" de los equipos
-  guardados; la ruleta de castigos sigue siendo para quien perdió esa
-  partida. "Crear equipo" abre el
+  historial (partidas, victorias y mejor puntaje de una partida). "Crear equipo" abre el
   editor: nombre (obligatorio, hasta 24 letras, sin repetir), color de la
   paleta de la app e ícono o emoji. Los jugadores se quitaron del editor
   (quedan como idea: decir a quién le toca en cada turno); los que se

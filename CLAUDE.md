@@ -29,9 +29,10 @@ detalles de cada parte están en `README.md`, `server/README.md` y
 
 - App `com.valkiriacode.charadeando` en prueba cerrada. **La última
   subida a Play es 13 (1.0.0)** (29 oct 2026, probada en el celular por el
-  usuario). `develop` va en 14 (1.0.0), sin subir: puntaje acumulado de
-  los equipos guardados (en Equipos y en el resultado final, con
-  "Reiniciar puntajes"; la ruleta sigue por partida) y la palabra que
+  usuario). `develop` va en 14 (1.0.0), sin subir: "Otra categoría con
+  este puntaje" en el resultado final (la partida siguiente empieza con
+  los puntos de ahora, con los mismos equipos; aviso en Categorías y
+  "Siguen sumando" en la configuración) y la palabra que
   estaba en pantalla al acabarse el tiempo aparece como pasada en la lista
   del turno. Fotomímica repite fotos porque solo hay 87 objetos: queda
   para otra ocasión (más objetos y marcar como vistas solo las que salen). Historial: 8 (1.0.0), enlace
