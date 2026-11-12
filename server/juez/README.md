@@ -91,9 +91,10 @@ sala; abre `localhost:8787/juez/<CODIGO>` en un navegador (en otro dice
 ## Publicar en Cloudflare
 
 Se publica con **Workers Builds**, carpeta raíz `/server/juez`.
-**Por ahora desde la rama `develop`**: `main` queda para cuando se publique
-la app en Play Store. Ese día se cambia la rama de producción a `main` en
-**Workers & Pages → charadeando-juez → Settings → Builds**.
+La app se publicó en Play Store el 12 nov 2026: la rama de producción
+pasa a ser **`main`** (se cambia en **Workers & Pages → charadeando-juez →
+Settings → Builds**). Así el Celular juez se actualiza solo cuando una
+versión llega a producción y se une en `main`.
 
 ### Configuración (una sola vez)
 

@@ -73,9 +73,9 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   productos activos (opción de compra `comprar`) y verificadores de
   licencia; las compras de prueba funcionan (los errores intermitentes de
   Google del primer día eran por productos recién creados).
-- Los 3 canjes de `codigos_canjes` en Directus están **pausados** (prefijo
-  `pausado-` en `dispositivo`) para probar sin Premium; se reactivan
-  quitando el prefijo, con confirmación del usuario.
+- Los 3 canjes de `codigos_canjes` en Directus se reactivaron el 12 nov
+  2026 (se quitó el prefijo `pausado-` de `dispositivo`, con confirmación
+  del usuario).
 - En `codigos` hay un código `TODO` para los revisores de Google (20 usos,
   sin vencimiento), puesto en Play Console > Detalles de acceso. **No se
   pausa ni se borra:** Google lo usa en cada actualización.
@@ -113,11 +113,12 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   de producción.
 - 12 nov 2026: **Charadeando está en Google Play**. Clasificación IARC
   activa (correo con el Global Rating ID, para otras tiendas IARC).
-- Sigue, con confirmación del usuario: unir en `main` lo lanzado (la 14
-  sale del commit `045151b` de `develop`), cambiar el Worker del juez a
-  `main` en Cloudflare y decidir si se reactivan los 3 canjes pausados.
-  Cada versión nueva: primero a la prueba cerrada y luego "Promocionar
-  versión" a producción.
+- 12 nov 2026: `main` quedó en el commit `045151b`, el de la 14 (1.0.0)
+  publicada. Desde ahora `main` = lo que está en Play Store: cada versión
+  que llegue a producción se une en `main`. Falta que el usuario cambie el
+  Worker del juez a `main` en Cloudflare (Workers > charadeando-juez >
+  Settings > Builds). Cada versión nueva: primero a la prueba cerrada y
+  luego "Promocionar versión" a producción.
 
 ## Reglas de seguridad
 
