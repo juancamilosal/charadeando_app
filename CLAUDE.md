@@ -27,9 +27,11 @@ detalles de cada parte están en `README.md`, `server/README.md` y
 
 ## Lanzamiento en Google Play (en qué va)
 
-- App `com.valkiriacode.charadeando` en prueba cerrada. **La última
-  subida a Play es 14 (1.0.0)** (prueba cerrada, aprobada el 11 nov 2026;
-  falta probarla y enviarla a producción). `develop` va en 15 (1.0.0), sin
+- App `com.valkiriacode.charadeando` **publicada en Google Play
+  (producción) el 12 nov 2026** con la 14 (1.0.0), en todos los países
+  (177 + resto del mundo). La prueba cerrada sigue para probar cada versión
+  antes de promocionarla a producción. **La última subida a Play es 14
+  (1.0.0)** (prueba cerrada y producción). `develop` va en 15 (1.0.0), sin
   cambios todavía. 14 (1.0.0): "Otra categoría con
   este puntaje" en el resultado final (la partida siguiente empieza con
   los puntos de ahora, con los mismos equipos; aviso en Categorías y
@@ -109,9 +111,13 @@ detalles de cada parte están en `README.md`, `server/README.md` y
 - 11 nov 2026: **Google aprobó el acceso a producción** (correo "Your app
   has been granted Google Play production access"). Falta crear la versión
   de producción.
-- Sigue: prueba cerrada (12+ personas, 14 días) con la guía
-  `branding/prueba-cerrada.md` (pasos, mensaje de invitación y tabla de
-  comentarios para pedir producción) y luego producción.
+- 12 nov 2026: **Charadeando está en Google Play**. Clasificación IARC
+  activa (correo con el Global Rating ID, para otras tiendas IARC).
+- Sigue, con confirmación del usuario: unir en `main` lo lanzado (la 14
+  sale del commit `045151b` de `develop`), cambiar el Worker del juez a
+  `main` en Cloudflare y decidir si se reactivan los 3 canjes pausados.
+  Cada versión nueva: primero a la prueba cerrada y luego "Promocionar
+  versión" a producción.
 
 ## Reglas de seguridad
 
