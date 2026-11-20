@@ -165,7 +165,8 @@ detalles de cada parte están en `README.md`, `server/README.md` y
 - Cómo instalar o actualizar la extensión: `server/README.md`.
 - ¿Más o menos? (rama `feature/mas-o-menos`, sin mezclar en `develop`
   hasta que el usuario lo apruebe): colección `mas_menos` creada el 20 nov
-  2026 (no pública) con 60 datos cargados como borrador. **Los datos viven
+  2026 (no pública) con 300 datos publicados (100 por dificultad, 20 nov
+  2026), todos gratis. **Los datos viven
   solo en `mas_menos`**, no en ningún repositorio; las tandas nuevas se
   validan con `validar_datos.py` de `palabras-juego` (que lee las preguntas
   de Directus para no repetir) y el archivo temporal se borra.
