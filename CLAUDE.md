@@ -32,8 +32,9 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   (producción) el 12 nov 2026** con la 14 (1.0.0), en todos los países
   (177 + resto del mundo). La prueba cerrada sigue para probar cada versión
   antes de promocionarla a producción. **La última subida a Play es 15
-  (1.0.0)**, en la prueba cerrada desde el 20 nov 2026 (producción sigue
-  en la 14). `develop` va en 16 (1.0.0), sin cambios todavía. 15 (1.0.0):
+  (1.0.0)**: aprobada en la prueba cerrada el 20 nov 2026 y promovida a
+  producción ese mismo día (en revisión de Google; producción sigue en la
+  14 hasta que la aprueben, y entonces se une `develop` en `main`). `develop` va en 16 (1.0.0), sin cambios todavía. 15 (1.0.0):
   el juego nuevo "¿Más o menos?" (en "Más juegos"; Fácil 1, Normal 2 y
   Difícil 5 puntos) y el plugin de Gradle de Android en 9.1.1. 14 (1.0.0): "Otra categoría con
   este puntaje" en el resultado final (la partida siguiente empieza con
