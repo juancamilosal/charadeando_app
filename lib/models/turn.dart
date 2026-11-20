@@ -36,5 +36,5 @@ class Turn {
   ];
 
   int points(ScoringMode mode) =>
-      hits.fold(0, (sum, word) => sum + mode.pointsFor(word.wordCount));
+      hits.fold(0, (sum, word) => sum + mode.pointsOf(word));
 }

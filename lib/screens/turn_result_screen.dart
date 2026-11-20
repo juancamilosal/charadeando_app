@@ -285,7 +285,10 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
                         const SizedBox(height: 8),
                         // Por frase cada acierto es un punto: se cuentan
                         // aciertos.
-                        quick || mode == ScoringMode.perPhrase
+                        // En ¿Más o menos? cada dato vale 1, 2 o 5:
+                        // siempre se ven los puntos.
+                        (quick || mode == ScoringMode.perPhrase) &&
+                                !game.config.moreOrLess
                             ? BigScore(value: hits, label: 'Aciertos')
                             : BigScore(
                                 value: turn.points(mode),

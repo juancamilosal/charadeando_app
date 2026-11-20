@@ -389,7 +389,7 @@ JudgeState judgeTurnSummary(
         JudgeWord(
           e.word.text,
           hit: e.outcome == WordOutcome.hit,
-          points: mode.pointsFor(e.word.wordCount),
+          points: mode.pointsOf(e.word),
           answer: e.word.answer,
         ),
     ],

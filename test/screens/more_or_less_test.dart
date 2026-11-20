@@ -19,16 +19,18 @@ import 'config_screen_test.dart'
     show MemoryConfigStore, pumpConfig, tapContinue;
 
 /// Un dato de prueba.
-Word fact(int id, {String? note}) => FactsBank.wordOf(
-  FactItem(
-    id: '$id',
-    question: '¿Cuántas cosas tiene el dato número $id?',
-    answer: id,
-    unit: 'cosas',
-    topic: 'Pruebas',
-    note: note,
-  ),
-);
+Word fact(int id, {String? note, String difficulty = 'FACIL'}) =>
+    FactsBank.wordOf(
+      FactItem(
+        id: '$id',
+        question: '¿Cuántas cosas tiene el dato número $id?',
+        answer: id,
+        unit: 'cosas',
+        topic: 'Pruebas',
+        note: note,
+        difficulty: difficulty,
+      ),
+    );
 
 /// Un banco que no pide nada y anota lo que se recuerda.
 class _RememberingBank extends FactsBank {
@@ -301,7 +303,31 @@ void main() {
     });
     tearDown(() => container.dispose());
 
-    test('cada dato acertado vale 1 punto y pasar no suma', () {
+    test('más difícil, más puntos: Fácil 1, Normal 2 y Difícil 5, sin '
+        'importar la puntuación', () {
+      final easy = fact(1);
+      final normal = fact(2, difficulty: 'NORMAL');
+      final hard = fact(3, difficulty: 'DIFICIL');
+      expect([easy.value, normal.value, hard.value], [1, 2, 5]);
+      final turn = Turn(
+        round: 1,
+        groupIndex: 0,
+        entries: [
+          TurnEntry(easy, WordOutcome.hit),
+          TurnEntry(normal, WordOutcome.hit),
+          TurnEntry(hard, WordOutcome.hit),
+          TurnEntry(fact(4, difficulty: 'DIFICIL'), WordOutcome.pass),
+        ],
+      );
+      expect(turn.points(ScoringMode.perPhrase), 8);
+      expect(turn.points(ScoringMode.perWord), 8);
+      // El juez también ve cuánto vale cada uno.
+      expect(ScoringMode.perPhrase.pointsOf(hard), 5);
+      // Las palabras siguen igual.
+      expect(ScoringMode.perWord.pointsOf(Word('El Rey León')), 3);
+    });
+
+    test('cada dato fácil acertado vale 1 punto y pasar no suma', () {
       final deck = state().currentDeck;
       // Las preguntas tienen muchas palabras, pero cada una vale 1.
       expect(deck.first.wordCount, greaterThan(3));
@@ -355,7 +381,7 @@ void main() {
         ),
       );
       expect(find.byType(FactView), findsOneWidget);
-      expect(find.text('PRUEBAS'), findsOneWidget);
+      expect(find.text('PRUEBAS · 1 PUNTO'), findsOneWidget);
       expect(
         find.text('¿Cuántas cosas tiene el dato número 8?'),
         findsOneWidget,

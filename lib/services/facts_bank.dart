@@ -96,6 +96,7 @@ class FactsBank {
     answer: fact.answerText,
     topic: fact.topic,
     note: fact.note,
+    value: fact.points,
   );
 
   /// Anota como jugados los datos de [words] (los que salieron en un

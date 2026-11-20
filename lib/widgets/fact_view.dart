@@ -20,10 +20,15 @@ class FactView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final topic = word.topic;
+    // Arriba, el tema y cuánto vale: "ANIMALES · 1 PUNTO".
+    final value = word.value;
+    final topic = [
+      ?word.topic?.toUpperCase(),
+      if (value != null) value == 1 ? '1 PUNTO' : '$value PUNTOS',
+    ].join(' · ');
     return Column(
       children: [
-        if (topic != null)
+        if (topic.isNotEmpty)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 3),
             decoration: BoxDecoration(
@@ -31,7 +36,7 @@ class FactView extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              topic.toUpperCase(),
+              topic,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(

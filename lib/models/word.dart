@@ -8,6 +8,7 @@ class Word {
     this.answer,
     this.topic,
     this.note,
+    this.value,
   }) : text = _normalize(text);
 
   final String text;
@@ -33,6 +34,11 @@ class Word {
   /// En "¿Más o menos?", el dato curioso que se ve en el resultado del
   /// turno.
   final String? note;
+
+  /// Puntos fijos que da al acertarla, sin importar la puntuación elegida.
+  /// En "¿Más o menos?" depende de la dificultad del dato (1, 2 o 5); null
+  /// en las palabras, que se cuentan por frase o por palabra.
+  final int? value;
 
   /// Es un dato de "¿Más o menos?" (pregunta y respuesta).
   bool get isFact => answer != null;

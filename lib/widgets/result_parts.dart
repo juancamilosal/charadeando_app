@@ -254,7 +254,7 @@ class _EntryRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                hit ? '+${mode.pointsFor(entry.word.wordCount)}' : '0',
+                hit ? '+${mode.pointsOf(entry.word)}' : '0',
                 style: TextStyle(
                   fontFamily: AppFonts.display,
                   fontSize: 17,

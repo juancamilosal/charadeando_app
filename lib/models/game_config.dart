@@ -24,6 +24,10 @@ enum ScoringMode {
     ScoringMode.perWord => wordCount,
     ScoringMode.perPhrase => 1,
   };
+
+  /// Puntos de [word] acertada: los suyos si los trae fijos (los datos de
+  /// ¿Más o menos?) o, si no, según su largo.
+  int pointsOf(Word word) => word.value ?? pointsFor(word.wordCount);
 }
 
 /// Cómo se marcan los aciertos durante un turno.
@@ -97,10 +101,10 @@ enum Difficulty {
 
   /// Qué es cada dificultad en "¿Más o menos?", donde se adivinan números.
   String get factDescription => switch (this) {
-    mixed => 'De todo: números pequeños, años y números grandes.',
-    easy => 'Números del 1 al 100. Ideal con niños.',
-    normal => 'Años: ¿en qué año pasó?',
-    hard => 'Números grandes, de muchas cifras.',
+    mixed => 'De todo: cada dato vale 1, 2 o 5 puntos según su dificultad.',
+    easy => 'Números del 1 al 100: 1 punto cada uno. Ideal con niños.',
+    normal => 'Años, ¿en qué año pasó?: 2 puntos cada uno.',
+    hard => 'Números grandes, de muchas cifras: 5 puntos cada uno.',
   };
 
   final String label;

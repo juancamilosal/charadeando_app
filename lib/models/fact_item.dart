@@ -51,6 +51,12 @@ class FactItem {
   /// `FACIL`, `NORMAL` o `DIFICIL`.
   final String? difficulty;
 
+  /// Puntos por acertarlo: más difícil, más puntos, porque toma más tiempo
+  /// adivinarlo. Fácil 1, Normal 2 y Difícil 5.
+  static const pointsByDifficulty = {'FACIL': 1, 'NORMAL': 2, 'DIFICIL': 5};
+
+  int get points => pointsByDifficulty[difficulty] ?? 1;
+
   /// La respuesta para leerla de lejos: "8 patas", "1969", "42.195
   /// metros". Los números de 5 cifras o más llevan puntos de miles; los
   /// de 4 (como los años) no.

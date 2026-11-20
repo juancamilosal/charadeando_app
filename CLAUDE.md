@@ -170,6 +170,7 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   solo en `mas_menos`**, no en ningún repositorio; las tandas nuevas se
   validan con `validar_datos.py` de `palabras-juego` (que lee las preguntas
   de Directus para no repetir) y el archivo temporal se borra.
+  Puntos por dato según la dificultad: Fácil 1, Normal 2, Difícil 5.
   Ruta `POST /juego/datos`. La respuesta es bigInteger: Directus la
   devuelve como texto y la extensión la pasa a número.
 

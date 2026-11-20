@@ -457,9 +457,14 @@ la cámara frontal graba a los participantes para revivir las risas.
   exacto. Aciertos y pases como siempre (inclinación, toque, Modo TV o
   celular juez, que también ve la pregunta y la respuesta; campo
   `respuesta` del Worker). Turnos de 1:30 a 3:00 de 30 en 30 s (1:30 por
-  defecto y en la partida rápida; `GameConfig.validTurn`), un punto por
-  dato (sin sección "Puntuación", como Fotomímica), dificultad Mezclada,
-  Fácil (1 a 100), Normal (años) o Difícil (números grandes). En el
+  defecto y en la partida rápida; `GameConfig.validTurn`). Más
+  difícil, más puntos, porque toma más tiempo adivinarlo: Fácil (1 a 100)
+  vale 1, Normal (años) 2 y Difícil (números grandes) 5
+  (`FactItem.pointsByDifficulty`, en `Word.value`; `ScoringMode.pointsOf`
+  lo usa en el marcador, el resultado, el juez y la ruleta). En Mezclada
+  cada dato vale según su dificultad. No hay sección "Puntuación", el
+  turno muestra "ANIMALES · 1 PUNTO" arriba de la pregunta y el resultado
+  del turno muestra los puntos (no los aciertos). En el
   resultado del turno cada dato muestra pregunta y respuesta, y el botón
   ⓘ abre el dato curioso (tocar la fila sigue corrigiendo la marca). El
   video lleva el tema, la pregunta y la respuesta. Necesita internet
