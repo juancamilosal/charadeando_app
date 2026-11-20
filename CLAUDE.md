@@ -9,7 +9,8 @@ detalles de cada parte están en `README.md`, `server/README.md` y
 - **App:** Charadeando, juego de charadas familiar en Flutter (Android
   primero) que graba el turno en video.
 - **Repositorio:** `juancamilosal/charadeando_app` (público). Se trabaja en
-  la rama **`develop`**. **`main` es solo para el lanzamiento en Play Store:**
+  la rama **`develop`**, siempre: **no se crean ramas nuevas salvo que el
+  usuario lo pida**. **`main` es solo para el lanzamiento en Play Store:**
   no se mezcla `develop` en `main` hasta lanzar.
 - **Idioma:** se responde en español. Textos de la app, código y comentarios
   también en español.
@@ -163,8 +164,7 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   gratis por ahora; la app los da gratis con `PhotoMimeBank.freeForNow`).
   Se agregan más con `server/scripts/importar-fotomimica.mjs`.
 - Cómo instalar o actualizar la extensión: `server/README.md`.
-- ¿Más o menos? (rama `feature/mas-o-menos`, sin mezclar en `develop`
-  hasta que el usuario lo apruebe): colección `mas_menos` creada el 20 nov
+- ¿Más o menos? (en `develop` desde el 20 nov 2026): colección `mas_menos` creada el 20 nov
   2026 (no pública) con 300 datos publicados (100 por dificultad, 20 nov
   2026), todos gratis. **Los datos viven
   solo en `mas_menos`**, no en ningún repositorio; las tandas nuevas se
