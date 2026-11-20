@@ -248,8 +248,9 @@ app las pide a 720 px de ancho en WebP.
 Un juego de datos: el grupo ve la pregunta y la respuesta, y quien tiene el
 turno dice números mientras el grupo grita "¡más!" o "¡menos!" hasta que
 dice el número exacto. Colección `mas_menos` (no pública; la app la lee solo
-con `POST /juego/datos`). Los datos no van en este repositorio: viven en el
-repositorio privado `palabras-juego`, con su validador.
+con `POST /juego/datos`). Los datos viven **solo en la colección**: no van
+en este repositorio ni en `palabras-juego` (allí solo está el validador
+de las tandas nuevas, `validar_datos.py`).
 
 | Campo | Tipo | Notas |
 |---|---|---|
@@ -294,7 +295,7 @@ falten.
 ### Cargar los datos
 
 ```sh
-node server/scripts/importar-datos.mjs /ruta/a/palabras-juego/datos/mas-o-menos.json
+node server/scripts/importar-datos.mjs tanda.json   # archivo temporal, ya validado; luego se borra
 ```
 
 Revisa cada dato (respuesta entera, dificultad, fuente con URL, largos) y

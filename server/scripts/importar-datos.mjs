@@ -1,5 +1,6 @@
 // Carga en la colección `mas_menos` los datos de "¿Más o menos?" de un archivo
-// JSON (los del repositorio privado palabras-juego, ya validados):
+// JSON temporal, ya revisado con validar_datos.py de palabras-juego. Los
+// datos viven solo en Directus: el archivo se borra después de cargarlo.
 //
 //   DIRECTUS_TOKEN=xxx node server/scripts/importar-datos.mjs <archivo.json> [--publicar]
 //

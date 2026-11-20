@@ -468,9 +468,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   turno (`datos_vistos.json`) para no repetirlos. Si no alcanzan, se
   repiten durante la partida, nunca dos seguidos. Por ahora es gratis
   (`FactsBank.freeForNow`). Por dentro es `GameCategory.moreOrLess`
-  (código `MAS_O_MENOS`, también en las estadísticas). Los datos viven en
-  el repositorio privado `palabras-juego` (`datos_mas_o_menos.json` y
-  `validar_datos.py`).
+  (código `MAS_O_MENOS`, también en las estadísticas). Los datos viven
+  solo en la colección `mas_menos` de Directus; las tandas nuevas se
+  revisan con `validar_datos.py` de `palabras-juego`.
 - Fotomímica: otro juego, con fotos de objetos en vez de palabras. En
   Categorías va en su propia sección, "Más juegos", después de las
   categorías y antes de "Mis categorías" (Libre y "Combinar categorías"
