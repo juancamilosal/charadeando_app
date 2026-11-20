@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../theme.dart';
 import 'end_game_dialog.dart';
+import 'fact_view.dart';
 import 'photo_mime_view.dart';
 
 /// Turno del Modo TV. El celular se duplica en el televisor, así que esta
@@ -47,6 +48,8 @@ class TvTurnView extends StatelessWidget {
     // Fotomímica: la foto grande, en vez de la palabra, sobre el mismo
     // fondo de siempre.
     final photo = marking && word.image != null;
+    // ¿Más o menos?: la pregunta y la respuesta.
+    final fact = marking && word.isFact;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
       decoration: BoxDecoration(
@@ -98,6 +101,13 @@ class TvTurnView extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     child: PhotoMimeView(word: word, nameSize: 20),
+                  ),
+                )
+              else if (fact)
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: FactView(word: word, scale: 0.9),
                   ),
                 )
               else

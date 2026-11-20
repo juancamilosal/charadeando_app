@@ -446,6 +446,31 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Con las palabras escritas por los equipos, en el turno se ve cuántas
   faltan de toda la partida. Con las automáticas no se muestra, porque el
   turno dura hasta que se acabe el tiempo.
+- ¿Más o menos?: otro juego, en "Más juegos" debajo de Fotomímica
+  (`MoreOrLessSection`, cartel oscuro con su ícono de flechas
+  `assets/img/categorias/mas_o_menos.png`, "NUEVO JUEGO", un dato de
+  ejemplo y "¡Más!"/"¡Menos!"). En el turno el grupo ve arriba el tema del
+  dato, en el centro la pregunta y abajo, muy grande, la respuesta con su
+  unidad ("8 patas", "1969"; 5 cifras o más con puntos de miles:
+  "42.195 metros") en `FactView` (en `WordCard` y en el Modo TV), y grita
+  "¡más!" o "¡menos!" hasta que quien tiene el turno dice el número
+  exacto. Aciertos y pases como siempre (inclinación, toque, Modo TV o
+  celular juez, que también ve la pregunta y la respuesta; campo
+  `respuesta` del Worker). Turnos de 1:30 a 3:00 de 30 en 30 s (1:30 por
+  defecto y en la partida rápida; `GameConfig.validTurn`), un punto por
+  dato (sin sección "Puntuación", como Fotomímica), dificultad Mezclada,
+  Fácil (1 a 100), Normal (años) o Difícil (números grandes). En el
+  resultado del turno cada dato muestra pregunta y respuesta, y el botón
+  ⓘ abre el dato curioso (tocar la fila sigue corrigiendo la marca). El
+  video lleva el tema, la pregunta y la respuesta. Necesita internet
+  (`FactsBank`, ruta `POST /juego/datos`; sin conexión, "Sin conexión" con
+  "Reintentar") y recuerda en el celular los datos que salieron en algún
+  turno (`datos_vistos.json`) para no repetirlos. Si no alcanzan, se
+  repiten durante la partida, nunca dos seguidos. Por ahora es gratis
+  (`FactsBank.freeForNow`). Por dentro es `GameCategory.moreOrLess`
+  (código `MAS_O_MENOS`, también en las estadísticas). Los datos viven en
+  el repositorio privado `palabras-juego` (`datos_mas_o_menos.json` y
+  `validar_datos.py`).
 - Fotomímica: otro juego, con fotos de objetos en vez de palabras. En
   Categorías va en su propia sección, "Más juegos", después de las
   categorías y antes de "Mis categorías" (Libre y "Combinar categorías"

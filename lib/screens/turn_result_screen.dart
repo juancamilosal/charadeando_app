@@ -295,11 +295,33 @@ class _TurnResultScreenState extends ConsumerState<TurnResultScreen> {
                         HitPassPills(hits: hits, passes: passes),
                         const SizedBox(height: 16),
                         if (turn.entries.isNotEmpty) ...[
-                          Text(
-                            'Toca una palabra si se marcó mal.',
-                            textAlign: TextAlign.center,
-                            style: muted,
-                          ),
+                          if (game.config.moreOrLess)
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  const TextSpan(
+                                    text: 'Toca un dato si se marcó mal. En ',
+                                  ),
+                                  WidgetSpan(
+                                    alignment: PlaceholderAlignment.middle,
+                                    child: Icon(
+                                      Icons.info_outline,
+                                      size: 16,
+                                      color: muted.color,
+                                    ),
+                                  ),
+                                  const TextSpan(text: ', el dato curioso.'),
+                                ],
+                              ),
+                              textAlign: TextAlign.center,
+                              style: muted,
+                            )
+                          else
+                            Text(
+                              'Toca una palabra si se marcó mal.',
+                              textAlign: TextAlign.center,
+                              style: muted,
+                            ),
                           const SizedBox(height: 6),
                         ],
                         TurnWordsPanel(

@@ -39,6 +39,10 @@ class DirectusService {
   /// `MAX_PHOTO_MIME` de la extensión.
   static const maxPhotoMime = 100;
 
+  /// Máximo de datos de ¿Más o menos? por petición. Debe coincidir con
+  /// `MAX_FACTS` de la extensión.
+  static const maxFacts = 100;
+
   static const _timeout = Duration(seconds: 15);
 
   final http.Client _client;
@@ -46,6 +50,7 @@ class DirectusService {
 
   Uri get wordsUri => Uri.parse('$baseUrl/juego/palabras');
   Uri get photoMimeUri => Uri.parse('$baseUrl/juego/fotomimica');
+  Uri get factsUri => Uri.parse('$baseUrl/juego/datos');
 
   /// Trae [count] palabras al azar, de [category] y [difficulty] si se
   /// indican (códigos de Directus, como `ANIMALES` y `FACIL`). Con
@@ -91,6 +96,29 @@ class DirectusService {
           if (PhotoMimeItem.fromJson(item, baseUrl: baseUrl) case final p
               when p.valid)
             p,
+    ];
+  }
+
+  /// Trae [count] datos de ¿Más o menos? al azar (solo los publicados), de
+  /// [difficulty] si se indica (`FACIL`, `NORMAL` o `DIFICIL`; si de esa
+  /// hay pocos, el servidor completa con las otras). Los de [exclude] (ids
+  /// ya jugados) solo se repiten si no alcanzan los demás. Sin
+  /// [includePremium] solo llegan los gratis.
+  Future<List<FactItem>> fetchFacts({
+    required int count,
+    String? difficulty,
+    Iterable<String> exclude = const [],
+    bool includePremium = false,
+  }) async {
+    final data = await _post(factsUri, {
+      'n': count.clamp(1, maxFacts),
+      'dificultad': ?difficulty,
+      'excluir': [for (final id in _lastExcluded(exclude)) ?int.tryParse(id)],
+      'incluir_premium': includePremium,
+    });
+    return [
+      for (final item in data)
+        if (item is Map<String, dynamic>) ?FactItem.fromJson(item),
     ];
   }
 

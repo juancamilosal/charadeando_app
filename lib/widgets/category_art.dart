@@ -45,6 +45,7 @@ class CategoryArt extends StatelessWidget {
     GameCategory.christmas,
     GameCategory.vacations,
     GameCategory.photoMime,
+    GameCategory.moreOrLess,
   };
 
   final GameCategory category;

@@ -12,4 +12,5 @@ export 'backdrop.dart';
 export 'app_settings.dart';
 export 'saved_team.dart';
 export 'premium_access.dart';
+export 'fact_item.dart';
 export 'photo_mime_item.dart';

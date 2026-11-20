@@ -56,6 +56,7 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
     });
     final config = ref.read(gameControllerProvider).config;
     if (config.photoMime) return _loadPhotos(config);
+    if (config.moreOrLess) return _loadFacts(config);
     if (config.isMix) return _loadMix(config);
     final custom = config.customCategory;
     if (custom != null) {
@@ -124,6 +125,30 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
                 _photosTotal = total;
               });
             },
+          );
+      if (!mounted) return;
+      _play(WordBatch(words, offline: false));
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = e;
+      });
+    }
+  }
+
+  /// ¿Más o menos?: pide los datos de la dificultad elegida. Con Todo
+  /// Charadeando también salen los de Premium.
+  Future<void> _loadFacts(GameConfig config) async {
+    try {
+      final words = await ref
+          .read(factsBankProvider)
+          .prepare(
+            min(config.autoWordsNeeded, FactsBank.maxPerGame),
+            difficulty: config.difficulty,
+            includePremium:
+                FactsBank.freeForNow || ref.read(premiumUnlockedProvider),
+            minimum: config.groupCount,
           );
       if (!mounted) return;
       _play(WordBatch(words, offline: false));
@@ -221,7 +246,13 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
-            title: Text(_photos ? 'Fotomímica' : 'Palabras automáticas'),
+            title: Text(
+              _photos
+                  ? 'Fotomímica'
+                  : ref.read(gameControllerProvider).config.moreOrLess
+                  ? '¿Más o menos?'
+                  : 'Palabras automáticas',
+            ),
             leading: BackButton(onPressed: _back),
           ),
           body: SafeArea(
@@ -245,7 +276,9 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
           CircularProgressIndicator(color: context.onBackdrop),
           SizedBox(height: 20),
           Text(
-            'Buscando palabras…',
+            ref.read(gameControllerProvider).config.moreOrLess
+                ? 'Buscando datos…'
+                : 'Buscando palabras…',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: AppFonts.display,
@@ -281,9 +314,22 @@ class _AutoWordsScreenState extends ConsumerState<AutoWordsScreen> {
         onAction: _load,
       );
     }
+    if (error is FactsException) {
+      return _Message(
+        icon: error.offline ? Icons.wifi_off : Icons.cloud_off,
+        title: error.offline
+            ? 'Sin conexión'
+            : 'No se pudieron traer los datos',
+        text: error.message,
+        action: 'Reintentar',
+        onAction: _load,
+      );
+    }
     return _Message(
       icon: Icons.cloud_off,
-      title: _photos
+      title: ref.read(gameControllerProvider).config.moreOrLess
+          ? 'No se pudieron traer los datos'
+          : _photos
           ? 'No se pudieron traer los objetos'
           : 'No se pudieron traer las palabras',
       text: switch (error) {

@@ -106,7 +106,7 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   final _segmentClock = Stopwatch();
   Duration _recorded = Duration.zero;
   bool _recording = false;
-  (String, CaptionStyle, Duration, String?)? _openCaption;
+  (String, CaptionStyle, Duration, String?, String?)? _openCaption;
 
   Duration get _now => _recorded + _segmentClock.elapsed;
 
@@ -346,9 +346,12 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
       JudgeState(
         phase: playing ? JudgeState.playing : JudgeState.waiting,
         word: word?.text,
+        answer: word?.answer,
         category: word == null
             ? config.categoryLabel
-            : config.wordCategoryLabel(word) ?? config.categoryLabel,
+            : word.topic ??
+                  config.wordCategoryLabel(word) ??
+                  config.categoryLabel,
         seconds: _remaining.inSeconds,
         team: game.inGroups ? game.currentGroup.name : null,
         // Sin equipos, solo los puntos de este turno.
@@ -472,9 +475,14 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     _segmentClock.reset();
   }
 
-  void _showCaption(String text, CaptionStyle style, {String? label}) {
+  void _showCaption(
+    String text,
+    CaptionStyle style, {
+    String? label,
+    String? answer,
+  }) {
     _closeCaption();
-    _openCaption = (text, style, _now, label);
+    _openCaption = (text, style, _now, label, answer);
   }
 
   /// La palabra que se está adivinando, con su categoría en una mezcla.
@@ -483,7 +491,8 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
     _showCaption(
       word.text,
       CaptionStyle.word,
-      label: _config.wordCategoryLabel(word),
+      label: word.topic ?? _config.wordCategoryLabel(word),
+      answer: word.answer,
     );
   }
 
@@ -492,7 +501,9 @@ class _TurnScreenState extends ConsumerState<TurnScreen>
   void _closeCaption() {
     final open = _openCaption;
     if (open == null) return;
-    _captions.add(Caption(open.$1, open.$2, open.$3, _now, label: open.$4));
+    _captions.add(
+      Caption(open.$1, open.$2, open.$3, _now, label: open.$4, answer: open.$5),
+    );
     _openCaption = null;
   }
 

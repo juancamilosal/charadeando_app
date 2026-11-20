@@ -12,6 +12,7 @@ import '../widgets/category_card.dart';
 import '../widgets/combine_categories_sheet.dart';
 import '../widgets/play_background.dart';
 import '../widgets/play_choice.dart';
+import '../widgets/more_or_less_section.dart';
 import '../widgets/photo_mime_view.dart';
 import '../widgets/premium_sheet.dart';
 
@@ -230,7 +231,7 @@ class CategoryScreen extends ConsumerWidget {
         // Antes de "Mis categorías" y con otro aspecto, para que no parezca
         // una categoría más.
         const SizedBox(height: 44),
-        const CategorySectionHeader(title: 'Más juegos', trailing: '1 juego'),
+        const CategorySectionHeader(title: 'Más juegos', trailing: '2 juegos'),
         const SizedBox(height: 18),
         PhotoMimeSection(
           // Por ahora es gratis para todos: sin "Más objetos con Premium".
@@ -242,6 +243,17 @@ class CategoryScreen extends ConsumerWidget {
             color: GameCategory.photoMime.color,
           ),
           onMore: () => showPremiumSheet(context),
+        ),
+        // ¿Más o menos?: preguntas con un número por respuesta. Por ahora
+        // gratis para todos (FactsBank.freeForNow).
+        const SizedBox(height: 16),
+        MoreOrLessSection(
+          onPlay: () => _choose(
+            context,
+            ref,
+            GameCategory.moreOrLess,
+            color: GameCategory.moreOrLess.color,
+          ),
         ),
         // Al final, las que creó el usuario.
         const SizedBox(height: 44),

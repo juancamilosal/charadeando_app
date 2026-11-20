@@ -139,6 +139,16 @@ void main() {
       expect(photos['modo'], 'FOTOMIMICA');
       expect(photos['categorias'], ['FOTOMIMICA']);
       expect(photos['dificultad'], isNull);
+      final facts = _stats(
+        const GameConfig(
+          category: GameCategory.moreOrLess,
+          wordSource: WordSource.random,
+          difficulty: Difficulty.normal,
+        ),
+      );
+      expect(facts['modo'], 'MAS_O_MENOS');
+      expect(facts['categorias'], ['MAS_O_MENOS']);
+      expect(facts['dificultad'], 'NORMAL');
     });
 
     test('cómo se marcaron los aciertos y si hubo video', () {

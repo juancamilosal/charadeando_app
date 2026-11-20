@@ -296,7 +296,16 @@ class VideoRenderer {
       };
       // En una mezcla, la categoría va arriba de la palabra, más pequeña.
       final label = caption.label;
-      final text = label == null
+      final answer = caption.answer;
+      final text = answer != null
+          // ¿Más o menos?: el tema y la pregunta más pequeños y la
+          // respuesta grande.
+          ? [
+              if (label != null) '{\\fs40}${_escape(label)}',
+              '{\\fs52}${_escape(caption.text)}',
+              '{\\r}${_escape(answer)}',
+            ].join('\\N')
+          : label == null
           ? _escape(caption.text)
           : '{\\fs44}${_escape(label)}\\N{\\r}${_escape(caption.text)}';
       buffer.writeln(

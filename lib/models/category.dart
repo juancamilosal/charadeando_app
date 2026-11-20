@@ -92,6 +92,17 @@ enum GameCategory {
     'Objeto',
   ),
 
+  // ¿Más o menos?: preguntas con un número por respuesta. También va
+  // aparte, en "Más juegos", y no se combina con otras.
+  moreOrLess(
+    '¿Más o menos?',
+    'Adivina el número exacto',
+    Icons.swap_vert,
+    AppColors.turquoise,
+    'MAS_O_MENOS',
+    'Dato',
+  ),
+
   // Clásicos.
   animals(
     'Animales',
@@ -415,14 +426,23 @@ enum GameCategory {
     return null;
   }
 
-  /// Categorías con palabras del backend, sin contar "Libre" ni
-  /// Fotomímica (que tiene fotos, no palabras).
+  /// Categorías con palabras del backend, sin contar "Libre", Fotomímica
+  /// (que tiene fotos, no palabras) ni ¿Más o menos? (que tiene datos).
   static List<GameCategory> get themed => values
-      .where((c) => c != GameCategory.free && c != GameCategory.photoMime)
+      .where(
+        (c) =>
+            c != GameCategory.free &&
+            c != GameCategory.photoMime &&
+            c != GameCategory.moreOrLess,
+      )
       .toList();
 
   /// Fotomímica: se juega con fotos de objetos en vez de palabras.
   bool get photos => this == GameCategory.photoMime;
+
+  /// ¿Más o menos?: se juega con datos (pregunta y número) en vez de
+  /// palabras.
+  bool get facts => this == GameCategory.moreOrLess;
 
   /// Las categorías de [section] que se ven en [date], en su orden.
   static List<GameCategory> inSection(

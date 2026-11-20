@@ -223,15 +223,27 @@ class _EntryRow extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              entry.word.text,
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w800,
-                color: on,
-              ),
-            ),
+            child: entry.word.isFact
+                ? _FactText(word: entry.word, color: on)
+                : Text(
+                    entry.word.text,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      color: on,
+                    ),
+                  ),
           ),
+          // ¿Más o menos?: el dato curioso, aparte del cambio de marca.
+          if (entry.word.note case final note?) ...[
+            IconButton(
+              tooltip: 'Dato curioso',
+              visualDensity: VisualDensity.compact,
+              icon: Icon(Icons.info_outline, color: on.withValues(alpha: 0.7)),
+              onPressed: () => showCuriousFact(context, entry.word, note),
+            ),
+            const SizedBox(width: 2),
+          ],
           // Los puntos de la palabra según la puntuación elegida: por
           // frase, +1; por palabra, uno por cada palabra. Las pasadas, 0.
           if (mode != null) ...[
@@ -276,6 +288,75 @@ class _EntryRow extends StatelessWidget {
       ),
     );
   }
+}
+
+/// ¿Más o menos?: la pregunta y, debajo, la respuesta con su unidad.
+class _FactText extends StatelessWidget {
+  const _FactText({required this.word, required this.color});
+
+  final Word word;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          word.text,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: color,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          word.answer ?? '',
+          style: TextStyle(
+            fontFamily: AppFonts.display,
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// El dato curioso de [word], en una ventana.
+Future<void> showCuriousFact(BuildContext context, Word word, String note) {
+  return showDialog<void>(
+    context: context,
+    builder: (context) => AlertDialog(
+      icon: const Icon(Icons.lightbulb, color: AppColors.yellow, size: 40),
+      title: const Text('Dato curioso'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(word.text, style: const TextStyle(fontWeight: FontWeight.w700)),
+          Text(
+            word.answer ?? '',
+            style: const TextStyle(
+              fontFamily: AppFonts.display,
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(note, style: const TextStyle(fontSize: 17)),
+        ],
+      ),
+      actions: [
+        FilledButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Listo'),
+        ),
+      ],
+    ),
+  );
 }
 
 /// Marcador pequeño con todos los grupos y sus puntos; el que va ganando,

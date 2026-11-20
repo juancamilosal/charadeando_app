@@ -23,10 +23,14 @@ SQLite, que sirve en el plan gratis) y la API de **WebSocket Hibernation**
 
 ## Mensajes (JSON)
 
-- **Anfitrión → sala:** `{ "tipo": "estado", "palabra", "categoria", "segundos", "equipo", "puntos", "estado": "esperando" | "jugando" | "fin_turno" | "fin_partida", "aciertos"?, "pasadas"?, "palabras"?, "editable"?, "cuenta"? }`.
+- **Anfitrión → sala:** `{ "tipo": "estado", "palabra", "categoria", "segundos", "equipo", "puntos", "estado": "esperando" | "jugando" | "fin_turno" | "fin_partida", "aciertos"?, "pasadas"?, "palabras"?, "editable"?, "cuenta"?, "respuesta"? }`.
+  `respuesta` (hasta 60 caracteres) solo llega en "¿Más o menos?": la
+  página muestra la pregunta (en `palabra`, hasta 160) más pequeña y la
+  respuesta grande debajo ("8 patas"). En las demás partidas no se manda,
+  así que el juez de siempre no cambia.
   La sala guarda el último y se lo manda a cada juez que se conecta. Al
   final del turno, `palabras` es la lista del turno en orden
-  (`[{ "texto", "acierto": true|false, "puntos"? }]`, hasta 100) y
+  (`[{ "texto", "acierto": true|false, "puntos"?, "respuesta"? }]`, hasta 100) y
   `editable` dice si el juez todavía puede corregirla (mientras la app está
   en el resultado de ese turno). Hasta 16 KB por mensaje. Mientras se
   juega, `marca` (`"acierto"`, `"pasar"` o `null`) dice lo que el celular

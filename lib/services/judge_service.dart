@@ -40,16 +40,20 @@ class JudgeException implements Exception {
 
 /// Una palabra del resumen del turno que ve el juez.
 class JudgeWord {
-  const JudgeWord(this.text, {required this.hit, this.points = 1});
+  const JudgeWord(this.text, {required this.hit, this.points = 1, this.answer});
 
   final String text;
+
+  /// ¿Más o menos?: la respuesta del dato ("8 patas").
+  final String? answer;
   final bool hit;
 
   /// Puntos que da si se acertó.
   final int points;
 
   Map<String, Object?> toJson() => {
-    'texto': JudgeState._cut(text, 120),
+    'texto': JudgeState._cut(text, 160),
+    'respuesta': ?JudgeState._cut(answer, 60),
     'acierto': hit,
     'puntos': points.clamp(0, 99),
   };
@@ -83,6 +87,7 @@ class JudgeState {
   const JudgeState({
     required this.phase,
     this.word,
+    this.answer,
     this.category,
     this.seconds = 0,
     this.team,
@@ -100,6 +105,10 @@ class JudgeState {
   /// `esperando`, `jugando`, `fin_turno` o `fin_partida`.
   final String phase;
   final String? word;
+
+  /// ¿Más o menos?: la respuesta del dato, que va debajo de la pregunta
+  /// ([word]). Solo se manda en ese juego.
+  final String? answer;
   final String? category;
   final int seconds;
   final String? team;
@@ -140,7 +149,8 @@ class JudgeState {
 
   Map<String, Object?> toJson() => {
     'tipo': 'estado',
-    'palabra': _cut(word, 120),
+    'palabra': _cut(word, 160),
+    'respuesta': ?_cut(answer, 60),
     'categoria': _cut(category, 60),
     'segundos': seconds.clamp(0, 3600),
     'equipo': _cut(team, 60),
@@ -167,6 +177,7 @@ class JudgeState {
   JudgeState locked() => JudgeState(
     phase: phase,
     word: word,
+    answer: answer,
     category: category,
     seconds: seconds,
     team: team,

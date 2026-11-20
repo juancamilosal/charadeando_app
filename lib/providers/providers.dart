@@ -30,6 +30,11 @@ final photoMimeBankProvider = Provider(
   (ref) => PhotoMimeBank(ref.watch(directusServiceProvider)),
 );
 
+/// ¿Más o menos?: los datos y los ya jugados.
+final factsBankProvider = Provider(
+  (ref) => FactsBank(ref.watch(directusServiceProvider)),
+);
+
 /// Celular juez: crea las salas en el Worker.
 final judgeServiceProvider = Provider((ref) => JudgeService());
 
@@ -385,6 +390,7 @@ JudgeState judgeTurnSummary(
           e.word.text,
           hit: e.outcome == WordOutcome.hit,
           points: mode.pointsFor(e.word.wordCount),
+          answer: e.word.answer,
         ),
     ],
     editable: editable && turn != null,

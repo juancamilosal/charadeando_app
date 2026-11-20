@@ -66,6 +66,7 @@ abstract final class GameStats {
       return (myCategories, const [myCategories]);
     }
     if (config.photoMime) return ('FOTOMIMICA', [config.category.code]);
+    if (config.moreOrLess) return ('MAS_O_MENOS', [config.category.code]);
     if (config.category == GameCategory.free) {
       return ('LIBRE', [config.category.code]);
     }

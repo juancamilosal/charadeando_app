@@ -37,10 +37,11 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   void initState() {
     super.initState();
     _config = ref.read(gameControllerProvider).config;
-    // Fotomímica permite menos rondas.
+    // Fotomímica permite menos rondas, y ¿Más o menos? turnos más largos.
     if (_config.rounds > _config.roundsMax) {
       _config = _config.copyWith(rounds: _config.roundsMax);
     }
+    _config = _config.copyWith(turnDuration: _config.validTurn);
     if (_automatic && !_noDifficulty) {
       // Las palabras vienen mezcladas.
       _difficulty = Difficulty.mixed;
@@ -79,12 +80,9 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
       ];
       _config = _config.copyWith(
         rounds: saved.rounds.clamp(GameConfig.minRounds, _config.roundsMax),
-        turnDuration: Duration(
-          seconds: saved.turnDuration.inSeconds.clamp(
-            GameConfig.minTurnSeconds,
-            GameConfig.maxTurnSeconds,
-          ),
-        ),
+        turnDuration: _config
+            .copyWith(turnDuration: saved.turnDuration)
+            .validTurn,
         wordsPerGroup: saved.wordsPerGroup.clamp(
           GameConfig.minWordsPerGroup,
           GameConfig.maxWordsPerGroup,
@@ -147,11 +145,17 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   /// solo si no hay ninguna del juego).
   bool get _noDifficulty => !_config.usesDifficulty;
 
-  /// Fotomímica: cada foto es un objeto, así que no se elige la puntuación
-  /// y se cuenta siempre un punto por acierto.
-  bool get _photos => _config.photoMime;
+  /// Fotomímica y ¿Más o menos?: cada foto o dato vale lo mismo, así que
+  /// no se elige la puntuación y se cuenta siempre un punto por acierto.
+  bool get _photos => _config.smallPool;
 
-  /// La puntuación con que se juega: en Fotomímica, siempre por frase.
+  /// "1:30" en ¿Más o menos? y "45 s" en lo demás.
+  String _turnLabel(int seconds) => _config.moreOrLess
+      ? '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}'
+      : '$seconds\u00A0s';
+
+  /// La puntuación con que se juega: en Fotomímica y ¿Más o menos?,
+  /// siempre por frase (un punto por acierto).
   ScoringMode? get _scoringToPlay => _photos ? ScoringMode.perPhrase : _scoring;
 
   /// Modo TV: el celular está duplicando la pantalla en un televisor. El
@@ -406,10 +410,10 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                         label: 'Tiempo por turno',
                         child: NumberStepper(
                           value: _config.turnDuration.inSeconds,
-                          min: GameConfig.minTurnSeconds,
-                          max: GameConfig.maxTurnSeconds,
-                          step: 15,
-                          format: (v) => '$v\u00A0s',
+                          min: _config.turnMin,
+                          max: _config.turnMax,
+                          step: _config.turnStep,
+                          format: _turnLabel,
                           onChanged: (v) => _update(
                             _config.copyWith(
                               turnDuration: Duration(seconds: v),
@@ -482,10 +486,15 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
       title: 'Dificultad',
       children: [
         OptionSelector<Difficulty>(
-          label: '¿Qué tan difíciles las quieren?',
+          label: _config.moreOrLess
+              ? '¿Qué números quieren adivinar?'
+              : '¿Qué tan difíciles las quieren?',
           options: Difficulty.values,
           selected: _difficulty,
-          labelOf: (o) => o.label,
+          labelOf: (o) => _config.moreOrLess && o == Difficulty.mixed
+              ? 'Mezclada'
+              : o.label,
+          description: _config.moreOrLess ? _difficulty?.factDescription : null,
           errorText: _choiceError(_difficulty),
           onSelected: (o) => setState(() {
             _difficulty = o;
@@ -522,10 +531,10 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
           label: 'Tiempo por turno',
           child: NumberStepper(
             value: _config.turnDuration.inSeconds,
-            min: GameConfig.minTurnSeconds,
-            max: GameConfig.maxTurnSeconds,
-            step: 15,
-            format: (v) => '$v\u00A0s',
+            min: _config.turnMin,
+            max: _config.turnMax,
+            step: _config.turnStep,
+            format: _turnLabel,
             onChanged: (v) =>
                 _update(_config.copyWith(turnDuration: Duration(seconds: v))),
           ),

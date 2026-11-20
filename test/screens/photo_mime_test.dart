@@ -8,6 +8,7 @@ import 'package:charadeando_app/screens/auto_words_screen.dart';
 import 'package:charadeando_app/screens/category_screen.dart';
 import 'package:charadeando_app/theme.dart';
 import 'package:charadeando_app/services/services.dart';
+import 'package:charadeando_app/widgets/more_or_less_section.dart';
 import 'package:charadeando_app/widgets/photo_mime_view.dart';
 import 'package:charadeando_app/widgets/tv_turn_view.dart';
 import 'package:charadeando_app/widgets/word_card.dart';
@@ -122,7 +123,17 @@ void main() {
       expect(find.byType(PhotoMimeSection), findsOneWidget);
       expect(find.text('Fotomímica'), findsWidgets);
       expect(find.text('Más juegos'), findsOneWidget);
-      expect(find.text('NUEVO JUEGO'), findsOneWidget);
+      // Fotomímica y ¿Más o menos?, los dos nuevos.
+      expect(find.text('NUEVO JUEGO'), findsNWidgets(2));
+      expect(find.text('2 juegos'), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.byType(MoreOrLessSection)).dy,
+        greaterThan(tester.getTopLeft(find.byType(PhotoMimeSection)).dy),
+      );
+      expect(
+        tester.getTopLeft(find.byType(MoreOrLessSection)).dy,
+        lessThan(tester.getTopLeft(find.text('Mis categorías')).dy),
+      );
       // Va después de las categorías, justo antes de "Mis categorías".
       expect(
         tester.getTopLeft(find.byType(PhotoMimeSection)).dy,

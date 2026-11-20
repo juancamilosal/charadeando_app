@@ -253,7 +253,7 @@ test('mensajes inválidos se rechazan sin cerrar la conexión', async () => {
     [estado({ estado: 'ganando' }), 'anfitrion'],
     [estado({ segundos: -1 }), 'anfitrion'],
     [estado({ segundos: 1.5 }), 'anfitrion'],
-    [estado({ palabra: 'x'.repeat(121) }), 'anfitrion'],
+    [estado({ palabra: 'x'.repeat(161) }), 'anfitrion'],
     [estado({ nombre: 'Ana' }), 'anfitrion'],
     [JSON.stringify({ tipo: 'estado', palabra: 'Sin tiempo' }), 'anfitrion'],
     ['x'.repeat(MAX_MENSAJE + 1), 'juez'],
@@ -417,7 +417,16 @@ test('valida la lista de palabras y la corrección', () => {
   assert.equal(lista([{ texto: 'Jirafa', acierto: true }]).tipo, 'estado');
   assert.ok(lista('Jirafa').error);
   assert.ok(lista([{ texto: 'Jirafa' }]).error);
-  assert.ok(lista([{ texto: 'x'.repeat(121), acierto: true }]).error);
+  assert.ok(lista([{ texto: 'x'.repeat(161), acierto: true }]).error);
+  // ¿Más o menos?: la pregunta con su respuesta.
+  assert.equal(
+    lista([{ texto: '¿Cuántas patas tiene una araña?', respuesta: '8 patas', acierto: true }]).tipo,
+    'estado',
+  );
+  assert.ok(lista([{ texto: 'a', respuesta: 8, acierto: true }]).error);
+  assert.ok(lista([{ texto: 'a', respuesta: 'x'.repeat(61), acierto: true }]).error);
+  assert.equal(leerMensaje(estado({ respuesta: '1969' }), 'anfitrion').respuesta, '1969');
+  assert.ok(leerMensaje(estado({ respuesta: 1969 }), 'anfitrion').error);
   assert.ok(lista([{ texto: 'Jirafa', acierto: true, nombre: 'Ana' }]).error);
   assert.ok(lista(Array.from({ length: 101 }, () => ({ texto: 'a', acierto: true }))).error);
   // 100 palabras largas caben en el mensaje del anfitrión.

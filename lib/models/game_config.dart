@@ -95,6 +95,14 @@ enum Difficulty {
 
   const Difficulty(this.label, this.code, this.description);
 
+  /// Qué es cada dificultad en "¿Más o menos?", donde se adivinan números.
+  String get factDescription => switch (this) {
+    mixed => 'De todo: números pequeños, años y números grandes.',
+    easy => 'Números del 1 al 100. Ideal con niños.',
+    normal => 'Años: ¿en qué año pasó?',
+    hard => 'Números grandes, de muchas cifras.',
+  };
+
   final String label;
 
   /// Valor del campo `dificultad` en Directus, o null para traer de todas.
@@ -198,6 +206,13 @@ class GameConfig {
   static const maxPhotoMimeRounds = 5;
   static const minTurnSeconds = 30;
   static const maxTurnSeconds = 90;
+  static const turnSecondsStep = 15;
+
+  /// En "¿Más o menos?" cada dato toma más tiempo: turnos de 1:30 a 3:00,
+  /// de 30 en 30 segundos, y 1:30 por defecto (también en la rápida).
+  static const minFactSeconds = 90;
+  static const maxFactSeconds = 180;
+  static const factSecondsStep = 30;
   static const minWordsPerGroup = 5;
   static const maxWordsPerGroup = 50;
 
@@ -255,6 +270,29 @@ class GameConfig {
   bool get usesDifficulty =>
       wordSource == WordSource.random &&
       (isMix ? mixCategories.isNotEmpty : customCategory == null && !photoMime);
+
+  /// Se juega "¿Más o menos?": datos con una pregunta y un número por
+  /// respuesta. Tiene dificultad, pero no se combina con otras categorías.
+  bool get moreOrLess =>
+      !isMix && customCategory == null && category == GameCategory.moreOrLess;
+
+  /// Hay pocos para elegir (Fotomímica y ¿Más o menos?): si no alcanzan
+  /// para la partida, se repiten.
+  bool get smallPool => photoMime || moreOrLess;
+
+  /// Tiempo por turno que se puede elegir, en segundos: de [turnMin] a
+  /// [turnMax], de [turnStep] en [turnStep].
+  int get turnMin => moreOrLess ? minFactSeconds : minTurnSeconds;
+  int get turnMax => moreOrLess ? maxFactSeconds : maxTurnSeconds;
+  int get turnStep => moreOrLess ? factSecondsStep : turnSecondsStep;
+
+  /// [turnDuration] dentro de lo que permite el juego: en ¿Más o menos?
+  /// nunca menos de 1:30.
+  Duration get validTurn {
+    final seconds = turnDuration.inSeconds.clamp(turnMin, turnMax);
+    final steps = ((seconds - turnMin) / turnStep).round();
+    return Duration(seconds: turnMin + steps * turnStep);
+  }
 
   /// Se juega Fotomímica: fotos de objetos en vez de palabras. No tiene
   /// dificultad ni se combina con otras categorías.
@@ -332,8 +370,9 @@ class GameConfig {
   int get turns => groupCount * rounds;
 
   /// Palabras que alcanzaría un grupo rápido en un turno: una cada 3
-  /// segundos.
-  int get fastWordsPerTurn => max(3, turnDuration.inSeconds ~/ 3);
+  /// segundos (en ¿Más o menos?, un dato cada 6).
+  int get fastWordsPerTurn =>
+      max(3, turnDuration.inSeconds ~/ (moreOrLess ? 6 : 3));
 
   /// Palabras automáticas que se piden al empezar la partida: las que
   /// alcanzaría un grupo rápido en todos los turnos.

@@ -105,7 +105,10 @@ function entero(valor, min, max) {
 }
 
 const CAMPOS_ESTADO = {
-  palabra: (v) => v === null || texto(v, 120),
+  palabra: (v) => v === null || texto(v, 160),
+  // ¿Más o menos?: la respuesta del dato ("8 patas"), debajo de la
+  // pregunta (que llega en "palabra").
+  respuesta: (v) => v === null || texto(v, 60),
   categoria: (v) => v === null || texto(v, 60),
   segundos: (v) => entero(v, 0, 3600),
   equipo: (v) => v === null || texto(v, 60),
@@ -124,8 +127,11 @@ const CAMPOS_ESTADO = {
         p &&
         typeof p === 'object' &&
         !Array.isArray(p) &&
-        Object.keys(p).every((k) => k === 'texto' || k === 'acierto' || k === 'puntos') &&
-        texto(p.texto, 120) &&
+        Object.keys(p).every(
+          (k) => k === 'texto' || k === 'acierto' || k === 'puntos' || k === 'respuesta',
+        ) &&
+        texto(p.texto, 160) &&
+        (p.respuesta === undefined || texto(p.respuesta, 60)) &&
         typeof p.acierto === 'boolean' &&
         (p.puntos === undefined || entero(p.puntos, 0, 99)),
     ),

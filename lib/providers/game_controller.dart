@@ -192,14 +192,14 @@ class GameController extends Notifier<GameState> {
   );
 
   /// Empieza con las palabras automáticas, repartidas entre los grupos.
-  /// En Fotomímica, si no alcanzan los objetos, cada mazo se completa
-  /// repitiendo fotos.
+  /// En Fotomímica y ¿Más o menos?, si no alcanzan los objetos o los
+  /// datos, cada mazo se completa repitiéndolos.
   void startWithWords(List<Word> words) {
     final decks = ref
         .read(wordServiceProvider)
         .decksFromWords(words, state.groups.length);
     startWithDecks(
-      state.config.photoMime
+      state.config.smallPool
           ? [
               for (final deck in decks)
                 _repeatPhotos(deck, words, state.config.fastWordsPerTurn),
@@ -215,6 +215,7 @@ class GameController extends Notifier<GameState> {
         GameConfig(hitMode: HitMode.tv) => 'tv',
         GameConfig(judgePhone: true) => 'juez',
         GameConfig(photoMime: true) => 'fotomimica',
+        GameConfig(moreOrLess: true) => 'mas_o_menos',
         _ => 'normal',
       })
       ..setKey(CrashKeys.resolution, config.resolution.name);
@@ -243,6 +244,13 @@ class GameController extends Notifier<GameState> {
     final decks = [...state.decks];
     decks[turn.groupIndex] = deck;
     state = state.copyWith(decks: decks, turns: [...state.turns, turn]);
+    // ¿Más o menos?: los datos que salieron no se repiten en las partidas
+    // siguientes.
+    if (state.config.moreOrLess) {
+      ref.read(factsBankProvider).remember([
+        for (final e in turn.entries) e.word,
+      ]).ignore();
+    }
   }
 
   /// Corrige una palabra del último turno (se marcó mal): la [index] queda
@@ -286,9 +294,9 @@ class GameController extends Notifier<GameState> {
   List<Word> _refill(List<Word> deck, Turn justPlayed) {
     final need = state.config.fastWordsPerTurn - deck.length;
     if (need <= 0) return deck;
-    if (state.config.photoMime) {
-      // Hay pocos objetos: se repiten, mejor los que este grupo no acaba
-      // de ver.
+    if (state.config.smallPool) {
+      // Hay pocos objetos o datos: se repiten, mejor los que este grupo no
+      // acaba de ver.
       return _repeatPhotos(
         deck,
         {

@@ -18,7 +18,9 @@ abstract final class QuickGame {
       inGroups: false,
       groups: const [Group('')],
       rounds: 1,
-      turnDuration: GameConfig.quickTurn,
+      turnDuration: base.category.facts
+          ? const Duration(seconds: GameConfig.minFactSeconds)
+          : GameConfig.quickTurn,
       scoringMode: ScoringMode.perPhrase,
       hitMode: tv ? HitMode.tv : HitMode.tilt,
       resolution: saved?.resolution ?? const GameConfig().resolution,
@@ -38,7 +40,9 @@ abstract final class QuickGame {
       quick: false,
       groups: defaults.groups,
       rounds: defaults.rounds,
-      turnDuration: defaults.turnDuration,
+      turnDuration: quick
+          .copyWith(turnDuration: defaults.turnDuration)
+          .validTurn,
       hitMode: HitMode.tilt,
     );
   }

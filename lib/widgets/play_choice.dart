@@ -108,6 +108,9 @@ class PlayChoiceSheet extends ConsumerWidget {
               PlayChoiceCards(
                 onQuick: () => Navigator.pop(context, PlayChoice.quick),
                 onCustom: () => Navigator.pop(context, PlayChoice.custom),
+                quickText: config.moreOrLess
+                    ? '1:30, sin configurar nada'
+                    : '1 minuto, sin configurar nada',
               ),
             ],
           ),
@@ -124,7 +127,11 @@ class PlayChoiceCards extends StatelessWidget {
     super.key,
     required this.onQuick,
     required this.onCustom,
+    this.quickText = '1 minuto, sin configurar nada',
   });
+
+  /// Lo que dura la partida rápida.
+  final String quickText;
 
   /// Ancho de pantalla desde el que van lado a lado.
   static const sideBySideWidth = 340.0;
@@ -138,7 +145,7 @@ class PlayChoiceCards extends StatelessWidget {
       color: AppColors.orange,
       icon: Icons.bolt,
       title: 'Partida rápida',
-      text: '1 minuto, sin configurar nada',
+      text: quickText,
       onTap: onQuick,
     );
     final custom = _ChoiceCard(

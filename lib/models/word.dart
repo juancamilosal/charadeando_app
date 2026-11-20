@@ -1,7 +1,14 @@
 /// Una palabra o frase que el jugador debe adivinar.
 class Word {
-  Word(String text, {this.category, this.id, this.image})
-    : text = _normalize(text);
+  Word(
+    String text, {
+    this.category,
+    this.id,
+    this.image,
+    this.answer,
+    this.topic,
+    this.note,
+  }) : text = _normalize(text);
 
   final String text;
   final String? category;
@@ -14,6 +21,21 @@ class Word {
   /// del archivo). En el turno se muestra la foto y el texto, pequeño,
   /// debajo. Null en las palabras.
   final String? image;
+
+  /// En "¿Más o menos?", [text] es la pregunta y esta la respuesta ya
+  /// escrita con su unidad ("8 patas", "1969"). Null en las palabras.
+  final String? answer;
+
+  /// En "¿Más o menos?", el tema del dato ("Animales"), que va arriba de la
+  /// pregunta.
+  final String? topic;
+
+  /// En "¿Más o menos?", el dato curioso que se ve en el resultado del
+  /// turno.
+  final String? note;
+
+  /// Es un dato de "¿Más o menos?" (pregunta y respuesta).
+  bool get isFact => answer != null;
 
   /// Cantidad de palabras de la frase. Cuentan también artículos y
   /// conectores: "El Rey León" tiene 3.

@@ -43,6 +43,10 @@ export function paginaJuez(codigo) {
 .categoria{font-size:15px;letter-spacing:.08em;text-transform:uppercase;opacity:.85}
 .palabra{font-family:Fredoka,system-ui,sans-serif;font-weight:600;font-size:clamp(34px,11vw,64px);line-height:1.05;
   word-break:break-word;text-shadow:0 4px 12px rgba(0,0,0,.25)}
+.palabra.pregunta{font-size:clamp(22px,6.5vw,34px);line-height:1.15}
+.respuesta{font-family:Fredoka,system-ui,sans-serif;font-weight:700;font-size:clamp(34px,12vw,60px);line-height:1.1;
+  background:#fff;color:#2B0A57;border-radius:24px;padding:2px 22px;word-break:break-word}
+.fila .resp{display:block;font-size:.85em;opacity:.75}
 .tiempo{font-family:Fredoka,system-ui,sans-serif;font-size:30px;background:#fff;color:#2B0A57;border-radius:999px;padding:4px 20px;min-width:96px}
 .tiempo.poco{background:#FFD23F}
 .botones{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -107,6 +111,7 @@ button.marcado{animation:marcado .22s ease-out}
 <main class="centro">
   <div class="categoria" id="categoria"></div>
   <div class="palabra" id="palabra">…</div>
+  <div class="respuesta" id="respuesta" hidden></div>
   <div class="tiempo" id="tiempo">--</div>
   <div class="marca" id="marca" role="status" aria-live="polite" hidden></div>
 </main>
@@ -170,6 +175,12 @@ button.marcado{animation:marcado .22s ease-out}
       const t = document.createElement('span');
       t.className = 'texto';
       t.textContent = p.texto;
+      if (p.respuesta) {
+        const r = document.createElement('span');
+        r.className = 'resp';
+        r.textContent = p.respuesta;
+        t.append(r);
+      }
       const pts = document.createElement('span');
       pts.className = 'pts';
       pts.textContent = p.acierto ? '+' + (p.puntos ?? 1) : '0';
@@ -283,6 +294,10 @@ button.marcado{animation:marcado .22s ease-out}
     $('puntos').textContent = e.puntos ?? 0;
     $('categoria').textContent = e.categoria || '';
     $('palabra').textContent = e.palabra || '…';
+    // ¿Más o menos?: la pregunta más pequeña y la respuesta grande debajo.
+    $('palabra').classList.toggle('pregunta', !!e.respuesta);
+    $('respuesta').hidden = !e.respuesta;
+    $('respuesta').textContent = e.respuesta || '';
     $('tiempo').textContent = e.segundos + ' s';
     $('tiempo').classList.toggle('poco', e.segundos <= 10);
     const jugando = e.estado === 'jugando';

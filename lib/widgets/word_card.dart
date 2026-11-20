@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../theme.dart';
 import 'end_game_dialog.dart';
+import 'fact_view.dart';
 import 'photo_mime_view.dart';
 
 /// Lo que ven los demás mientras el jugador tiene el celular en la frente:
@@ -55,6 +56,8 @@ class WordCard extends StatelessWidget {
     // Fotomímica: la foto grande, en vez de la palabra, sobre el mismo
     // fondo de siempre.
     final photo = feedback == null && word.image != null;
+    // ¿Más o menos?: la pregunta y la respuesta.
+    final fact = feedback == null && word.isFact;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
       decoration: BoxDecoration(
@@ -77,6 +80,14 @@ class WordCard extends StatelessWidget {
                     wordsLeft != null ? 44 : 8,
                   ),
                   child: PhotoMimeView(word: word),
+                ),
+              )
+            else if (fact)
+              Positioned.fill(
+                child: Padding(
+                  // Arriba deja espacio al tiempo y abajo, a "Finalizar".
+                  padding: EdgeInsets.fromLTRB(sideMargin, 14, sideMargin, 40),
+                  child: FactView(word: word),
                 ),
               )
             else
