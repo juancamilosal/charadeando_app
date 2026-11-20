@@ -247,7 +247,7 @@ app las pide a 720 px de ancho en WebP.
 
 Un juego de datos: el grupo ve la pregunta y la respuesta, y quien tiene el
 turno dice números mientras el grupo grita "¡más!" o "¡menos!" hasta que
-dice el número exacto. Colección `datos` (no pública; la app la lee solo
+dice el número exacto. Colección `mas_menos` (no pública; la app la lee solo
 con `POST /juego/datos`). Los datos no van en este repositorio: viven en el
 repositorio privado `palabras-juego`, con su validador.
 
@@ -285,7 +285,7 @@ read -rs DIRECTUS_TOKEN && export DIRECTUS_TOKEN
 node server/scripts/crear-datos.mjs
 ```
 
-Crea la colección `datos` con sus campos (ícono `quiz`, plantilla
+Crea la colección `mas_menos` con sus campos (ícono `quiz`, plantilla
 `pregunta → respuesta unidad`, `status` como campo de archivo). No le da
 permisos públicos; si los encuentra, lo avisa sin borrarlos. Se puede correr
 varias veces: lo que ya existe lo deja igual y completa los campos que

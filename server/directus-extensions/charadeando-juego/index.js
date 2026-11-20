@@ -14,7 +14,7 @@
 //   POST /juego/fotomimica  Objetos al azar de la colección fotomimica
 //                         (publicados) con el id de su imagen, para la
 //                         sección Fotomímica.
-//   POST /juego/datos     Datos al azar de la colección datos (publicados)
+//   POST /juego/datos     Datos al azar de la colección mas_menos (publicados)
 //                         para "¿Más o menos?": pregunta, respuesta exacta,
 //                         unidad, dato curioso y categoría.
 //   GET  /juego/estado    Uso del servidor (RAM, CPU, carga, disco). Solo
@@ -130,7 +130,7 @@ const MAX_PHOTO_MIME = 100;
 /// Datos de "¿Más o menos?" (pregunta, respuesta entera, unidad,
 /// dato_curioso, categoria, dificultad, fuente, status y premium). No es
 /// pública: solo se leen con /juego/datos.
-const FACTS = 'datos';
+const FACTS = 'mas_menos';
 
 /// Tope de datos por petición. Debe coincidir con DirectusService.maxFacts.
 const MAX_FACTS = 100;

@@ -163,6 +163,12 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   gratis por ahora; la app los da gratis con `PhotoMimeBank.freeForNow`).
   Se agregan más con `server/scripts/importar-fotomimica.mjs`.
 - Cómo instalar o actualizar la extensión: `server/README.md`.
+- ¿Más o menos? (rama `feature/mas-o-menos`, sin mezclar en `develop`
+  hasta que el usuario lo apruebe): colección `mas_menos` creada el 20 nov
+  2026 (no pública) con 60 datos cargados como borrador desde
+  `palabras-juego` (`datos_mas_o_menos.json`, rama `feature/mas-o-menos`).
+  Ruta `POST /juego/datos`. La respuesta es bigInteger: Directus la
+  devuelve como texto y la extensión la pasa a número.
 
 ## Funciones ya hechas en la app
 

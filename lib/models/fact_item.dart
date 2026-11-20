@@ -1,4 +1,4 @@
-/// Un dato de "¿Más o menos?" en Directus (colección `datos`): una
+/// Un dato de "¿Más o menos?" en Directus (colección `mas_menos`): una
 /// pregunta y su respuesta, un número entero exacto.
 class FactItem {
   const FactItem({

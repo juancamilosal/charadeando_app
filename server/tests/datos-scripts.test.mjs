@@ -50,7 +50,7 @@ const fact = (over = {}) => ({
   ...over,
 });
 
-test('crea la colección datos con todos sus campos, una sola vez', async () => {
+test('crea la colección mas_menos con todos sus campos, una sola vez', async () => {
   const api = fakeDirectus();
   const first = await createFacts(api);
   assert.equal(first.creado.length, 1);

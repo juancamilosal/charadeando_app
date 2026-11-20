@@ -1,4 +1,4 @@
-// Carga en la colección `datos` los datos de "¿Más o menos?" de un archivo
+// Carga en la colección `mas_menos` los datos de "¿Más o menos?" de un archivo
 // JSON (los del repositorio privado palabras-juego, ya validados):
 //
 //   DIRECTUS_TOKEN=xxx node server/scripts/importar-datos.mjs <archivo.json> [--publicar]

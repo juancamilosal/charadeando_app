@@ -1,4 +1,4 @@
-// Crea en Directus la colección `datos` del juego "¿Más o menos?":
+// Crea en Directus la colección `mas_menos` del juego "¿Más o menos?":
 //
 //   id, status (published/draft), pregunta, respuesta (número entero),
 //   unidad (opcional), dato_curioso, categoria, dificultad (FACIL, NORMAL,
@@ -15,7 +15,7 @@
 
 import { configFromEnv, directusApi, isMain, query } from './directus-api.mjs';
 
-export const FACTS = 'datos';
+export const FACTS = 'mas_menos';
 
 const choices = (values) => ({
   choices: values.map(([text, value]) => ({ text, value })),
