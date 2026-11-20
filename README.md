@@ -823,6 +823,12 @@ flutter test
 flutter run
 ```
 
+Android usa el plugin de Gradle (AGP) 9.1.1 (`android/settings.gradle.kts`)
+y Gradle 9.3.1 (`android/gradle/wrapper/gradle-wrapper.properties`). Si al
+actualizar Flutter sale "Your project's Android Gradle Plugin version … is
+lower than Flutter's minimum supported version", se sube la versión de
+`com.android.application` en `settings.gradle.kts` a la que pide el error.
+
 La app se prueba en un celular real: necesita cámara frontal y acelerómetro.
 En modo debug, durante el turno tocar la mitad izquierda de la pantalla pasa
 y la mitad derecha acierta, para probar en un emulador.
