@@ -10,6 +10,8 @@ import {
   normalizeCode,
   normalizeDevice,
   parseMeminfo,
+  factsOut,
+  parseFactsBody,
   parsePhotoMimeBody,
   photoMimeOut,
   pickAvoiding,
@@ -270,6 +272,62 @@ test('Fotomímica: entrega id, nombre, imagen y premium', () => {
       { id: 1, nombre: 'Taladro', imagen: 'f1', premium: false },
       { id: 2, nombre: 'Llaves', imagen: 'f2', premium: true },
       { id: 5, nombre: 'Peine', imagen: 'f5', premium: false },
+    ],
+  );
+});
+
+test('valida el pedido de ¿Más o menos?', () => {
+  assert.deepEqual(parseFactsBody({}), { n: 20, excluir: [], dificultad: null, incluirPremium: false });
+  assert.deepEqual(parseFactsBody({ n: 30, excluir: [3, '4'], dificultad: 'FACIL' }), {
+    n: 30,
+    excluir: [3, 4],
+    dificultad: 'FACIL',
+    incluirPremium: false,
+  });
+  // Mezclada es lo mismo que sin dificultad: de todas.
+  assert.equal(parseFactsBody({ dificultad: 'MEZCLADA' }).dificultad, null);
+  assert.ok(parseFactsBody({ n: 0 }).error);
+  assert.ok(parseFactsBody({ n: 101 }).error);
+  assert.ok(parseFactsBody({ dificultad: 'MUY_FACIL' }).error);
+  assert.ok(parseFactsBody({ excluir: ['x'] }).error);
+  assert.ok(parseFactsBody({ incluir_premium: 1 }).error);
+});
+
+test('¿Más o menos?: entrega solo datos con pregunta y respuesta entera', () => {
+  assert.deepEqual(
+    factsOut([
+      {
+        id: 1,
+        pregunta: ' ¿Cuántas patas tiene una araña? ',
+        respuesta: '8',
+        unidad: 'patas',
+        dato_curioso: 'Las arañas no son insectos.',
+        categoria: 'Animales',
+        dificultad: 'FACIL',
+      },
+      { id: 2, pregunta: '', respuesta: 5 },
+      { id: 3, pregunta: '¿Qué tan alto es?', respuesta: 8848.86 },
+      { id: 4, pregunta: '¿Año de la Luna?', respuesta: 1969, unidad: '' },
+    ]),
+    [
+      {
+        id: 1,
+        pregunta: '¿Cuántas patas tiene una araña?',
+        respuesta: 8,
+        unidad: 'patas',
+        dato_curioso: 'Las arañas no son insectos.',
+        categoria: 'Animales',
+        dificultad: 'FACIL',
+      },
+      {
+        id: 4,
+        pregunta: '¿Año de la Luna?',
+        respuesta: 1969,
+        unidad: null,
+        dato_curioso: null,
+        categoria: null,
+        dificultad: null,
+      },
     ],
   );
 });

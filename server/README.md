@@ -49,6 +49,8 @@ Directus 11 con PostgreSQL y Redis, desplegado con Coolify en el VPS.
     20 castigos de respaldo. 10 peticiones por minuto por IP.
   - `POST /juego/fotomimica`: objetos de Fotomímica al azar (ver
     "Fotomímica" abajo). 10 peticiones por minuto por IP.
+  - `POST /juego/datos`: datos de "¿Más o menos?" al azar (ver
+    "¿Más o menos?" abajo). 10 peticiones por minuto por IP.
   - `POST /juego/partida`: estadísticas anónimas de una partida (ver
     "Estadísticas de las partidas" abajo). 20 peticiones por minuto por IP.
 - `GET /juego/estado`: uso del servidor para revisarlo sin entrar a la
@@ -113,7 +115,7 @@ peticiones), ni el ANDROID_ID, ni nombres de equipos o jugadores.
 |---|---|---|
 | `id` | Integer, automático | |
 | `fecha` | Timestamp | La pone el servidor. |
-| `modo` | String | `NORMAL`, `LIBRE`, `COMBINADA`, `MIS_CATEGORIAS` o `FOTOMIMICA`. |
+| `modo` | String | `NORMAL`, `LIBRE`, `COMBINADA`, `MIS_CATEGORIAS`, `FOTOMIMICA` o `MAS_O_MENOS` (con `categorias: ["MAS_O_MENOS"]`). |
 | `categoria` | String | La categoría jugada, o `COMBINADA` si fueron varias. La calcula el servidor para poder agrupar en Insights. |
 | `categorias` | JSON | Lista de códigos. Las categorías propias llegan solo como `MIS_CATEGORIAS`. |
 | `dificultad` | String o null | `MEZCLADA`, `FACIL`, `NORMAL` o `DIFICIL`; null si las palabras no tienen dificultad. |
@@ -240,6 +242,68 @@ Después revisa los objetos en Directus, marca `premium` en los que quieras
 de pago y cámbialos a **Publicado** para que salgan en el juego. Fotos
 recomendadas: el objeto solo, centrado, con fondo liso y horizontales; la
 app las pide a 720 px de ancho en WebP.
+
+## ¿Más o menos?
+
+Un juego de datos: el grupo ve la pregunta y la respuesta, y quien tiene el
+turno dice números mientras el grupo grita "¡más!" o "¡menos!" hasta que
+dice el número exacto. Colección `datos` (no pública; la app la lee solo
+con `POST /juego/datos`). Los datos no van en este repositorio: viven en el
+repositorio privado `palabras-juego`, con su validador.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `id` | Integer, automático | |
+| `status` | String: `published` / `draft` | Por defecto `draft`. Solo los publicados salen en el juego. Es el campo de archivo de la colección. |
+| `pregunta` | String, máx. 160 | "¿Cuántas patas tiene una araña?" |
+| `respuesta` | Big Integer | Un solo número entero, exacto e indiscutible. |
+| `unidad` | String, máx. 30, opcional | Va después del número: "8 patas". Vacío para los años. |
+| `dato_curioso` | String, máx. 200, opcional | Sale en el resultado del turno. |
+| `categoria` | String, máx. 40 | Tema del dato (Animales, Historia…), arriba de la pregunta. |
+| `dificultad` | String | `FACIL` (del 1 al 100), `NORMAL` (años) o `DIFICIL` (números grandes). |
+| `fuente` | String (URL), máx. 300 | De dónde sale la respuesta. |
+| `premium` | Boolean, por defecto `false` | Si está activo, solo sale con Todo Charadeando. |
+
+Reglas de cada dato (las revisa el validador de `palabras-juego`): un solo
+número entero exacto, que no cambie con el tiempo, que sirva en todos los
+países, nada aproximado ni que dependa de la fuente, y siempre con fuente.
+
+`POST /juego/datos` con `{ "n": 40, "excluir": [ids], "dificultad": "FACIL", "incluir_premium": false }`
+(`n` de 1 a 100; `dificultad` `FACIL`, `NORMAL`, `DIFICIL` o `MEZCLADA`/sin
+ella para todas) devuelve datos publicados al azar como
+`{ "data": [{ "id", "pregunta", "respuesta", "unidad", "dato_curioso", "categoria", "dificultad" }] }`.
+Sin `incluir_premium` solo los gratis. Los de `excluir` (ya jugados) solo se
+repiten si no alcanzan los demás, y si de una dificultad hay pocos, completa
+con las otras. 10 peticiones por minuto por IP.
+
+### Crear la colección (una vez)
+
+Con el token de administrador (ver "Fotomímica" → "1. Crear el token"):
+
+```sh
+read -rs DIRECTUS_TOKEN && export DIRECTUS_TOKEN
+node server/scripts/crear-datos.mjs
+```
+
+Crea la colección `datos` con sus campos (ícono `quiz`, plantilla
+`pregunta → respuesta unidad`, `status` como campo de archivo). No le da
+permisos públicos; si los encuentra, lo avisa sin borrarlos. Se puede correr
+varias veces: lo que ya existe lo deja igual y completa los campos que
+falten.
+
+### Cargar los datos
+
+```sh
+node server/scripts/importar-datos.mjs /ruta/a/palabras-juego/datos/mas-o-menos.json
+```
+
+Revisa cada dato (respuesta entera, dificultad, fuente con URL, largos) y
+lo carga como **borrador** y gratis; con `--publicar` quedan publicados. Si
+ya hay uno con la misma pregunta (sin importar mayúsculas, tildes ni
+signos), lo salta. Al final dice cuántos se cargaron, cuántos ya existían y
+los errores.
+
+Pruebas: `node --test server/tests/datos-scripts.test.mjs`.
 
 ## Códigos promocionales
 

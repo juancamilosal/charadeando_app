@@ -14,6 +14,9 @@
 //   POST /juego/fotomimica  Objetos al azar de la colección fotomimica
 //                         (publicados) con el id de su imagen, para la
 //                         sección Fotomímica.
+//   POST /juego/datos     Datos al azar de la colección datos (publicados)
+//                         para "¿Más o menos?": pregunta, respuesta exacta,
+//                         unidad, dato curioso y categoría.
 //   GET  /juego/estado    Uso del servidor (RAM, CPU, carga, disco). Solo
 //                         para administradores de Directus; solo lee.
 //
@@ -109,6 +112,7 @@ const limits = {
   misCodigos: { points: 5, hits: new Map() },
   castigos: { points: 10, hits: new Map() },
   fotomimica: { points: 10, hits: new Map() },
+  datos: { points: 10, hits: new Map() },
   // Una partida manda uno al terminar (y la app reintenta los que no
   // llegaron, de a uno), así que 20 por minuto sobra.
   partida: { points: 20, hits: new Map() },
@@ -123,6 +127,14 @@ const PHOTO_MIME = 'fotomimica';
 /// DirectusService.maxPhotoMime.
 const MAX_PHOTO_MIME = 100;
 
+/// Datos de "¿Más o menos?" (pregunta, respuesta entera, unidad,
+/// dato_curioso, categoria, dificultad, fuente, status y premium). No es
+/// pública: solo se leen con /juego/datos.
+const FACTS = 'datos';
+
+/// Tope de datos por petición. Debe coincidir con DirectusService.maxFacts.
+const MAX_FACTS = 100;
+
 /// Castigos de la ruleta (campo `nombre`). No es pública.
 const PUNISHMENTS = 'castigos';
 
@@ -135,7 +147,14 @@ const MAX_PUNISHMENTS = 200;
 const GAMES = 'partidas';
 
 /// Modos de juego y cómo se marcan los aciertos, como los manda la app.
-export const MODOS_PARTIDA = ['NORMAL', 'LIBRE', 'COMBINADA', 'MIS_CATEGORIAS', 'FOTOMIMICA'];
+export const MODOS_PARTIDA = [
+  'NORMAL',
+  'LIBRE',
+  'COMBINADA',
+  'MIS_CATEGORIAS',
+  'FOTOMIMICA',
+  'MAS_O_MENOS',
+];
 export const MODOS_ACIERTO = ['INCLINACION', 'TOQUE', 'JUEZ', 'TV'];
 
 /// Dificultades de una partida con palabras automáticas (MEZCLADA es la que
@@ -206,12 +225,16 @@ export function parsePartidaBody(body) {
   }
   const solo = (codigo) => categorias.length === 1 && categorias[0] === codigo;
   const modoOk = {
-    NORMAL: categorias.length === 1 && !['LIBRE', 'FOTOMIMICA', 'MIS_CATEGORIAS'].includes(categorias[0]),
+    NORMAL:
+      categorias.length === 1 &&
+      !['LIBRE', 'FOTOMIMICA', 'MAS_O_MENOS', 'MIS_CATEGORIAS'].includes(categorias[0]),
     LIBRE: solo('LIBRE'),
     FOTOMIMICA: solo('FOTOMIMICA'),
+    MAS_O_MENOS: solo('MAS_O_MENOS'),
     MIS_CATEGORIAS: solo('MIS_CATEGORIAS'),
     COMBINADA:
-      categorias.length >= 2 && !categorias.includes('LIBRE') && !categorias.includes('FOTOMIMICA'),
+      categorias.length >= 2 &&
+      !['LIBRE', 'FOTOMIMICA', 'MAS_O_MENOS'].some((c) => categorias.includes(c)),
   }[b.modo];
   if (!modoOk) return { error: `"categorias" no corresponde al modo ${b.modo}.` };
 
@@ -328,6 +351,63 @@ export function parsePhotoMimeBody(body) {
     return { error: '"incluir_premium" debe ser true o false.' };
   }
   return { n, excluir: excluir.map(Number), incluirPremium: incluir };
+}
+
+/// Valida el cuerpo de /juego/datos:
+/// `{ n, excluir?, dificultad?, incluir_premium? }`. Sin dificultad (o con
+/// MEZCLADA) salen de todas. Devuelve `{ n, excluir, dificultad,
+/// incluirPremium }` o `{ error }`.
+export function parseFactsBody(body) {
+  const b = body ?? {};
+  const n = Number(b.n ?? 20);
+  if (!Number.isInteger(n) || n < 1 || n > MAX_FACTS) {
+    return { error: `"n" debe ser un número entre 1 y ${MAX_FACTS}.` };
+  }
+  const excluir = b.excluir ?? [];
+  if (
+    !Array.isArray(excluir) ||
+    excluir.length > MAX_EXCLUDE ||
+    !excluir.every((id) => Number.isInteger(id) || (typeof id === 'string' && /^\d{1,12}$/.test(id)))
+  ) {
+    return { error: `"excluir" debe ser una lista de hasta ${MAX_EXCLUDE} ids.` };
+  }
+  const dificultad = b.dificultad ?? null;
+  if (dificultad !== null && !DIFICULTADES_PARTIDA.includes(dificultad)) {
+    return { error: `"dificultad" debe ser null o uno de ${DIFICULTADES_PARTIDA.join(', ')}.` };
+  }
+  const incluir = b.incluir_premium ?? false;
+  if (typeof incluir !== 'boolean') {
+    return { error: '"incluir_premium" debe ser true o false.' };
+  }
+  return {
+    n,
+    excluir: excluir.map(Number),
+    dificultad: dificultad === 'MEZCLADA' ? null : dificultad,
+    incluirPremium: incluir,
+  };
+}
+
+/// Datos para la app: `{ id, pregunta, respuesta, unidad, dato_curioso,
+/// categoria, dificultad }`, sin los que no tienen pregunta o cuya
+/// respuesta no es un entero.
+export function factsOut(rows) {
+  const out = [];
+  const texto = (v) => (typeof v === 'string' ? v.trim() : '');
+  for (const row of rows ?? []) {
+    const pregunta = texto(row?.pregunta);
+    const respuesta = Number(row?.respuesta);
+    if (!pregunta || !Number.isSafeInteger(respuesta)) continue;
+    out.push({
+      id: row.id,
+      pregunta,
+      respuesta,
+      unidad: texto(row.unidad) || null,
+      dato_curioso: texto(row.dato_curioso) || null,
+      categoria: texto(row.categoria) || null,
+      dificultad: texto(row.dificultad) || null,
+    });
+  }
+  return out;
 }
 
 /// Toma [n] filas al azar con [query]: primero sin las de [excluir] (ya
@@ -953,6 +1033,52 @@ export default {
       } catch (e) {
         logger.error(e, '[juego] No se pudieron leer los objetos de Fotomímica');
         return error(res, 500, 'No se pudieron leer los objetos de Fotomímica.');
+      }
+    });
+
+    // Datos al azar para "¿Más o menos?": { "n": 30, "excluir": [ids],
+    // "dificultad": "FACIL", "incluir_premium": false }. Solo los
+    // publicados; sin Premium, solo los gratis. Los de "excluir" (ya
+    // jugados) solo se repiten si no alcanzan; si de una dificultad no
+    // alcanzan, se completa con las otras.
+    router.post('/datos', async (req, res) => {
+      if (!allowed('datos', clientIp(req))) {
+        return error(res, 429, 'Demasiadas peticiones. Espera un minuto.');
+      }
+      const body = parseFactsBody(req.body);
+      if (body.error) return error(res, 400, body.error);
+      try {
+        const pick = (dificultad) => (n, excluir) =>
+          pickAvoiding(
+            ({ excluir: fuera1, tomadas, limit }) => {
+              const q = database(FACTS)
+                .select('id', 'pregunta', 'respuesta', 'unidad', 'dato_curioso', 'categoria', 'dificultad')
+                .where('status', 'published')
+                .orderByRaw('random()')
+                .limit(limit);
+              if (dificultad) q.where('dificultad', dificultad);
+              if (!body.incluirPremium) {
+                q.where((w) => w.where('premium', false).orWhereNull('premium'));
+              }
+              const fuera = [...fuera1, ...tomadas];
+              if (fuera.length > 0) q.whereNotIn('id', fuera);
+              return q;
+            },
+            n,
+            excluir,
+          );
+        const rows = await pick(body.dificultad)(body.n, body.excluir);
+        if (body.dificultad && rows.length < body.n) {
+          const otras = await pick(null)(body.n - rows.length, [
+            ...body.excluir,
+            ...rows.map((r) => r.id),
+          ]);
+          rows.push(...otras.filter((o) => !rows.some((r) => r.id === o.id)));
+        }
+        return res.json({ data: factsOut(rows) });
+      } catch (e) {
+        logger.error(e, '[juego] No se pudieron leer los datos de ¿Más o menos?');
+        return error(res, 500, 'No se pudieron leer los datos.');
       }
     });
 
