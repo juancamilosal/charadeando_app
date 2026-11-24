@@ -176,8 +176,9 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   Puntos por dato según la dificultad: Fácil 1, Normal 2, Difícil 5.
   Ruta `POST /juego/datos`. La respuesta es bigInteger: Directus la
   devuelve como texto y la extensión la pasa a número.
-- Letras (rama `feature/letras`, sin mezclar en `develop` hasta que el
-  usuario lo apruebe): la bomba, con botón "¡Pasa!" (se descartó el
+- La Bomba (en el código y en Directus se llama Letras: `LETRAS`,
+  `letras_tematicas`; rama `feature/letras`, sin mezclar en `develop`
+  hasta que el usuario lo apruebe): con botón "¡Pasa!" (se descartó el
   reconocimiento de voz). Colección `letras_tematicas` (no pública) creada
   el 24 nov 2026 con 100 temáticas publicadas; cada una con sus `letras`
   (nunca Ñ, W, X ni Z). Ruta `POST /juego/tematicas` y modo `LETRAS` en

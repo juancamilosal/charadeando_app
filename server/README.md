@@ -308,9 +308,9 @@ los errores.
 
 Pruebas: `node --test server/tests/datos-scripts.test.mjs`.
 
-## Letras
+## Letras (La Bomba)
 
-La bomba: sale una temática y una letra, cada quien dice una palabra y pasa
+El juego que en la app se llama "La Bomba": sale una temática y una letra, cada quien dice una palabra y pasa
 el celular hasta que explota. Colección `letras_tematicas` (no pública; la
 app la lee solo con `POST /juego/tematicas`). Los datos viven solo en
 Directus.

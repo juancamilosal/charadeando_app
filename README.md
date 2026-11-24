@@ -446,7 +446,8 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Con las palabras escritas por los equipos, en el turno se ve cuántas
   faltan de toda la partida. Con las automáticas no se muestra, porque el
   turno dura hasta que se acabe el tiempo.
-- Letras (en prueba, rama `feature/letras`): la bomba. Tercer cartel de
+- La Bomba (en el código, `Letras`; en prueba, rama `feature/letras`).
+  Tercer cartel de
   "Más juegos" (`LettersSection`, debajo de ¿Más o menos?; ruta
   `/letras`, `LettersScreen`, en vertical). "¡Girar!" saca una temática
   de Directus ("Cosas que hay en un baño") y la ruleta frena en una de sus

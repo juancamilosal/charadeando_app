@@ -16,13 +16,13 @@ class LettersException implements Exception {
   final bool offline;
 
   static const noConnection = LettersException(
-    'Letras necesita internet para descargar las temáticas. Revisa tu '
+    'La Bomba necesita internet para descargar las temáticas. Revisa tu '
     'conexión e inténtalo otra vez.',
     offline: true,
   );
 
   static const empty = LettersException(
-    'Todavía no hay temáticas para jugar Letras. Inténtalo más tarde.',
+    'Todavía no hay temáticas para jugar La Bomba. Inténtalo más tarde.',
   );
 
   @override

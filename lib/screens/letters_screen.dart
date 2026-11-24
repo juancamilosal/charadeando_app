@@ -19,7 +19,7 @@ import '../widgets/system_back.dart';
 
 enum _Phase { loading, error, ready, spinning, playing, boom, result }
 
-/// El juego "Letras": la bomba. Sale una temática y una letra; quien tiene
+/// El juego "La Bomba" (por dentro, Letras). Sale una temática y una letra; quien tiene
 /// el celular dice una palabra de la temática que empiece con la letra,
 /// toca "¡Pasa!" y se lo pasa al siguiente. La bomba explota en un tiempo
 /// secreto (de 20 a 60 segundos): pierde quien la tenía. Todo en vertical,
@@ -270,7 +270,7 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
             describe: (assetId) => SavedVideo(
               assetId: assetId,
               savedAt: DateTime.now(),
-              category: 'Letras: ${bomb.topic.topic} · La ${bomb.letter}',
+              category: 'La Bomba: ${bomb.topic.topic} · La ${bomb.letter}',
               round: game.bombs.length,
               points: bomb.passes,
             ),
@@ -421,24 +421,38 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
     final settings = ref.watch(settingsProvider);
     return Column(
       children: [
-        const SizedBox(height: 40),
-        const Text('💣', style: TextStyle(fontSize: 96)),
-        Text('Letras', style: _title(52)),
-        const SizedBox(height: 12),
-        const Text(
-          'Sale una temática y una letra. Di una palabra de la temática que '
-          'empiece con esa letra, toca "¡Pasa!" y pásale el celular al '
-          'siguiente.\n\nLa bomba explota cuando nadie lo espera: ¡que no '
-          'te explote a ti!',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 17,
-            height: 1.35,
-            fontWeight: FontWeight.w700,
+        // Si no cabe (celulares pequeños), se desplaza; el interruptor y
+        // el botón quedan siempre abajo.
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                const SizedBox(height: 40),
+                const Text('💣', style: TextStyle(fontSize: 96)),
+                Text(
+                  'La Bomba',
+                  textAlign: TextAlign.center,
+                  style: _title(52),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Sale una temática y una letra. Di una palabra de la '
+                  'temática que empiece con esa letra, toca "¡Pasa!" y '
+                  'pásale el celular al siguiente.\n\nLa bomba explota '
+                  'cuando nadie lo espera: ¡que no te explote a ti!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    height: 1.35,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         ),
-        const Spacer(),
         SwitchListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 8),
           tileColor: Colors.white.withValues(alpha: 0.15),

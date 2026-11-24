@@ -5,7 +5,7 @@ import '../theme.dart';
 /// Fondo del cartel de Letras en Categorías.
 const lettersBackground = Color(0xFF2A1010);
 
-/// Letras en "Más juegos": un cartel ancho y oscuro, como los de
+/// "La Bomba" (por dentro, Letras) en "Más juegos": un cartel ancho y oscuro, como los de
 /// Fotomímica y ¿Más o menos?, con una bomba, una temática de ejemplo, la
 /// letra y "Jugar".
 class LettersSection extends StatelessWidget {
@@ -42,7 +42,7 @@ class LettersSection extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const Text('🔤', style: TextStyle(fontSize: 22)),
+                        const Text('💣', style: TextStyle(fontSize: 22)),
                         const SizedBox(width: 6),
                         Flexible(
                           child: FittedBox(
@@ -76,7 +76,7 @@ class LettersSection extends StatelessWidget {
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        'Letras',
+                        'La Bomba',
                         style: TextStyle(
                           fontFamily: AppFonts.display,
                           fontSize: 32,
@@ -89,8 +89,7 @@ class LettersSection extends StatelessWidget {
                     const SizedBox(height: 4),
                     const Expanded(
                       child: Text(
-                        'Di una palabra y pasa la bomba. '
-                        '¡Que no te explote!',
+                        'Di una palabra y pásala antes del ¡BOOM!',
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
