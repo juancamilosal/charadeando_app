@@ -892,7 +892,24 @@ class _ModeCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Row(
             children: [
-              Text(emoji, style: const TextStyle(fontSize: 40)),
+              // El emoji en un círculo, para que se vea sobre cualquier
+              // color (el rayo amarillo se perdía en la tarjeta amarilla).
+              Container(
+                width: 60,
+                height: 60,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: color == Colors.white
+                      ? const Color(0xFFF1ECFA)
+                      : Colors.white,
+                  border: Border.all(
+                    color: AppColors.ink.withValues(alpha: 0.12),
+                    width: 2,
+                  ),
+                ),
+                child: Text(emoji, style: const TextStyle(fontSize: 32)),
+              ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
