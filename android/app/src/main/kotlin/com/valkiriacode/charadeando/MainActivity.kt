@@ -20,7 +20,6 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
     private var tv: TvConnection? = null
     private var screen: ScreenSide? = null
-    private var voice: VoiceTools? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -52,12 +51,6 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
-        // Juego "Letras": reconocimiento de voz sin internet y el bip.
-        val tools = VoiceTools(this)
-        voice = tools
-        MethodChannel(messenger, "charadeando/voz").setMethodCallHandler { call, result ->
-            tools.handle(call.method, call.arguments, result)
-        }
         // Identificador del celular para los códigos promocionales. Desde
         // Android 8 es fijo por app y celular: sobrevive a desinstalar y
         // reinstalar la app (solo cambia al restablecer de fábrica).
@@ -85,7 +78,6 @@ class MainActivity : FlutterActivity() {
     override fun onDestroy() {
         tv?.onCancel(null)
         screen?.stop()
-        voice?.release()
         super.onDestroy()
     }
 

@@ -1,8 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/models.dart';
@@ -170,85 +168,9 @@ class SettingsScreen extends ConsumerWidget {
                     title: 'Califica Charadeando',
                     onTap: () => ref.read(reviewServiceProvider).openStore(),
                   ),
-                  // Solo en desarrollo: la prueba de voz de "Letras".
-                  if (kDebugMode)
-                    _LinkRow(
-                      icon: Icons.mic,
-                      color: AppColors.green,
-                      title: 'Prueba de voz (Letras)',
-                      onTap: () => context.push(Routes.voiceTest),
-                    ),
                 ],
               ),
-              const SizedBox(height: 12),
-              // Con 5 toques en la versión se abre la prueba de voz.
-              VersionLabel(onSecret: () => context.push(Routes.voiceTest)),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// "Versión 1.0.0 (16)", abajo de Ajustes. Con 5 toques seguidos (en
-/// menos de 3 segundos) llama a [onSecret]: abre la prueba de voz de
-/// "Letras" también en la versión publicada.
-class VersionLabel extends StatefulWidget {
-  const VersionLabel({super.key, required this.onSecret});
-
-  final VoidCallback onSecret;
-
-  static const tapsToOpen = 5;
-
-  @override
-  State<VersionLabel> createState() => _VersionLabelState();
-}
-
-class _VersionLabelState extends State<VersionLabel> {
-  String _version = '';
-  final _taps = <DateTime>[];
-
-  @override
-  void initState() {
-    super.initState();
-    PackageInfo.fromPlatform()
-        .then((info) {
-          if (!mounted) return;
-          setState(
-            () => _version = info.buildNumber.isEmpty
-                ? info.version
-                : '${info.version} (${info.buildNumber})',
-          );
-        })
-        .catchError((_) {});
-  }
-
-  void _tap() {
-    final now = DateTime.now();
-    _taps
-      ..add(now)
-      ..removeWhere((t) => now.difference(t) > const Duration(seconds: 3));
-    if (_taps.length >= VersionLabel.tapsToOpen) {
-      _taps.clear();
-      widget.onSecret();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: _tap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Text(
-          _version.isEmpty ? 'Charadeando' : 'Charadeando · Versión $_version',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: context.onBackdrop.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
           ),
         ),
       ),
@@ -525,14 +447,6 @@ class CreditsSheet extends StatelessWidget {
       'Íconos de Flaticon (flaticon.com), hechos por sus autores; el de '
           'Anime, por smalllikeart; el de Futbolistas, por justicon, y los '
           'de Deportistas y Fotomímica (el mimo), por Magnific.',
-    ),
-    (
-      Icons.menu_book,
-      AppColors.green,
-      'Diccionario de español',
-      'Las palabras del juego Letras salen del diccionario ortográfico de '
-          'LibreOffice en español (proyecto RLA-ES, de Santiago Bosio y '
-          'colaboradores), con la licencia MPL 2.0 (mozilla.org/MPL/2.0).',
     ),
   ];
 
