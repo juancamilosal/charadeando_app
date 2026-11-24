@@ -13,12 +13,22 @@ import '../router.dart';
 import '../services/services.dart';
 import '../theme.dart';
 import '../widgets/bomb_explosion.dart';
+import '../widgets/countdown_view.dart';
 import '../widgets/letter_wheel.dart';
 import '../widgets/play_background.dart';
 import '../widgets/result_parts.dart';
 import '../widgets/system_back.dart';
 
-enum _Phase { loading, error, ready, playing, roundOver, boom, result }
+enum _Phase {
+  loading,
+  error,
+  ready,
+  countdown,
+  playing,
+  roundOver,
+  boom,
+  result,
+}
 
 /// El juego "La Bomba" (por dentro, Letras). Sale una temática con su
 /// rueda de letras; quien tiene el celular dice una palabra de la temática,
@@ -60,6 +70,11 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
   final _picks = <(Duration, String)>[];
   final _notices = <(Duration, Duration, String)>[];
   Duration? _noticeFrom;
+
+  /// La cuenta 3, 2, 1 antes de cada bomba, como en las categorías.
+  static const _countdownFrom = 3;
+  int _countdown = _countdownFrom;
+  Timer? _countdownTimer;
 
   /// La bomba late con cada tic.
   bool _pulse = false;
@@ -158,7 +173,7 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
     _picks.clear();
     _notices.clear();
     ref.read(hapticsProvider).heavy();
-    _start();
+    _startCountdown();
   }
 
   /// "Escribir temática": el grupo escribe la temática y arranca la bomba.
@@ -172,6 +187,30 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
   }
 
   // --- La bomba ------------------------------------------------------------
+
+  /// 3, 2, 1 con un pitido en cada número (y la temática arriba), para
+  /// alcanzar a prepararse; luego arranca la bomba.
+  void _startCountdown() {
+    _countdownTimer?.cancel();
+    setState(() {
+      _countdown = _countdownFrom;
+      _phase = _Phase.countdown;
+    });
+    final sounds = ref.read(soundServiceProvider);
+    sounds.play(SoundEffect.countdown);
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted || _phase != _Phase.countdown) {
+        timer.cancel();
+      } else if (_countdown > 1) {
+        setState(() => _countdown--);
+        sounds.play(SoundEffect.countdown);
+      } else {
+        timer.cancel();
+        sounds.play(SoundEffect.start);
+        _start();
+      }
+    });
+  }
 
   Future<void> _start() async {
     if (!mounted) return;
@@ -335,6 +374,7 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
 
   /// Corta la bomba sin explotar (se salió de la app o del juego).
   Future<void> _abort() async {
+    _countdownTimer?.cancel();
     _tickTimer?.cancel();
     _fuseTimer?.cancel();
     _clock.stop();
@@ -350,7 +390,9 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.paused) return;
-    if (_phase == _Phase.playing || _phase == _Phase.roundOver) {
+    if (_phase == _Phase.countdown ||
+        _phase == _Phase.playing ||
+        _phase == _Phase.roundOver) {
       _abort();
       if (mounted) setState(() => _phase = _Phase.ready);
     }
@@ -364,6 +406,7 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _countdownTimer?.cancel();
     _tickTimer?.cancel();
     _fuseTimer?.cancel();
     _flashTimer?.cancel();
@@ -403,12 +446,21 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
                     ),
                     _Phase.error => _errorView(),
                     _Phase.ready => _readyView(),
+                    // La cuenta va encima de todo (abajo).
+                    _Phase.countdown => const SizedBox.expand(),
                     _Phase.playing || _Phase.boom => _bombView(),
                     _Phase.roundOver => _roundOverView(),
                     _Phase.result => _resultView(),
                   },
                 ),
               ),
+              if (_phase == _Phase.countdown)
+                Positioned.fill(
+                  child: CountdownView(
+                    value: _countdown,
+                    caption: _game?.topic?.topic,
+                  ),
+                ),
               if (_phase == _Phase.boom)
                 Positioned.fill(
                   child: BombExplosion(

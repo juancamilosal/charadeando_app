@@ -455,7 +455,9 @@ la cámara frontal graba a los participantes para revivir las risas.
   60 letras, `LettersRules.maxTopicLength`; `LettersGame.nextBomb(custom:)`,
   sin id, así que no se recuerda ni se manda en las estadísticas). "Otra
   bomba" repite la forma elegida, y sin internet se puede jugar con "Escribir
-  temática". Luego sale la rueda de
+  temática". Antes de cada bomba sale la cuenta 3, 2, 1 como en las
+  categorías (`CountdownView`, con la temática arriba en `caption` y los
+  mismos pitidos), para alcanzar a prepararse. Luego sale la rueda de
   letras (`LetterWheel`: las 23 letras del juego, todas se pueden tocar,
   en un óvalo que aprovecha el alto, repartidas a la misma distancia sin tocarse y con
   la bomba en el centro; nunca Ñ, W, X ni Z: `LettersRules.letters`; el

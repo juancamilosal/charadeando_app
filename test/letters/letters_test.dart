@@ -7,6 +7,7 @@ import 'package:charadeando_app/providers/providers.dart';
 import 'package:charadeando_app/screens/letters_screen.dart';
 import 'package:charadeando_app/services/services.dart';
 import 'package:charadeando_app/widgets/bomb_explosion.dart';
+import 'package:charadeando_app/widgets/countdown_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -316,6 +317,13 @@ void main() {
       await tester.pump();
       await tester.tap(find.text('Rápida'));
       await tester.pump();
+      // Antes, la cuenta 3, 2, 1 con la temática arriba.
+      expect(find.byType(CountdownView), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      for (var i = 0; i < 31; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(find.byType(CountdownView), findsNothing);
       // Las 23 letras están en la rueda.
       for (final l in LettersRules.letters) {
         expect(find.text(l), findsOneWidget, reason: l);
@@ -373,6 +381,14 @@ void main() {
 
       await tester.tap(find.text('Rápida'));
       await tester.pump();
+      expect(find.text('Temática 1'), findsOneWidget);
+      // Antes, la cuenta 3, 2, 1 con la temática arriba.
+      expect(find.byType(CountdownView), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      for (var i = 0; i < 31; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(find.byType(CountdownView), findsNothing);
       expect(find.text('Temática 1'), findsOneWidget);
       expect(find.text('0 pases'), findsOneWidget);
       expect(find.textContaining('toca su letra'), findsNothing);
@@ -482,7 +498,16 @@ void main() {
       await tester.enterText(find.byType(TextField), 'Cosas de la playa');
       await tester.pump();
       await tester.tap(find.text('¡Jugar!'));
-      await tester.pumpAndSettle(const Duration(milliseconds: 100));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Cosas de la playa'), findsOneWidget);
+      // Antes, la cuenta 3, 2, 1 con la temática arriba.
+      expect(find.byType(CountdownView), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      for (var i = 0; i < 31; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(find.byType(CountdownView), findsNothing);
       expect(find.text('Cosas de la playa'), findsOneWidget);
       expect(find.text('0 pases'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
