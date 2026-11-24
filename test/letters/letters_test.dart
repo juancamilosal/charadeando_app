@@ -279,6 +279,16 @@ void main() {
     });
   });
 
+  test('con mi temática se juega aunque no haya temáticas de Directus', () {
+    final game = LettersGame(const [], random: Random(1));
+    expect(game.hasTopics, isFalse);
+    game.nextBomb(custom: '  Cosas que hay en la playa ');
+    expect(game.topic!.topic, 'Cosas que hay en la playa');
+    expect(game.topic!.id, isEmpty);
+    expect(game.letters, LettersRules.letters);
+    expect(() => game.nextBomb(), throwsStateError);
+  });
+
   group('pantalla', () {
     testWidgets('al usar todas las letras termina la ronda y la bomba se '
         'pausa', (tester) async {
@@ -304,7 +314,7 @@ void main() {
         ),
       );
       await tester.pump();
-      await tester.tap(find.text('¡Empezar!'));
+      await tester.tap(find.text('Rápida'));
       await tester.pump();
       // Las 23 letras están en la rueda.
       for (final l in LettersRules.letters) {
@@ -358,9 +368,10 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(find.text('¡Empezar!'), findsOneWidget);
+      expect(find.text('Rápida'), findsOneWidget);
+      expect(find.text('Mi temática'), findsOneWidget);
 
-      await tester.tap(find.text('¡Empezar!'));
+      await tester.tap(find.text('Rápida'));
       await tester.pump();
       expect(find.text('Temática 1'), findsOneWidget);
       expect(find.text('0 pases'), findsOneWidget);
@@ -431,6 +442,50 @@ void main() {
       // Al salir se registra la partida.
       await tester.pumpWidget(const SizedBox());
       expect(stats.records, [(1, 2)]);
+    });
+
+    testWidgets('mi temática: se escribe y se juega con ella', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2340);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+      final container = ProviderContainer(
+        overrides: [
+          settingsStoreProvider.overrideWithValue(MemorySettingsStore()),
+          statsServiceProvider.overrideWithValue(NoStatsService()),
+        ],
+      );
+      addTearDown(container.dispose);
+      container
+          .read(settingsProvider.notifier)
+          .update(const AppSettings(recordVideo: false));
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            home: LettersScreen(
+              random: Random(5),
+              startWith: [topic(1, 'APS')],
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.text('Mi temática'));
+      await tester.pumpAndSettle();
+      // Sin texto no se puede jugar.
+      expect(
+        tester
+            .widget<FilledButton>(find.widgetWithText(FilledButton, '¡Jugar!'))
+            .onPressed,
+        isNull,
+      );
+      await tester.enterText(find.byType(TextField), 'Cosas de la playa');
+      await tester.pump();
+      await tester.tap(find.text('¡Jugar!'));
+      await tester.pumpAndSettle(const Duration(milliseconds: 100));
+      expect(find.text('Cosas de la playa'), findsOneWidget);
+      expect(find.text('0 pases'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
     });
   });
 }

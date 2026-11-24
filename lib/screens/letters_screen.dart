@@ -73,6 +73,10 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
   /// Medio segundo después de un pase no cuenta otro.
   Timer? _passCooldown;
 
+  /// La temática que escribió el grupo en la última bomba ("Mi temática");
+  /// null si fue rápida (al azar). "Otra bomba" sigue igual.
+  String? _custom;
+
   CameraController? _camera;
   bool _recording = false;
 
@@ -143,16 +147,28 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
     }
   }
 
-  /// Saca la temática y arranca la bomba.
-  void _spin() {
-    final game = _game;
-    if (game == null) return;
+  /// Saca la temática (al azar, o [custom] si el grupo la escribió) y
+  /// arranca la bomba.
+  void _spin({String? custom}) {
+    final game = _game ??= LettersGame(const [], random: _random);
+    if (custom == null && !game.hasTopics) return;
+    _custom = custom;
     ref.read(turnVideoProvider.notifier).discard().ignore();
-    game.nextBomb();
+    game.nextBomb(custom: custom);
     _picks.clear();
     _notices.clear();
     ref.read(hapticsProvider).heavy();
     _start();
+  }
+
+  /// "Mi temática": el grupo escribe la temática y arranca la bomba.
+  Future<void> _playCustom() async {
+    final topic = await showDialog<String>(
+      context: context,
+      builder: (_) => _TopicDialog(initial: _custom ?? ''),
+    );
+    if (!mounted || topic == null || topic.trim().isEmpty) return;
+    _spin(custom: topic.trim());
   }
 
   // --- La bomba ------------------------------------------------------------
@@ -448,6 +464,18 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
           ),
           const SizedBox(height: 20),
           FilledButton(onPressed: _load, child: const Text('Reintentar')),
+          const SizedBox(height: 8),
+          TextButton.icon(
+            onPressed: _playCustom,
+            icon: const Icon(Icons.edit, color: Colors.white),
+            label: const Text(
+              'Jugar con mi temática',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -457,26 +485,44 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
     final settings = ref.watch(settingsProvider);
     return Column(
       children: [
-        // Si no cabe (celulares pequeños), se desplaza; el interruptor y
-        // el botón quedan siempre abajo.
+        // Si no cabe (celulares pequeños), se desplaza; el interruptor
+        // queda siempre abajo.
         Expanded(
           child: SingleChildScrollView(
             child: Column(
               children: [
-                const SizedBox(height: 40),
-                const Text('💣', style: TextStyle(fontSize: 96)),
+                const SizedBox(height: 32),
+                const Text('💣', style: TextStyle(fontSize: 88)),
                 Text(
                   'La Bomba',
                   textAlign: TextAlign.center,
                   style: _title(52),
                 ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Sale una temática y una rueda de letras. Di una palabra '
-                  'de la temática, toca la letra con que empieza y pásale '
-                  'el celular al siguiente. Cada letra se usa una vez por '
-                  'ronda.\n\nLa bomba explota cuando nadie lo espera: '
-                  '¡que no te explote a ti!',
+                const SizedBox(height: 8),
+                Text(
+                  'Di una palabra, toca su letra y ¡pásala!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.9),
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 28),
+                _ModeCard(
+                  emoji: '⚡',
+                  title: 'Rápida',
+                  subtitle: 'Temática al azar',
+                  color: AppColors.yellow,
+                  onTap: _spin,
+                ),
+                const SizedBox(height: 14),
+                _ModeCard(
+                  emoji: '✏️',
+                  title: 'Mi temática',
+                  subtitle: 'Escríbela tú',
+                  color: Colors.white,
+                  onTap: _playCustom,
                 ),
                 const SizedBox(height: 16),
               ],
@@ -501,13 +547,6 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
                 .update(settings.copyWith(recordVideo: v));
             if (v && _camera == null) _openCamera();
           },
-        ),
-        const SizedBox(height: 16),
-        _bigButton(
-          '¡Empezar!',
-          icon: Icons.play_arrow_rounded,
-          color: AppColors.yellow,
-          onPressed: _spin,
         ),
       ],
     );
@@ -767,7 +806,7 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
           'Otra bomba',
           icon: Icons.refresh,
           color: Colors.white,
-          onPressed: _spin,
+          onPressed: _custom == null ? _spin : _playCustom,
         ),
         if (game.bombs.length > 1) ...[
           const SizedBox(height: 16),
@@ -818,6 +857,136 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
       onPressed: onPressed,
       icon: Icon(icon, size: height > 80 ? 40 : 26),
       label: Text(label),
+    );
+  }
+}
+
+/// Una de las dos formas de jugar en el inicio: una tarjeta grande con su
+/// emoji, el nombre y una línea corta.
+class _ModeCard extends StatelessWidget {
+  const _ModeCard({
+    required this.emoji,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String emoji;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: color,
+      elevation: 6,
+      shadowColor: Colors.black38,
+      borderRadius: BorderRadius.circular(28),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(28),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Row(
+            children: [
+              Text(emoji, style: const TextStyle(fontSize: 40)),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontFamily: AppFonts.display,
+                        fontSize: 28,
+                        height: 1.1,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.ink,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.ink.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.play_arrow_rounded,
+                size: 36,
+                color: AppColors.ink,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// La ventana para escribir la temática ("Cosas que hay en la playa").
+/// Devuelve el texto, o null si se cierra.
+class _TopicDialog extends StatefulWidget {
+  const _TopicDialog({this.initial = ''});
+
+  final String initial;
+
+  @override
+  State<_TopicDialog> createState() => _TopicDialogState();
+}
+
+class _TopicDialogState extends State<_TopicDialog> {
+  late final _controller = TextEditingController(text: widget.initial);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _play() {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+    Navigator.of(context).pop(text);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Mi temática'),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        maxLength: LettersRules.maxTopicLength,
+        textCapitalization: TextCapitalization.sentences,
+        textInputAction: TextInputAction.go,
+        onSubmitted: (_) => _play(),
+        onChanged: (_) => setState(() {}),
+        decoration: const InputDecoration(
+          hintText: 'Ej.: Cosas que hay en la playa',
+        ),
+      ),
+      // El botón grande arriba y "Cancelar" debajo.
+      actionsOverflowDirection: VerticalDirection.down,
+      actions: [
+        FilledButton(
+          onPressed: _controller.text.trim().isEmpty ? null : _play,
+          child: const Text('¡Jugar!'),
+        ),
+        TextButton(
+          style: TextButton.styleFrom(foregroundColor: context.surfaces.accent),
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancelar'),
+        ),
+      ],
     );
   }
 }

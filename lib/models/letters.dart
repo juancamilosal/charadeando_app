@@ -41,6 +41,9 @@ abstract final class LettersRules {
   ];
 
   /// La bomba explota en un tiempo secreto entre [minFuse] y [maxFuse].
+  /// Largo máximo de una temática escrita por el grupo.
+  static const maxTopicLength = 60;
+
   static const minFuse = Duration(seconds: 20);
   static const maxFuse = Duration(seconds: 60);
 
@@ -121,6 +124,9 @@ class LettersGame {
       _random = random ?? Random();
 
   final List<LettersTopic> _topics;
+
+  /// Si hay temáticas de Directus para el juego rápido.
+  bool get hasTopics => _topics.isNotEmpty;
   final Random _random;
   int _next = 0;
 
@@ -147,14 +153,20 @@ class LettersGame {
   int get wordsPerPass => round;
 
   /// Saca la siguiente temática y un tiempo secreto nuevo. Cuando se acaban
-  /// las temáticas, vuelven a salir en otro orden.
-  void nextBomb() {
-    if (_topics.isEmpty) throw StateError('Sin temáticas');
-    if (_next >= _topics.length) {
-      _topics.shuffle(_random);
-      _next = 0;
+  /// las temáticas, vuelven a salir en otro orden. Con [custom] se juega
+  /// con la temática que escribió el grupo (sin id: no se recuerda).
+  void nextBomb({String? custom}) {
+    final own = custom?.trim() ?? '';
+    if (own.isNotEmpty) {
+      topic = LettersTopic(id: '', topic: own, letters: LettersRules.letters);
+    } else {
+      if (_topics.isEmpty) throw StateError('Sin temáticas');
+      if (_next >= _topics.length) {
+        _topics.shuffle(_random);
+        _next = 0;
+      }
+      topic = _topics[_next++];
     }
-    topic = _topics[_next++];
     fuse = LettersRules.secretFuse(_random);
     passes = 0;
     round = 1;
