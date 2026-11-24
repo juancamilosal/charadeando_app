@@ -458,8 +458,9 @@ la cámara frontal graba a los participantes para revivir las risas.
     segundos de silencio y se vuelve a encender solo hasta tocar "Parar"
     (cuenta los reinicios y el tiempo sin escuchar de cada corte).
     `WordStream` convierte los resultados parciales en palabras nuevas, una
-    vez cada una (la última de un parcial espera a la siguiente o al
-    final). La latencia es aproximada: desde que sube el volumen del
+    vez cada una (la última de un parcial espera a la siguiente, al
+    final o a que la frase se quede quieta medio segundo:
+    `VoiceListener.settle`; así una palabra suelta cuenta enseguida). La latencia es aproximada: desde que sube el volumen del
     micrófono hasta que aparece la palabra.
   - "Solo en el celular": pide reconocer sin enviar el audio
     (`createOnDeviceSpeechRecognizer` desde Android 12). Necesita el

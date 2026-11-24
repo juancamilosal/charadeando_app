@@ -161,6 +161,18 @@ void main() {
       expect(s.feed('piña', isFinal: true), ['piña']);
     });
 
+    test('si la frase se queda quieta, la última palabra cuenta sin '
+        'esperar el final', () {
+      final s = WordStream();
+      expect(s.feed('perro', isFinal: false), isEmpty);
+      expect(s.settle('perro'), ['perro']);
+      // Ni el final ni otro momento quieto la vuelven a contar.
+      expect(s.settle('perro'), isEmpty);
+      expect(s.feed('perro pato', isFinal: false), isEmpty);
+      expect(s.settle('perro pato'), ['pato']);
+      expect(s.feed('perro pato', isFinal: true), isEmpty);
+    });
+
     test('no repite palabras si el parcial se corrige', () {
       final s = WordStream();
       expect(s.feed('casa grande', isFinal: false), ['casa']);

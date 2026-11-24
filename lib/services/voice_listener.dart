@@ -38,6 +38,16 @@ class WordStream {
     return added;
   }
 
+  /// La frase se quedó quieta un momento ([VoiceListener.settle]): la
+  /// última palabra ya no va a cambiar, así que cuenta también. La frase
+  /// sigue: si después llegan más palabras, solo salen las nuevas.
+  List<String> settle(String text) {
+    final words = LetterWords.split(text);
+    final added = [for (var i = _taken; i < words.length; i++) words[i]];
+    if (words.length > _taken) _taken = words.length;
+    return added;
+  }
+
   /// Empieza otra frase (otra vez a escuchar).
   void reset() => _taken = 0;
 }
@@ -50,6 +60,12 @@ class VoiceListener extends ChangeNotifier {
   VoiceListener({SpeechToText? speech}) : _speech = speech ?? SpeechToText();
 
   final SpeechToText _speech;
+
+  /// Si lo que va entendiendo no cambia en este tiempo, la última palabra
+  /// cuenta como dicha, sin esperar al resultado final (que puede tardar
+  /// varios segundos de silencio).
+  static const settle = Duration(milliseconds: 500);
+  Timer? _settleTimer;
   final _stream = WordStream();
   final _words = StreamController<HeardWord>.broadcast();
 
@@ -141,6 +157,7 @@ class VoiceListener extends ChangeNotifier {
 
   Future<void> _listen() async {
     if (!_active) return;
+    _settleTimer?.cancel();
     _stream.reset();
     _speechStart = null;
     partial = '';
@@ -155,7 +172,6 @@ class VoiceListener extends ChangeNotifier {
           listenMode: ListenMode.dictation,
           localeId: localeId,
           listenFor: const Duration(minutes: 1),
-          pauseFor: const Duration(seconds: 10),
         ),
       );
     } catch (e) {
@@ -172,6 +188,7 @@ class VoiceListener extends ChangeNotifier {
   /// Deja de escuchar.
   Future<void> stop() async {
     _active = false;
+    _settleTimer?.cancel();
     await _speech.stop();
     status = 'parado';
     notifyListeners();
@@ -179,11 +196,19 @@ class VoiceListener extends ChangeNotifier {
 
   void _onResult(SpeechRecognitionResult result) {
     partial = result.recognizedWords;
+    _settleTimer?.cancel();
+    _emit(_stream.feed(result.recognizedWords, isFinal: result.finalResult));
+    if (!result.finalResult) {
+      final text = result.recognizedWords;
+      _settleTimer = Timer(settle, () => _emit(_stream.settle(text)));
+    }
+    notifyListeners();
+  }
+
+  void _emit(List<String> words) {
+    if (words.isEmpty) return;
     final now = DateTime.now();
-    for (final word in _stream.feed(
-      result.recognizedWords,
-      isFinal: result.finalResult,
-    )) {
+    for (final word in words) {
       final start = _speechStart;
       _words.add(
         HeardWord(
@@ -247,6 +272,7 @@ class VoiceListener extends ChangeNotifier {
   @override
   void dispose() {
     _active = false;
+    _settleTimer?.cancel();
     _speech.cancel();
     _words.close();
     super.dispose();
