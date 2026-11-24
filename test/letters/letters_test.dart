@@ -353,10 +353,12 @@ void main() {
       final rects = [
         for (final letter in LettersRules.letters)
           tester.getRect(
-            find.ancestor(
-              of: find.text(letter),
-              matching: find.byType(Positioned),
-            ),
+            find
+                .ancestor(
+                  of: find.text(letter),
+                  matching: find.byType(Positioned),
+                )
+                .last,
           ),
       ];
       for (var i = 0; i < rects.length; i++) {
