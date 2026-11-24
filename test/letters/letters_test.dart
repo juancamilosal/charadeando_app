@@ -310,7 +310,7 @@ void main() {
       expect(find.byType(BombExplosion), findsNothing);
       await tester.tap(find.text('¡Seguir!'));
       await tester.pump();
-      expect(find.textContaining('Ronda 2 · Di dos palabras'), findsOneWidget);
+      expect(find.text('Ronda 1 finalizada'), findsNothing);
       expect(find.text('23 pases'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
     });
@@ -348,7 +348,30 @@ void main() {
       await tester.pump();
       expect(find.text('Temática 1'), findsOneWidget);
       expect(find.text('0 pases'), findsOneWidget);
-      expect(find.textContaining('Ronda 1 · Di una palabra'), findsOneWidget);
+      expect(find.textContaining('toca su letra'), findsNothing);
+      // Ningún círculo de letra toca a otro.
+      final rects = [
+        for (final letter in LettersRules.letters)
+          tester.getRect(
+            find.ancestor(
+              of: find.text(letter),
+              matching: find.byType(Positioned),
+            ),
+          ),
+      ];
+      for (var i = 0; i < rects.length; i++) {
+        for (var j = i + 1; j < rects.length; j++) {
+          final gap =
+              (rects[i].center - rects[j].center).distance - rects[i].width;
+          expect(
+            gap,
+            greaterThan(2),
+            reason:
+                '${LettersRules.letters[i]}'
+                ' y ${LettersRules.letters[j]}',
+          );
+        }
+      }
 
       await tester.tap(find.text('P'));
       await tester.pump();

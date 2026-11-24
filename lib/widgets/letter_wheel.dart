@@ -34,7 +34,7 @@ class LetterWheel extends StatelessWidget {
         final height = min(constraints.maxHeight, width * 1.45);
         final n = max(letters.length, 1);
         // Un óvalo que aprovecha el alto. Las fichas, del tamaño que quepa
-        // sin chocar: el 85 % del espacio que le toca a cada una.
+        // sin tocarse: el 78 % del espacio que le toca a cada una.
         var tile = 60.0;
         var points = <Offset>[];
         for (var i = 0; i < 3; i++) {
@@ -42,7 +42,7 @@ class LetterWheel extends StatelessWidget {
           final ry = height / 2 - tile / 2 - 4;
           final placed = _evenlySpaced(rx, ry, n);
           points = placed.points;
-          tile = (placed.step * 0.88).clamp(36.0, 84.0);
+          tile = (placed.step * 0.78).clamp(30.0, 84.0);
         }
         final rx = width / 2 - tile / 2 - 4;
         final ry = height / 2 - tile / 2 - 4;

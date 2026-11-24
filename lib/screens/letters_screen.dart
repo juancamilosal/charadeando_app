@@ -511,7 +511,6 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
     final game = _game!;
     final playing = _phase == _Phase.playing;
     final camera = _camera;
-    final words = game.wordsPerPass;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -543,12 +542,6 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
           ),
         ),
         const SizedBox(height: 12),
-        Text(
-          'Ronda ${game.round} · Di ${LettersGame.number(words)} '
-          '${words == 1 ? 'palabra' : 'palabras'} y toca su letra',
-          textAlign: TextAlign.center,
-          style: _title(20),
-        ),
         // La rueda de letras, con la bomba en el centro.
         Expanded(
           child: Stack(

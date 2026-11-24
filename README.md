@@ -451,7 +451,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   menos?; ruta `/letras`, `LettersScreen`, en vertical). "¡Empezar!" saca
   una temática de Directus ("Cosas que hay en un baño") y la rueda de
   letras (`LetterWheel`: las 23 letras del juego, todas se pueden tocar,
-  en un óvalo que aprovecha el alto, repartidas a la misma distancia y con
+  en un óvalo que aprovecha el alto, repartidas a la misma distancia sin tocarse y con
   la bomba en el centro; nunca Ñ, W, X ni Z: `LettersRules.letters`; el
   campo `letras` de la temática no se usa en la rueda). Quien
   tiene el celular dice una palabra de la temática, toca la letra con que
