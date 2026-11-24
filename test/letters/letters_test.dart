@@ -182,6 +182,7 @@ void main() {
         ],
         boomAt: const Duration(seconds: 30),
         end: const Duration(seconds: 32),
+        letters: LettersRules.letters,
       );
       expect(ass, contains('PlayResX: 720'));
       expect(ass, contains('PlayResY: 1280'));
@@ -191,8 +192,23 @@ void main() {
           '0:00:00.00,0:00:30.00,Topic,,0,0,0,,Cosas que hay en un baño',
         ),
       );
-      expect(ass, contains('0:00:02.00,0:00:03.20,Letter'));
-      expect(ass, contains('0:00:05.00,0:00:06.20,Letter'));
+      // La rueda: la P queda espichada (gris) desde que se elige hasta
+      // que acaba la ronda, y luego vuelve a estar libre.
+      expect(ass, contains('0:00:00.00,0:00:02.00,Fly,,0,0,0,,{\\an5'));
+      expect(
+        RegExp(r'0:00:02\.00,0:00:10\.00,Fx,,0,0,0,,\{[^}]*\\1c&HDAC1C9&')
+            .hasMatch(ass),
+        isTrue,
+      );
+      expect(
+        RegExp(r'0:00:05\.00,0:00:10\.00,Fly,,0,0,0,,\{[^}]*\}J').hasMatch(ass),
+        isTrue,
+      );
+      expect(
+        RegExp(r'0:00:10\.00,0:00:30\.00,Fly,,0,0,0,,\{[^}]*\}P').hasMatch(ass),
+        isTrue,
+      );
+      expect(ass, isNot(contains(',Letter,')));
       expect(ass, contains('Notice,,0,0,0,,Ronda 1 finalizada'));
       expect(ass, contains('0:00:30.00,0:00:32.00,Boom'));
       // La explosión: oscuro, bola de fuego, chispas y destello.

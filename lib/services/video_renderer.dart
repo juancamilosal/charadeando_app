@@ -256,10 +256,11 @@ class VideoRenderer {
   }
 
   /// Subtítulos del video de La Bomba (Letras), vertical (720x1280):
-  /// arriba la [topic] hasta el BOOM; debajo, un momento, la letra que
-  /// eligió cada quien ([picks]: cuándo y cuál; no en el centro, para no
-  /// tapar la cara); los avisos de fin de ronda ([notices]: desde, hasta y
-  /// texto), y en [boomAt] la explosión: destello, bola de fuego, chispas,
+  /// arriba la [topic] hasta el BOOM; alrededor de la cara, la rueda con
+  /// las [letters] del juego (sin la bomba), que se espichan cuando alguien
+  /// las elige ([picks]: cuándo y cuál); los avisos de fin de ronda
+  /// ([notices]: desde, hasta y texto; al final de cada uno las letras
+  /// quedan libres otra vez), y en [boomAt] la explosión: destello, bola de fuego, chispas,
   /// humo, las [letters] de la rueda que salen volando y "¡BOOM!", hasta
   /// [end].
   static String lettersSubtitles({
@@ -285,14 +286,13 @@ class VideoRenderer {
         'ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, '
         'Alignment, MarginL, MarginR, MarginV, Encoding',
       );
-    // Temática arriba en una caja morada; la letra elegida, blanca con
-    // borde morado, debajo; el aviso de ronda, en una caja verde; el BOOM,
+    // Temática arriba en una caja morada; las letras de la rueda (Fly),
+    // moradas sobre sus botones; el aviso de ronda, en una caja verde; el BOOM,
     // amarillo con borde rojo, en el centro. Fx son las figuras de la
     // explosión.
     for (final (name, size, color, box, border, align, marginV) in [
       ('Topic', 56, '&H00FFFFFF', '&H20E01B6A', 3, 8, 70),
-      ('Letter', 230, '&H00FFFFFF', '&H00E01B6A', 1, 8, 175),
-      ('Notice', 60, '&H00FFFFFF', '&H206BC218', 3, 8, 200),
+      ('Notice', 60, '&H00FFFFFF', '&H206BC218', 3, 5, 0),
       ('Boom', 200, '&H003FD2FF', '&H002839D6', 1, 5, 0),
       ('Fx', 20, '&H00FFFFFF', '&H00000000', 1, 5, 0),
       ('Fly', 58, '&H00571A2B', '&H00FFFFFF', 1, 5, 0),
@@ -326,18 +326,9 @@ class VideoRenderer {
     }
 
     line(0, Duration.zero, boomAt, 'Topic', _escape(topic));
-    for (final (at, letter) in picks) {
-      final until = at + const Duration(milliseconds: 1200);
-      line(
-        1,
-        at,
-        until < boomAt ? until : boomAt,
-        'Letter',
-        '{\\fad(60,250)}${_escape(letter)}',
-      );
-    }
+    _ring(line, letters, picks, notices, boomAt);
     for (final (from, to, text) in notices) {
-      line(1, from, to, 'Notice', _escape(text));
+      line(3, from, to, 'Notice', _escape(text));
     }
     _explosion(line, boomAt, end);
     _flyingLetters(line, letters, boomAt, end);
@@ -431,6 +422,68 @@ class VideoRenderer {
     );
   }
 
+  /// Dónde va la letra [i] de [n] en el óvalo de la rueda del video
+  /// (alrededor de la cara, debajo de la temática).
+  static (int, int) _ringPoint(int i, int n) {
+    final angle = -pi / 2 + i * 2 * pi / n;
+    return ((360 + cos(angle) * 300).round(), (690 + sin(angle) * 390).round());
+  }
+
+  /// La rueda de letras del juego, sin la bomba: cada letra en su botón,
+  /// blanco mientras está libre y gris desde que se elige ([picks]) hasta
+  /// que acaba la ronda (el final de su aviso en [notices]). Al elegirla,
+  /// el botón se encoge un momento, como espichado.
+  static void _ring(
+    void Function(int, Duration, Duration, String, String) line,
+    List<String> letters,
+    List<(Duration, String)> picks,
+    List<(Duration, Duration, String)> notices,
+    Duration boomAt,
+  ) {
+    final resets = [for (final (_, to, _) in notices) to]..sort();
+    for (var i = 0; i < letters.length; i++) {
+      final letter = letters[i];
+      final (x, y) = _ringPoint(i, letters.length);
+      // Desde cuándo y hasta cuándo la letra estuvo espichada.
+      final used = <(Duration, Duration)>[];
+      for (final (at, picked) in picks) {
+        if (picked != letter || at >= boomAt) continue;
+        final reset = resets.where((r) => r > at).firstOrNull;
+        used.add((at, reset != null && reset < boomAt ? reset : boomAt));
+      }
+      used.sort((a, b) => a.$1.compareTo(b.$1));
+      var from = Duration.zero;
+      void button(Duration a, Duration b, bool pressed) {
+        final fill = pressed ? '&HDAC1C9&' : '&HFFFFFF&';
+        final pop = pressed ? '\\t(0,180,\\fscx34\\fscy34)' : '';
+        line(
+          1,
+          a,
+          b,
+          'Fx',
+          '{\\an5\\pos($x,$y)\\p1\\1c$fill\\3c&H571A2B&\\bord5\\shad0'
+              '\\fscx40\\fscy40$pop}$_circle',
+        );
+        line(
+          2,
+          a,
+          b,
+          'Fly',
+          '{\\an5\\pos($x,$y)\\fs50${pressed ? '\\1a&H90&' : ''}}'
+              '${_escape(letter)}',
+        );
+      }
+
+      for (final (a, b) in used) {
+        if (a < from) continue;
+        button(from, a, false);
+        button(a, b, true);
+        from = b;
+      }
+      button(from, boomAt, false);
+    }
+  }
+
   /// Las letras de la rueda salen de un óvalo alrededor del centro hacia
   /// afuera, girando y cayendo, por encima de la bola de fuego.
   static void _flyingLetters(
@@ -446,8 +499,7 @@ class VideoRenderer {
       final push = angle + (random.nextDouble() - 0.5) * 0.6;
       final speed = 250 + random.nextDouble() * 250;
       final spin = ((random.nextDouble() - 0.5) * 720).round();
-      final x1 = (360 + cos(angle) * 290).round();
-      final y1 = (640 + sin(angle) * 380).round();
+      final (x1, y1) = _ringPoint(i, letters.length);
       final x2 = (x1 + cos(push) * speed).round();
       final y2 = (y1 + sin(push) * speed + 500).round();
       final move = '\\move($x1,$y1,$x2,$y2,0,2500)';
@@ -459,7 +511,7 @@ class VideoRenderer {
         to,
         'Fx',
         '{\\an5$move\\p1\\1c&HFFFFFF&\\3c&H571A2B&\\bord5\\shad0'
-            '\\fscx42\\fscy42}$_circle',
+            '\\fscx40\\fscy40}$_circle',
       );
       line(
         12,

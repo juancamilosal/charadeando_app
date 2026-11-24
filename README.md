@@ -470,8 +470,10 @@ la cámara frontal graba a los participantes para revivir las risas.
   tiempo, con "Girar la ruleta de castigos" y "Otra bomba". El grupo es el
   juez: no hay reconocimiento de voz. Con "Grabar video" graba en vertical
   con la cámara de frente (se ve pequeña arriba a la derecha) y con
-  sonido; el video lleva la temática arriba, cada letra elegida debajo por
-  un momento, los avisos de fin de ronda y, al final, la explosión dibujada
+  sonido; el video lleva la temática arriba, la rueda con las 23 letras
+  alrededor de la cara (sin la bomba: esa solo va en el juego; cada letra
+  se espicha y queda gris cuando la eligen, y vuelve a quedar libre al
+  acabar la ronda), los avisos de fin de ronda en el centro y, al final, la explosión dibujada
   con figuras ASS (oscuro, humo, bola de fuego en capas, chispas, destello,
   las letras volando y "¡BOOM!": `VideoRenderer.lettersSubtitles`, 720x1280), y se guarda en
   Mis videos (`TurnVideoController.process` con `subtitles` y `describe`).
