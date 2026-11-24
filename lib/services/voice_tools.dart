@@ -38,11 +38,15 @@ class VoiceDiagnosis {
 class VoiceTools {
   static const _channel = MethodChannel('charadeando/voz');
 
+  /// "es_US" → "es-US": Android solo entiende el idioma con guion. Con
+  /// guion bajo toma el idioma del celular (y pedía descargar inglés).
+  static String tag(String language) => language.replaceAll('_', '-');
+
   static Future<VoiceDiagnosis> diagnose(String language) async {
     try {
       final data = await _channel.invokeMapMethod<String, Object?>(
         'diagnostico',
-        language,
+        tag(language),
       );
       return VoiceDiagnosis(data ?? const {});
     } on Exception catch (e) {
@@ -54,7 +58,10 @@ class VoiceTools {
   /// Pide al sistema descargar el español para reconocer sin internet.
   static Future<bool> downloadLanguage(String language) async {
     try {
-      return await _channel.invokeMethod<bool>('descargarIdioma', language) ??
+      return await _channel.invokeMethod<bool>(
+            'descargarIdioma',
+            tag(language),
+          ) ??
           false;
     } on Exception {
       return false;

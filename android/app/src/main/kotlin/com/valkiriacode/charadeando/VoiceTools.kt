@@ -34,7 +34,8 @@ class VoiceTools(private val context: Context) {
     private fun intentFor(language: String) =
         Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, language)
+            // "es_US" no lo entiende: tiene que ser "es-US".
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, language.replace('_', '-'))
         }
 
     private fun diagnose(language: String, result: MethodChannel.Result) {

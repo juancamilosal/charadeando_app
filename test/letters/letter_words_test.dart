@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:charadeando_app/models/letter_words.dart';
 import 'package:charadeando_app/services/spanish_dictionary.dart';
 import 'package:charadeando_app/services/voice_listener.dart';
+import 'package:charadeando_app/services/voice_tools.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -141,6 +142,11 @@ void main() {
         expect(dictionary.contains(w), isFalse, reason: w);
       }
     });
+  });
+
+  test('el idioma va con guion para Android (es_US → es-US)', () {
+    expect(VoiceTools.tag('es_US'), 'es-US');
+    expect(VoiceTools.tag('es-CO'), 'es-CO');
   });
 
   group('palabras que llegan del reconocimiento de voz', () {
