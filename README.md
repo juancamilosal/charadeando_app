@@ -451,11 +451,11 @@ la cámara frontal graba a los participantes para revivir las risas.
   menos?; ruta `/letras`, `LettersScreen`, en vertical). El inicio tiene una
   frase corta ("Di una palabra, toca su letra y ¡pásala!") y dos
   tarjetas: "Rápida" saca una temática de Directus al azar ("Cosas que
-  hay en un baño") y "Mi temática" abre una ventana para escribirla (hasta
+  hay en un baño") y "Escribir temática" ("Ustedes eligen de qué") abre una ventana para escribirla (hasta
   60 letras, `LettersRules.maxTopicLength`; `LettersGame.nextBomb(custom:)`,
   sin id, así que no se recuerda ni se manda en las estadísticas). "Otra
-  bomba" repite la forma elegida, y sin internet se puede jugar con "Jugar
-  con mi temática". Luego sale la rueda de
+  bomba" repite la forma elegida, y sin internet se puede jugar con "Escribir
+  temática". Luego sale la rueda de
   letras (`LetterWheel`: las 23 letras del juego, todas se pueden tocar,
   en un óvalo que aprovecha el alto, repartidas a la misma distancia sin tocarse y con
   la bomba en el centro; nunca Ñ, W, X ni Z: `LettersRules.letters`; el

@@ -369,7 +369,7 @@ void main() {
       );
       await tester.pump();
       expect(find.text('Rápida'), findsOneWidget);
-      expect(find.text('Mi temática'), findsOneWidget);
+      expect(find.text('Escribir temática'), findsOneWidget);
 
       await tester.tap(find.text('Rápida'));
       await tester.pump();
@@ -470,7 +470,7 @@ void main() {
         ),
       );
       await tester.pump();
-      await tester.tap(find.text('Mi temática'));
+      await tester.tap(find.text('Escribir temática'));
       await tester.pumpAndSettle();
       // Sin texto no se puede jugar.
       expect(

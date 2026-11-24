@@ -73,7 +73,7 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
   /// Medio segundo después de un pase no cuenta otro.
   Timer? _passCooldown;
 
-  /// La temática que escribió el grupo en la última bomba ("Mi temática");
+  /// La temática que escribió el grupo en la última bomba ("Escribir temática");
   /// null si fue rápida (al azar). "Otra bomba" sigue igual.
   String? _custom;
 
@@ -161,7 +161,7 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
     _start();
   }
 
-  /// "Mi temática": el grupo escribe la temática y arranca la bomba.
+  /// "Escribir temática": el grupo escribe la temática y arranca la bomba.
   Future<void> _playCustom() async {
     final topic = await showDialog<String>(
       context: context,
@@ -469,7 +469,7 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
             onPressed: _playCustom,
             icon: const Icon(Icons.edit, color: Colors.white),
             label: const Text(
-              'Jugar con mi temática',
+              'Escribir temática',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w800,
@@ -519,8 +519,8 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
                 const SizedBox(height: 14),
                 _ModeCard(
                   emoji: '✏️',
-                  title: 'Mi temática',
-                  subtitle: 'Escríbela tú',
+                  title: 'Escribir temática',
+                  subtitle: 'Ustedes eligen de qué',
                   color: Colors.white,
                   onTap: _playCustom,
                 ),
@@ -915,14 +915,19 @@ class _ModeCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontFamily: AppFonts.display,
-                        fontSize: 28,
-                        height: 1.1,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.ink,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        style: const TextStyle(
+                          fontFamily: AppFonts.display,
+                          fontSize: 28,
+                          height: 1.1,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.ink,
+                        ),
                       ),
                     ),
                     Text(
@@ -978,7 +983,7 @@ class _TopicDialogState extends State<_TopicDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Mi temática'),
+      title: const Text('Escribir temática'),
       content: TextField(
         controller: _controller,
         autofocus: true,
