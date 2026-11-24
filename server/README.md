@@ -51,6 +51,8 @@ Directus 11 con PostgreSQL y Redis, desplegado con Coolify en el VPS.
     "Fotomímica" abajo). 10 peticiones por minuto por IP.
   - `POST /juego/datos`: datos de "¿Más o menos?" al azar (ver
     "¿Más o menos?" abajo). 10 peticiones por minuto por IP.
+  - `POST /juego/tematicas`: temáticas del juego Letras al azar (ver
+    "Letras" abajo). 10 peticiones por minuto por IP.
   - `POST /juego/partida`: estadísticas anónimas de una partida (ver
     "Estadísticas de las partidas" abajo). 20 peticiones por minuto por IP.
 - `GET /juego/estado`: uso del servidor para revisarlo sin entrar a la
@@ -115,7 +117,7 @@ peticiones), ni el ANDROID_ID, ni nombres de equipos o jugadores.
 |---|---|---|
 | `id` | Integer, automático | |
 | `fecha` | Timestamp | La pone el servidor. |
-| `modo` | String | `NORMAL`, `LIBRE`, `COMBINADA`, `MIS_CATEGORIAS`, `FOTOMIMICA` o `MAS_O_MENOS` (con `categorias: ["MAS_O_MENOS"]`). |
+| `modo` | String | `NORMAL`, `LIBRE`, `COMBINADA`, `MIS_CATEGORIAS`, `FOTOMIMICA`, `MAS_O_MENOS` (con `categorias: ["MAS_O_MENOS"]`) o `LETRAS` (con `categorias: ["LETRAS"]`; las bombas van en `rondas` y los pases en `aciertos`). |
 | `categoria` | String | La categoría jugada, o `COMBINADA` si fueron varias. La calcula el servidor para poder agrupar en Insights. |
 | `categorias` | JSON | Lista de códigos. Las categorías propias llegan solo como `MIS_CATEGORIAS`. |
 | `dificultad` | String o null | `MEZCLADA`, `FACIL`, `NORMAL` o `DIFICIL`; null si las palabras no tienen dificultad. |
@@ -305,6 +307,36 @@ signos), lo salta. Al final dice cuántos se cargaron, cuántos ya existían y
 los errores.
 
 Pruebas: `node --test server/tests/datos-scripts.test.mjs`.
+
+## Letras
+
+La bomba: sale una temática y una letra, cada quien dice una palabra y pasa
+el celular hasta que explota. Colección `letras_tematicas` (no pública; la
+app la lee solo con `POST /juego/tematicas`). Los datos viven solo en
+Directus.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `id` | Integer, automático | |
+| `status` | String: `published` / `draft` / `archived` | Por defecto `published`. Solo las publicadas salen en el juego. Archivar las esconde. |
+| `premium` | Boolean, por defecto `false` | Si está activo, solo sale con Todo Charadeando. |
+| `tematica` | String, máx. 60 | "Cosas que hay en un baño". |
+| `letras` | String, máx. 30 | Letras con que se puede jugar ("ABCDEIJLPST"). Nunca Ñ, W, X ni Z: el servidor las quita (`LETRAS_JUEGO`) y, si no queda ninguna, usa todas. |
+
+`POST /juego/tematicas` con `{ "n": 100, "excluir": [ids], "incluir_premium": false }`
+(`n` de 1 a 200, por defecto 100) devuelve temáticas publicadas al azar como
+`{ "data": [{ "id", "tematica", "letras" }] }`. Las de `excluir` (ya
+jugadas) solo se repiten si no alcanzan. 10 peticiones por minuto por IP.
+
+La colección se crea con `node server/scripts/crear-tematicas.mjs` (como
+las demás, con el token de administrador) y las temáticas se cargan con
+`node server/scripts/importar-tematicas.mjs tematicas.json` (archivo
+temporal `[{ "tematica", "letras" }]`, que se borra después): las revisa
+(letras en mayúscula, sin repetir, al menos 3, sin Ñ, W, X ni Z), salta
+las que ya existen y las deja publicadas (`--borrador` para dejarlas en
+borrador). El 24 nov 2026 se cargaron 100.
+
+Pruebas: `node --test server/tests/tematicas-scripts.test.mjs`.
 
 ## Códigos promocionales
 

@@ -43,6 +43,10 @@ class DirectusService {
   /// `MAX_FACTS` de la extensión.
   static const maxFacts = 100;
 
+  /// Máximo de temáticas de Letras por petición. Debe coincidir con
+  /// `MAX_TOPICS` de la extensión.
+  static const maxTopics = 200;
+
   static const _timeout = Duration(seconds: 15);
 
   final http.Client _client;
@@ -51,6 +55,7 @@ class DirectusService {
   Uri get wordsUri => Uri.parse('$baseUrl/juego/palabras');
   Uri get photoMimeUri => Uri.parse('$baseUrl/juego/fotomimica');
   Uri get factsUri => Uri.parse('$baseUrl/juego/datos');
+  Uri get topicsUri => Uri.parse('$baseUrl/juego/tematicas');
 
   /// Trae [count] palabras al azar, de [category] y [difficulty] si se
   /// indican (códigos de Directus, como `ANIMALES` y `FACIL`). Con
@@ -119,6 +124,25 @@ class DirectusService {
     return [
       for (final item in data)
         if (item is Map<String, dynamic>) ?FactItem.fromJson(item),
+    ];
+  }
+
+  /// Trae [count] temáticas de Letras al azar (solo las publicadas). Las
+  /// de [exclude] (ids ya jugados) solo se repiten si no alcanzan las
+  /// demás. Sin [includePremium] solo llegan las gratis.
+  Future<List<LettersTopic>> fetchTopics({
+    required int count,
+    Iterable<String> exclude = const [],
+    bool includePremium = false,
+  }) async {
+    final data = await _post(topicsUri, {
+      'n': count.clamp(1, maxTopics),
+      'excluir': [for (final id in _lastExcluded(exclude)) ?int.tryParse(id)],
+      'incluir_premium': includePremium,
+    });
+    return [
+      for (final item in data)
+        if (item is Map<String, dynamic>) ?LettersTopic.fromJson(item),
     ];
   }
 

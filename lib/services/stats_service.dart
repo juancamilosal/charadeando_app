@@ -52,6 +52,30 @@ abstract final class GameStats {
     };
   }
 
+  /// Una partida de Letras: [bombs] bombas que explotaron (cuentan como
+  /// rondas), [passes] pases en total y lo que duraron en promedio.
+  static Map<String, Object?> letters({
+    required int bombs,
+    required int passes,
+    required Duration averageFuse,
+    required bool video,
+    required String version,
+  }) => {
+    'modo': 'LETRAS',
+    'categorias': const ['LETRAS'],
+    'dificultad': null,
+    'equipos': 0,
+    'rondas': bombs.clamp(1, 20),
+    'duracion_turno': averageFuse.inSeconds.clamp(10, 600),
+    'palabras_jugadas': passes.clamp(0, 2000),
+    'aciertos': passes.clamp(0, 2000),
+    'pases': 0,
+    'modo_acierto': 'TOQUE',
+    'terminada': true,
+    'video': video,
+    'version_app': version,
+  };
+
   static (String, List<String>) _modeAndCategories(GameConfig config) {
     if (config.isMix) {
       final categories = [
@@ -128,6 +152,28 @@ class StatsService {
         finished: finished,
         controller: controller,
         recordVideo: recordVideo,
+        version: await _version(),
+      );
+      final queue = [...await _read(), stats];
+      await _write(queue.sublist(max(0, queue.length - maxQueue)));
+      await _flushNow();
+    });
+  }
+
+  /// Registra una partida de Letras ([GameStats.letters]).
+  Future<void> recordLetters({
+    required int bombs,
+    required int passes,
+    required Duration averageFuse,
+    required bool video,
+  }) {
+    if (!enabled || bombs == 0) return Future.value();
+    return _enqueue(() async {
+      final stats = GameStats.letters(
+        bombs: bombs,
+        passes: passes,
+        averageFuse: averageFuse,
+        video: video,
         version: await _version(),
       );
       final queue = [...await _read(), stats];

@@ -33,6 +33,7 @@ class VideoRenderer {
     required String outputPath,
     required int bitrateMbps,
     bool watermark = false,
+    String? subtitles,
     void Function(double progress)? onProgress,
   }) async {
     final fontsDir = await _prepareFonts(workDir);
@@ -40,8 +41,13 @@ class VideoRenderer {
     final logoWidth = logo == null
         ? 0
         : watermarkPixels(await _videoWidth(recording.segments.first));
-    final subtitles = File('${workDir.path}/turno.ass');
-    await subtitles.writeAsString(buildSubtitles(recording.captions));
+    // [subtitles] trae los textos ya armados (Letras, en vertical); si no,
+    // se arman con los del turno.
+    final customSubtitles = subtitles;
+    final subtitlesFile = File('${workDir.path}/turno.ass');
+    await subtitlesFile.writeAsString(
+      customSubtitles ?? buildSubtitles(recording.captions),
+    );
 
     final encoders = [
       if (Platform.isAndroid) hardwareEncoder('h264_mediacodec', bitrateMbps),
@@ -59,7 +65,7 @@ class VideoRenderer {
           final failure = await _run(
             buildArguments(
               segments: recording.segments,
-              subtitlesPath: subtitles.path,
+              subtitlesPath: subtitlesFile.path,
               fontsDir: fontsDir,
               encoder: encoder,
               outputPath: outputPath,
@@ -246,6 +252,67 @@ class VideoRenderer {
       '+faststart',
       outputPath,
     ];
+  }
+
+  /// Subtítulos del video de Letras, vertical (720x1280): arriba la
+  /// [topic] y debajo la [letter] en grande (no en el centro, para no
+  /// tapar la cara de quien tiene el celular), durante [playing], y desde
+  /// [boomAt] hasta [end] el ¡BOOM! en el centro.
+  static String lettersSubtitles({
+    required String topic,
+    required String letter,
+    required Duration playing,
+    required Duration boomAt,
+    required Duration end,
+  }) {
+    final buffer = StringBuffer()
+      ..writeln('[Script Info]')
+      ..writeln('ScriptType: v4.00+')
+      ..writeln('PlayResX: 720')
+      ..writeln('PlayResY: 1280')
+      ..writeln('WrapStyle: 0')
+      ..writeln('ScaledBorderAndShadow: yes')
+      ..writeln()
+      ..writeln('[V4+ Styles]')
+      ..writeln(
+        'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, '
+        'OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, '
+        'ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, '
+        'Alignment, MarginL, MarginR, MarginV, Encoding',
+      );
+    // Temática arriba en una caja morada; la letra, blanca con borde
+    // morado, debajo; el BOOM, amarillo con borde rojo, en el centro.
+    for (final (name, size, color, box, border, align, marginV) in [
+      ('Topic', 56, '&H00FFFFFF', '&H20E01B6A', 3, 8, 70),
+      ('Letter', 230, '&H00FFFFFF', '&H00E01B6A', 1, 8, 175),
+      ('Boom', 200, '&H003FD2FF', '&H002839D6', 1, 5, 0),
+    ]) {
+      final outline = border == 3 ? 18 : 14;
+      buffer.writeln(
+        'Style: $name,Fredoka,$size,$color,$color,$box,&H00000000,'
+        '-1,0,0,0,100,100,0,0,$border,$outline,0,$align,50,50,$marginV,1',
+      );
+    }
+    buffer
+      ..writeln()
+      ..writeln('[Events]')
+      ..writeln(
+        'Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, '
+        'Effect, Text',
+      )
+      ..writeln(
+        'Dialogue: 0,${_time(Duration.zero)},${_time(playing)},Topic,,'
+        '0,0,0,,${_escape(topic)}',
+      )
+      ..writeln(
+        'Dialogue: 0,${_time(Duration.zero)},${_time(playing)},Letter,,'
+        '0,0,0,,${_escape(letter)}',
+      )
+      ..writeln(
+        'Dialogue: 1,${_time(boomAt)},${_time(end)},Boom,,0,0,0,,'
+        '¡BOOM!',
+      );
+    return buffer.toString();
   }
 
   /// Subtítulos en formato ASS. Las medidas son para un video de 1280x720 y

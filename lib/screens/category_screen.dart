@@ -12,6 +12,7 @@ import '../widgets/category_card.dart';
 import '../widgets/combine_categories_sheet.dart';
 import '../widgets/play_background.dart';
 import '../widgets/play_choice.dart';
+import '../widgets/letters_section.dart';
 import '../widgets/more_or_less_section.dart';
 import '../widgets/photo_mime_view.dart';
 import '../widgets/premium_sheet.dart';
@@ -231,7 +232,7 @@ class CategoryScreen extends ConsumerWidget {
         // Antes de "Mis categorías" y con otro aspecto, para que no parezca
         // una categoría más.
         const SizedBox(height: 44),
-        const CategorySectionHeader(title: 'Más juegos', trailing: '2 juegos'),
+        const CategorySectionHeader(title: 'Más juegos', trailing: '3 juegos'),
         const SizedBox(height: 18),
         PhotoMimeSection(
           // Por ahora es gratis para todos: sin "Más objetos con Premium".
@@ -255,6 +256,10 @@ class CategoryScreen extends ConsumerWidget {
             color: GameCategory.moreOrLess.color,
           ),
         ),
+        // Letras: la bomba. Por ahora gratis para todos
+        // (LettersBank.freeForNow).
+        const SizedBox(height: 16),
+        LettersSection(onPlay: () => context.push(Routes.letters)),
         // Al final, las que creó el usuario.
         const SizedBox(height: 44),
         CategorySectionHeader(

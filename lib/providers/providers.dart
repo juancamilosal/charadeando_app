@@ -35,6 +35,11 @@ final factsBankProvider = Provider(
   (ref) => FactsBank(ref.watch(directusServiceProvider)),
 );
 
+/// Letras: las temáticas y las ya jugadas.
+final lettersBankProvider = Provider(
+  (ref) => LettersBank(ref.watch(directusServiceProvider)),
+);
+
 /// Celular juez: crea las salas en el Worker.
 final judgeServiceProvider = Provider((ref) => JudgeService());
 

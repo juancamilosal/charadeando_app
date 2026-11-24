@@ -53,16 +53,21 @@ class TurnVideoController extends Notifier<TurnVideoState> {
   @override
   TurnVideoState build() => TurnVideoState.none;
 
+  /// Arma el video de [recording]. Letras manda sus propios textos
+  /// ([subtitles]) y cómo se anota en Mis videos ([describe]); los turnos
+  /// usan los de la partida.
   Future<void> process(
     TurnRecording recording,
-    VideoResolution resolution,
-  ) async {
+    VideoResolution resolution, {
+    String? subtitles,
+    SavedVideo Function(String assetId)? describe,
+  }) async {
     final generation = ++_generation;
     if (recording.isEmpty) {
       state = TurnVideoState.none;
       return;
     }
-    final describe = _describe = _describeTurn();
+    final describeVideo = _describe = describe ?? _describeTurn();
     final autoSave = ref.read(settingsProvider).autoSaveVideo;
     state = const TurnVideoState(TurnVideoStatus.rendering);
     final videos = ref.read(videoServiceProvider);
@@ -82,6 +87,7 @@ class TurnVideoController extends Notifier<TurnVideoState> {
             bitrateMbps: _bitrate(resolution),
             // Premium quita la marca de agua.
             watermark: !ref.read(premiumUnlockedProvider),
+            subtitles: subtitles,
             onProgress: (progress) {
               if (generation != _generation) return;
               state = TurnVideoState(
@@ -124,7 +130,7 @@ class TurnVideoController extends Notifier<TurnVideoState> {
     if (current) {
       await save();
     } else {
-      await _store(path, describe);
+      await _store(path, describeVideo);
       await _deleteIfExists(path);
     }
     _savingInBackground = false;

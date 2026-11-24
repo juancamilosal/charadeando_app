@@ -17,6 +17,9 @@
 //   POST /juego/datos     Datos al azar de la colección mas_menos (publicados)
 //                         para "¿Más o menos?": pregunta, respuesta exacta,
 //                         unidad, dato curioso y categoría.
+//   POST /juego/tematicas Temáticas al azar de la colección letras_tematicas
+//                         (publicadas) para el juego Letras: la temática y
+//                         las letras con que se puede jugar.
 //   GET  /juego/estado    Uso del servidor (RAM, CPU, carga, disco). Solo
 //                         para administradores de Directus; solo lee.
 //
@@ -113,6 +116,7 @@ const limits = {
   castigos: { points: 10, hits: new Map() },
   fotomimica: { points: 10, hits: new Map() },
   datos: { points: 10, hits: new Map() },
+  tematicas: { points: 10, hits: new Map() },
   // Una partida manda uno al terminar (y la app reintenta los que no
   // llegaron, de a uno), así que 20 por minuto sobra.
   partida: { points: 20, hits: new Map() },
@@ -135,6 +139,19 @@ const FACTS = 'mas_menos';
 /// Tope de datos por petición. Debe coincidir con DirectusService.maxFacts.
 const MAX_FACTS = 100;
 
+/// Temáticas del juego Letras ("Cosas que hay en un baño") con las letras
+/// con que se puede jugar cada una, status y premium. No es pública: solo
+/// se leen con /juego/tematicas.
+const TOPICS = 'letras_tematicas';
+
+/// Tope de temáticas por petición. Debe coincidir con
+/// DirectusService.maxTopics.
+const MAX_TOPICS = 200;
+
+/// Letras del juego Letras: todas menos Ñ, W, X y Z, que casi no tienen
+/// palabras en español.
+export const LETRAS_JUEGO = 'ABCDEFGHIJKLMNOPQRSTUVY'.split('');
+
 /// Castigos de la ruleta (campo `nombre`). No es pública.
 const PUNISHMENTS = 'castigos';
 
@@ -154,6 +171,7 @@ export const MODOS_PARTIDA = [
   'MIS_CATEGORIAS',
   'FOTOMIMICA',
   'MAS_O_MENOS',
+  'LETRAS',
 ];
 export const MODOS_ACIERTO = ['INCLINACION', 'TOQUE', 'JUEZ', 'TV'];
 
@@ -227,14 +245,15 @@ export function parsePartidaBody(body) {
   const modoOk = {
     NORMAL:
       categorias.length === 1 &&
-      !['LIBRE', 'FOTOMIMICA', 'MAS_O_MENOS', 'MIS_CATEGORIAS'].includes(categorias[0]),
+      !['LIBRE', 'FOTOMIMICA', 'MAS_O_MENOS', 'LETRAS', 'MIS_CATEGORIAS'].includes(categorias[0]),
     LIBRE: solo('LIBRE'),
     FOTOMIMICA: solo('FOTOMIMICA'),
     MAS_O_MENOS: solo('MAS_O_MENOS'),
+    LETRAS: solo('LETRAS'),
     MIS_CATEGORIAS: solo('MIS_CATEGORIAS'),
     COMBINADA:
       categorias.length >= 2 &&
-      !['LIBRE', 'FOTOMIMICA', 'MAS_O_MENOS'].some((c) => categorias.includes(c)),
+      !['LIBRE', 'FOTOMIMICA', 'MAS_O_MENOS', 'LETRAS'].some((c) => categorias.includes(c)),
   }[b.modo];
   if (!modoOk) return { error: `"categorias" no corresponde al modo ${b.modo}.` };
 
@@ -385,6 +404,52 @@ export function parseFactsBody(body) {
     dificultad: dificultad === 'MEZCLADA' ? null : dificultad,
     incluirPremium: incluir,
   };
+}
+
+/// Valida el pedido de /juego/tematicas: `n` (1 a MAX_TOPICS, por defecto
+/// 100), `excluir` (ids ya jugados) e `incluir_premium`.
+export function parseTopicsBody(body) {
+  const b = body ?? {};
+  const n = Number(b.n ?? 100);
+  if (!Number.isInteger(n) || n < 1 || n > MAX_TOPICS) {
+    return { error: `"n" debe ser un número entre 1 y ${MAX_TOPICS}.` };
+  }
+  const excluir = b.excluir ?? [];
+  if (
+    !Array.isArray(excluir) ||
+    excluir.length > MAX_EXCLUDE ||
+    !excluir.every((id) => Number.isInteger(id) || (typeof id === 'string' && /^\d{1,12}$/.test(id)))
+  ) {
+    return { error: `"excluir" debe ser una lista de hasta ${MAX_EXCLUDE} ids.` };
+  }
+  const incluir = b.incluir_premium ?? false;
+  if (typeof incluir !== 'boolean') {
+    return { error: '"incluir_premium" debe ser true o false.' };
+  }
+  return { n, excluir: excluir.map(Number), incluirPremium: incluir };
+}
+
+/// Las letras de una temática ("abcpst", "A, B, C"), en mayúsculas, sin
+/// repetir y solo las de LETRAS_JUEGO, en orden. Si no queda ninguna,
+/// todas las del juego.
+export function topicLetters(value) {
+  const set = new Set(String(value ?? '').toUpperCase().split(''));
+  const letras = LETRAS_JUEGO.filter((l) => set.has(l));
+  return letras.length > 0 ? letras.join('') : LETRAS_JUEGO.join('');
+}
+
+/// Temáticas para la app: `{ id, tematica, letras }`, sin las vacías ni
+/// repetidas.
+export function topicsOut(rows) {
+  const seen = new Set();
+  const out = [];
+  for (const row of rows ?? []) {
+    const tematica = typeof row?.tematica === 'string' ? row.tematica.trim() : '';
+    if (!tematica || seen.has(key(tematica))) continue;
+    seen.add(key(tematica));
+    out.push({ id: row.id, tematica, letras: topicLetters(row.letras) });
+  }
+  return out;
 }
 
 /// Datos para la app: `{ id, pregunta, respuesta, unidad, dato_curioso,
@@ -1102,6 +1167,40 @@ export default {
       } catch (e) {
         logger.error(e, '[juego] No se pudo guardar la partida');
         return error(res, 500, 'No se pudo guardar la partida.');
+      }
+    });
+
+    // { "n": 100, "excluir": [ids], "incluir_premium": false }: temáticas
+    // publicadas al azar; sin Premium, solo las gratis. Las de "excluir"
+    // (ya jugadas) solo se repiten si no alcanzan.
+    router.post('/tematicas', async (req, res) => {
+      if (!allowed('tematicas', clientIp(req))) {
+        return error(res, 429, 'Demasiadas peticiones. Espera un minuto.');
+      }
+      const body = parseTopicsBody(req.body);
+      if (body.error) return error(res, 400, body.error);
+      try {
+        const rows = await pickAvoiding(
+          ({ excluir, tomadas, limit }) => {
+            const q = database(TOPICS)
+              .select('id', 'tematica', 'letras')
+              .where('status', 'published')
+              .orderByRaw('random()')
+              .limit(limit);
+            if (!body.incluirPremium) {
+              q.where((w) => w.where('premium', false).orWhereNull('premium'));
+            }
+            const fuera = [...excluir, ...tomadas];
+            if (fuera.length > 0) q.whereNotIn('id', fuera);
+            return q;
+          },
+          body.n,
+          body.excluir,
+        );
+        return res.json({ data: topicsOut(rows) });
+      } catch (e) {
+        logger.error(e, '[juego] No se pudieron leer las temáticas');
+        return error(res, 500, 'No se pudieron leer las temáticas.');
       }
     });
 

@@ -37,6 +37,7 @@ class FakeRenderer extends VideoRenderer {
     required String outputPath,
     required int bitrateMbps,
     bool watermark = false,
+    String? subtitles,
     void Function(double progress)? onProgress,
   }) async {
     watermarks.add(watermark);

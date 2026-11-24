@@ -82,7 +82,7 @@ export const FIELDS = [
     },
     schema: { is_nullable: false },
   },
-  string('modo', 20, 'Cómo se jugó.', ['NORMAL', 'LIBRE', 'COMBINADA', 'MIS_CATEGORIAS', 'FOTOMIMICA', 'MAS_O_MENOS']),
+  string('modo', 20, 'Cómo se jugó.', ['NORMAL', 'LIBRE', 'COMBINADA', 'MIS_CATEGORIAS', 'FOTOMIMICA', 'MAS_O_MENOS', 'LETRAS']),
   string(
     'categoria',
     40,

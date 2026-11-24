@@ -18,6 +18,7 @@ import 'screens/team_editor_screen.dart';
 import 'screens/teams_screen.dart';
 import 'screens/turn_result_screen.dart';
 import 'screens/turn_screen.dart';
+import 'screens/letters_screen.dart';
 import 'screens/video_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/word_entry_screen.dart';
@@ -42,6 +43,9 @@ abstract final class Routes {
   static const video = '/video';
   static const finalResult = '/final';
   static const directusTest = '/directus';
+
+  /// El juego "Letras": la bomba.
+  static const letters = '/letras';
 
   /// Sección "Ruleta de castigos".
   static const punishments = '/ruleta';
@@ -162,6 +166,10 @@ final List<RouteBase> appRoutes = [
   GoRoute(
     path: Routes.directusTest,
     builder: (_, _) => const DirectusTestScreen(),
+  ),
+  GoRoute(
+    path: Routes.letters,
+    builder: (_, _) => const MusicSilence(child: LettersScreen()),
   ),
   GoRoute(
     path: Routes.customCategory,

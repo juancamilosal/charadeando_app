@@ -25,6 +25,8 @@ class AssetEffectPlayer implements EffectPlayer {
     SoundEffect.clock: ('audio/reloj.mp3', 0.8, 1010),
     SoundEffect.timeUp: ('audio/fin.mp3', 0.8, 2190),
     SoundEffect.spin: ('audio/ruleta.mp3', 0.9, 130),
+    SoundEffect.tick: ('audio/tic.mp3', 0.9, 110),
+    SoundEffect.boom: ('audio/explosion.mp3', 1.0, 2450),
   };
 
   /// Lo que dura la marimba del final del turno.

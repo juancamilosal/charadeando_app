@@ -59,6 +59,12 @@ test('los modos especiales solo llevan su propio código', () => {
       .error,
     undefined,
   );
+  assert.equal(
+    parsePartidaBody(partida({ modo: 'LETRAS', categorias: ['LETRAS'], dificultad: null })).error,
+    undefined,
+  );
+  assert.ok(parsePartidaBody(partida({ modo: 'NORMAL', categorias: ['LETRAS'] })).error);
+  assert.ok(parsePartidaBody(partida({ modo: 'LETRAS', categorias: ['ANIMALES'] })).error);
   assert.ok(parsePartidaBody(partida({ modo: 'NORMAL', categorias: ['MAS_O_MENOS'] })).error);
   assert.ok(parsePartidaBody(partida({ modo: 'MAS_O_MENOS', categorias: ['ANIMALES'] })).error);
   assert.ok(

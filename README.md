@@ -446,6 +446,33 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Con las palabras escritas por los equipos, en el turno se ve cuántas
   faltan de toda la partida. Con las automáticas no se muestra, porque el
   turno dura hasta que se acabe el tiempo.
+- Letras (en prueba, rama `feature/letras`): la bomba. Tercer cartel de
+  "Más juegos" (`LettersSection`, debajo de ¿Más o menos?; ruta
+  `/letras`, `LettersScreen`, en vertical). "¡Girar!" saca una temática
+  de Directus ("Cosas que hay en un baño") y la ruleta frena en una de sus
+  letras (`LettersTopic.letters`; nunca Ñ, W, X ni Z:
+  `LettersRules.letters`). Arriba la temática, en el centro la letra y
+  abajo el botón "¡Pasa!": quien tiene el celular dice una palabra, lo
+  toca (vibra, suena ✓, "¡Pasa el celular!"; medio segundo sin contar
+  otro pase) y se lo pasa al siguiente. La bomba explota en un tiempo
+  secreto al azar entre 20 y 60 s (`LettersRules.secretFuse`) con un
+  tic-tac que se acelera hasta el final (`tickInterval`). ¡BOOM!
+  (`BombExplosion`: destello, bola de fuego, chispas, humo, temblor y
+  "¡BOOM!", con el sonido `explosion.mp3` y vibración): pierde quien lo
+  tenía; el resultado muestra la temática, la letra, los pases y el
+  tiempo, con "Girar la ruleta de castigos" y "Otra bomba". El grupo es
+  el juez: no hay reconocimiento de voz. Con "Grabar video" graba en
+  vertical con la cámara de frente (se ve pequeña arriba a la derecha) y
+  con sonido; el video lleva la temática arriba, la letra debajo y el
+  ¡BOOM! al final (`VideoRenderer.lettersSubtitles`, 720x1280) y se
+  guarda en Mis videos como los demás (`TurnVideoController.process` con
+  `subtitles` y `describe`). Temáticas: `LettersBank` (`POST
+  /juego/tematicas`, 100 por partida, recuerda las jugadas en
+  `tematicas_vistas.json`; sin internet, "Sin conexión" con
+  "Reintentar"). Gratis por ahora (`LettersBank.freeForNow`).
+  Estadísticas con el modo `LETRAS` (`StatsService.recordLetters`: bombas
+  como rondas y pases como aciertos). Los sonidos `tic.mp3` y
+  `explosion.mp3` son sintéticos (`tool/sonidos/generar_letras.py`).
 - ¿Más o menos?: otro juego, en "Más juegos" debajo de Fotomímica
   (`MoreOrLessSection`, cartel oscuro con su ícono de flechas
   `assets/img/categorias/mas_o_menos.png`, "NUEVO JUEGO", un dato de

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import {
+  LETRAS_JUEGO,
   codeProblem,
   cpuPercent,
   ensureRedemptions,
@@ -10,6 +11,9 @@ import {
   normalizeCode,
   normalizeDevice,
   parseMeminfo,
+  parseTopicsBody,
+  topicLetters,
+  topicsOut,
   factsOut,
   parseFactsBody,
   parsePhotoMimeBody,
@@ -328,6 +332,42 @@ test('¿Más o menos?: entrega solo datos con pregunta y respuesta entera', () =
         categoria: null,
         dificultad: null,
       },
+    ],
+  );
+});
+
+test('Letras: valida el pedido de temáticas', () => {
+  assert.deepEqual(parseTopicsBody({}), { n: 100, excluir: [], incluirPremium: false });
+  assert.deepEqual(parseTopicsBody({ n: 5, excluir: [1, '2'], incluir_premium: true }), {
+    n: 5,
+    excluir: [1, 2],
+    incluirPremium: true,
+  });
+  for (const body of [{ n: 0 }, { n: 201 }, { n: 1.5 }, { excluir: 'x' }, { excluir: ['a'] }, { incluir_premium: 'si' }]) {
+    assert.ok(parseTopicsBody(body).error, JSON.stringify(body));
+  }
+});
+
+test('Letras: las letras de una temática nunca traen Ñ, W, X ni Z', () => {
+  assert.equal(LETRAS_JUEGO.join(''), 'ABCDEFGHIJKLMNOPQRSTUVY');
+  assert.equal(topicLetters('pstabc'), 'ABCPST');
+  assert.equal(topicLetters('A, B, B, ñ, w, x, z'), 'AB');
+  // Sin letras válidas, todas las del juego.
+  assert.equal(topicLetters('ÑWXZ'), LETRAS_JUEGO.join(''));
+  assert.equal(topicLetters(null), LETRAS_JUEGO.join(''));
+});
+
+test('Letras: entrega temáticas sin vacías ni repetidas', () => {
+  assert.deepEqual(
+    topicsOut([
+      { id: 1, tematica: ' Cosas que hay en un baño ', letras: 'abcz' },
+      { id: 2, tematica: 'cosas que hay en un BAÑO', letras: 'p' },
+      { id: 3, tematica: '', letras: 'a' },
+      { id: 4, tematica: 'Frutas', letras: null },
+    ]),
+    [
+      { id: 1, tematica: 'Cosas que hay en un baño', letras: 'ABC' },
+      { id: 4, tematica: 'Frutas', letras: LETRAS_JUEGO.join('') },
     ],
   );
 });
