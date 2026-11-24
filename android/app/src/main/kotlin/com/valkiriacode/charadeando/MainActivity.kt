@@ -6,8 +6,12 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.hardware.display.DisplayManager
 import android.media.MediaRouter
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.provider.Settings
 import android.util.DisplayMetrics
 import android.view.Surface
@@ -51,6 +55,19 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
+        // Vibraciones con fuerza y largo (La Bomba): HapticFeedback de
+        // Flutter solo tiene toques cortos y siempre iguales.
+        MethodChannel(messenger, "charadeando/vibrar").setMethodCallHandler { call, result ->
+            when (call.method) {
+                "vibrar" -> {
+                    val tiempos = (call.argument<List<Int>>("tiempos") ?: emptyList())
+                        .map { it.toLong() }.toLongArray()
+                    val fuerzas = (call.argument<List<Int>>("fuerzas") ?: emptyList()).toIntArray()
+                    result.success(vibrate(tiempos, fuerzas))
+                }
+                else -> result.notImplemented()
+            }
+        }
         // Identificador del celular para los códigos promocionales. Desde
         // Android 8 es fijo por app y celular: sobrevive a desinstalar y
         // reinstalar la app (solo cambia al restablecer de fábrica).
@@ -79,6 +96,36 @@ class MainActivity : FlutterActivity() {
         tv?.onCancel(null)
         screen?.stop()
         super.onDestroy()
+    }
+
+    // Vibra con el patrón: [tiempos] en milisegundos (vibrando y en pausa,
+    // empezando por vibrar) y la fuerza de cada tramo (1 a 255; 0 es
+    // pausa). Los celulares sin control de fuerza vibran a la suya.
+    @Suppress("DEPRECATION")
+    private fun vibrate(tiempos: LongArray, fuerzas: IntArray): Boolean {
+        if (tiempos.isEmpty()) return false
+        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            (getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+        } else {
+            getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
+        if (!vibrator.hasVibrator()) return false
+        // createWaveform empieza con una pausa: se le pone 0 al principio.
+        val timings = longArrayOf(0) + tiempos
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val amplitudes = intArrayOf(0) + IntArray(tiempos.size) { i ->
+                val fuerza = fuerzas.getOrElse(i) { if (i % 2 == 0) 255 else 0 }
+                if (!vibrator.hasAmplitudeControl() && fuerza > 0) {
+                    VibrationEffect.DEFAULT_AMPLITUDE
+                } else {
+                    fuerza.coerceIn(0, 255)
+                }
+            }
+            vibrator.vibrate(VibrationEffect.createWaveform(timings, amplitudes, -1))
+        } else {
+            vibrator.vibrate(timings, -1)
+        }
+        return true
     }
 
     // Deja de transmitir a un Chromecast u otra ruta de video. Si no hay

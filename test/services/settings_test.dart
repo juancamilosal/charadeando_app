@@ -237,6 +237,42 @@ void main() {
       expect(made, hasLength(2));
     });
 
+    testWidgets('buzz y pattern usan el vibrador con fuerza', (tester) async {
+      final vibrations = <Object?>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('charadeando/vibrar'),
+        (call) async {
+          vibrations.add(call.arguments);
+          return true;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          const MethodChannel('charadeando/vibrar'),
+          null,
+        ),
+      );
+      await const Haptics(enabled: false)
+          .buzz(const Duration(milliseconds: 100));
+      expect(vibrations, isEmpty);
+      const haptics = Haptics(enabled: true);
+      await haptics.buzz(const Duration(milliseconds: 100), strength: 0.5);
+      await haptics.pattern(const [
+        (Duration(milliseconds: 700), 1),
+        (Duration(milliseconds: 90), 0),
+      ]);
+      expect(vibrations, [
+        {
+          'tiempos': [100],
+          'fuerzas': [128],
+        },
+        {
+          'tiempos': [700, 90],
+          'fuerzas': [255, 0],
+        },
+      ]);
+    });
+
     test('el proveedor sigue el ajuste', () {
       final container = ProviderContainer(
         overrides: [

@@ -265,8 +265,24 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
         _explode();
       } else {
         setState(() => _turnLeft = left);
+        _warn(left);
       }
     });
+  }
+
+  /// En los últimos 3 segundos el celular vibra cada 0,3 s, cada vez más
+  /// largo y más fuerte, hasta el ¡BOOM!
+  void _warn(Duration left) {
+    const warning = Duration(seconds: 3);
+    if (left > warning || left.inMilliseconds % 300 != 0) return;
+    final progress = 1 - left.inMilliseconds / warning.inMilliseconds;
+    ref
+        .read(hapticsProvider)
+        .buzz(
+          Duration(milliseconds: (70 + 180 * progress).round()),
+          strength: 0.3 + 0.7 * progress,
+        )
+        .ignore();
   }
 
   /// Segundos que le quedan a quien tiene el celular (modo de 11 s).
@@ -306,7 +322,11 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
     _passCooldown = Timer(const Duration(milliseconds: 500), () {});
     final roundOver = game.choose(letter);
     _picks.add((_videoClock.elapsed, letter));
-    ref.read(hapticsProvider).heavy();
+    // Una vibración clara al elegir la letra.
+    ref
+        .read(hapticsProvider)
+        .buzz(const Duration(milliseconds: 90), strength: 0.8)
+        .ignore();
     ref.read(soundServiceProvider).play(SoundEffect.hit);
     _flashTimer?.cancel();
     if (roundOver) {
@@ -369,10 +389,14 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
     final bomb = game.explode();
     setState(() => _phase = _Phase.boom);
     ref.read(soundServiceProvider).play(SoundEffect.boom);
-    final haptics = ref.read(hapticsProvider);
-    for (var i = 0; i < 4; i++) {
-      Timer(Duration(milliseconds: i * 180), haptics.heavy);
-    }
+    // ¡BOOM! Vibra mucho: un golpe largo y dos más, a toda fuerza.
+    ref.read(hapticsProvider).pattern(const [
+      (Duration(milliseconds: 700), 1),
+      (Duration(milliseconds: 90), 0),
+      (Duration(milliseconds: 450), 1),
+      (Duration(milliseconds: 90), 0),
+      (Duration(milliseconds: 350), 1),
+    ]).ignore();
     ref.read(lettersBankProvider).remember(bomb.topic).ignore();
     // El video sigue un momento después del BOOM, para ver las caras.
     final boomAt = _videoClock.elapsed;

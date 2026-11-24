@@ -479,6 +479,15 @@ la cámara frontal graba a los participantes para revivir las risas.
   cero, explota en sus manos (al acabar la ronda se pausa y la ronda
   nueva empieza con 11 s). En los dos, un tic-tac que se acelera hasta el
   final (`tickInterval`; en el de 11 s, en cada turno) y la bomba latiendo.
+  Vibraciones (con el ajuste de vibración): al elegir una letra, una
+  vibración clara; en el modo de 11 s, en los últimos 3 segundos vibra
+  cada 0,3 s, cada vez más larga y más fuerte, hasta el BOOM (en el modo
+  secreto no, para no delatar cuándo explota); y al explotar, un golpe
+  largo y dos más a toda fuerza. Usan `Haptics.buzz` y `Haptics.pattern`,
+  que van por el canal nativo `charadeando/vibrar` (`MainActivity`, con
+  `VibrationEffect.createWaveform` y la fuerza de cada tramo; permiso
+  `VIBRATE`, que no se le pide al usuario); fuera de Android, un toque
+  fuerte.
   ¡BOOM! (`BombExplosion`: destello, bola de fuego, chispas, humo, temblor,
   las 23 letras de la rueda que salen volando girando y "¡BOOM!", con el sonido `explosion.mp3` y vibración): pierde quien lo
   tenía; el resultado muestra la temática, los pases, la ronda y el

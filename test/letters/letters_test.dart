@@ -9,6 +9,7 @@ import 'package:charadeando_app/services/services.dart';
 import 'package:charadeando_app/widgets/bomb_explosion.dart';
 import 'package:charadeando_app/widgets/countdown_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -545,6 +546,20 @@ void main() {
         ),
       );
       await tester.pump();
+      final vibrations = <Map<Object?, Object?>>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('charadeando/vibrar'),
+        (call) async {
+          vibrations.add(call.arguments as Map<Object?, Object?>);
+          return true;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          const MethodChannel('charadeando/vibrar'),
+          null,
+        ),
+      );
       expect(find.text('Explota cuando nadie lo espera'), findsOneWidget);
       await tester.tap(find.text('⏱️ 11 segundos'));
       await tester.pump();
@@ -565,15 +580,27 @@ void main() {
       // A los 9 segundos pasa: el siguiente tiene otros 11.
       await wait(90);
       expect(find.text('2'), findsOneWidget);
+      // Antes de tocar ya vibró en los últimos 3 segundos, cada vez más.
+      final warnings = [
+        for (final v in vibrations) (v['fuerzas']! as List).first as int,
+      ];
+      expect(warnings.length, 4); // En 3,0, 2,7, 2,4 y 2,1 s.
+      for (var i = 1; i < warnings.length; i++) {
+        expect(warnings[i], greaterThan(warnings[i - 1]));
+      }
+      vibrations.clear();
       await tester.tap(find.text('A'));
       await tester.pump();
+      // Al elegir la letra, una vibración.
+      expect(vibrations.first['tiempos'], [90]);
       await wait(3);
       expect(find.text('11'), findsOneWidget);
       await wait(90);
       expect(find.byType(BombExplosion), findsNothing);
-      // Nadie respondió: ¡BOOM!
+      // Nadie respondió: ¡BOOM! y vibra mucho.
       await wait(25);
       expect(find.byType(BombExplosion), findsOneWidget);
+      expect(vibrations.last['tiempos'], [700, 90, 450, 90, 350]);
       await wait(30);
       expect(find.text('Perdió quien tenía el celular'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
