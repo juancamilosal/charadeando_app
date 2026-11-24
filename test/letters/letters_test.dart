@@ -280,6 +280,10 @@ void main() {
     });
   });
 
+  test('en el modo de turnos cada quien tiene 11 segundos', () {
+    expect(LettersRules.turnTime, const Duration(seconds: 11));
+  });
+
   test('con mi temática se juega aunque no haya temáticas de Directus', () {
     final game = LettersGame(const [], random: Random(1));
     expect(game.hasTopics, isFalse);
@@ -510,6 +514,68 @@ void main() {
       expect(find.byType(CountdownView), findsNothing);
       expect(find.text('Cosas de la playa'), findsOneWidget);
       expect(find.text('0 pases'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('11 segundos: cada pase da 11 segundos y si no, ¡BOOM!', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1080, 2340);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+      final container = ProviderContainer(
+        overrides: [
+          settingsStoreProvider.overrideWithValue(MemorySettingsStore()),
+          statsServiceProvider.overrideWithValue(NoStatsService()),
+        ],
+      );
+      addTearDown(container.dispose);
+      container
+          .read(settingsProvider.notifier)
+          .update(const AppSettings(recordVideo: false));
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            home: LettersScreen(
+              random: Random(5),
+              startWith: [topic(1, 'APS')],
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.text('Explota cuando nadie lo espera'), findsOneWidget);
+      await tester.tap(find.text('⏱️ 11 segundos'));
+      await tester.pump();
+      expect(
+        find.text('Cada quien tiene 11 segundos para responder'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Rápida'));
+      await tester.pump();
+      Future<void> wait(int tenths) async {
+        for (var i = 0; i < tenths; i++) {
+          await tester.pump(const Duration(milliseconds: 100));
+        }
+      }
+
+      await wait(31); // La cuenta 3, 2, 1.
+      expect(find.text('11'), findsOneWidget);
+      // A los 9 segundos pasa: el siguiente tiene otros 11.
+      await wait(90);
+      expect(find.text('2'), findsOneWidget);
+      await tester.tap(find.text('A'));
+      await tester.pump();
+      await wait(3);
+      expect(find.text('11'), findsOneWidget);
+      await wait(90);
+      expect(find.byType(BombExplosion), findsNothing);
+      // Nadie respondió: ¡BOOM!
+      await wait(25);
+      expect(find.byType(BombExplosion), findsOneWidget);
+      await wait(30);
+      expect(find.text('Perdió quien tenía el celular'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
     });
   });

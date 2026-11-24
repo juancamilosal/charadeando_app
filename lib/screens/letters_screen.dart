@@ -71,6 +71,15 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
   final _notices = <(Duration, Duration, String)>[];
   Duration? _noticeFrom;
 
+  /// Cómo explota la bomba: en secreto (como siempre) o a los 11 segundos
+  /// de cada quien. "Otra bomba" sigue con el mismo.
+  LettersMode _mode = LettersMode.secret;
+
+  /// En el modo de 11 segundos: el tiempo que le queda a quien tiene el
+  /// celular. Lo baja un temporizador cada décima; en cero, ¡BOOM!
+  Duration _turnLeft = LettersRules.turnTime;
+  Timer? _turnTimer;
+
   /// La cuenta 3, 2, 1 antes de cada bomba, como en las categorías.
   static const _countdownFrom = 3;
   int _countdown = _countdownFrom;
@@ -232,9 +241,40 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
     _videoClock
       ..reset()
       ..start();
-    _fuseTimer = Timer(game.fuse, _explode);
+    if (_mode == LettersMode.turn) {
+      _startTurn();
+    } else {
+      _fuseTimer = Timer(game.fuse, _explode);
+    }
     _tick();
     if (mounted) setState(() {});
+  }
+
+  /// Modo de 11 segundos: empieza el tiempo de quien tiene el celular. Si
+  /// se le acaba, ¡BOOM!
+  void _startTurn() {
+    _turnTimer?.cancel();
+    setState(() => _turnLeft = LettersRules.turnTime);
+    const step = Duration(milliseconds: 100);
+    _turnTimer = Timer.periodic(step, (timer) {
+      if (!mounted || _phase != _Phase.playing) return;
+      final left = _turnLeft - step;
+      if (left <= Duration.zero) {
+        timer.cancel();
+        _turnLeft = Duration.zero;
+        _explode();
+      } else {
+        setState(() => _turnLeft = left);
+      }
+    });
+  }
+
+  /// Segundos que le quedan a quien tiene el celular (modo de 11 s).
+  int get _secondsLeft => (_turnLeft.inMilliseconds / 1000).ceil();
+
+  void _stopTurn() {
+    _turnTimer?.cancel();
+    _turnTimer = null;
   }
 
   /// El tic-tac, cada vez más rápido.
@@ -242,8 +282,14 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
     final game = _game;
     if (!mounted || _phase != _Phase.playing || game == null) return;
     ref.read(soundServiceProvider).play(SoundEffect.tick);
+    // En el modo de 11 segundos el tic-tac se acelera en cada turno.
     _tickTimer = Timer(
-      LettersRules.tickInterval(_clock.elapsed, game.fuse),
+      _mode == LettersMode.turn
+          ? LettersRules.tickInterval(
+              LettersRules.turnTime - _turnLeft,
+              LettersRules.turnTime,
+            )
+          : LettersRules.tickInterval(_clock.elapsed, game.fuse),
       _tick,
     );
     setState(() => _pulse = !_pulse);
@@ -267,6 +313,8 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
       _pauseBomb();
       return;
     }
+    // El siguiente tiene sus 11 segundos.
+    if (_mode == LettersMode.turn) _startTurn();
     setState(() => _passFlash = true);
     _flashTimer = Timer(const Duration(milliseconds: 900), () {
       if (mounted) setState(() => _passFlash = false);
@@ -278,6 +326,7 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
     _fuseTimer?.cancel();
     _tickTimer?.cancel();
     _clock.stop();
+    _stopTurn();
     _noticeFrom = _videoClock.elapsed;
     setState(() {
       _passFlash = false;
@@ -295,8 +344,12 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
     game.nextRound();
     setState(() => _phase = _Phase.playing);
     _clock.start();
-    final left = game.fuse - _clock.elapsed;
-    _fuseTimer = Timer(left.isNegative ? Duration.zero : left, _explode);
+    if (_mode == LettersMode.turn) {
+      _startTurn();
+    } else {
+      final left = game.fuse - _clock.elapsed;
+      _fuseTimer = Timer(left.isNegative ? Duration.zero : left, _explode);
+    }
     _tick();
   }
 
@@ -309,7 +362,10 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
     if (!mounted || _phase != _Phase.playing) return;
     _tickTimer?.cancel();
     _clock.stop();
+    _stopTurn();
     final game = _game!;
+    // En el modo de 11 segundos la bomba duró lo que se jugó.
+    if (_mode == LettersMode.turn) game.fuse = _clock.elapsed;
     final bomb = game.explode();
     setState(() => _phase = _Phase.boom);
     ref.read(soundServiceProvider).play(SoundEffect.boom);
@@ -375,6 +431,7 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
   /// Corta la bomba sin explotar (se salió de la app o del juego).
   Future<void> _abort() async {
     _countdownTimer?.cancel();
+    _stopTurn();
     _tickTimer?.cancel();
     _fuseTimer?.cancel();
     _clock.stop();
@@ -407,6 +464,7 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _countdownTimer?.cancel();
+    _turnTimer?.cancel();
     _tickTimer?.cancel();
     _fuseTimer?.cancel();
     _flashTimer?.cancel();
@@ -560,7 +618,12 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 24),
+                _BombModePicker(
+                  mode: _mode,
+                  onChanged: (mode) => setState(() => _mode = mode),
+                ),
+                const SizedBox(height: 20),
                 _ModeCard(
                   emoji: '⚡',
                   title: 'Rápida',
@@ -652,6 +715,9 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
                   used: game.used,
                   enabled: playing,
                   pulse: _pulse,
+                  seconds: _mode == LettersMode.turn && _phase == _Phase.playing
+                      ? _secondsLeft
+                      : null,
                   onTap: _choose,
                 ),
               ),
@@ -1059,6 +1125,83 @@ class _TopicDialogState extends State<_TopicDialog> {
           style: TextButton.styleFrom(foregroundColor: context.surfaces.accent),
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancelar'),
+        ),
+      ],
+    );
+  }
+}
+
+/// Cómo explota la bomba: "Mecha secreta" o "11 segundos", con una línea
+/// que explica el elegido.
+class _BombModePicker extends StatelessWidget {
+  const _BombModePicker({required this.mode, required this.onChanged});
+
+  final LettersMode mode;
+  final ValueChanged<LettersMode> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget option(LettersMode value, String emoji, String label) {
+      final selected = mode == value;
+      return Expanded(
+        child: Semantics(
+          button: true,
+          selected: selected,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => onChanged(value),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: selected ? Colors.white : Colors.transparent,
+                borderRadius: BorderRadius.circular(22),
+              ),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  '$emoji $label',
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontFamily: AppFonts.display,
+                    fontSize: 19,
+                    fontWeight: FontWeight.w700,
+                    color: selected ? AppColors.ink : Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.18),
+            borderRadius: BorderRadius.circular(26),
+          ),
+          child: Row(
+            children: [
+              option(LettersMode.secret, '💣', 'Mecha secreta'),
+              option(LettersMode.turn, '⏱️', '11 segundos'),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          mode == LettersMode.secret
+              ? 'Explota cuando nadie lo espera'
+              : 'Cada quien tiene 11 segundos para responder',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.85),
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ],
     );

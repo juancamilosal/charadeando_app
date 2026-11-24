@@ -447,7 +447,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   faltan de toda la partida. Con las automáticas no se muestra, porque el
   turno dura hasta que se acabe el tiempo.
 - La Bomba (en el código, `Letras`; en prueba, rama `feature/letras`).
-  Tercer cartel de "Más juegos" (`LettersSection`, debajo de ¿Más o
+  Tercer cartel de "Más juegos" (`LettersSection`, con la bomba sobre un resplandor de fuego para que se vea en el fondo oscuro, debajo de ¿Más o
   menos?; ruta `/letras`, `LettersScreen`, en vertical). El inicio tiene una
   frase corta ("Di una palabra, toca su letra y ¡pásala!") y dos
   tarjetas: "Rápida" saca una temática de Directus al azar ("Cosas que
@@ -469,9 +469,16 @@ la cámara frontal graba a los participantes para revivir las risas.
   pausa y sale "Ronda 1 finalizada · Ahora debes mencionar dos palabras
   para pasar" con "¡Seguir!"; las letras vuelven a quedar libres y en la
   ronda N hay que decir N palabras (`LettersGame.choose`, `nextRound`,
-  `wordsPerPass`). La bomba explota en un tiempo secreto al azar entre 20
-  y 60 s (`LettersRules.secretFuse`; las pausas no cuentan) con un tic-tac
-  que se acelera hasta el final (`tickInterval`) y la bomba latiendo.
+  `wordsPerPass`). En el inicio se elige cómo explota (`LettersMode`,
+  `_BombModePicker`; "Otra bomba" sigue con el mismo): "💣 Mecha secreta"
+  ("Explota cuando nadie lo espera"): en un tiempo secreto al azar entre
+  20 y 60 s (`LettersRules.secretFuse`; las pausas no cuentan); o
+  "⏱️ 11 segundos" ("Cada quien tiene 11 segundos para responder"): cada
+  pase le da al siguiente 11 s (`LettersRules.turnTime`), que se ven
+  bajando encima de la bomba (amarillos en los 3 últimos); si llegan a
+  cero, explota en sus manos (al acabar la ronda se pausa y la ronda
+  nueva empieza con 11 s). En los dos, un tic-tac que se acelera hasta el
+  final (`tickInterval`; en el de 11 s, en cada turno) y la bomba latiendo.
   ¡BOOM! (`BombExplosion`: destello, bola de fuego, chispas, humo, temblor,
   las 23 letras de la rueda que salen volando girando y "¡BOOM!", con el sonido `explosion.mp3` y vibración): pierde quien lo
   tenía; el resultado muestra la temática, los pases, la ronda y el

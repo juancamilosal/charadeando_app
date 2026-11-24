@@ -31,6 +31,16 @@ class LettersTopic {
   String toString() => 'LettersTopic($id, $topic)';
 }
 
+/// Cómo explota la bomba.
+enum LettersMode {
+  /// Explota en un tiempo secreto, de 20 a 60 segundos: nadie sabe cuándo.
+  secret,
+
+  /// Cada quien tiene [LettersRules.turnTime] para decir su palabra: si se
+  /// le acaba el tiempo, explota en sus manos.
+  turn,
+}
+
 /// Reglas del juego "Letras": la bomba.
 abstract final class LettersRules {
   /// Letras del juego: todas menos Ñ, W, X y Z, que casi no tienen palabras
@@ -43,6 +53,9 @@ abstract final class LettersRules {
   /// La bomba explota en un tiempo secreto entre [minFuse] y [maxFuse].
   /// Largo máximo de una temática escrita por el grupo.
   static const maxTopicLength = 60;
+
+  /// En el modo de turnos ([LettersMode.turn]): el tiempo de cada quien.
+  static const turnTime = Duration(seconds: 11);
 
   static const minFuse = Duration(seconds: 20);
   static const maxFuse = Duration(seconds: 60);

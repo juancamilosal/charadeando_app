@@ -30,11 +30,9 @@ class LettersSection extends StatelessWidget {
             children: [
               // Ejemplo: la temática, la letra y la bomba.
               const Positioned(right: 12, top: 16, child: _Sample()),
-              const Positioned(
-                right: 96,
-                bottom: 10,
-                child: Text('💣', style: TextStyle(fontSize: 54)),
-              ),
+              // La bomba con un resplandor de fuego detrás: sobre el fondo
+              // oscuro, sola, se perdía.
+              const Positioned(right: 78, bottom: 0, child: _GlowBomb()),
               Padding(
                 padding: const EdgeInsets.fromLTRB(18, 16, 160, 16),
                 child: Column(
@@ -42,7 +40,19 @@ class LettersSection extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const Text('💣', style: TextStyle(fontSize: 22)),
+                        Container(
+                          width: 32,
+                          height: 32,
+                          alignment: Alignment.center,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                          ),
+                          child: const Text(
+                            '💣',
+                            style: TextStyle(fontSize: 19),
+                          ),
+                        ),
                         const SizedBox(width: 6),
                         Flexible(
                           child: FittedBox(
@@ -195,6 +205,33 @@ class _Sample extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// La bomba del cartel sobre un resplandor amarillo y naranja.
+class _GlowBomb extends StatelessWidget {
+  const _GlowBomb();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 96,
+      height: 96,
+      alignment: Alignment.center,
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: [
+            Color(0xFFFFE07A),
+            AppColors.yellow,
+            AppColors.orange,
+            Color(0x00FF7A1A),
+          ],
+          stops: [0, 0.35, 0.62, 1],
+        ),
+      ),
+      child: const Text('💣', style: TextStyle(fontSize: 50)),
     );
   }
 }

@@ -16,6 +16,7 @@ class LetterWheel extends StatelessWidget {
     required this.onTap,
     this.enabled = true,
     this.pulse = false,
+    this.seconds,
   });
 
   final List<String> letters;
@@ -25,6 +26,10 @@ class LetterWheel extends StatelessWidget {
 
   /// La bomba late con cada tic.
   final bool pulse;
+
+  /// En el modo de 11 segundos: los que le quedan a quien tiene el
+  /// celular, encima de la bomba. Null en el modo secreto.
+  final int? seconds;
 
   @override
   Widget build(BuildContext context) {
@@ -73,9 +78,37 @@ class LetterWheel extends StatelessWidget {
                   child: AnimatedScale(
                     scale: pulse ? 1.12 : 1,
                     duration: const Duration(milliseconds: 90),
-                    child: Text(
-                      '💣',
-                      style: TextStyle(fontSize: min(rx, ry) * 0.7),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Text(
+                          '💣',
+                          style: TextStyle(fontSize: min(rx, ry) * 0.7),
+                        ),
+                        if (seconds case final seconds?)
+                          Padding(
+                            // Sobre el cuerpo de la bomba, no sobre la mecha.
+                            padding: EdgeInsets.only(
+                              top: min(rx, ry) * 0.18,
+                              right: min(rx, ry) * 0.1,
+                            ),
+                            child: Text(
+                              '$seconds',
+                              style: TextStyle(
+                                fontFamily: AppFonts.display,
+                                fontSize: min(rx, ry) * 0.42,
+                                height: 1,
+                                fontWeight: FontWeight.w700,
+                                color: seconds <= 3
+                                    ? AppColors.yellow
+                                    : Colors.white,
+                                shadows: const [
+                                  Shadow(color: Colors.black, blurRadius: 8),
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),
