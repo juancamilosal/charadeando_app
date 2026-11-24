@@ -482,7 +482,7 @@ la cámara frontal graba a los participantes para revivir las risas.
     cuenta aparte ("año" no es "ano") y Fácil deja fuera Ñ, Q, W, X, Y, K
     y Z.
   - Diccionario en el celular (`SpanishDictionary`,
-    `assets/diccionario/es.txt.gz`, 280 KB): unas 498.000 palabras sacadas
+    `assets/diccionario/es.bin`, 280 KB): unas 498.000 palabras sacadas
     del diccionario ortográfico de LibreOffice en español (RLA-ES, es_CO),
     con licencia MPL 2.0 (`assets/diccionario/LICENCIA.md`; también en
     Ajustes > Créditos). Se arma con `python3 tool/diccionario/construir.py`.

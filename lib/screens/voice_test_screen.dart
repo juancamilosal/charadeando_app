@@ -70,6 +70,7 @@ class _VoiceTestScreenState extends State<VoiceTestScreen> {
 
   SpanishDictionary? _dictionary;
   Duration? _dictionaryLoad;
+  String? _dictionaryError;
   VoiceDiagnosis? _diagnosis;
 
   bool _guided = false;
@@ -107,7 +108,13 @@ class _VoiceTestScreenState extends State<VoiceTestScreen> {
 
   Future<void> _loadDictionary() async {
     final watch = Stopwatch()..start();
-    final dictionary = await SpanishDictionary.load();
+    final SpanishDictionary dictionary;
+    try {
+      dictionary = await SpanishDictionary.load();
+    } catch (e) {
+      if (mounted) setState(() => _dictionaryError = '$e');
+      return;
+    }
     if (!mounted) return;
     setState(() {
       _dictionary = dictionary;
@@ -247,7 +254,7 @@ class _VoiceTestScreenState extends State<VoiceTestScreen> {
       ..writeln(
         'Android ${d?.sdk ?? '?'} · idioma ${_listener.localeId} · '
         '${_listener.onDevice ? 'en el celular' : 'por internet'}'
-        '${_listener.fellBackToNetwork ? ' (no tenía el español descargado)' : ''}',
+        '${_listener.fellBackToNetwork ? ' (pasó a internet: ${_listener.fallbackReason})' : ''}',
       )
       ..writeln(
         'Español descargado: ${d?.spanishInstalled ?? 'no se sabe'} · '
@@ -343,7 +350,11 @@ class _VoiceTestScreenState extends State<VoiceTestScreen> {
               '${(d?.pending?.isNotEmpty ?? false) ? ' · bajando: ${d!.pending!.join(', ')}' : ''}',
             ),
             Text(
-              'Diccionario: ${_dictionary == null ? 'cargando…' : '${_dictionary!.length} palabras en ${_dictionaryLoad!.inMilliseconds} ms'}',
+              'Diccionario: ${_dictionaryError != null
+                  ? 'no cargó: $_dictionaryError'
+                  : _dictionary == null
+                  ? 'cargando…'
+                  : '${_dictionary!.length} palabras en ${_dictionaryLoad!.inMilliseconds} ms'}',
             ),
             Wrap(
               spacing: 8,
@@ -440,12 +451,13 @@ class _VoiceTestScreenState extends State<VoiceTestScreen> {
             Text(
               'Estado: ${l.status} · idioma: ${l.localeId ?? '?'} · '
               '${l.onDevice ? 'en el celular' : 'por internet'}'
-              '${l.fellBackToNetwork ? ' (sin español descargado)' : ''}',
+              '${l.fellBackToNetwork ? ' (pasó a internet: ${l.fallbackReason})' : ''}',
             ),
             Text(
               'Se volvió a encender ${l.restarts} veces · tiempo sin '
               'escuchar en cada corte: $avgGap',
             ),
+            Text('Volumen del micrófono: ${l.level.toStringAsFixed(1)} dB'),
             LinearProgressIndicator(value: ((l.level + 2) / 12).clamp(0, 1)),
             const SizedBox(height: 6),
             Text(

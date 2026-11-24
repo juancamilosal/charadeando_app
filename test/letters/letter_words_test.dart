@@ -4,6 +4,7 @@ import 'package:charadeando_app/models/letter_words.dart';
 import 'package:charadeando_app/services/spanish_dictionary.dart';
 import 'package:charadeando_app/services/voice_listener.dart';
 import 'package:charadeando_app/services/voice_tools.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -105,6 +106,12 @@ void main() {
       );
     });
 
+    test('se carga desde los archivos de la app, en otro hilo', () async {
+      final loaded = await SpanishDictionary.load(_FileBundle());
+      expect(loaded.length, dictionary.length);
+      expect(loaded.contains('canción'), isTrue);
+    });
+
     test('tiene casi medio millón de palabras y pesa poco', () {
       expect(dictionary.length, greaterThan(450000));
       expect(File(SpanishDictionary.asset).lengthSync(), lessThan(400 * 1024));
@@ -180,4 +187,11 @@ void main() {
       expect(s.feed('casas grande', isFinal: true), ['grande']);
     });
   });
+}
+
+/// Lee los archivos de la app desde el disco, como en el celular.
+class _FileBundle extends CachingAssetBundle {
+  @override
+  Future<ByteData> load(String key) async =>
+      ByteData.sublistView(File(key).readAsBytesSync());
 }

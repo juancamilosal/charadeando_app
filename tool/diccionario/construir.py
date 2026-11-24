@@ -1,4 +1,4 @@
-"""Arma el diccionario de "Letras" (assets/diccionario/es.txt.gz).
+"""Arma el diccionario de "Letras" (assets/diccionario/es.bin).
 
 Uso, desde la raíz del repositorio:
 
@@ -16,6 +16,8 @@ Uso, desde la raíz del repositorio:
    la app (lib/models/letter_words.dart).
 4. Las ordena y las guarda con prefijos compartidos (cada línea dice
    cuántas letras repite de la anterior, de 0 a 9, y el resto) y en gzip.
+   El archivo termina en .bin y no en .gz: Android trata aparte los
+   archivos .gz de la app y en el celular no cargaba.
 """
 import collections
 import gzip
@@ -27,7 +29,7 @@ import urllib.request
 from pathlib import Path
 
 FUENTE = 'https://raw.githubusercontent.com/LibreOffice/dictionaries/master/es/'
-SALIDA = Path('assets/diccionario/es.txt.gz')
+SALIDA = Path('assets/diccionario/es.bin')
 
 
 def descargar(nombre):

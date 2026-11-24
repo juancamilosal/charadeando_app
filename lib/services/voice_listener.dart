@@ -85,8 +85,17 @@ class VoiceListener extends ChangeNotifier {
   bool onDevice = true;
 
   /// Si se tuvo que pasar a reconocer por internet porque el celular no
-  /// tenía el paquete de español.
+  /// tenía el paquete de español o el reconocimiento en el celular no
+  /// respondió.
   bool fellBackToNetwork = false;
+
+  /// Por qué pasó a internet.
+  String? fallbackReason;
+
+  /// Errores error_client seguidos sin entender nada: el reconocimiento en
+  /// el celular no está funcionando.
+  int _clientErrors = 0;
+  bool _heardSomething = false;
 
   /// Cuántas veces se volvió a encender después de un corte.
   int restarts = 0;
@@ -151,6 +160,8 @@ class VoiceListener extends ChangeNotifier {
     if (!await init()) return;
     _active = true;
     restarts = 0;
+    _clientErrors = 0;
+    _heardSomething = false;
     gaps.clear();
     await _listen();
   }
@@ -196,6 +207,10 @@ class VoiceListener extends ChangeNotifier {
 
   void _onResult(SpeechRecognitionResult result) {
     partial = result.recognizedWords;
+    if (partial.isNotEmpty) {
+      _heardSomething = true;
+      _clientErrors = 0;
+    }
     _settleTimer?.cancel();
     _emit(_stream.feed(result.recognizedWords, isFinal: result.finalResult));
     if (!result.finalResult) {
@@ -249,6 +264,19 @@ class VoiceListener extends ChangeNotifier {
             error.errorMsg.contains('server') && error.permanent)) {
       onDevice = false;
       fellBackToNetwork = true;
+      fallbackReason = 'sin el español descargado (${error.errorMsg})';
+    }
+    // El reconocimiento en el celular falla una y otra vez sin entender
+    // nada: se pasa a internet.
+    if (onDevice && error.errorMsg == 'error_client' && !_heardSomething) {
+      _clientErrors++;
+      if (_clientErrors >= 3) {
+        onDevice = false;
+        fellBackToNetwork = true;
+        fallbackReason =
+            'el reconocimiento en el celular no respondió '
+            '(error_client)';
+      }
     }
     if (_active) {
       _stoppedAt ??= DateTime.now();

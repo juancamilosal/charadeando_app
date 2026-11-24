@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'dart:io' show gzip;
-import 'dart:isolate';
-import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../models/letter_words.dart';
@@ -18,7 +17,7 @@ import '../models/letter_words.dart';
 class SpanishDictionary {
   SpanishDictionary._(this._text, this._starts);
 
-  static const asset = 'assets/diccionario/es.txt.gz';
+  static const asset = 'assets/diccionario/es.bin';
 
   /// Las palabras, separadas por saltos de línea.
   final String _text;
@@ -36,7 +35,7 @@ class SpanishDictionary {
       data.offsetInBytes,
       data.lengthInBytes,
     );
-    final (text, starts) = await Isolate.run(() => _decode(bytes));
+    final (text, starts) = await compute(_decodeBytes, bytes);
     return SpanishDictionary._(text, starts);
   }
 
@@ -106,3 +105,7 @@ class SpanishDictionary {
     return false;
   }
 }
+
+/// Para [compute]: tiene que ser una función de primer nivel.
+(String, Int32List) _decodeBytes(Uint8List bytes) =>
+    SpanishDictionary._decode(bytes);

@@ -1,6 +1,6 @@
 # Diccionario de "Letras"
 
-`es.txt.gz` es una lista de palabras en español derivada del diccionario
+`es.bin` es una lista de palabras en español derivada del diccionario
 ortográfico de LibreOffice en español (variante de Colombia, `es_CO.dic` y
 `es_CO.aff`), del proyecto RLA-ES, desarrollado por Santiago Bosio y
 colaboradores:
