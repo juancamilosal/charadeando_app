@@ -27,9 +27,6 @@ class LettersTopic {
   /// Letras que sirven para esta temática (nunca Ñ, W, X ni Z).
   final List<String> letters;
 
-  /// Una de sus letras, al azar.
-  String randomLetter(Random random) => letters[random.nextInt(letters.length)];
-
   @override
   String toString() => 'LettersTopic($id, $topic)';
 }
@@ -92,27 +89,32 @@ abstract final class LettersRules {
 class LettersBomb {
   const LettersBomb({
     required this.topic,
-    required this.letter,
     required this.fuse,
     required this.passes,
+    required this.round,
   });
 
   final LettersTopic topic;
-  final String letter;
 
   /// Cuánto duró (el tiempo secreto).
   final Duration fuse;
   final int passes;
 
-  /// "Cosas que hay en un baño · La P · 14 pases".
+  /// La ronda en que explotó.
+  final int round;
+
+  /// "Cosas que hay en un baño · 14 pases · ronda 2".
   String get summary =>
-      '${topic.topic} · La $letter · '
-      '${passes == 1 ? '1 pase' : '$passes pases'}';
+      '${topic.topic} · ${passes == 1 ? '1 pase' : '$passes pases'}'
+      '${round > 1 ? ' · ronda $round' : ''}';
 }
 
-/// Una partida de Letras: va sacando temáticas (sin repetir mientras
-/// alcancen), sortea la letra y el tiempo secreto de cada bomba y cuenta
-/// los pases.
+/// Una partida de La Bomba (por dentro, Letras): va sacando temáticas (sin
+/// repetir mientras alcancen) con su rueda de letras y el tiempo secreto de
+/// cada bomba. Quien tiene el celular dice una palabra y toca la letra con
+/// que empieza: esa letra queda usada. Cuando se usan todas, termina la
+/// ronda: las letras vuelven a quedar libres y en la siguiente hay que
+/// decir una palabra más para pasar.
 class LettersGame {
   LettersGame(List<LettersTopic> topics, {Random? random})
     : _topics = [...topics],
@@ -123,39 +125,67 @@ class LettersGame {
   int _next = 0;
 
   LettersTopic? topic;
-  String? letter;
 
   /// Tiempo secreto de la bomba actual.
   Duration fuse = Duration.zero;
   int passes = 0;
 
+  /// Ronda de la bomba actual: en la ronda N hay que decir N palabras.
+  int round = 1;
+
+  /// Letras ya usadas en esta ronda.
+  final used = <String>{};
+
   /// Las bombas que ya explotaron.
   final bombs = <LettersBomb>[];
 
-  /// Saca la siguiente temática, su letra y un tiempo secreto nuevo. Cuando
-  /// se acaban las temáticas, vuelven a salir en otro orden.
+  /// Las letras de la rueda (las de la temática).
+  List<String> get letters => topic?.letters ?? const [];
+
+  /// Palabras que hay que decir para pasar en esta ronda.
+  int get wordsPerPass => round;
+
+  /// Saca la siguiente temática y un tiempo secreto nuevo. Cuando se acaban
+  /// las temáticas, vuelven a salir en otro orden.
   void nextBomb() {
     if (_topics.isEmpty) throw StateError('Sin temáticas');
     if (_next >= _topics.length) {
       _topics.shuffle(_random);
       _next = 0;
     }
-    final t = _topics[_next++];
-    topic = t;
-    letter = t.randomLetter(_random);
+    topic = _topics[_next++];
     fuse = LettersRules.secretFuse(_random);
     passes = 0;
+    round = 1;
+    used.clear();
   }
 
-  void pass() => passes++;
+  /// Se dijo una palabra con [letter]: queda usada y cuenta el pase.
+  /// Devuelve true si con ella se usaron todas (terminó la ronda). Una
+  /// letra ya usada o que no es de la rueda no cuenta.
+  bool choose(String letter) {
+    if (!letters.contains(letter) || used.contains(letter)) return false;
+    used.add(letter);
+    passes++;
+    return used.length >= letters.length;
+  }
+
+  /// Si la ronda ya terminó (todas las letras usadas).
+  bool get roundOver => letters.isNotEmpty && used.length >= letters.length;
+
+  /// Empieza la ronda siguiente: todas las letras libres otra vez.
+  void nextRound() {
+    round++;
+    used.clear();
+  }
 
   /// ¡BOOM! Anota la bomba y la devuelve.
   LettersBomb explode() {
     final bomb = LettersBomb(
       topic: topic!,
-      letter: letter!,
       fuse: fuse,
       passes: passes,
+      round: round,
     );
     bombs.add(bomb);
     return bomb;
@@ -172,4 +202,19 @@ class LettersGame {
               bombs.fold(0, (sum, b) => sum + b.fuse.inMilliseconds) ~/
               bombs.length,
         );
+
+  /// "dos", "tres"… para "Ahora debes mencionar dos palabras".
+  static String number(int n) => switch (n) {
+    1 => 'una',
+    2 => 'dos',
+    3 => 'tres',
+    4 => 'cuatro',
+    5 => 'cinco',
+    6 => 'seis',
+    7 => 'siete',
+    8 => 'ocho',
+    9 => 'nueve',
+    10 => 'diez',
+    _ => '$n',
+  };
 }

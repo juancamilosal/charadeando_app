@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:ffmpeg_kit_flutter_new_video/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_new_video/ffmpeg_kit_config.dart';
@@ -254,14 +255,16 @@ class VideoRenderer {
     ];
   }
 
-  /// Subtítulos del video de Letras, vertical (720x1280): arriba la
-  /// [topic] y debajo la [letter] en grande (no en el centro, para no
-  /// tapar la cara de quien tiene el celular), durante [playing], y desde
-  /// [boomAt] hasta [end] el ¡BOOM! en el centro.
+  /// Subtítulos del video de La Bomba (Letras), vertical (720x1280):
+  /// arriba la [topic] hasta el BOOM; debajo, un momento, la letra que
+  /// eligió cada quien ([picks]: cuándo y cuál; no en el centro, para no
+  /// tapar la cara); los avisos de fin de ronda ([notices]: desde, hasta y
+  /// texto), y en [boomAt] la explosión: destello, bola de fuego, chispas,
+  /// humo y "¡BOOM!", hasta [end].
   static String lettersSubtitles({
     required String topic,
-    required String letter,
-    required Duration playing,
+    required List<(Duration, String)> picks,
+    List<(Duration, Duration, String)> notices = const [],
     required Duration boomAt,
     required Duration end,
   }) {
@@ -280,14 +283,18 @@ class VideoRenderer {
         'ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, '
         'Alignment, MarginL, MarginR, MarginV, Encoding',
       );
-    // Temática arriba en una caja morada; la letra, blanca con borde
-    // morado, debajo; el BOOM, amarillo con borde rojo, en el centro.
+    // Temática arriba en una caja morada; la letra elegida, blanca con
+    // borde morado, debajo; el aviso de ronda, en una caja verde; el BOOM,
+    // amarillo con borde rojo, en el centro. Fx son las figuras de la
+    // explosión.
     for (final (name, size, color, box, border, align, marginV) in [
       ('Topic', 56, '&H00FFFFFF', '&H20E01B6A', 3, 8, 70),
       ('Letter', 230, '&H00FFFFFF', '&H00E01B6A', 1, 8, 175),
+      ('Notice', 60, '&H00FFFFFF', '&H206BC218', 3, 8, 200),
       ('Boom', 200, '&H003FD2FF', '&H002839D6', 1, 5, 0),
+      ('Fx', 20, '&H00FFFFFF', '&H00000000', 1, 5, 0),
     ]) {
-      final outline = border == 3 ? 18 : 14;
+      final outline = name == 'Fx' ? 0 : (border == 3 ? 18 : 14);
       buffer.writeln(
         'Style: $name,Fredoka,$size,$color,$color,$box,&H00000000,'
         '-1,0,0,0,100,100,0,0,$border,$outline,0,$align,50,50,$marginV,1',
@@ -299,20 +306,123 @@ class VideoRenderer {
       ..writeln(
         'Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, '
         'Effect, Text',
-      )
-      ..writeln(
-        'Dialogue: 0,${_time(Duration.zero)},${_time(playing)},Topic,,'
-        '0,0,0,,${_escape(topic)}',
-      )
-      ..writeln(
-        'Dialogue: 0,${_time(Duration.zero)},${_time(playing)},Letter,,'
-        '0,0,0,,${_escape(letter)}',
-      )
-      ..writeln(
-        'Dialogue: 1,${_time(boomAt)},${_time(end)},Boom,,0,0,0,,'
-        '¡BOOM!',
       );
+    void line(
+      int layer,
+      Duration from,
+      Duration to,
+      String style,
+      String text,
+    ) {
+      if (to <= from) return;
+      buffer.writeln(
+        'Dialogue: $layer,${_time(from)},${_time(to)},$style,,0,0,0,,$text',
+      );
+    }
+
+    line(0, Duration.zero, boomAt, 'Topic', _escape(topic));
+    for (final (at, letter) in picks) {
+      final until = at + const Duration(milliseconds: 1200);
+      line(
+        1,
+        at,
+        until < boomAt ? until : boomAt,
+        'Letter',
+        '{\\fad(60,250)}${_escape(letter)}',
+      );
+    }
+    for (final (from, to, text) in notices) {
+      line(1, from, to, 'Notice', _escape(text));
+    }
+    _explosion(line, boomAt, end);
+    line(
+      12,
+      boomAt,
+      end,
+      'Boom',
+      '{\\frz6\\fscx20\\fscy20\\t(0,350,\\fscx110\\fscy110)'
+          '\\t(350,550,\\fscx100\\fscy100)}¡BOOM!',
+    );
     return buffer.toString();
+  }
+
+  /// Círculo de 200 de diámetro para dibujar en ASS (con \p1).
+  static const _circle =
+      'm 100 0 b 155 0 200 45 200 100 b 200 155 155 200 100 200 '
+      'b 45 200 0 155 0 100 b 0 45 45 0 100 0';
+  static const _screen = 'm 0 0 l 720 0 l 720 1280 l 0 1280';
+
+  /// La explosión dibujada en el video: se oscurece, sale humo, una bola
+  /// de fuego en capas que crece, chispas que vuelan y un destello blanco.
+  static void _explosion(
+    void Function(int, Duration, Duration, String, String) line,
+    Duration at,
+    Duration end,
+  ) {
+    Duration after(int ms) => at + Duration(milliseconds: ms);
+    final random = Random(7);
+    line(
+      2,
+      at,
+      end,
+      'Fx',
+      '{\\an7\\pos(0,0)\\p1\\1c&H0B0B1A&\\1a&H40&\\fad(150,0)}$_screen',
+    );
+    for (var i = 0; i < 10; i++) {
+      final angle = random.nextDouble() * 2 * pi;
+      final distance = 120 + random.nextDouble() * 250;
+      final x = (360 + cos(angle) * distance).round();
+      final y = (640 + sin(angle) * distance).round();
+      line(
+        3,
+        after(300),
+        end,
+        'Fx',
+        '{\\an5\\pos($x,$y)\\p1\\1c&H50505A&\\1a&HFF&\\blur40\\fscx80\\fscy80'
+            '\\t(0,1500,\\1a&H90&\\fscx220\\fscy220)}$_circle',
+      );
+    }
+    final layers = [
+      ('&H2839D6&', '&H20&', 700, 60),
+      ('&H008AFF&', '&H10&', 520, 45),
+      ('&H3FD2FF&', '&H00&', 330, 30),
+      ('&HFFFFFF&', '&H00&', 160, 25),
+    ];
+    for (var i = 0; i < layers.length; i++) {
+      final (color, alpha, scale, blur) = layers[i];
+      line(
+        4 + i,
+        at,
+        after(1800),
+        'Fx',
+        '{\\an5\\pos(360,640)\\p1\\1c$color\\1a$alpha\\bord0\\shad0'
+            '\\blur$blur\\fscx10\\fscy10\\t(0,450,0.6,\\fscx$scale\\fscy$scale)'
+            '\\fad(0,1000)}$_circle',
+      );
+    }
+    for (var i = 0; i < 36; i++) {
+      final angle = random.nextDouble() * 2 * pi;
+      final speed = 250 + random.nextDouble() * 450;
+      final x = (360 + cos(angle) * speed).round();
+      final y = (640 + sin(angle) * speed + 120).round();
+      final size = 6 + random.nextInt(11);
+      final color = random.nextBool() ? '&H3FD2FF&' : '&H008AFF&';
+      line(
+        9,
+        at,
+        after(1300),
+        'Fx',
+        '{\\an5\\move(360,640,$x,$y,0,1200)\\p1\\1c$color\\bord0\\shad0'
+            '\\fscx$size\\fscy$size\\fad(0,500)}$_circle',
+      );
+    }
+    line(
+      10,
+      at,
+      after(350),
+      'Fx',
+      '{\\an7\\pos(0,0)\\p1\\1c&HFFFFFF&\\fad(0,330)}$_screen',
+    );
   }
 
   /// Subtítulos en formato ASS. Las medidas son para un video de 1280x720 y

@@ -13,18 +13,22 @@ import '../router.dart';
 import '../services/services.dart';
 import '../theme.dart';
 import '../widgets/bomb_explosion.dart';
+import '../widgets/letter_wheel.dart';
 import '../widgets/play_background.dart';
 import '../widgets/result_parts.dart';
 import '../widgets/system_back.dart';
 
-enum _Phase { loading, error, ready, spinning, playing, boom, result }
+enum _Phase { loading, error, ready, playing, roundOver, boom, result }
 
-/// El juego "La Bomba" (por dentro, Letras). Sale una temática y una letra; quien tiene
-/// el celular dice una palabra de la temática que empiece con la letra,
-/// toca "¡Pasa!" y se lo pasa al siguiente. La bomba explota en un tiempo
-/// secreto (de 20 a 60 segundos): pierde quien la tenía. Todo en vertical,
-/// y si "Grabar video" está encendido, graba con la cámara de frente a
-/// quien tiene el celular, con la temática y la letra encima.
+/// El juego "La Bomba" (por dentro, Letras). Sale una temática con su
+/// rueda de letras; quien tiene el celular dice una palabra de la temática,
+/// toca la letra con que empieza (queda usada) y se lo pasa al siguiente.
+/// Cuando se usan todas las letras termina la ronda: se pausa la bomba,
+/// avisa "Ronda 1 finalizada" y en la siguiente hay que decir una palabra
+/// más. La bomba explota en un tiempo secreto (de 20 a 60 segundos):
+/// pierde quien la tenía. Todo en vertical, y si "Grabar video" está
+/// encendido, graba con la cámara de frente a quien tiene el celular, con
+/// la temática, cada letra elegida, los avisos de ronda y la explosión.
 class LettersScreen extends ConsumerStatefulWidget {
   const LettersScreen({super.key, this.random, this.startWith});
 
@@ -46,12 +50,19 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
   LettersGame? _game;
   Object? _error;
 
-  /// La letra que se ve mientras gira la ruleta.
-  String _shownLetter = '?';
-  Timer? _spinTimer;
-
-  /// Tiempo de la bomba actual.
+  /// Tiempo que lleva corriendo la bomba actual (se detiene entre rondas).
   final _clock = Stopwatch();
+
+  /// Tiempo del video de la bomba actual (no se detiene).
+  final _videoClock = Stopwatch();
+
+  /// Para el video: cuándo se eligió cada letra y los avisos de ronda.
+  final _picks = <(Duration, String)>[];
+  final _notices = <(Duration, Duration, String)>[];
+  Duration? _noticeFrom;
+
+  /// La bomba late con cada tic.
+  bool _pulse = false;
   Timer? _tickTimer;
   Timer? _fuseTimer;
 
@@ -132,42 +143,16 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
     }
   }
 
-  // --- La ruleta de letras ---------------------------------------------
-
-  /// Saca la temática y gira la ruleta hasta la letra.
+  /// Saca la temática y arranca la bomba.
   void _spin() {
     final game = _game;
     if (game == null) return;
     ref.read(turnVideoProvider.notifier).discard().ignore();
     game.nextBomb();
-    final letters = game.topic!.letters;
-    setState(() => _phase = _Phase.spinning);
-    var step = 0;
-    const steps = 16;
-    void turn() {
-      if (!mounted || _phase != _Phase.spinning) return;
-      step++;
-      final last = step >= steps;
-      setState(
-        () => _shownLetter = last
-            ? game.letter!
-            : letters.length == 1
-            ? letters.first
-            : LettersRules.letters[_random.nextInt(
-                LettersRules.letters.length,
-              )],
-      );
-      ref.read(soundServiceProvider).play(SoundEffect.spin);
-      if (last) {
-        ref.read(hapticsProvider).heavy();
-        _spinTimer = Timer(const Duration(milliseconds: 700), _start);
-        return;
-      }
-      // Cada vez más despacio, como una ruleta que frena.
-      _spinTimer = Timer(Duration(milliseconds: 60 + step * step * 2), turn);
-    }
-
-    turn();
+    _picks.clear();
+    _notices.clear();
+    ref.read(hapticsProvider).heavy();
+    _start();
   }
 
   // --- La bomba ------------------------------------------------------------
@@ -189,6 +174,9 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
     _clock
       ..reset()
       ..start();
+    _videoClock
+      ..reset()
+      ..start();
     _fuseTimer = Timer(game.fuse, _explode);
     _tick();
     if (mounted) setState(() {});
@@ -203,24 +191,64 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
       LettersRules.tickInterval(_clock.elapsed, game.fuse),
       _tick,
     );
-    setState(() {});
+    setState(() => _pulse = !_pulse);
   }
 
-  void _pass() {
+  /// Se dijo una palabra con [letter]: queda usada y se pasa el celular.
+  void _choose(String letter) {
     if (_phase != _Phase.playing) return;
     // Un toque cada medio segundo como mucho: si no, dos toques seguidos
     // contarían dos pases.
     if (_passCooldown?.isActive ?? false) return;
+    final game = _game!;
+    if (game.used.contains(letter)) return;
     _passCooldown = Timer(const Duration(milliseconds: 500), () {});
-    _game!.pass();
+    final roundOver = game.choose(letter);
+    _picks.add((_videoClock.elapsed, letter));
     ref.read(hapticsProvider).heavy();
     ref.read(soundServiceProvider).play(SoundEffect.hit);
     _flashTimer?.cancel();
+    if (roundOver) {
+      _pauseBomb();
+      return;
+    }
     setState(() => _passFlash = true);
     _flashTimer = Timer(const Duration(milliseconds: 900), () {
       if (mounted) setState(() => _passFlash = false);
     });
   }
+
+  /// Se usaron todas las letras: la bomba se detiene y sale el aviso.
+  void _pauseBomb() {
+    _fuseTimer?.cancel();
+    _tickTimer?.cancel();
+    _clock.stop();
+    _noticeFrom = _videoClock.elapsed;
+    setState(() {
+      _passFlash = false;
+      _phase = _Phase.roundOver;
+    });
+  }
+
+  /// "¡Seguir!": letras libres otra vez y la bomba sigue donde iba.
+  void _nextRound() {
+    final game = _game!;
+    final from = _noticeFrom;
+    if (from != null) {
+      _notices.add((from, _videoClock.elapsed, _roundNotice(game.round)));
+    }
+    game.nextRound();
+    setState(() => _phase = _Phase.playing);
+    _clock.start();
+    final left = game.fuse - _clock.elapsed;
+    _fuseTimer = Timer(left.isNegative ? Duration.zero : left, _explode);
+    _tick();
+  }
+
+  /// "Ronda 1 finalizada · Ahora, dos palabras" (para el video).
+  static String _roundNotice(int round) =>
+      'Ronda $round finalizada · Ahora, '
+      '${LettersGame.number(round + 1)} palabras';
 
   Future<void> _explode() async {
     if (!mounted || _phase != _Phase.playing) return;
@@ -236,15 +264,20 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
     }
     ref.read(lettersBankProvider).remember(bomb.topic).ignore();
     // El video sigue un momento después del BOOM, para ver las caras.
+    final boomAt = _videoClock.elapsed;
     await Future<void>.delayed(const Duration(milliseconds: 2400));
-    final recorded = _clock.elapsed + const Duration(milliseconds: 2400);
-    await _finishVideo(bomb, recorded);
+    await _finishVideo(bomb, boomAt, _videoClock.elapsed);
+    _videoClock.stop();
     if (mounted && _phase == _Phase.boom) {
       setState(() => _phase = _Phase.result);
     }
   }
 
-  Future<void> _finishVideo(LettersBomb bomb, Duration recorded) async {
+  Future<void> _finishVideo(
+    LettersBomb bomb,
+    Duration boomAt,
+    Duration recorded,
+  ) async {
     final camera = _camera;
     if (!_recording || camera == null) return;
     _recording = false;
@@ -252,9 +285,9 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
       final file = await camera.stopVideoRecording();
       final subtitles = VideoRenderer.lettersSubtitles(
         topic: bomb.topic.topic,
-        letter: bomb.letter,
-        playing: bomb.fuse,
-        boomAt: bomb.fuse,
+        picks: [..._picks],
+        notices: [..._notices],
+        boomAt: boomAt,
         end: recorded,
       );
       ref
@@ -270,7 +303,7 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
             describe: (assetId) => SavedVideo(
               assetId: assetId,
               savedAt: DateTime.now(),
-              category: 'La Bomba: ${bomb.topic.topic} · La ${bomb.letter}',
+              category: 'La Bomba: ${bomb.topic.topic}',
               round: game.bombs.length,
               points: bomb.passes,
             ),
@@ -285,7 +318,6 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
 
   /// Corta la bomba sin explotar (se salió de la app o del juego).
   Future<void> _abort() async {
-    _spinTimer?.cancel();
     _tickTimer?.cancel();
     _fuseTimer?.cancel();
     _clock.stop();
@@ -301,7 +333,7 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.paused) return;
-    if (_phase == _Phase.playing || _phase == _Phase.spinning) {
+    if (_phase == _Phase.playing || _phase == _Phase.roundOver) {
       _abort();
       if (mounted) setState(() => _phase = _Phase.ready);
     }
@@ -315,7 +347,6 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _spinTimer?.cancel();
     _tickTimer?.cancel();
     _fuseTimer?.cancel();
     _flashTimer?.cancel();
@@ -355,9 +386,8 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
                     ),
                     _Phase.error => _errorView(),
                     _Phase.ready => _readyView(),
-                    _Phase.spinning ||
-                    _Phase.playing ||
-                    _Phase.boom => _bombView(),
+                    _Phase.playing || _Phase.boom => _bombView(),
+                    _Phase.roundOver => _roundOverView(),
                     _Phase.result => _resultView(),
                   },
                 ),
@@ -436,17 +466,11 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  'Sale una temática y una letra. Di una palabra de la '
-                  'temática que empiece con esa letra, toca "¡Pasa!" y '
-                  'pásale el celular al siguiente.\n\nLa bomba explota '
-                  'cuando nadie lo espera: ¡que no te explote a ti!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 17,
-                    height: 1.35,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  'Sale una temática y una rueda de letras. Di una palabra '
+                  'de la temática, toca la letra con que empieza y pásale '
+                  'el celular al siguiente. Cada letra se usa una vez por '
+                  'ronda.\n\nLa bomba explota cuando nadie lo espera: '
+                  '¡que no te explote a ti!',
                 ),
                 const SizedBox(height: 16),
               ],
@@ -474,8 +498,8 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
         ),
         const SizedBox(height: 16),
         _bigButton(
-          '¡Girar!',
-          icon: Icons.casino,
+          '¡Empezar!',
+          icon: Icons.play_arrow_rounded,
           color: AppColors.yellow,
           onPressed: _spin,
         ),
@@ -485,8 +509,9 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
 
   Widget _bombView() {
     final game = _game!;
-    final playing = _phase == _Phase.playing || _phase == _Phase.boom;
+    final playing = _phase == _Phase.playing;
     final camera = _camera;
+    final words = game.wordsPerPass;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -517,50 +542,31 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
             ),
           ),
         ),
-        // La letra, en el centro.
+        const SizedBox(height: 12),
+        Text(
+          'Ronda ${game.round} · Di ${LettersGame.number(words)} '
+          '${words == 1 ? 'palabra' : 'palabras'} y toca su letra',
+          textAlign: TextAlign.center,
+          style: _title(20),
+        ),
+        // La rueda de letras, con la bomba en el centro.
         Expanded(
           child: Stack(
             alignment: Alignment.center,
             children: [
-              AnimatedScale(
-                scale: _passFlash ? 1.08 : 1,
-                duration: const Duration(milliseconds: 150),
-                child: Container(
-                  width: 250,
-                  height: 250,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.18),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 6),
-                  ),
-                  child: FittedBox(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Text(
-                        _shownLetter,
-                        style: const TextStyle(
-                          fontFamily: AppFonts.display,
-                          fontSize: 190,
-                          height: 1,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              color: Color(0x55000000),
-                              offset: Offset(0, 6),
-                              blurRadius: 12,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: LetterWheel(
+                  letters: game.letters,
+                  used: game.used,
+                  enabled: playing,
+                  pulse: _pulse,
+                  onTap: _choose,
                 ),
               ),
               if (_passFlash)
                 Positioned(
-                  bottom: 8,
+                  bottom: 0,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 18,
@@ -579,13 +585,13 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
                   _recording &&
                   playing)
                 Positioned(
-                  top: 12,
+                  top: 0,
                   right: 0,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
                     child: SizedBox(
-                      width: 78,
-                      height: 104,
+                      width: 66,
+                      height: 88,
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
@@ -593,11 +599,11 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
                           const Align(
                             alignment: Alignment.topLeft,
                             child: Padding(
-                              padding: EdgeInsets.all(6),
+                              padding: EdgeInsets.all(5),
                               child: Icon(
                                 Icons.fiber_manual_record,
                                 color: Colors.red,
-                                size: 14,
+                                size: 12,
                               ),
                             ),
                           ),
@@ -610,22 +616,67 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
           ),
         ),
         Text(
-          _phase == _Phase.spinning
-              ? 'Girando…'
-              : game.passes == 1
-              ? '1 pase'
-              : '${game.passes} pases',
+          game.passes == 1 ? '1 pase' : '${game.passes} pases',
           textAlign: TextAlign.center,
           style: _title(22),
         ),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+
+  /// Se usaron todas las letras: "Ronda 1 finalizada" y "¡Seguir!". La
+  /// bomba está detenida mientras tanto.
+  Widget _roundOverView() {
+    final game = _game!;
+    final next = game.round + 1;
+    return Column(
+      children: [
+        const Spacer(),
+        const Text('🎉', style: TextStyle(fontSize: 80)),
+        Text(
+          'Ronda ${game.round} finalizada',
+          textAlign: TextAlign.center,
+          style: _title(44),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Text(
+            'Ahora debes mencionar ${LettersGame.number(next)} palabras '
+            'para pasar',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontFamily: AppFonts.display,
+              fontSize: 28,
+              height: 1.15,
+              fontWeight: FontWeight.w600,
+              color: AppColors.ink,
+            ),
+          ),
+        ),
         const SizedBox(height: 12),
+        const Text(
+          'Las letras vuelven a quedar libres. La bomba está en pausa.',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const Spacer(),
         _bigButton(
-          '¡Pasa!',
-          icon: Icons.east,
+          '¡Seguir!',
+          icon: Icons.play_arrow_rounded,
           color: AppColors.green,
           textColor: Colors.white,
-          height: 110,
-          onPressed: _phase == _Phase.playing ? _pass : null,
+          height: 80,
+          onPressed: _nextRound,
         ),
       ],
     );
@@ -669,9 +720,8 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
               ),
               const SizedBox(height: 6),
               Text(
-                'La ${bomb.letter} · '
                 '${bomb.passes == 1 ? '1 pase' : '${bomb.passes} pases'} · '
-                '${bomb.fuse.inSeconds} s',
+                'ronda ${bomb.round} · ${bomb.fuse.inSeconds} s',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,

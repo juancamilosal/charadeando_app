@@ -75,7 +75,7 @@ void main() {
       expect(LettersRules.tickInterval(fuse, fuse), LettersRules.fastestTick);
     });
 
-    test('cada bomba trae otra temática, una de sus letras y su tiempo', () {
+    test('cada bomba trae otra temática con su rueda de letras', () {
       final game = LettersGame([
         topic(1, 'AB'),
         topic(2, 'CD'),
@@ -85,7 +85,9 @@ void main() {
       for (var i = 0; i < 3; i++) {
         game.nextBomb();
         topics.add(game.topic!.id);
-        expect(game.topic!.letters, contains(game.letter));
+        expect(game.letters, game.topic!.letters);
+        expect(game.round, 1);
+        expect(game.used, isEmpty);
         expect(game.fuse.inSeconds, inInclusiveRange(20, 60));
       }
       // No se repiten mientras alcancen.
@@ -95,24 +97,50 @@ void main() {
       expect(topics, contains(game.topic!.id));
     });
 
-    test('cuenta los pases de cada bomba y de la partida', () {
-      final game = LettersGame([topic(1, 'P')], random: Random(1));
+    test('cada letra se usa una vez por ronda; al usarlas todas termina '
+        'la ronda y en la siguiente se dice una palabra más', () {
+      final game = LettersGame([topic(1, 'ABC')], random: Random(1));
+      game.nextBomb();
+      expect(game.wordsPerPass, 1);
+      expect(game.choose('A'), isFalse);
+      // Repetida o fuera de la rueda: no cuenta.
+      expect(game.choose('A'), isFalse);
+      expect(game.choose('Z'), isFalse);
+      expect(game.passes, 1);
+      expect(game.choose('C'), isFalse);
+      expect(game.roundOver, isFalse);
+      expect(game.choose('B'), isTrue);
+      expect(game.roundOver, isTrue);
+      expect(game.passes, 3);
+      game.nextRound();
+      expect(game.round, 2);
+      expect(game.wordsPerPass, 2);
+      expect(game.used, isEmpty);
+      // Las letras vuelven a quedar libres.
+      expect(game.choose('A'), isFalse);
+      expect(game.passes, 4);
+      final bomb = game.explode();
+      expect(bomb.round, 2);
+      expect(bomb.summary, 'Temática 1 · 4 pases · ronda 2');
+      expect(LettersGame.number(2), 'dos');
+      expect(LettersGame.number(3), 'tres');
+    });
+
+    test('cuenta los pases de la partida', () {
+      final game = LettersGame([topic(1, 'PQRS')], random: Random(1));
       game.nextBomb();
       game
-        ..pass()
-        ..pass()
-        ..pass();
-      final bomb = game.explode();
-      expect(bomb.passes, 3);
-      expect(bomb.summary, 'Temática 1 · La P · 3 pases');
+        ..choose('P')
+        ..choose('Q');
+      game.explode();
       game.nextBomb();
       expect(game.passes, 0);
-      game.pass();
+      game.choose('S');
       game.explode();
-      expect(game.totalPasses, 4);
+      expect(game.totalPasses, 3);
       expect(game.bombs, hasLength(2));
       expect(game.averageFuse.inSeconds, inInclusiveRange(20, 60));
-      expect(game.bombs.last.summary, endsWith('1 pase'));
+      expect(game.bombs.last.summary, 'Temática 1 · 1 pase');
     });
 
     test('las estadísticas de Letras van como LETRAS', () {
@@ -132,19 +160,38 @@ void main() {
       expect(stats['modo_acierto'], 'TOQUE');
     });
 
-    test('el video lleva la temática, la letra y el BOOM', () {
+    test('el video lleva la temática, cada letra, la ronda y la explosión', () {
       final ass = VideoRenderer.lettersSubtitles(
         topic: 'Cosas que hay en un baño',
-        letter: 'P',
-        playing: const Duration(seconds: 30),
+        picks: const [(Duration(seconds: 2), 'P'), (Duration(seconds: 5), 'J')],
+        notices: const [
+          (
+            Duration(seconds: 8),
+            Duration(seconds: 10),
+            'Ronda 1 finalizada · Ahora, dos palabras',
+          ),
+        ],
         boomAt: const Duration(seconds: 30),
         end: const Duration(seconds: 32),
       );
       expect(ass, contains('PlayResX: 720'));
       expect(ass, contains('PlayResY: 1280'));
-      expect(ass, contains('Topic,,0,0,0,,Cosas que hay en un baño'));
-      expect(ass, contains('Letter,,0,0,0,,P'));
+      expect(
+        ass,
+        contains(
+          '0:00:00.00,0:00:30.00,Topic,,0,0,0,,Cosas que hay en un baño',
+        ),
+      );
+      expect(ass, contains('0:00:02.00,0:00:03.20,Letter'));
+      expect(ass, contains('0:00:05.00,0:00:06.20,Letter'));
+      expect(ass, contains('Notice,,0,0,0,,Ronda 1 finalizada'));
       expect(ass, contains('0:00:30.00,0:00:32.00,Boom'));
+      // La explosión: oscuro, bola de fuego, chispas y destello.
+      expect(
+        RegExp(r'Dialogue: \d+,0:00:30\.\d\d,[^,]+,Fx').allMatches(ass).length,
+        greaterThan(40),
+      );
+      expect(ass, contains(r'\move(360,640,'));
     });
   });
 
@@ -208,6 +255,53 @@ void main() {
   });
 
   group('pantalla', () {
+    testWidgets('al usar todas las letras termina la ronda y la bomba se '
+        'pausa', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2340);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+      final container = ProviderContainer(
+        overrides: [
+          settingsStoreProvider.overrideWithValue(MemorySettingsStore()),
+          statsServiceProvider.overrideWithValue(NoStatsService()),
+        ],
+      );
+      addTearDown(container.dispose);
+      container
+          .read(settingsProvider.notifier)
+          .update(const AppSettings(recordVideo: false));
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            home: LettersScreen(random: Random(5), startWith: [topic(1, 'AB')]),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.text('¡Empezar!'));
+      await tester.pump();
+      await tester.tap(find.text('A'));
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.tap(find.text('B'));
+      await tester.pump();
+      expect(find.text('Ronda 1 finalizada'), findsOneWidget);
+      expect(
+        find.text('Ahora debes mencionar dos palabras para pasar'),
+        findsOneWidget,
+      );
+      // En pausa la bomba no explota, aunque pase más del máximo.
+      for (var s = 0; s < 70; s++) {
+        await tester.pump(const Duration(seconds: 1));
+      }
+      expect(find.byType(BombExplosion), findsNothing);
+      await tester.tap(find.text('¡Seguir!'));
+      await tester.pump();
+      expect(find.textContaining('Ronda 2 · Di dos palabras'), findsOneWidget);
+      expect(find.text('2 pases'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+
     testWidgets('girar, pasar el celular y ¡BOOM!', (tester) async {
       tester.view.physicalSize = const Size(1080, 2340);
       tester.view.devicePixelRatio = 3;
@@ -227,32 +321,37 @@ void main() {
         UncontrolledProviderScope(
           container: container,
           child: MaterialApp(
-            home: LettersScreen(random: Random(5), startWith: [topic(1, 'P')]),
+            home: LettersScreen(
+              random: Random(5),
+              startWith: [topic(1, 'APS')],
+            ),
           ),
         ),
       );
       await tester.pump();
-      expect(find.text('¡Girar!'), findsOneWidget);
+      expect(find.text('¡Empezar!'), findsOneWidget);
 
-      await tester.tap(find.text('¡Girar!'));
-      // La ruleta gira y frena en la letra.
-      for (var i = 0; i < 60; i++) {
-        await tester.pump(const Duration(milliseconds: 100));
-      }
+      await tester.tap(find.text('¡Empezar!'));
+      await tester.pump();
       expect(find.text('Temática 1'), findsOneWidget);
-      expect(find.text('P'), findsOneWidget);
       expect(find.text('0 pases'), findsOneWidget);
+      expect(find.textContaining('Ronda 1 · Di una palabra'), findsOneWidget);
 
-      await tester.tap(find.text('¡Pasa!'));
+      await tester.tap(find.text('P'));
       await tester.pump();
       expect(find.text('¡Pasa el celular!'), findsOneWidget);
       expect(find.text('1 pase'), findsOneWidget);
       // Dos toques seguidos cuentan uno.
-      await tester.tap(find.text('¡Pasa!'));
+      await tester.tap(find.text('A'));
       await tester.pump();
       expect(find.text('1 pase'), findsOneWidget);
       await tester.pump(const Duration(milliseconds: 600));
-      await tester.tap(find.text('¡Pasa!'));
+      await tester.tap(find.text('A'));
+      await tester.pump();
+      expect(find.text('2 pases'), findsOneWidget);
+      // La P ya está usada: no cuenta otra vez.
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.tap(find.text('P'));
       await tester.pump();
       expect(find.text('2 pases'), findsOneWidget);
 
@@ -271,7 +370,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 100));
       }
       expect(find.text('Perdió quien tenía el celular'), findsOneWidget);
-      expect(find.textContaining('La P · 2 pases'), findsOneWidget);
+      expect(find.textContaining('2 pases · ronda 1'), findsOneWidget);
       expect(find.text('Girar la ruleta de castigos'), findsOneWidget);
       expect(find.text('Otra bomba'), findsOneWidget);
 

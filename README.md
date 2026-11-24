@@ -447,30 +447,35 @@ la cámara frontal graba a los participantes para revivir las risas.
   faltan de toda la partida. Con las automáticas no se muestra, porque el
   turno dura hasta que se acabe el tiempo.
 - La Bomba (en el código, `Letras`; en prueba, rama `feature/letras`).
-  Tercer cartel de
-  "Más juegos" (`LettersSection`, debajo de ¿Más o menos?; ruta
-  `/letras`, `LettersScreen`, en vertical). "¡Girar!" saca una temática
-  de Directus ("Cosas que hay en un baño") y la ruleta frena en una de sus
-  letras (`LettersTopic.letters`; nunca Ñ, W, X ni Z:
-  `LettersRules.letters`). Arriba la temática, en el centro la letra y
-  abajo el botón "¡Pasa!": quien tiene el celular dice una palabra, lo
-  toca (vibra, suena ✓, "¡Pasa el celular!"; medio segundo sin contar
-  otro pase) y se lo pasa al siguiente. La bomba explota en un tiempo
-  secreto al azar entre 20 y 60 s (`LettersRules.secretFuse`) con un
-  tic-tac que se acelera hasta el final (`tickInterval`). ¡BOOM!
-  (`BombExplosion`: destello, bola de fuego, chispas, humo, temblor y
-  "¡BOOM!", con el sonido `explosion.mp3` y vibración): pierde quien lo
-  tenía; el resultado muestra la temática, la letra, los pases y el
-  tiempo, con "Girar la ruleta de castigos" y "Otra bomba". El grupo es
-  el juez: no hay reconocimiento de voz. Con "Grabar video" graba en
-  vertical con la cámara de frente (se ve pequeña arriba a la derecha) y
-  con sonido; el video lleva la temática arriba, la letra debajo y el
-  ¡BOOM! al final (`VideoRenderer.lettersSubtitles`, 720x1280) y se
-  guarda en Mis videos como los demás (`TurnVideoController.process` con
-  `subtitles` y `describe`). Temáticas: `LettersBank` (`POST
-  /juego/tematicas`, 100 por partida, recuerda las jugadas en
-  `tematicas_vistas.json`; sin internet, "Sin conexión" con
-  "Reintentar"). Gratis por ahora (`LettersBank.freeForNow`).
+  Tercer cartel de "Más juegos" (`LettersSection`, debajo de ¿Más o
+  menos?; ruta `/letras`, `LettersScreen`, en vertical). "¡Empezar!" saca
+  una temática de Directus ("Cosas que hay en un baño") con su rueda de
+  letras (`LetterWheel`: las `letras` de la temática en círculo, con la
+  bomba en el centro; nunca Ñ, W, X ni Z: `LettersRules.letters`). Quien
+  tiene el celular dice una palabra de la temática, toca la letra con que
+  empieza (queda usada, apagada y con ✓; vibra, suena ✓ y "¡Pasa el
+  celular!"; medio segundo sin contar otro toque) y se lo pasa al
+  siguiente. Cuando se usan todas las letras termina la ronda: la bomba se
+  pausa y sale "Ronda 1 finalizada · Ahora debes mencionar dos palabras
+  para pasar" con "¡Seguir!"; las letras vuelven a quedar libres y en la
+  ronda N hay que decir N palabras (`LettersGame.choose`, `nextRound`,
+  `wordsPerPass`). La bomba explota en un tiempo secreto al azar entre 20
+  y 60 s (`LettersRules.secretFuse`; las pausas no cuentan) con un tic-tac
+  que se acelera hasta el final (`tickInterval`) y la bomba latiendo.
+  ¡BOOM! (`BombExplosion`: destello, bola de fuego, chispas, humo, temblor
+  y "¡BOOM!", con el sonido `explosion.mp3` y vibración): pierde quien lo
+  tenía; el resultado muestra la temática, los pases, la ronda y el
+  tiempo, con "Girar la ruleta de castigos" y "Otra bomba". El grupo es el
+  juez: no hay reconocimiento de voz. Con "Grabar video" graba en vertical
+  con la cámara de frente (se ve pequeña arriba a la derecha) y con
+  sonido; el video lleva la temática arriba, cada letra elegida debajo por
+  un momento, los avisos de fin de ronda y, al final, la explosión dibujada
+  con figuras ASS (oscuro, humo, bola de fuego en capas, chispas, destello
+  y "¡BOOM!": `VideoRenderer.lettersSubtitles`, 720x1280), y se guarda en
+  Mis videos (`TurnVideoController.process` con `subtitles` y `describe`).
+  Temáticas: `LettersBank` (`POST /juego/tematicas`, 100 por partida,
+  recuerda las jugadas en `tematicas_vistas.json`; sin internet, "Sin
+  conexión" con "Reintentar"). Gratis por ahora (`LettersBank.freeForNow`).
   Estadísticas con el modo `LETRAS` (`StatsService.recordLetters`: bombas
   como rondas y pases como aciertos). Los sonidos `tic.mp3` y
   `explosion.mp3` son sintéticos (`tool/sonidos/generar_letras.py`).
