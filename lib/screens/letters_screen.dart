@@ -289,6 +289,7 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
         notices: [..._notices],
         boomAt: boomAt,
         end: recorded,
+        letters: LettersRules.letters,
       );
       ref
           .read(turnVideoProvider.notifier)
@@ -393,7 +394,12 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
                 ),
               ),
               if (_phase == _Phase.boom)
-                const Positioned.fill(child: BombExplosion()),
+                Positioned.fill(
+                  child: BombExplosion(
+                    letters: _game?.letters ?? const [],
+                    used: {...?_game?.used},
+                  ),
+                ),
               if (_phase != _Phase.boom)
                 Positioned(
                   top: MediaQuery.paddingOf(context).top + 4,
@@ -549,8 +555,9 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
+                // Al explotar, las letras salen volando (BombExplosion).
                 child: LetterWheel(
-                  letters: game.letters,
+                  letters: _phase == _Phase.boom ? const [] : game.letters,
                   used: game.used,
                   enabled: playing,
                   pulse: _pulse,

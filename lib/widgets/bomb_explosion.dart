@@ -13,9 +13,16 @@ class BombExplosion extends StatefulWidget {
     super.key,
     this.duration = const Duration(milliseconds: 1800),
     this.progress,
+    this.letters = const [],
+    this.used = const {},
   });
 
   final Duration duration;
+
+  /// Las letras de la rueda: salen volando, girando, con la explosión. Las
+  /// de [used] van grises, como quedaron espichadas.
+  final List<String> letters;
+  final Set<String> used;
 
   /// Para las capturas y las pruebas: muestra la explosión fija en este
   /// punto (0 a 1) en vez de animarla.
@@ -58,10 +65,103 @@ class _BombExplosionState extends State<BombExplosion>
           offset: Offset(dx, dy),
           child: CustomPaint(
             painter: _ExplosionPainter(t),
-            child: Center(child: _BoomText(t: t)),
+            child: LayoutBuilder(
+              builder: (context, constraints) => Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  ..._flyingLetters(t, constraints.biggest),
+                  Center(child: _BoomText(t: t)),
+                ],
+              ),
+            ),
           ),
         );
       },
+    );
+  }
+
+  /// Cada letra sale de su lugar en la rueda hacia afuera, gira y cae.
+  List<Widget> _flyingLetters(double t, Size size) {
+    final letters = widget.letters;
+    if (letters.isEmpty) return const [];
+    final center = size.center(Offset.zero);
+    final reach = size.longestSide;
+    final tile = (size.shortestSide * 0.13).clamp(40.0, 64.0);
+    final travel = Curves.easeOutQuad.transform(t);
+    final random = Random(3);
+    return [
+      for (var i = 0; i < letters.length; i++)
+        () {
+          final angle = -pi / 2 + i * 2 * pi / letters.length;
+          final push = angle + (random.nextDouble() - 0.5) * 0.6;
+          final speed = 0.2 + random.nextDouble() * 0.25;
+          final spin = (random.nextDouble() - 0.5) * 4 * pi;
+          final start = Offset(
+            cos(angle) * size.width * 0.4,
+            sin(angle) * size.height * 0.3,
+          );
+          final position =
+              center +
+              start +
+              Offset(cos(push), sin(push)) * reach * speed * travel +
+              Offset(0, t * t * reach * 0.4);
+          final letter = letters[i];
+          return Positioned(
+            left: position.dx - tile / 2,
+            top: position.dy - tile / 2,
+            child: Transform.rotate(
+              angle: spin * travel,
+              child: Transform.scale(
+                scale: 1 + travel * 0.3,
+                child: _FlyingLetter(
+                  letter: letter,
+                  size: tile,
+                  used: widget.used.contains(letter),
+                ),
+              ),
+            ),
+          );
+        }(),
+    ];
+  }
+}
+
+/// Una letra de la rueda en el aire: un botón blanco con su borde.
+class _FlyingLetter extends StatelessWidget {
+  const _FlyingLetter({
+    required this.letter,
+    required this.size,
+    required this.used,
+  });
+
+  final String letter;
+  final double size;
+  final bool used;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: used ? const Color(0xFFC9C1DA) : Colors.white,
+        border: Border.all(color: AppColors.ink, width: size * 0.05),
+        boxShadow: const [
+          BoxShadow(color: AppColors.ink, offset: Offset(0, 5)),
+        ],
+      ),
+      child: Text(
+        letter,
+        style: TextStyle(
+          fontFamily: AppFonts.display,
+          fontSize: size * 0.55,
+          height: 1,
+          fontWeight: FontWeight.w700,
+          color: used ? AppColors.ink.withValues(alpha: 0.45) : AppColors.ink,
+        ),
+      ),
     );
   }
 }

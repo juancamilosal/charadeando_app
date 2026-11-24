@@ -260,13 +260,15 @@ class VideoRenderer {
   /// eligió cada quien ([picks]: cuándo y cuál; no en el centro, para no
   /// tapar la cara); los avisos de fin de ronda ([notices]: desde, hasta y
   /// texto), y en [boomAt] la explosión: destello, bola de fuego, chispas,
-  /// humo y "¡BOOM!", hasta [end].
+  /// humo, las [letters] de la rueda que salen volando y "¡BOOM!", hasta
+  /// [end].
   static String lettersSubtitles({
     required String topic,
     required List<(Duration, String)> picks,
     List<(Duration, Duration, String)> notices = const [],
     required Duration boomAt,
     required Duration end,
+    List<String> letters = const [],
   }) {
     final buffer = StringBuffer()
       ..writeln('[Script Info]')
@@ -293,8 +295,11 @@ class VideoRenderer {
       ('Notice', 60, '&H00FFFFFF', '&H206BC218', 3, 8, 200),
       ('Boom', 200, '&H003FD2FF', '&H002839D6', 1, 5, 0),
       ('Fx', 20, '&H00FFFFFF', '&H00000000', 1, 5, 0),
+      ('Fly', 58, '&H00571A2B', '&H00FFFFFF', 1, 5, 0),
     ]) {
-      final outline = name == 'Fx' ? 0 : (border == 3 ? 18 : 14);
+      final outline = name == 'Fx' || name == 'Fly'
+          ? 0
+          : (border == 3 ? 18 : 14);
       buffer.writeln(
         'Style: $name,Fredoka,$size,$color,$color,$box,&H00000000,'
         '-1,0,0,0,100,100,0,0,$border,$outline,0,$align,50,50,$marginV,1',
@@ -335,8 +340,9 @@ class VideoRenderer {
       line(1, from, to, 'Notice', _escape(text));
     }
     _explosion(line, boomAt, end);
+    _flyingLetters(line, letters, boomAt, end);
     line(
-      12,
+      13,
       boomAt,
       end,
       'Boom',
@@ -423,6 +429,46 @@ class VideoRenderer {
       'Fx',
       '{\\an7\\pos(0,0)\\p1\\1c&HFFFFFF&\\fad(0,330)}$_screen',
     );
+  }
+
+  /// Las letras de la rueda salen de un óvalo alrededor del centro hacia
+  /// afuera, girando y cayendo, por encima de la bola de fuego.
+  static void _flyingLetters(
+    void Function(int, Duration, Duration, String, String) line,
+    List<String> letters,
+    Duration at,
+    Duration end,
+  ) {
+    final random = Random(3);
+    final until = at + const Duration(milliseconds: 2600);
+    for (var i = 0; i < letters.length; i++) {
+      final angle = -pi / 2 + i * 2 * pi / letters.length;
+      final push = angle + (random.nextDouble() - 0.5) * 0.6;
+      final speed = 250 + random.nextDouble() * 250;
+      final spin = ((random.nextDouble() - 0.5) * 720).round();
+      final x1 = (360 + cos(angle) * 290).round();
+      final y1 = (640 + sin(angle) * 380).round();
+      final x2 = (x1 + cos(push) * speed).round();
+      final y2 = (y1 + sin(push) * speed + 500).round();
+      final move = '\\move($x1,$y1,$x2,$y2,0,2500)';
+      final to = until < end ? until : end;
+      // El botón blanco con borde morado y, encima, la letra que gira.
+      line(
+        11,
+        at,
+        to,
+        'Fx',
+        '{\\an5$move\\p1\\1c&HFFFFFF&\\3c&H571A2B&\\bord5\\shad0'
+            '\\fscx42\\fscy42}$_circle',
+      );
+      line(
+        12,
+        at,
+        to,
+        'Fly',
+        '{\\an5$move\\t(0,2500,\\frz$spin)}${_escape(letters[i])}',
+      );
+    }
   }
 
   /// Subtítulos en formato ASS. Las medidas son para un video de 1280x720 y
