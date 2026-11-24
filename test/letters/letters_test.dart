@@ -85,7 +85,8 @@ void main() {
       for (var i = 0; i < 3; i++) {
         game.nextBomb();
         topics.add(game.topic!.id);
-        expect(game.letters, game.topic!.letters);
+        // La rueda tiene las 23 letras, sea cual sea la temática.
+        expect(game.letters, LettersRules.letters);
         expect(game.round, 1);
         expect(game.used, isEmpty);
         expect(game.fuse.inSeconds, inInclusiveRange(20, 60));
@@ -103,25 +104,33 @@ void main() {
       game.nextBomb();
       expect(game.wordsPerPass, 1);
       expect(game.choose('A'), isFalse);
-      // Repetida o fuera de la rueda: no cuenta.
+      // Repetida o fuera de la rueda (Ñ, W, X, Z): no cuenta.
       expect(game.choose('A'), isFalse);
       expect(game.choose('Z'), isFalse);
+      expect(game.choose('Ñ'), isFalse);
       expect(game.passes, 1);
-      expect(game.choose('C'), isFalse);
+      // Todas las letras se pueden usar, también las difíciles.
+      final rest = [
+        for (final l in LettersRules.letters)
+          if (l != 'A') l,
+      ];
+      for (final l in rest.take(rest.length - 1)) {
+        expect(game.choose(l), isFalse, reason: l);
+      }
       expect(game.roundOver, isFalse);
-      expect(game.choose('B'), isTrue);
+      expect(game.choose(rest.last), isTrue);
       expect(game.roundOver, isTrue);
-      expect(game.passes, 3);
+      expect(game.passes, 23);
       game.nextRound();
       expect(game.round, 2);
       expect(game.wordsPerPass, 2);
       expect(game.used, isEmpty);
       // Las letras vuelven a quedar libres.
       expect(game.choose('A'), isFalse);
-      expect(game.passes, 4);
+      expect(game.passes, 24);
       final bomb = game.explode();
       expect(bomb.round, 2);
-      expect(bomb.summary, 'Temática 1 · 4 pases · ronda 2');
+      expect(bomb.summary, 'Temática 1 · 24 pases · ronda 2');
       expect(LettersGame.number(2), 'dos');
       expect(LettersGame.number(3), 'tres');
     });
@@ -281,10 +290,14 @@ void main() {
       await tester.pump();
       await tester.tap(find.text('¡Empezar!'));
       await tester.pump();
-      await tester.tap(find.text('A'));
-      await tester.pump(const Duration(milliseconds: 600));
-      await tester.tap(find.text('B'));
-      await tester.pump();
+      // Las 23 letras están en la rueda.
+      for (final l in LettersRules.letters) {
+        expect(find.text(l), findsOneWidget, reason: l);
+      }
+      for (final l in LettersRules.letters) {
+        await tester.tap(find.text(l));
+        await tester.pump(const Duration(milliseconds: 600));
+      }
       expect(find.text('Ronda 1 finalizada'), findsOneWidget);
       expect(
         find.text('Ahora debes mencionar dos palabras para pasar'),
@@ -298,7 +311,7 @@ void main() {
       await tester.tap(find.text('¡Seguir!'));
       await tester.pump();
       expect(find.textContaining('Ronda 2 · Di dos palabras'), findsOneWidget);
-      expect(find.text('2 pases'), findsOneWidget);
+      expect(find.text('23 pases'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
     });
 

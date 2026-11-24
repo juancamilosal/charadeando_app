@@ -139,8 +139,9 @@ class LettersGame {
   /// Las bombas que ya explotaron.
   final bombs = <LettersBomb>[];
 
-  /// Las letras de la rueda (las de la temática).
-  List<String> get letters => topic?.letters ?? const [];
+  /// Las letras de la rueda: las 23 del juego (todas menos Ñ, W, X y Z),
+  /// sea cual sea la temática. Todas se pueden tocar.
+  List<String> get letters => topic == null ? const [] : LettersRules.letters;
 
   /// Palabras que hay que decir para pasar en esta ronda.
   int get wordsPerPass => round;

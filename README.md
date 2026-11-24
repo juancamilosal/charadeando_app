@@ -449,13 +449,15 @@ la cámara frontal graba a los participantes para revivir las risas.
 - La Bomba (en el código, `Letras`; en prueba, rama `feature/letras`).
   Tercer cartel de "Más juegos" (`LettersSection`, debajo de ¿Más o
   menos?; ruta `/letras`, `LettersScreen`, en vertical). "¡Empezar!" saca
-  una temática de Directus ("Cosas que hay en un baño") con su rueda de
-  letras (`LetterWheel`: las `letras` de la temática en círculo, con la
-  bomba en el centro; nunca Ñ, W, X ni Z: `LettersRules.letters`). Quien
+  una temática de Directus ("Cosas que hay en un baño") y la rueda de
+  letras (`LetterWheel`: las 23 letras del juego, todas se pueden tocar,
+  en un óvalo que aprovecha el alto, repartidas a la misma distancia y con
+  la bomba en el centro; nunca Ñ, W, X ni Z: `LettersRules.letters`; el
+  campo `letras` de la temática no se usa en la rueda). Quien
   tiene el celular dice una palabra de la temática, toca la letra con que
   empieza (queda usada, apagada y con ✓; vibra, suena ✓ y "¡Pasa el
   celular!"; medio segundo sin contar otro toque) y se lo pasa al
-  siguiente. Cuando se usan todas las letras termina la ronda: la bomba se
+  siguiente. Cuando se usan las 23 letras termina la ronda: la bomba se
   pausa y sale "Ronda 1 finalizada · Ahora debes mencionar dos palabras
   para pasar" con "¡Seguir!"; las letras vuelven a quedar libres y en la
   ronda N hay que decir N palabras (`LettersGame.choose`, `nextRound`,

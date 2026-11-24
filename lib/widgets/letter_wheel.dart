@@ -30,35 +30,42 @@ class LetterWheel extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final size = min(constraints.maxWidth, constraints.maxHeight);
+        final width = constraints.maxWidth;
+        final height = min(constraints.maxHeight, width * 1.45);
         final n = max(letters.length, 1);
-        // Las fichas, más pequeñas cuanto más letras haya.
-        final tile =
-            (size *
-                    (n <= 10
-                        ? 0.19
-                        : n <= 16
-                        ? 0.15
-                        : 0.125))
-                .clamp(36.0, 84.0);
-        final radius = size / 2 - tile / 2 - 4;
+        // Un óvalo que aprovecha el alto. Las fichas, del tamaño que quepa
+        // sin chocar: el 85 % del espacio que le toca a cada una.
+        var tile = 60.0;
+        var points = <Offset>[];
+        for (var i = 0; i < 3; i++) {
+          final rx = width / 2 - tile / 2 - 4;
+          final ry = height / 2 - tile / 2 - 4;
+          final placed = _evenlySpaced(rx, ry, n);
+          points = placed.points;
+          tile = (placed.step * 0.88).clamp(36.0, 84.0);
+        }
+        final rx = width / 2 - tile / 2 - 4;
+        final ry = height / 2 - tile / 2 - 4;
+        points = _evenlySpaced(rx, ry, n).points;
         return Center(
-          child: SizedBox.square(
-            dimension: size,
+          child: SizedBox(
+            width: width,
+            height: height,
             child: Stack(
               children: [
                 // El aro de la rueda.
                 Center(
                   child: Container(
-                    width: radius * 2,
-                    height: radius * 2,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.12),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.5),
-                        width: 3,
+                    width: rx * 2,
+                    height: ry * 2,
+                    decoration: ShapeDecoration(
+                      shape: OvalBorder(
+                        side: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.5),
+                          width: 3,
+                        ),
                       ),
+                      color: Colors.white.withValues(alpha: 0.12),
                     ),
                   ),
                 ),
@@ -68,20 +75,14 @@ class LetterWheel extends StatelessWidget {
                     duration: const Duration(milliseconds: 90),
                     child: Text(
                       '💣',
-                      style: TextStyle(fontSize: radius * 0.75),
+                      style: TextStyle(fontSize: min(rx, ry) * 0.7),
                     ),
                   ),
                 ),
                 for (var i = 0; i < letters.length; i++)
                   Positioned(
-                    left:
-                        size / 2 +
-                        radius * cos(-pi / 2 + i * 2 * pi / n) -
-                        tile / 2,
-                    top:
-                        size / 2 +
-                        radius * sin(-pi / 2 + i * 2 * pi / n) -
-                        tile / 2,
+                    left: width / 2 + points[i].dx - tile / 2,
+                    top: height / 2 + points[i].dy - tile / 2,
                     child: _LetterTile(
                       letter: letters[i],
                       size: tile,
@@ -98,6 +99,40 @@ class LetterWheel extends StatelessWidget {
       },
     );
   }
+}
+
+/// [n] puntos sobre el óvalo de radios [rx] y [ry], separados por la misma
+/// distancia a lo largo del borde (con ángulos iguales se amontonan en las
+/// puntas). El primero queda arriba, en el centro. También da la distancia
+/// entre uno y otro.
+({List<Offset> points, double step}) _evenlySpaced(
+  double rx,
+  double ry,
+  int n,
+) {
+  const samples = 720;
+  Offset at(int k) {
+    final angle = -pi / 2 + k * 2 * pi / samples;
+    return Offset(rx * cos(angle), ry * sin(angle));
+  }
+
+  final lengths = <double>[0];
+  for (var k = 1; k <= samples; k++) {
+    lengths.add(lengths.last + (at(k) - at(k - 1)).distance);
+  }
+  final step = lengths.last / n;
+  final points = <Offset>[];
+  var k = 0;
+  for (var i = 0; i < n; i++) {
+    final target = i * step;
+    while (k < samples && lengths[k + 1] < target) {
+      k++;
+    }
+    final span = lengths[k + 1] - lengths[k];
+    final t = span == 0 ? 0.0 : (target - lengths[k]) / span;
+    points.add(Offset.lerp(at(k), at(k + 1), t)!);
+  }
+  return (points: points, step: step);
 }
 
 class _LetterTile extends StatelessWidget {
