@@ -57,6 +57,7 @@ dependencies:
   package_info_plus: ^10.2.2
   url_launcher: ^6.3.3
   in_app_update: ^5.0.0
+  speech_to_text: ^7.5.0
 
 dev_dependencies:
   flutter_test:
@@ -95,6 +96,8 @@ flutter:
     - assets/img/fotomimica/
     # Logo y destello de la pantalla de carga.
     - assets/img/marca/
+    # Diccionario de "Letras" (LibreOffice/RLA-ES, MPL 2.0) y su licencia.
+    - assets/diccionario/
     # Música de fondo de la app.
     - assets/audio/
 

@@ -446,6 +446,49 @@ la cámara frontal graba a los participantes para revivir las risas.
 - Con las palabras escritas por los equipos, en el turno se ve cuántas
   faltan de toda la partida. Con las automáticas no se muestra, porque el
   turno dura hasta que se acabe el tiempo.
+- Letras (en prueba, rama `feature/letras`, fase 1): juego de decir
+  palabras que empiecen con una letra; el celular escucha y las cuenta.
+  Por ahora solo hay una pantalla escondida para probar el reconocimiento
+  de voz (`VoiceTestScreen`, ruta `/prueba-voz`): se abre con 5 toques en
+  "Charadeando · Versión …", abajo de Ajustes (`VersionLabel`), o, en modo
+  debug, con "Prueba de voz (Letras)" en Ajustes > Ayuda. Tiene:
+  - Reconocimiento de voz de Android con `speech_to_text`
+    (`VoiceListener`), en español (el del celular o, si no, es-CO), con
+    resultados parciales y escucha continua: Android corta tras unos
+    segundos de silencio y se vuelve a encender solo hasta tocar "Parar"
+    (cuenta los reinicios y el tiempo sin escuchar de cada corte).
+    `WordStream` convierte los resultados parciales en palabras nuevas, una
+    vez cada una (la última de un parcial espera a la siguiente o al
+    final). La latencia es aproximada: desde que sube el volumen del
+    micrófono hasta que aparece la palabra.
+  - "Solo en el celular": pide reconocer sin enviar el audio
+    (`createOnDeviceSpeechRecognizer` desde Android 12). Necesita el
+    paquete de español descargado; si no lo tiene, pasa a reconocer por
+    internet y lo avisa. `VoiceTools` (canal `charadeando/voz`,
+    `VoiceTools.kt`) dice, desde Android 13, qué idiomas tiene
+    descargados, pide descargar el español y silencia el "bip" (sonidos
+    del sistema y de notificaciones mientras escucha).
+  - Video mientras escucha: sin video, con sonido o sin sonido, para ver
+    si la cámara y el reconocimiento comparten el micrófono.
+  - Modo libre: letra al azar, lista en vivo con ✓ válida, ❌ no empieza
+    con la letra, ❌ repetida y ❌ no está en el diccionario, contador y
+    latencia de cada palabra, y un campo para probar una palabra escrita.
+  - Prueba de 32 palabras (fáciles, con ñ, con tildes y compuestas, en
+    `voiceTestWords`): marca si la entendió (también separada, como "abre
+    latas") y "Copiar resultados" copia la tabla.
+  - Reglas en `LetterWords` y `WordChecker`: se compara sin tildes, sin
+    mayúsculas y sin la "s" final ("casa" y "casas" son la misma), la ñ
+    cuenta aparte ("año" no es "ano") y Fácil deja fuera Ñ, Q, W, X, Y, K
+    y Z.
+  - Diccionario en el celular (`SpanishDictionary`,
+    `assets/diccionario/es.txt.gz`, 280 KB): unas 498.000 palabras sacadas
+    del diccionario ortográfico de LibreOffice en español (RLA-ES, es_CO),
+    con licencia MPL 2.0 (`assets/diccionario/LICENCIA.md`; también en
+    Ajustes > Créditos). Se arma con `python3 tool/diccionario/construir.py`.
+    Se busca con búsqueda binaria sobre un solo texto, sin internet.
+  - El micrófono ya estaba en el manifiesto (`RECORD_AUDIO`, para el
+    video); `speech_to_text` pide el permiso al empezar. El manifiesto
+    agrega la consulta de `android.speech.RecognitionService`.
 - ¿Más o menos?: otro juego, en "Más juegos" debajo de Fotomímica
   (`MoreOrLessSection`, cartel oscuro con su ícono de flechas
   `assets/img/categorias/mas_o_menos.png`, "NUEVO JUEGO", un dato de

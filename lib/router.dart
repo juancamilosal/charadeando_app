@@ -19,6 +19,7 @@ import 'screens/teams_screen.dart';
 import 'screens/turn_result_screen.dart';
 import 'screens/turn_screen.dart';
 import 'screens/video_screen.dart';
+import 'screens/voice_test_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/word_entry_screen.dart';
 import 'widgets/app_nav_bar.dart';
@@ -42,6 +43,9 @@ abstract final class Routes {
   static const video = '/video';
   static const finalResult = '/final';
   static const directusTest = '/directus';
+
+  /// Pantalla escondida para probar el reconocimiento de voz de "Letras".
+  static const voiceTest = '/prueba-voz';
 
   /// Sección "Ruleta de castigos".
   static const punishments = '/ruleta';
@@ -162,6 +166,10 @@ final List<RouteBase> appRoutes = [
   GoRoute(
     path: Routes.directusTest,
     builder: (_, _) => const DirectusTestScreen(),
+  ),
+  GoRoute(
+    path: Routes.voiceTest,
+    builder: (_, _) => const MusicSilence(child: VoiceTestScreen()),
   ),
   GoRoute(
     path: Routes.customCategory,
