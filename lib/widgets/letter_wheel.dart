@@ -17,6 +17,7 @@ class LetterWheel extends StatelessWidget {
     this.enabled = true,
     this.pulse = false,
     this.seconds,
+    this.title,
   });
 
   final List<String> letters;
@@ -30,6 +31,9 @@ class LetterWheel extends StatelessWidget {
   /// En el modo de 11 segundos: los que le quedan a quien tiene el
   /// celular, encima de la bomba. Null en el modo secreto.
   final int? seconds;
+
+  /// La temática, dentro del círculo, encima de la bomba.
+  final String? title;
 
   @override
   Widget build(BuildContext context) {
@@ -74,40 +78,33 @@ class LetterWheel extends StatelessWidget {
                     ),
                   ),
                 ),
+                // Dentro del círculo: la temática y, debajo, la bomba.
                 Center(
-                  child: AnimatedScale(
-                    scale: pulse ? 1.12 : 1,
-                    duration: const Duration(milliseconds: 90),
-                    child: Stack(
-                      alignment: Alignment.center,
+                  child: SizedBox(
+                    width: (rx - tile / 2) * 2 * 0.86,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          '💣',
-                          style: TextStyle(fontSize: min(rx, ry) * 0.7),
-                        ),
-                        if (seconds case final seconds?)
-                          Padding(
-                            // Sobre el cuerpo de la bomba, no sobre la mecha.
-                            padding: EdgeInsets.only(
-                              top: min(rx, ry) * 0.18,
-                              right: min(rx, ry) * 0.1,
-                            ),
-                            child: Text(
-                              '$seconds',
-                              style: TextStyle(
-                                fontFamily: AppFonts.display,
-                                fontSize: min(rx, ry) * 0.42,
-                                height: 1,
-                                fontWeight: FontWeight.w700,
-                                color: seconds <= 3
-                                    ? AppColors.yellow
-                                    : Colors.white,
-                                shadows: const [
-                                  Shadow(color: Colors.black, blurRadius: 8),
-                                ],
-                              ),
+                        if (title case final title?) ...[
+                          Text(
+                            title,
+                            textAlign: TextAlign.center,
+                            maxLines: 4,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontFamily: AppFonts.display,
+                              fontSize: (min(rx, ry) * 0.17).clamp(18.0, 30.0),
+                              height: 1.1,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              shadows: const [
+                                Shadow(color: Colors.black38, blurRadius: 6),
+                              ],
                             ),
                           ),
+                          SizedBox(height: min(rx, ry) * 0.08),
+                        ],
+                        _bomb(title == null ? min(rx, ry) : min(rx, ry) * 0.75),
                       ],
                     ),
                   ),
@@ -116,13 +113,19 @@ class LetterWheel extends StatelessWidget {
                   Positioned(
                     left: width / 2 + points[i].dx - tile / 2,
                     top: height / 2 + points[i].dy - tile / 2,
-                    child: _LetterTile(
-                      letter: letters[i],
-                      size: tile,
-                      used: used.contains(letters[i]),
-                      onTap: enabled && !used.contains(letters[i])
-                          ? () => onTap(letters[i])
-                          : null,
+                    // Cada letra mira hacia afuera: derecha para quien esté
+                    // sentado frente a ella (se juega con el celular en el
+                    // centro y la gente alrededor).
+                    child: Transform.rotate(
+                      angle: atan2(points[i].dy, points[i].dx) - pi / 2,
+                      child: _LetterTile(
+                        letter: letters[i],
+                        size: tile,
+                        used: used.contains(letters[i]),
+                        onTap: enabled && !used.contains(letters[i])
+                            ? () => onTap(letters[i])
+                            : null,
+                      ),
                     ),
                   ),
               ],
@@ -130,6 +133,37 @@ class LetterWheel extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  /// La bomba (late con cada tic) y, en el modo de 11 segundos, los que
+  /// quedan encima. [radius] es el tamaño de referencia.
+  Widget _bomb(double radius) {
+    return AnimatedScale(
+      scale: pulse ? 1.12 : 1,
+      duration: const Duration(milliseconds: 90),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Text('💣', style: TextStyle(fontSize: radius * 0.7)),
+          if (seconds case final seconds?)
+            Padding(
+              // Sobre el cuerpo de la bomba, no sobre la mecha.
+              padding: EdgeInsets.only(top: radius * 0.18, right: radius * 0.1),
+              child: Text(
+                '$seconds',
+                style: TextStyle(
+                  fontFamily: AppFonts.display,
+                  fontSize: radius * 0.42,
+                  height: 1,
+                  fontWeight: FontWeight.w700,
+                  color: seconds <= 3 ? AppColors.yellow : Colors.white,
+                  shadows: const [Shadow(color: Colors.black, blurRadius: 8)],
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

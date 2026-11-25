@@ -8,6 +8,7 @@ import 'package:charadeando_app/screens/letters_screen.dart';
 import 'package:charadeando_app/services/services.dart';
 import 'package:charadeando_app/widgets/bomb_explosion.dart';
 import 'package:charadeando_app/widgets/countdown_view.dart';
+import 'package:charadeando_app/widgets/letter_wheel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -333,6 +334,29 @@ void main() {
       for (final l in LettersRules.letters) {
         expect(find.text(l), findsOneWidget, reason: l);
       }
+      // Cada letra mira hacia afuera: la A (arriba) está de cabeza para
+      // quien tiene el celular y la de abajo, derecha. La temática va
+      // dentro del círculo.
+      double cosOf(String letter) => tester
+          .widget<Transform>(
+            find
+                .ancestor(
+                  of: find.text(letter),
+                  matching: find.byType(Transform),
+                )
+                .last,
+          )
+          .transform
+          .storage[0];
+      expect(cosOf('A'), closeTo(-1, 0.01));
+      expect(cosOf('M'), greaterThan(0.9));
+      expect(
+        find.descendant(
+          of: find.byType(LetterWheel),
+          matching: find.text('Temática 1'),
+        ),
+        findsOneWidget,
+      );
       for (final l in LettersRules.letters) {
         await tester.tap(find.text(l));
         await tester.pump(const Duration(milliseconds: 600));

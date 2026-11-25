@@ -459,8 +459,10 @@ la cámara frontal graba a los participantes para revivir las risas.
   categorías (`CountdownView`, con la temática arriba en `caption` y los
   mismos pitidos), para alcanzar a prepararse. Luego sale la rueda de
   letras (`LetterWheel`: las 23 letras del juego, todas se pueden tocar,
-  en un óvalo que aprovecha el alto, repartidas a la misma distancia sin tocarse y con
-  la bomba en el centro; nunca Ñ, W, X ni Z: `LettersRules.letters`; el
+  en un óvalo que aprovecha el alto, repartidas a la misma distancia sin
+  tocarse, y cada una girada hacia afuera, derecha para quien esté sentado
+  frente a ella: se puede jugar con el celular en el centro de la mesa;
+  dentro del círculo, la temática y debajo la bomba; nunca Ñ, W, X ni Z: `LettersRules.letters`; el
   campo `letras` de la temática no se usa en la rueda). Quien
   tiene el celular dice una palabra de la temática, toca la letra con que
   empieza (es un botón de los que se espichan: baja al tocarlo y queda espichado y gris; vibra, suena ✓ y "¡Pasa el
@@ -495,7 +497,8 @@ la cámara frontal graba a los participantes para revivir las risas.
   (`RouletteSetupView` compacta: la ruleta, "Girar" y "Personalizar
   castigos", donde se elige si los escriben los jugadores, los pone la app
   o los dos, y cuántos campos) y "Otra bomba". El grupo es el
-  juez: no hay reconocimiento de voz. Con "Grabar video" graba en vertical
+  juez: no hay reconocimiento de voz. Con "Grabar video" (al apagarlo se cierra la cámara y no graba)
+  graba en vertical
   con la cámara de frente (se ve pequeña arriba a la derecha) y con
   sonido; el video lleva la temática arriba, la rueda con las 23 letras
   alrededor de la cara (sin la bomba: esa solo va en el juego; cada letra

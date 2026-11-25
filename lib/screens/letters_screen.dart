@@ -149,6 +149,14 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
     }
   }
 
+  /// "Grabar video" apagado: se cierra la cámara (si no, seguía grabando).
+  void _closeCamera() {
+    final camera = _camera;
+    if (camera == null) return;
+    setState(() => _camera = null);
+    camera.dispose();
+  }
+
   Future<void> _openCamera() async {
     try {
       final cameras = await availableCameras();
@@ -161,7 +169,8 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
       await camera.initialize();
       await camera.lockCaptureOrientation(DeviceOrientation.portraitUp);
       await camera.prepareForVideoRecording();
-      if (!mounted) {
+      // Si mientras abría se apagó "Grabar video", no se usa.
+      if (!mounted || !ref.read(settingsProvider).recordVideo) {
         await camera.dispose();
         return;
       }
@@ -227,7 +236,10 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
     final game = _game!;
     setState(() => _phase = _Phase.playing);
     final camera = _camera;
-    if (camera != null && camera.value.isInitialized) {
+    // Solo con "Grabar video" encendido.
+    if (ref.read(settingsProvider).recordVideo &&
+        camera != null &&
+        camera.value.isInitialized) {
       try {
         await camera.startVideoRecording();
         _recording = true;
@@ -685,7 +697,11 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
             ref
                 .read(settingsProvider.notifier)
                 .update(settings.copyWith(recordVideo: v));
-            if (v && _camera == null) _openCamera();
+            if (v && _camera == null) {
+              _openCamera();
+            } else if (!v) {
+              _closeCamera();
+            }
           },
         ),
       ],
@@ -699,35 +715,8 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 44),
-        // La temática, arriba.
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x33000000),
-                blurRadius: 12,
-                offset: Offset(0, 6),
-              ),
-            ],
-          ),
-          child: Text(
-            game.topic?.topic ?? '',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontFamily: AppFonts.display,
-              fontSize: 30,
-              height: 1.1,
-              fontWeight: FontWeight.w600,
-              color: AppColors.ink,
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        // La rueda de letras, con la bomba en el centro.
+        const SizedBox(height: 40),
+        // La rueda de letras, con la temática y la bomba en el centro.
         Expanded(
           child: Stack(
             alignment: Alignment.center,
@@ -737,6 +726,7 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
                 // Al explotar, las letras salen volando (BombExplosion).
                 child: LetterWheel(
                   letters: _phase == _Phase.boom ? const [] : game.letters,
+                  title: game.topic?.topic,
                   used: game.used,
                   enabled: playing,
                   pulse: _pulse,
