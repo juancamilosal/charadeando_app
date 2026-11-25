@@ -295,54 +295,23 @@ class _LetterTileState extends State<_LetterTile> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: used
-                          ? const [Color(0xFF8E7FAA), Color(0xFFA597BE)]
+                          ? const [Color(0xFFB8AECB), Color(0xFFD9D3E4)]
                           : pressed
                           ? const [Color(0xFFDCD6E8), Color(0xFFF4F1FA)]
                           : const [Colors.white, Color(0xFFE3DDEE)],
                     ),
                   ),
-                  // Usada: más oscura, la letra apagada y una ✓ verde
-                  // pequeña, para que no se confunda con las libres.
-                  child: Stack(
-                    alignment: Alignment.center,
-                    clipBehavior: Clip.none,
-                    children: [
-                      Text(
-                        widget.letter,
-                        style: TextStyle(
-                          fontFamily: AppFonts.display,
-                          fontSize: face * 0.55,
-                          height: 1,
-                          fontWeight: FontWeight.w700,
-                          color: used
-                              ? Colors.white.withValues(alpha: 0.9)
-                              : AppColors.ink,
-                        ),
-                      ),
-                      if (used)
-                        Positioned(
-                          right: -face * 0.26,
-                          top: -face * 0.22,
-                          child: Container(
-                            width: face * 0.44,
-                            height: face * 0.44,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppColors.green,
-                              border: Border.all(
-                                color: Colors.white,
-                                width: max(1.5, face * 0.04),
-                              ),
-                            ),
-                            child: Icon(
-                              Icons.check_rounded,
-                              color: Colors.white,
-                              size: face * 0.3,
-                            ),
-                          ),
-                        ),
-                    ],
+                  child: Text(
+                    widget.letter,
+                    style: TextStyle(
+                      fontFamily: AppFonts.display,
+                      fontSize: face * 0.55,
+                      height: 1,
+                      fontWeight: FontWeight.w700,
+                      color: used
+                          ? AppColors.ink.withValues(alpha: 0.4)
+                          : AppColors.ink,
+                    ),
                   ),
                 ),
               ),
