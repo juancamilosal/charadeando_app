@@ -31,10 +31,13 @@ detalles de cada parte están en `README.md`, `server/README.md` y
 - App `com.valkiriacode.charadeando` **publicada en Google Play
   (producción) el 12 nov 2026** con la 14 (1.0.0), en todos los países
   (177 + resto del mundo). La prueba cerrada sigue para probar cada versión
-  antes de promocionarla a producción. **La última subida a Play es 15
-  (1.0.0)**: aprobada en la prueba cerrada el 20 nov 2026 y promovida a
-  producción ese mismo día (en revisión de Google; producción sigue en la
-  14 hasta que la aprueben, y entonces se une `develop` en `main`). `develop` va en 16 (1.0.0), con el juego nuevo "La Bomba" (unido el 25 nov 2026, aprobado por el usuario; falta subirla a Play). 15 (1.0.0):
+  antes de promocionarla a producción. **La última subida a Play es 16
+  (1.0.0)**, el 25 nov 2026, para producción: el juego nuevo "La Bomba"
+  (notas de la versión en `branding/ficha-play.md`, donde también se
+  agregaron "Más juegos" a la descripción completa). Cuando Google la
+  apruebe en producción se une `develop` en `main`. `develop` va en 17
+  (1.0.0), sin cambios todavía. 15 (1.0.0), promovida a producción el 20
+  nov 2026:
   el juego nuevo "¿Más o menos?" (en "Más juegos"; Fácil 1, Normal 2 y
   Difícil 5 puntos) y el plugin de Gradle de Android en 9.1.1. 14 (1.0.0): "Otra categoría con
   este puntaje" en el resultado final (la partida siguiente empieza con

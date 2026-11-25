@@ -36,12 +36,30 @@ Animales, comida, películas, series y novelas, geografía, deportes, equipos de
 • Combina varias categorías en una sola partida.
 • Crea tus propias categorías con las palabras que quieras.
 • Modo Libre: palabras nuevas en cada partida.
-• Fotomímica: adivina objetos con fotos.
+
+MÁS JUEGOS
+• La Bomba: sale una temática, dices una palabra, tocas su letra en la rueda y pasas el celular antes de que explote. Con mecha secreta u 11 segundos por turno, y ruleta de castigo para quien la tenga en el ¡BOOM!
+• ¿Más o menos?: adivina el número exacto mientras los demás te guían con "¡Más!" o "¡Menos!".
+• Fotomímica: mira la foto y conviértete en ese objeto, sin hablar.
 
 TODO CHARADEANDO
 Con un pago único desbloqueas todas las categorías, video en Full HD sin marca de agua, categorías propias sin límite y el fondo Oro. Sin suscripciones ni mensualidades. También puedes comprar categorías sueltas.
 
 ¡Descarga Charadeando y empieza la fiesta!
+```
+
+## Notas de la versión 16 (1.0.0) (máx. 500)
+
+```
+<es-419>
+¡Nuevo juego: La Bomba! 💣
+Sale una temática: di una palabra, toca su letra en la rueda y pasa el celular antes del ¡BOOM!
+• Dos modos: mecha secreta u 11 segundos por turno.
+• Juega con una temática al azar o escribe la tuya.
+• Ruleta de castigo para quien tenga la bomba al explotar.
+• Graba el video de la partida.
+Búscalo en "Más juegos".
+</es-419>
 ```
 
 ## Imágenes
