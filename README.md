@@ -491,7 +491,10 @@ la cámara frontal graba a los participantes para revivir las risas.
   ¡BOOM! (`BombExplosion`: destello, bola de fuego, chispas, humo, temblor,
   las 23 letras de la rueda que salen volando girando y "¡BOOM!", con el sonido `explosion.mp3` y vibración): pierde quien lo
   tenía; el resultado muestra la temática, los pases, la ronda y el
-  tiempo, con "Girar la ruleta de castigos" y "Otra bomba". El grupo es el
+  tiempo, con "¡Ruleta de castigo!" igual que en el final de las categorías
+  (`RouletteSetupView` compacta: la ruleta, "Girar" y "Personalizar
+  castigos", donde se elige si los escriben los jugadores, los pone la app
+  o los dos, y cuántos campos) y "Otra bomba". El grupo es el
   juez: no hay reconocimiento de voz. Con "Grabar video" graba en vertical
   con la cámara de frente (se ve pequeña arriba a la derecha) y con
   sonido; el video lleva la temática arriba, la rueda con las 23 letras

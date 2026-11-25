@@ -457,8 +457,24 @@ void main() {
       }
       expect(find.text('Perdió quien tenía el celular'), findsOneWidget);
       expect(find.textContaining('2 pases · ronda 1'), findsOneWidget);
-      expect(find.text('Girar la ruleta de castigos'), findsOneWidget);
+      // La ruleta de castigo, como en las categorías: con "Personalizar
+      // castigos" se eligen los de la app, los propios o los dos.
+      expect(find.text('¡Ruleta de castigo!'), findsOneWidget);
+      expect(find.text('Girar'), findsOneWidget);
+      await tester.scrollUntilVisible(find.text('Otra bomba'), 200);
       expect(find.text('Otra bomba'), findsOneWidget);
+      await tester.tap(find.text('Personalizar castigos'));
+      for (var i = 0; i < 10; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      await tester.scrollUntilVisible(
+        find.text(PunishmentSource.own.label),
+        200,
+        scrollable: find.byType(Scrollable).last,
+      );
+      expect(find.text(PunishmentSource.own.label), findsOneWidget);
+      expect(find.text(PunishmentSource.system.label), findsOneWidget);
+      expect(find.text(PunishmentSource.mixed.label), findsOneWidget);
 
       // Al salir se registra la partida.
       await tester.pumpWidget(const SizedBox());

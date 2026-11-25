@@ -18,6 +18,7 @@ import '../widgets/letter_wheel.dart';
 import '../widgets/play_background.dart';
 import '../widgets/result_parts.dart';
 import '../widgets/system_back.dart';
+import 'roulette_screen.dart' show PunishmentSpinScreen, RouletteSetupView;
 
 enum _Phase {
   loading,
@@ -913,11 +914,21 @@ class _LettersScreenState extends ConsumerState<LettersScreen>
           ),
         ),
         const SizedBox(height: 16),
-        _bigButton(
-          'Girar la ruleta de castigos',
-          icon: Icons.casino,
-          color: AppColors.yellow,
-          onPressed: () => context.push(Routes.punishmentSpin),
+        // La ruleta de castigo, como en el final de las categorías: los
+        // castigos los pone el juego o se escriben a mano.
+        Text(
+          '¡Ruleta de castigo!',
+          textAlign: TextAlign.center,
+          style: _title(26),
+        ),
+        const SizedBox(height: 12),
+        RouletteSetupView(
+          key: ValueKey(game.bombs.length),
+          initialSource: PunishmentSource.system,
+          initialFields: PunishmentSpinScreen.defaultFields,
+          compact: true,
+          onSpin: (punishments, spin) =>
+              context.push(Routes.punishmentSpin, extra: (punishments, spin)),
         ),
         if (video.status != TurnVideoStatus.none) ...[
           const SizedBox(height: 12),
