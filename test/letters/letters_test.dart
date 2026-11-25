@@ -436,7 +436,8 @@ void main() {
       for (var i = 0; i < rects.length; i++) {
         for (var j = i + 1; j < rects.length; j++) {
           final gap =
-              (rects[i].center - rects[j].center).distance - rects[i].width;
+              (rects[i].center - rects[j].center).distance -
+              rects[i].width * 0.88; // La tapa: el 88 % del botón.
           expect(
             gap,
             greaterThan(2),

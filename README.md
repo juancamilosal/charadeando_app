@@ -465,7 +465,7 @@ la cámara frontal graba a los participantes para revivir las risas.
   dentro del círculo, la temática y debajo la bomba; nunca Ñ, W, X ni Z: `LettersRules.letters`; el
   campo `letras` de la temática no se usa en la rueda). Quien
   tiene el celular dice una palabra de la temática, toca la letra con que
-  empieza (es un botón de los que se espichan: baja al tocarlo y queda espichado y gris; vibra, suena ✓ y "¡Pasa el
+  empieza (es un botón de los que se espichan: baja al tocarlo y queda espichado, gris oscuro, con la letra en blanco y una ✓ verde en la esquina; vibra, suena ✓ y "¡Pasa el
   celular!"; medio segundo sin contar otro toque) y se lo pasa al
   siguiente. Cuando se usan las 23 letras termina la ronda: la bomba se
   pausa y sale "Ronda 1 finalizada · Ahora debes mencionar dos palabras

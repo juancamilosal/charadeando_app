@@ -43,7 +43,7 @@ class LetterWheel extends StatelessWidget {
         final height = min(constraints.maxHeight, width * 1.45);
         final n = max(letters.length, 1);
         // Un óvalo que aprovecha el alto. Las fichas, del tamaño que quepa
-        // sin tocarse: el 86 % del espacio que le toca a cada una.
+        // sin tocarse: el 95 % del espacio (la tapa ocupa menos) que le toca a cada una.
         var tile = 60.0;
         var points = <Offset>[];
         for (var i = 0; i < 3; i++) {
@@ -51,7 +51,7 @@ class LetterWheel extends StatelessWidget {
           final ry = height / 2 - tile / 2 - 4;
           final placed = _evenlySpaced(rx, ry, n);
           points = placed.points;
-          tile = (placed.step * 0.86).clamp(30.0, 84.0);
+          tile = (placed.step * 0.95).clamp(30.0, 84.0);
         }
         final rx = width / 2 - tile / 2 - 4;
         final ry = height / 2 - tile / 2 - 4;
@@ -295,23 +295,54 @@ class _LetterTileState extends State<_LetterTile> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: used
-                          ? const [Color(0xFFB8AECB), Color(0xFFD9D3E4)]
+                          ? const [Color(0xFF8E7FAA), Color(0xFFA597BE)]
                           : pressed
                           ? const [Color(0xFFDCD6E8), Color(0xFFF4F1FA)]
                           : const [Colors.white, Color(0xFFE3DDEE)],
                     ),
                   ),
-                  child: Text(
-                    widget.letter,
-                    style: TextStyle(
-                      fontFamily: AppFonts.display,
-                      fontSize: face * 0.55,
-                      height: 1,
-                      fontWeight: FontWeight.w700,
-                      color: used
-                          ? AppColors.ink.withValues(alpha: 0.4)
-                          : AppColors.ink,
-                    ),
+                  // Usada: más oscura, la letra apagada y una ✓ verde
+                  // pequeña, para que no se confunda con las libres.
+                  child: Stack(
+                    alignment: Alignment.center,
+                    clipBehavior: Clip.none,
+                    children: [
+                      Text(
+                        widget.letter,
+                        style: TextStyle(
+                          fontFamily: AppFonts.display,
+                          fontSize: face * 0.55,
+                          height: 1,
+                          fontWeight: FontWeight.w700,
+                          color: used
+                              ? Colors.white.withValues(alpha: 0.9)
+                              : AppColors.ink,
+                        ),
+                      ),
+                      if (used)
+                        Positioned(
+                          right: -face * 0.26,
+                          top: -face * 0.22,
+                          child: Container(
+                            width: face * 0.44,
+                            height: face * 0.44,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: AppColors.green,
+                              border: Border.all(
+                                color: Colors.white,
+                                width: max(1.5, face * 0.04),
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.check_rounded,
+                              color: Colors.white,
+                              size: face * 0.3,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ),
