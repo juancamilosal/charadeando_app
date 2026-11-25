@@ -34,7 +34,7 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   antes de promocionarla a producción. **La última subida a Play es 15
   (1.0.0)**: aprobada en la prueba cerrada el 20 nov 2026 y promovida a
   producción ese mismo día (en revisión de Google; producción sigue en la
-  14 hasta que la aprueben, y entonces se une `develop` en `main`). `develop` va en 16 (1.0.0), sin cambios todavía. 15 (1.0.0):
+  14 hasta que la aprueben, y entonces se une `develop` en `main`). `develop` va en 16 (1.0.0), con el juego nuevo "La Bomba" (unido el 25 nov 2026, aprobado por el usuario; falta subirla a Play). 15 (1.0.0):
   el juego nuevo "¿Más o menos?" (en "Más juegos"; Fácil 1, Normal 2 y
   Difícil 5 puntos) y el plugin de Gradle de Android en 9.1.1. 14 (1.0.0): "Otra categoría con
   este puntaje" en el resultado final (la partida siguiente empieza con
@@ -177,13 +177,20 @@ detalles de cada parte están en `README.md`, `server/README.md` y
   Ruta `POST /juego/datos`. La respuesta es bigInteger: Directus la
   devuelve como texto y la extensión la pasa a número.
 - La Bomba (en el código y en Directus se llama Letras: `LETRAS`,
-  `letras_tematicas`; rama `feature/letras`, sin mezclar en `develop`
-  hasta que el usuario lo apruebe): con botón "¡Pasa!" (se descartó el
-  reconocimiento de voz). Colección `letras_tematicas` (no pública) creada
-  el 24 nov 2026 con 100 temáticas publicadas; cada una con sus `letras`
-  (nunca Ñ, W, X ni Z). Ruta `POST /juego/tematicas` y modo `LETRAS` en
-  `/juego/partida`: hay que actualizar la extensión en Coolify para que
-  funcione.
+  `letras_tematicas`), en `develop` desde el 25 nov 2026 para la 16
+  (1.0.0); la rama `feature/letras` ya está unida. Rueda con las 23
+  letras (nunca Ñ, W, X ni Z) como botones que se espichan, girados hacia
+  afuera para jugar con el celular en la mesa, y la temática en el
+  centro; modos "Mecha secreta" (20 a 60 s) y "11 segundos" por turno;
+  "Rápida" (temática de Directus) o "Escribir temática"; cuenta 3, 2, 1;
+  vibraciones con fuerza (canal nativo `charadeando/vibrar`, permiso
+  `VIBRATE`); BOOM con las letras volando; ruleta de castigo como en las
+  categorías; video vertical con la rueda (sin la bomba). Se descartó el
+  reconocimiento de voz. Colección `letras_tematicas` (no pública) creada
+  el 24 nov 2026 con 100 temáticas publicadas (el campo `letras` ya no se
+  usa en la rueda). Ruta `POST /juego/tematicas` y modo `LETRAS` en
+  `/juego/partida`, ya activas en el servidor (extensión actualizada en
+  Coolify).
 
 ## Funciones ya hechas en la app
 
